@@ -15,8 +15,8 @@ export default redis;
 
 export const getUserData = async (userId: string) => {
 	try {
-		const data = await redis.get(userId);
-		return data ? JSON.parse(data) : null;
+		const data = await redis.hgetall(userId);
+		return data ? data : null;
 	} catch (error) {
 		console.error(`Error fetching user data for ${userId}:`, error);
 		throw new Error(`Failed to fetch user data: ${error?.message}`);

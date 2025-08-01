@@ -12,9 +12,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 			path: '/',
 			maxAge: 60 * 60 * 24 * 365 // 1 year
 		});
-		await redis.set(userId, JSON.stringify({ userId, createdAt: new Date().toISOString() }));
+		await redis.hset(userId, { userId, createdAt: new Date().toISOString() });
 	}
 	event.locals.userData = await getUserData(userId);
-
 	return await resolve(event);
 };
