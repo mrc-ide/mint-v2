@@ -1,7 +1,7 @@
 import { REDIS_URL } from '$env/static/private';
 import Redis from 'ioredis';
 
-const redis = new Redis(REDIS_URL, { lazyConnect: true });
+const redis = new Redis(REDIS_URL);
 redis.on('error', (err: Error) => {
 	console.error('Redis connection error:', err);
 	throw new Error(`Failed to connect to Redis: ${err.message}`);
