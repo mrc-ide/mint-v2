@@ -8,6 +8,8 @@
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
+	<title>MINT - Malaria Intervention Tool</title>
+	<meta name="description" content="Malaria intervention tool for analyzing and planning malaria prevention strategies" />
 </svelte:head>
 
 <ModeWatcher />
