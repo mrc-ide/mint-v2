@@ -4,7 +4,10 @@ declare global {
 	namespace App {
 		// interface Error {}
 		interface Locals {
-			userData: Record<string, any>; // TODO: update to a more specific type later
+			userData: {
+				userId: string;
+				createdAt: string;
+			}; // TODO: update as we iron out the types
 		}
 		// interface PageData {}
 		// interface PageState {}
