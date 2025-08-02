@@ -1,7 +1,7 @@
 import { REDIS_URL } from '$env/static/private';
 import Redis from 'ioredis';
 
-const redis = new Redis(REDIS_URL);
+const redis = new Redis(REDIS_URL, { lazyConnect: true });
 redis.on('error', (err: Error) => {
 	console.error('Redis connection error:', err);
 	throw new Error(`Failed to connect to Redis: ${err.message}`);
@@ -13,12 +13,11 @@ redis.on('connect', () => {
 
 export default redis;
 
-export const getUserData = async (userId: string) => {
-	try {
-		const data = await redis.hgetall(userId);
-		return data ? data : null;
-	} catch (error) {
-		console.error(`Error fetching user data for ${userId}:`, error);
-		throw new Error(`Failed to fetch user data: ${error?.message}`);
+export const getOrCreateUserData = async (userId: string) => {
+	let userData = await redis.hgetall(userId);
+	if (Object.keys(userData).length === 0) {
+		userData = { userId, createdAt: new Date().toISOString() };
+		await redis.hset(userId, userData);
 	}
+	return userData;
 };
