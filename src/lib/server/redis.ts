@@ -13,7 +13,7 @@ redis.on('reconnecting', () => {
 });
 export default redis;
 
-export const getOrCreateUserData = async (userId: string): Promise<App.Locals['userData']> => {
+export const loadOrSetupUserData = async (userId: string): Promise<App.Locals['userData']> => {
 	let userData = await redis.hgetall(userId); // TODO: maybe just store as key and string? hget and hset
 	if (Object.keys(userData).length === 0) {
 		userData = { userId, createdAt: new Date().toISOString() };

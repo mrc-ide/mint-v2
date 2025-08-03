@@ -1,4 +1,4 @@
-import { getOrCreateUserData } from '$lib/server/redis';
+import { loadOrSetupUserData } from '$lib/server/redis';
 import type { Handle } from '@sveltejs/kit';
 
 export const handle: Handle = async ({ event, resolve }) => {
@@ -13,6 +13,6 @@ export const handle: Handle = async ({ event, resolve }) => {
 			maxAge: 60 * 60 * 24 * 365 // 1 year
 		});
 	}
-	event.locals.userData = await getOrCreateUserData(userId);
+	event.locals.userData = await loadOrSetupUserData(userId);
 	return await resolve(event);
 };
