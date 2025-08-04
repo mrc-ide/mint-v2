@@ -13,10 +13,8 @@
 		<div class="ml-auto flex items-center gap-3 px-4">
 			<a href="/privacy" class="text-muted-foreground hover:underline">Privacy</a>
 			<a href="/accessibility" class="text-muted-foreground hover:underline">Accessibility</a>
-			<a
-				href="https://mrc-ide.github.io/mint-news/"
-				target="_blank"
-				class="font-light text-muted-foreground hover:underline">News</a
+			<a href="https://mrc-ide.github.io/mint-news/" target="_blank" class="text-muted-foreground hover:underline"
+				>News</a
 			>
 			<Button onclick={toggleMode} variant="ghost" size="icon">
 				<SunIcon class="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 !transition-all dark:scale-0 dark:-rotate-90" />
