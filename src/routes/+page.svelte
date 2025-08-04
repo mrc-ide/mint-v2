@@ -11,7 +11,7 @@
 </script>
 
 <h1>Welcome to {data.name}</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
+<div class="text-sidebar-primary"> wtf </div>
 <Button onclick={toggleMode} variant="outline" size="icon">
   <SunIcon
     class="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 !transition-all dark:-rotate-90 dark:scale-0"
@@ -21,3 +21,4 @@
   />
   <span class="sr-only">Toggle theme</span>
 </Button>
+<Button variant="outline"> wtf is this</Button>

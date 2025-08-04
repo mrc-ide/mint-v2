@@ -4,7 +4,7 @@ declare global {
 	namespace App {
 		// interface Error {}
 		interface Locals {
-			userData: {
+			userState: {
 				userId: string;
 				createdAt: string;
 			}; // TODO: update as we iron out the types
