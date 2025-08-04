@@ -66,4 +66,3 @@ npm run test:e2e     # End-to-end tests with Playwright
 - Files: `**/*.{test,spec}.{js,ts}` (excluding `.svelte` tests)
 
 **E2E Tests**: Full application testing with Playwright
-
