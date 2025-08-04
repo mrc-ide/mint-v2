@@ -1,4 +1,5 @@
 import { REDIS_URL } from '$env/static/private';
+import type { UserState } from '$lib/types';
 import Redis from 'ioredis';
 
 const redis = new Redis(REDIS_URL);
@@ -13,11 +14,17 @@ redis.on('reconnecting', () => {
 });
 export default redis;
 
-export const loadOrSetupUserState = async (userId: string): Promise<App.Locals['userState']> => {
-	let userState = await redis.hgetall(userId); // TODO: maybe just store as key and string? hget and hset
-	if (Object.keys(userState).length === 0) {
-		userState = { userId, createdAt: new Date().toISOString() };
-		await redis.hset(userId, userState);
+export const loadOrSetupUserState = async (userId: string): Promise<UserState> => {
+	try {
+		const cachedUserState: UserState = JSON.parse((await redis.get(userId)) || '{}');
+		if (cachedUserState) return cachedUserState;
+	} catch (error) {
+		console.error('Error parsing user state from Redis:', error);
+		// If parsing fails, reset the user state
 	}
-	return userState as App.Locals['userState'];
+
+	const newUserState: UserState = { userId, createdAt: new Date().toISOString(), projects: [] };
+	await redis.set(userId, JSON.stringify(newUserState));
+
+	return newUserState;
 };

@@ -1,10 +1,9 @@
-import redis from '$lib/server/redis';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async () => {
-	await redis.set('name', 'Mint');
+export const load: PageServerLoad = async ({ url }) => {
+	const userGuideLanguage = url.searchParams.get('lang') || 'en';
 
 	return {
-		name: await redis.get('name')
+		userGuideLanguage
 	};
 };

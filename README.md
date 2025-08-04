@@ -66,3 +66,11 @@ npm run test:e2e     # End-to-end tests with Playwright
 - Files: `**/*.{test,spec}.{js,ts}` (excluding `.svelte` tests)
 
 **E2E Tests**: Full application testing with Playwright
+
+## Component Management
+
+**Adding shadcn-svelte Components**: Use the CLI to install components from the [shadcn-svelte documentation](https://www.shadcn-svelte.com/docs/components):
+
+```sh
+npx shadcn-svelte@latest add [component-name]
+```
