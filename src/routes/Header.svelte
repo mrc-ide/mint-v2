@@ -3,13 +3,18 @@
 	import MoonIcon from '@lucide/svelte/icons/moon';
 	import SunIcon from '@lucide/svelte/icons/sun';
 	import { toggleMode } from 'mode-watcher';
+	import logo from '$lib/assets/logo.png';
 </script>
 
 <header>
 	<div
-		class="dark:shadow-gray-green-900 fixed top-0 right-0 left-0 flex h-16 items-center border-b border-accent bg-background shadow-sm dark:shadow-gray-800"
+		class="fixed top-0 right-0 left-0 flex h-16 items-center border-b border-accent bg-background shadow-sm dark:shadow-gray-800"
 	>
-		<a href="/" class="px-2 text-2xl font-extrabold text-primary hover:text-primary/80">MINT</a>
+		<a
+			href="/"
+			class="ml-2 flex items-center justify-center px-2 text-2xl font-extrabold text-primary hover:text-primary/80"
+			><img src={logo} alt="MINT logo" class="h-12 w-12" />MINT</a
+		>
 		<div class="ml-auto flex items-center gap-3 px-4">
 			<a href="/privacy" class="text-muted-foreground hover:underline">Privacy</a>
 			<a href="/accessibility" class="text-muted-foreground hover:underline">Accessibility</a>
