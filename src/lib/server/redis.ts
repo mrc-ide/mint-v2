@@ -16,7 +16,7 @@ export default redis;
 
 export const loadOrSetupUserState = async (userId: string): Promise<UserState> => {
 	try {
-		const cachedUserState: UserState = JSON.parse((await redis.get(userId)) || '{}');
+		const cachedUserState: UserState = JSON.parse((await redis.get(userId)) || '');
 		if (cachedUserState) return cachedUserState;
 	} catch (error) {
 		console.error('Error parsing user state from Redis:', error);
