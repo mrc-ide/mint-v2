@@ -74,3 +74,5 @@ npm run test:e2e     # End-to-end tests with Playwright
 ```sh
 npx shadcn-svelte@latest add [component-name]
 ```
+
+These components will be added to `src/lib/components/ui/` and automatically registered in the SvelteKit app.

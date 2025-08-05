@@ -28,3 +28,11 @@ export const loadOrSetupUserState = async (userId: string): Promise<UserState> =
 
 	return newUserState;
 };
+
+export const saveUserState = async (user: UserState): Promise<void> => {
+	try {
+		await redis.set(user.userId, JSON.stringify(user));
+	} catch (error) {
+		console.error('Error saving user state to Redis:', error);
+	}
+};

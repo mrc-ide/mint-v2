@@ -1,14 +1,24 @@
 <script lang="ts">
-	import type { PageProps } from './$types';
 	import userGuideEN from '$lib/assets/User-Guide-en.pdf';
 	import userGuideFR from '$lib/assets/User-Guide-fr.pdf';
-	import { Button, buttonVariants } from '$lib/components/ui/button';
-	import { Label } from '$lib/components/ui/label';
-	import { Input } from '$lib/components/ui/input';
+	import { buttonVariants } from '$lib/components/ui/button';
 	import * as Dialog from '$lib/components/ui/dialog/index';
+	import * as Form from '$lib/components/ui/form';
+	import { Input } from '$lib/components/ui/input';
+	import { Label } from '$lib/components/ui/label';
+	import { TagsInput } from '$lib/components/ui/TagsInput';
 	import PlusIcon from '@lucide/svelte/icons/plus';
+	import SuperDebug, { superForm } from 'sveltekit-superforms';
+	import { zodClient } from 'sveltekit-superforms/adapters';
+	import type { PageProps } from './$types';
+	import { formSchema } from './schema';
 
 	let { data }: PageProps = $props();
+
+	const form = superForm(data.form, {
+		validators: zodClient(formSchema)
+	});
+	const { form: formData, enhance } = form;
 </script>
 
 <div class="mx-auto max-w-4xl px-4 py-8">
@@ -38,32 +48,42 @@
 	<p class="mb-2 text-xl font-semibold">You have {data.userData.projects.length} projects</p>
 
 	<!-- TODO: do as table. name, regions (collapsible), delete button -->
-
+	<!-- TODO: remember project + region names can contain spaces (may need to hyphenate ) -->
 	<Dialog.Root>
 		<Dialog.Trigger class={buttonVariants({ variant: 'default' })}><PlusIcon />Create Project</Dialog.Trigger>
-		<Dialog.Content class="sm:max-w-[425px]">
+		<Dialog.Content class="sm:max-w-xl">
 			<Dialog.Header>
 				<Dialog.Title>Create Project</Dialog.Title>
-				<Dialog.Description>
-					Create a new project by entering a name and listing regions separated by commas. Regions can be added or
-					removed later.
-				</Dialog.Description>
+				<Dialog.Description>Create a new project by entering a name and listing regions.</Dialog.Description>
 			</Dialog.Header>
-			<div class="grid gap-4 py-4">
-				<div class="grid grid-cols-4 items-center gap-4">
-					<Label for="name" class="text-right">Name</Label>
-					<Input id="name" value="Pedro Duarte" class="col-span-3" />
-				</div>
-				<div class="grid grid-cols-4 items-center gap-4">
-					<Label for="username" class="text-right">Regions</Label>
-					<Input id="username" value="@peduarte" class="col-span-3" />
-				</div>
-			</div>
-			<Dialog.Footer>
-				<Button type="submit">Create</Button>
-			</Dialog.Footer>
+			<form method="POST" use:enhance action="?/create">
+				<Form.Field {form} name="name">
+					<Form.Control>
+						{#snippet children({ props })}
+							<Label for="name">Project Name</Label>
+							<Input {...props} placeholder="Enter project name" bind:value={$formData.name} />
+						{/snippet}
+					</Form.Control>
+					<Form.FieldErrors />
+				</Form.Field>
+				<Form.Field {form} name="regions">
+					<Form.Control>
+						{#snippet children({ props })}
+							<Label for="regions">Regions</Label>
+							<TagsInput {...props} bind:tags={$formData.regions} onlyUnique={true} placeholder="Enter region names" />
+						{/snippet}
+					</Form.Control>
+					<Form.Description>Add regions by pressing Enter. Backspace to remove.</Form.Description>
+					<Form.FieldErrors />
+				</Form.Field>
+				<Dialog.Footer>
+					<Form.Button>Create</Form.Button>
+				</Dialog.Footer>
+			</form>
 		</Dialog.Content>
 	</Dialog.Root>
+	<!-- TODO: remove debug -->
+	<SuperDebug data={$formData} />
 	<div>
 		{#each data.userData.projects as project}
 			<div class="flex border-b border-gray-200 py-4">

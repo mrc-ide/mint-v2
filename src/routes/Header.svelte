@@ -12,7 +12,7 @@
 	>
 		<a
 			href="/"
-			class="ml-2 flex items-center justify-center px-2 text-2xl font-extrabold text-primary hover:text-primary/80"
+			class="ml-2 flex items-center justify-center px-2 text-xl font-extrabold text-primary hover:text-primary/80"
 			><img src={logo} alt="MINT logo" class="h-12 w-12" />MINT</a
 		>
 		<div class="ml-auto flex items-center gap-3 px-4">
