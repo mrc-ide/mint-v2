@@ -36,6 +36,7 @@ export const actions: Actions = {
 
 		return { form };
 	},
+	// use basic sveltekit form handling for delete
 	delete: async ({ request, locals }) => {
 		const data = await request.formData();
 		const name = data.get('name') as string;
