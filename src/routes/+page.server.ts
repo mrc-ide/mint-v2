@@ -1,4 +1,4 @@
-import { superValidate } from 'sveltekit-superforms';
+import { setError, superValidate } from 'sveltekit-superforms';
 import type { PageServerLoad } from './$types';
 import { formSchema } from './schema';
 import { zod } from 'sveltekit-superforms/adapters';
@@ -15,11 +15,11 @@ export const load: PageServerLoad = async ({ url }) => {
 
 // region names must be unique & project names must be unique!!
 export const actions = {
-	create: async ({ request, locals }) => {
+	default: async ({ request, locals }) => {
 		const form = await superValidate(request, zod(formSchema));
 		const isDuplicateProjectName = locals.userState.projects.some((project) => project.name === form.data.name);
 		if (isDuplicateProjectName) {
-			form.errors.name = ['Project names must be unique'];
+			setError(form, 'name', 'Project names must be unique');
 		}
 		console.log(form);
 

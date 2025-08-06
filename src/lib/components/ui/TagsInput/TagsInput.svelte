@@ -1,3 +1,4 @@
+<!-- svelte-ignore state_referenced_locally -->
 <!-- Coppied over from https://github.com/agustinl/svelte-tags-input. used here with tailwind styles -->
 <script lang="ts">
 	import { cn } from '$lib/utils';
@@ -396,7 +397,7 @@
 		<input
 			type="text"
 			{id}
-			{name}
+			name="{name}-input"
 			bind:value={tag}
 			onkeydown={setTag}
 			onkeyup={getMatchElements}
@@ -410,6 +411,11 @@
 			autocomplete="off"
 			class="min-w-[120px] flex-1 border-0 bg-transparent text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed"
 		/>
+
+		<!-- Hidden inputs for form submission of tags -->
+		{#each tags as tag}
+			<input type="hidden" {name} value={typeof tag === 'string' ? tag : tag[autoCompleteKey]} />
+		{/each}
 	</div>
 
 	{#if autoComplete && arrelementsmatch.length > 0}

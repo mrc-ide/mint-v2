@@ -14,6 +14,7 @@
 	import { formSchema } from './schema';
 
 	let { data }: PageProps = $props();
+	let isOpen = $state(false);
 
 	const form = superForm(data.form, {
 		validators: zodClient(formSchema)
@@ -49,14 +50,14 @@
 
 	<!-- TODO: do as table. name, regions (collapsible), delete button -->
 	<!-- TODO: remember project + region names can contain spaces (may need to hyphenate ) -->
-	<Dialog.Root>
+	<Dialog.Root bind:open={isOpen}>
 		<Dialog.Trigger class={buttonVariants({ variant: 'default' })}><PlusIcon />Create Project</Dialog.Trigger>
 		<Dialog.Content class="sm:max-w-xl">
 			<Dialog.Header>
 				<Dialog.Title>Create Project</Dialog.Title>
 				<Dialog.Description>Create a new project by entering a name and listing regions.</Dialog.Description>
 			</Dialog.Header>
-			<form method="POST" use:enhance action="?/create">
+			<form method="POST" use:enhance>
 				<Form.Field {form} name="name">
 					<Form.Control>
 						{#snippet children({ props })}
@@ -82,8 +83,6 @@
 			</form>
 		</Dialog.Content>
 	</Dialog.Root>
-	<!-- TODO: remove debug -->
-	<SuperDebug data={$formData} />
 	<div>
 		{#each data.userData.projects as project}
 			<div class="flex border-b border-gray-200 py-4">
