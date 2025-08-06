@@ -5,5 +5,5 @@
 </script>
 
 TODO
-<p>Project: {params.project}</p>
-<p>Region: {params.region}</p>
+<p>Project: {params.project}, {data.project}</p>
+<p>Region: {params.region}, {data.region}</p>

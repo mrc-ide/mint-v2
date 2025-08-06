@@ -16,7 +16,7 @@
 </script>
 
 <div class="mt-2">
-	{#each projects as project}
+	{#each projects as project, index (index)}
 		<Collapsible.Root class="mb-2 space-y-2 border-b">
 			<div class="flex items-center justify-between space-x-4">
 				<Collapsible.Trigger class="flex flex-1 items-center space-x-0.5 hover:text-muted-foreground">
@@ -69,7 +69,7 @@
 				</AlertDialog.Root>
 			</div>
 			<Collapsible.Content class="space-y-2">
-				{#each project.regions as region}
+				{#each project.regions as region, index (index)}
 					<a
 						href="/projects/{project.name}/regions/{region.name}"
 						class="flex border-b px-2 py-1 font-mono text-sm hover:underline">{region.name}</a
