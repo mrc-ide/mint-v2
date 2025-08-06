@@ -37,8 +37,8 @@
 						<AlertDialog.Header>
 							<AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
 							<AlertDialog.Description>
-								This action cannot be undone. This will permanently delete your account and remove your data from our
-								servers.
+								This action cannot be undone. It will permanently delete the project <strong>{project.name}</strong> and
+								all its regions.
 							</AlertDialog.Description>
 						</AlertDialog.Header>
 						<AlertDialog.Footer>
@@ -61,7 +61,7 @@
 								}}
 							>
 								<AlertDialog.Action type="submit" class={buttonVariants({ variant: 'destructive' })}
-									>Continue</AlertDialog.Action
+									>Delete</AlertDialog.Action
 								>
 							</form>
 						</AlertDialog.Footer>
