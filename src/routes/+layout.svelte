@@ -3,10 +3,9 @@
 	import { ModeWatcher } from 'mode-watcher';
 	import '../app.css';
 	import Header from './Header.svelte';
+	import { Toaster } from '$lib/components/ui/sonner';
 
 	let { children, data } = $props();
-
-	$inspect(data); // TODO:remove this after debugging
 </script>
 
 <svelte:head>
@@ -19,6 +18,7 @@
 </svelte:head>
 
 <ModeWatcher />
+<Toaster richColors />
 <Header />
 <main class="flex min-h-svh px-5 pt-18 pb-5">
 	<div class="flex-1">{@render children?.()}</div>

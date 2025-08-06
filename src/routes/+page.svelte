@@ -8,16 +8,23 @@
 	import { Label } from '$lib/components/ui/label';
 	import { TagsInput } from '$lib/components/ui/TagsInput';
 	import PlusIcon from '@lucide/svelte/icons/plus';
-	import SuperDebug, { superForm } from 'sveltekit-superforms';
+	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import type { PageProps } from './$types';
 	import { formSchema } from './schema';
+	import { toast } from 'svelte-sonner';
 
 	let { data }: PageProps = $props();
 	let isOpen = $state(false);
 
 	const form = superForm(data.form, {
-		validators: zodClient(formSchema)
+		validators: zodClient(formSchema),
+		onUpdated({ form }) {
+			if (form.valid) {
+				toast.success('Project created successfully!');
+				isOpen = false;
+			}
+		}
 	});
 	const { form: formData, enhance } = form;
 </script>

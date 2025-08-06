@@ -21,7 +21,6 @@ export const actions = {
 		if (isDuplicateProjectName) {
 			setError(form, 'name', 'Project names must be unique');
 		}
-		console.log(form);
 
 		if (!form.valid) {
 			return fail(400, {
@@ -29,13 +28,12 @@ export const actions = {
 			});
 		}
 
-		console.log('Success bitches!!');
 		// if successful, then update local user data
-		// locals.userState.projects.push({
-		// 	name: form.data.name,
-		// 	regions: form.data.regions.map((region) => ({ name: region })),
-		// 	budget: 2000000 // default budget (TODO: place somewhere better)
-		// });
+		locals.userState.projects.push({
+			name: form.data.name,
+			regions: form.data.regions.map((region) => ({ name: region })),
+			budget: 2000000 // default budget (TODO: place somewhere better)
+		});
 
 		return { form };
 	}
