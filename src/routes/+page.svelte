@@ -46,16 +46,16 @@
 		{#each data.userData.projects as project}
 			<Collapsible.Root class="mb-2 space-y-2 border-b">
 				<div class="flex items-center justify-between space-x-4">
-					<div class="space-x- flex items-center justify-between space-x-1.5">
-						<Collapsible.Trigger class={buttonVariants({ variant: 'ghost', size: 'sm', class: 'w-9 p-0' })}>
-							<ChevronsUpDownIcon />
+					<Collapsible.Trigger class="flex items-center space-x-0.5 hover:text-muted-foreground">
+						<div class="text-muted-foreground">
+							<ChevronsUpDownIcon size={20} />
 							<span class="sr-only">Toggle</span>
-						</Collapsible.Trigger>
+						</div>
 						<h4 class="font-semibold">
 							{project.name}
-							<span class="text-sm font-medium text-muted-foreground">({project.regions.length} regions)</span>
+							<span class="text-sm font-normal">({project.regions.length} regions)</span>
 						</h4>
-					</div>
+					</Collapsible.Trigger>
 					<AlertDialog.Root bind:open={isOpen}>
 						<AlertDialog.Trigger class={buttonVariants({ variant: 'destructive', size: 'icon' })}
 							><Trash2 /></AlertDialog.Trigger
@@ -77,7 +77,6 @@
 										formData.append('name', project.name);
 
 										return async ({ update, result }) => {
-											console.log(result);
 											if (result.type === 'success') {
 												isOpen = false;
 												await update();
