@@ -48,7 +48,7 @@
 	let layoutElement = $state();
 
 	let autoCompleteIndexStart = $derived(autoCompleteStartFocused ? 0 : -1);
-	let autoCompleteIndex = $state(autoCompleteIndexStart);
+	let autoCompleteIndex = $state();
 	let matchsID = $derived(id + '_matchs');
 
 	let storePlaceholder = $state(placeholder);
@@ -58,7 +58,7 @@
 		storePlaceholder = placeholder;
 	});
 
-	// Update autoCompleteIndex when autoCompleteIndexStart changes
+	// Initialize and update autoCompleteIndex when autoCompleteIndexStart changes
 	$effect(() => {
 		autoCompleteIndex = autoCompleteIndexStart;
 	});

@@ -5,7 +5,7 @@
 	import Header from './Header.svelte';
 	import { Toaster } from '$lib/components/ui/sonner';
 
-	let { children, data } = $props();
+	let { children } = $props();
 </script>
 
 <svelte:head>
