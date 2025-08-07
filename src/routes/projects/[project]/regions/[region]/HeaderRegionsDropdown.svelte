@@ -37,7 +37,7 @@
 			{/snippet}
 		</DropdownMenu.Trigger>
 		<DropdownMenu.Content class="max-w-64">
-			{#each page.data.project.regions as region}
+			{#each page.data.project.regions as region, index (index)}
 				<DropdownMenu.Item>
 					<a class="flex-1" href={`/projects/${page.data.project.name}/regions/${region.name}`}>{region.name}</a>
 				</DropdownMenu.Item>

@@ -1,11 +1,11 @@
 <script lang="ts">
 	import favicon from '$lib/assets/favicon.ico';
+	import { Toaster } from '$lib/components/ui/sonner';
 	import { ModeWatcher } from 'mode-watcher';
 	import '../app.css';
 	import Header from './Header.svelte';
-	import { Toaster } from '$lib/components/ui/sonner';
 
-	let { children, data } = $props();
+	let { children } = $props();
 </script>
 
 <svelte:head>
