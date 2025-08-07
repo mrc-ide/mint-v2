@@ -46,9 +46,7 @@
 							<form
 								method="POST"
 								action="?/delete"
-								use:enhance={({ formData }) => {
-									formData.append('name', project.name);
-
+								use:enhance={() => {
 									return async ({ update, result }) => {
 										if (result.type === 'success') {
 											isOpen = false;
@@ -60,8 +58,11 @@
 									};
 								}}
 							>
-								<AlertDialog.Action type="submit" class={buttonVariants({ variant: 'destructive' })}
-									>Delete</AlertDialog.Action
+								<AlertDialog.Action
+									type="submit"
+									name="name"
+									value={project.name}
+									class={buttonVariants({ variant: 'destructive' })}>Delete</AlertDialog.Action
 								>
 							</form>
 						</AlertDialog.Footer>

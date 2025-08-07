@@ -21,6 +21,7 @@ export const loadOrSetupUserState = async (userId: string): Promise<UserState> =
 	} catch (error) {
 		console.error('Error parsing user state from Redis:', error);
 		// If parsing fails, reset the user state
+		console.warn('Resetting user state due to parsing error');
 	}
 
 	const newUserState: UserState = { userId, createdAt: new Date().toISOString(), projects: [] };
