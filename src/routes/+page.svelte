@@ -8,7 +8,7 @@
 	let { data }: PageProps = $props();
 </script>
 
-<div class="mx-auto max-w-4xl px-4 py-8">
+<div class="mx-auto max-w-3xl px-4 py-8">
 	<p class="mb-4 leading-relaxed">
 		This tool is designed to help National Malaria Control Programs explore the most cost effective option of deploying
 		current World Health Organisation (WHO) recommended mosquito net and IRS products for malaria control.

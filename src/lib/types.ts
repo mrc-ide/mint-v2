@@ -5,6 +5,7 @@ export interface Project {
 	name: string;
 	budget: number;
 	regions: Region[];
+	canStrategize?: boolean;
 }
 
 export interface UserState {

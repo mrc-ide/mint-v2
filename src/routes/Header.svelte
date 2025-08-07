@@ -1,9 +1,11 @@
 <script lang="ts">
-	import { Button } from '$lib/components/ui/button';
+	import { page } from '$app/state';
+	import logo from '$lib/assets/logo.png';
+	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import MoonIcon from '@lucide/svelte/icons/moon';
 	import SunIcon from '@lucide/svelte/icons/sun';
 	import { toggleMode } from 'mode-watcher';
-	import logo from '$lib/assets/logo.png';
+	import HeaderRegionsDropdown from './projects/[project]/regions/[region]/HeaderRegionsDropdown.svelte';
 </script>
 
 <header>
@@ -15,6 +17,17 @@
 			class="ml-2 flex items-center justify-center px-2 text-xl font-extrabold text-primary hover:text-primary/80"
 			><img src={logo} alt="MINT logo" class="h-12 w-12" />MINT</a
 		>
+		{#if page.data.project && page.data.region}
+			<HeaderRegionsDropdown />
+		{/if}
+		{#if page.data.project && page.data.project.canStrategize}
+			<a
+				class={buttonVariants({ variant: 'link', class: 'p-1' })}
+				href={`/projects/${page.data.project.name}/strategize`}
+			>
+				Strategize across regions
+			</a>
+		{/if}
 		<div class="ml-auto flex items-center gap-3 px-4">
 			<a href="/privacy" class="text-muted-foreground hover:underline">Privacy</a>
 			<a href="/accessibility" class="text-muted-foreground hover:underline">Accessibility</a>
