@@ -31,7 +31,7 @@ export const actions: Actions = {
 		locals.userState.projects.push({
 			name: form.data.name,
 			regions: form.data.regions.map((region) => ({ name: region })),
-			budget: 2000000, // default budget (TODO: place somewhere better)
+			budget: 2000000, // default budget (TODO: place somewhere better with other defaults)
 			canStrategize: false
 		});
 
