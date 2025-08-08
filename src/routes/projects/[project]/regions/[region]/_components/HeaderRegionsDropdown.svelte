@@ -10,9 +10,8 @@
 	import Plus from '@lucide/svelte/icons/plus';
 	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
-	import { addRegionSchema } from './schema';
+	import { addRegionSchema } from '../schema';
 
-	let isOpen = $state(false);
 	const form = superForm(page.data.addRegionForm ?? { name: '' }, {
 		validators: zodClient(addRegionSchema),
 		onResult({ result }) {
@@ -23,23 +22,25 @@
 	});
 
 	const { form: formData, enhance } = form;
+	let isOpen = $state(false);
+	let project = $derived(page.data.project);
 </script>
 
-{#if !page.data.project || !page.data.region}
+{#if !project || !page.data.region}
 	<div class="text-sm text-red-500">Error: Missing project or region data</div>
 {:else}
 	<DropdownMenu.Root bind:open={isOpen}>
 		<DropdownMenu.Trigger>
 			{#snippet child({ props })}
 				<Button {...props} variant="ghost" size="sm"
-					>{page.data.project.name}: {page.data.region.name} <ChevronsUpDownIcon /></Button
+					>{project.name}: {page.data.region.name} <ChevronsUpDownIcon /></Button
 				>
 			{/snippet}
 		</DropdownMenu.Trigger>
 		<DropdownMenu.Content class="max-w-64">
-			{#each page.data.project.regions as region, index (index)}
+			{#each project.regions as region, index (index)}
 				<DropdownMenu.Item>
-					<a class="flex-1" href={`/projects/${page.data.project.name}/regions/${region.name}`}>{region.name}</a>
+					<a class="flex-1" href={`/projects/${project.name}/regions/${region.name}`}>{region.name}</a>
 				</DropdownMenu.Item>
 			{/each}
 			<DropdownMenu.Separator />

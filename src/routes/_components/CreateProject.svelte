@@ -7,7 +7,7 @@
 	import { toast } from 'svelte-sonner';
 	import { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
-	import { createProjectSchema } from './schema';
+	import { createProjectSchema } from '../schema';
 	import { Input } from '$lib/components/ui/input';
 	interface Props {
 		pageForm: SuperValidated<Infer<typeof createProjectSchema>>;
