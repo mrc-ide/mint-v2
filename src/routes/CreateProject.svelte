@@ -23,7 +23,7 @@
 			}
 		}
 	});
-	const { form: formData, enhance } = form;
+	const { form: formData, enhance, errors } = form;
 	let isOpen = $state(false);
 </script>
 
@@ -48,7 +48,15 @@
 				<Form.Control>
 					{#snippet children({ props })}
 						<Form.Label for="regions">Regions</Form.Label>
-						<TagsInput {...props} bind:tags={$formData.regions} onlyUnique={true} placeholder="Enter region names" />
+						<TagsInput
+							{...props}
+							bind:tags={$formData.regions}
+							onlyUnique={true}
+							placeholder="Enter region names"
+							onDuplicate={(tag: string) => {
+								$errors.regions = { _errors: [`Region "${tag}" already exists`] };
+							}}
+						/>
 					{/snippet}
 				</Form.Control>
 				<Form.Description>Add regions by pressing Enter. Backspace to remove.</Form.Description>

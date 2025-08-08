@@ -73,7 +73,7 @@
 				{#each project.regions as region, index (index)}
 					<a
 						href="/projects/{project.name}/regions/{region.name}"
-						class="flex border-b px-2 py-1 font-mono text-sm hover:underline">{region.name}</a
+						class="mx-2 flex border-b py-1 font-mono text-sm hover:underline">{region.name}</a
 					>
 				{/each}
 			</Collapsible.Content>

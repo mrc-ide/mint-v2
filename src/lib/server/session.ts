@@ -11,7 +11,7 @@ export const getUserIdFromCookies = (cookies: Cookies): string => {
 		secure: true,
 		sameSite: 'lax',
 		path: '/',
-		maxAge: 60 * 60 * 24 * 365 // 1 year
+		maxAge: 60 * 60 * 24 * 365 // 1 year (TODO: chat and see if we want to do on this?)
 	});
 
 	return newUserId;

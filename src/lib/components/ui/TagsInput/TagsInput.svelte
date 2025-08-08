@@ -1,5 +1,5 @@
 <!-- svelte-ignore state_referenced_locally -->
-<!-- Coppied over from https://github.com/agustinl/svelte-tags-input. used here with tailwind styles -->
+<!-- Copied over from https://github.com/agustinl/svelte-tags-input. used here with tailwind styles -->
 <script lang="ts">
 	import { cn } from '$lib/utils';
 	import { Button } from '../button';
@@ -42,7 +42,8 @@
 		onTagAdded = () => {},
 		onTagRemoved = () => {},
 		cleanOnBlur = false,
-		customValidation = false
+		customValidation = false,
+		onDuplicate = (tag: string) => {}
 	} = $props();
 
 	let layoutElement = $state();
@@ -149,7 +150,10 @@
 			if (onlyUnique) {
 				let found = tags?.find((elem) => elem[autoCompleteKey] === currentTag[autoCompleteKey]);
 
-				if (found) return;
+				if (found) {
+					onDuplicate(currentTag);
+					return;
+				}
 			}
 
 			var currentObjTags = currentTag;
@@ -160,7 +164,10 @@
 
 		if (currentTag == '') return;
 		if (maxTags && tags.length == maxTags) return;
-		if (onlyUnique && tags.includes(currentTag)) return;
+		if (onlyUnique && tags.includes(currentTag)) {
+			onDuplicate(currentTag);
+			return;
+		}
 		if (onlyAutocomplete && arrelementsmatch.length === 0) return;
 
 		if (customValidation && !customValidation(currentTag)) return;

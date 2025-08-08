@@ -12,6 +12,7 @@ Mint v2 is a modern SvelteKit application using Svelte 5 with TypeScript, Tailwi
 - **Utility-first CSS**: Uses `cn()` utility (`src/lib/utils.ts`) combining `clsx` and `tailwind-merge`
 - **Svelte 5 runes**: Use `$props()`, `$state()`, `$derived()` - avoid legacy reactive syntax
 - **Type safety**: Components export prop types and variant types (see `Button` component)
+- **Forms**: Uses (superforms)[https://superforms.rocks/] and (formsnap)[https://formsnap.dev/]
 
 ### File Structure Conventions
 
@@ -72,6 +73,16 @@ npm run test         # Runs both unit and E2E tests
 - **Adapter**: Uses `adapter-auto` for deployment flexibility
 - **Data loading**: Server-side data via `+page.server.ts` with typed `PageServerLoad`
 - **Preprocessing**: Uses `vitePreprocess()` for TypeScript/CSS handling
+
+### User State & Redis Persistence
+
+- **Cookie identity**: `lib/server/session.ts` ensures a `userId` cookie (httpOnly, secure, 1y). Set in `hooks.server.ts`.
+- **Lifecycle hook**: `hooks.server.ts` loads (or initializes) `locals.userState` with `loadOrSetupUserState(userId)` (JSON blob in Redis keyed by userId) and after every response calls `saveUserState`.
+- **Data shape**: See `lib/types.ts` (`UserState` -> projects[] -> regions[]). Extend this interface plus the default object in `loadOrSetupUserState` when adding fields.
+- **Mutations**: Perform synchronous in‑memory mutation of `locals.userState` inside page `load` (rare) or `actions` (preferred). Do NOT call Redis directly in route handlers; the hook centralizes persistence.
+- **Validation + errors**: Enforce uniqueness (project / region names) manually before pushing; pair with `superValidate` + `setError` so client form shows validation issues.
+- **Adding new persisted fields**: (1) Update `UserState`; (2) Initialize defaults in `loadOrSetupUserState`; (3) Mutate via actions; existing users missing the field will receive defaults on first load because the hook rebuilds state if parse fails.
+- **Failure handling**: If JSON parse fails, code logs error and resets a clean state (see try/catch in `lib/server/redis.ts`). Avoid partial writes—always store full serialized state.
 
 ### TailwindCSS 4 Integration
 
