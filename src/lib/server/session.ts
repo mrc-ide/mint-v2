@@ -1,12 +1,9 @@
 import type { Cookies } from '@sveltejs/kit';
 
-export const getUserIdFromCookies = (cookies: Cookies): string => {
-	const userId = cookies.get('userId');
-	if (userId) return userId;
+export const setNewUserIdCookie = (cookies: Cookies) => {
+	const userId = crypto.randomUUID();
 
-	const newUserId = crypto.randomUUID();
-
-	cookies.set('userId', newUserId, {
+	cookies.set('userId', userId, {
 		httpOnly: true,
 		secure: true,
 		sameSite: 'lax',
@@ -14,5 +11,5 @@ export const getUserIdFromCookies = (cookies: Cookies): string => {
 		maxAge: 60 * 60 * 24 * 365 // 1 year (TODO: chat and see if we want to do on this?)
 	});
 
-	return newUserId;
+	return userId;
 };
