@@ -1,9 +1,15 @@
 <script lang="ts">
+	import { DynamicForm } from '$lib/components/dynamic-form';
+	import { formSchema } from '$lib/schemas/testForm';
+	import { toast } from 'svelte-sonner';
 	import type { PageProps } from './$types';
 
-	let { data, params }: PageProps = $props();
+	let { data }: PageProps = $props();
+	$effect(() => {
+		const d2 = data;
+		toast('re run');
+	});
 </script>
 
-TODO
-<p>Project: {params.project}, {JSON.stringify(data.project)}</p>
-<p>Region: {params.region}, {JSON.stringify(data.region)}</p>
+<!-- will need to pass in initial values + hasRun -->
+<DynamicForm schema={formSchema as any} initialValues={{}} hasRun={false} />

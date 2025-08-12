@@ -13,11 +13,9 @@
 	type Props = {
 		schema: Schema;
 		initialValues: Record<string, unknown>;
+		hasRun: boolean;
 	};
-	let { schema, initialValues }: Props = $props<{
-		schema: Schema;
-		initialValues: Record<string, unknown>;
-	}>();
+	let { schema, initialValues, hasRun = false }: Props = $props();
 
 	// Helpers to iterate fields and to map field->group
 	function forEachField(callback: (f: SchemaField, g: SchemaGroup, sg: SchemaSubGroup) => void) {
@@ -98,7 +96,7 @@
 	const isDisabled = (field: SchemaField): boolean => {
 		if (typeof field.disabled === 'boolean') return field.disabled;
 		if (!field.disabled || typeof field.disabled !== 'object') return false;
-		const expr = field.disabled;
+		const expr: CustomDisabled = field.disabled;
 		const vals = expr.fields.map((id) => form[id]);
 		switch (expr.operator) {
 			case 'falsy':

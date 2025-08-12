@@ -212,7 +212,7 @@ export const formSchema = {
 						},
 						{
 							id: 'itn_future_types',
-							label: 'What type of ITNs will be used?',
+							label: 'Future ITN Types',
 							helpText: 'Select the type of ITNs that will be used in the future.',
 							type: 'multiselect',
 							options: [
@@ -236,7 +236,7 @@ export const formSchema = {
 						},
 						{
 							id: 'routine_coverage',
-							label: 'Will continuous distribution of ITNs be used?',
+							label: 'Continuous distribution of ITNs',
 							helpText: 'Indicate whether continuous distribution of ITNs will be implemented.',
 							type: 'checkbox',
 							required: true,
@@ -310,7 +310,7 @@ export const formSchema = {
 						},
 						{
 							id: 'procurement_buffer',
-							label: 'Procurement Buffer (%)',
+							label: 'Procurement Buffer',
 							helpText: 'When planning procurement, what buffer is used?',
 							type: 'slider',
 							required: true,
