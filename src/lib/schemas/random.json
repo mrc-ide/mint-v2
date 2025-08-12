@@ -1,0 +1,253 @@
+{
+	"groups": [
+		{
+			"id": "model_params",
+			"title": "Model Parameters",
+			"description": "Core parameters that trigger model rerun",
+			"triggers_rerun": true,
+			"fields": [
+				{
+					"name": "start_date",
+					"type": "date",
+					"label": "Start Date",
+					"required": true,
+					"default": "2024-01-01",
+					"validation": {
+						"custom": "must_be_before_end_date"
+					}
+				},
+				{
+					"name": "end_date",
+					"type": "date",
+					"label": "End Date",
+					"required": true,
+					"validation": {
+						"custom": "must_be_after_start_date"
+					}
+				},
+				{
+					"name": "model_type",
+					"type": "select",
+					"label": "Model Type",
+					"required": true,
+					"options": [
+						{ "value": "arima", "label": "ARIMA" },
+						{ "value": "lstm", "label": "LSTM" },
+						{ "value": "prophet", "label": "Prophet" },
+						{ "value": "linear", "label": "Linear Regression" }
+					]
+				},
+				{
+					"name": "forecast_horizon",
+					"type": "number",
+					"label": "Forecast Horizon (days)",
+					"required": true,
+					"default": 30,
+					"min": 1,
+					"max": 365,
+					"step": 1,
+					"validation": {
+						"rules": ["integer"],
+						"message": "Must be between 1 and 365 days"
+					}
+				}
+			]
+		},
+		{
+			"id": "post_processing",
+			"title": "Post-Processing Options",
+			"description": "Calculations applied to existing results",
+			"triggers_rerun": false,
+			"fields": [
+				{
+					"name": "confidence_level",
+					"type": "slider",
+					"label": "Confidence Level",
+					"required": false,
+					"default": 95,
+					"min": 1,
+					"max": 99,
+					"step": 1,
+					"unit": "%",
+					"validation": {
+						"message": "Must be between 1% and 99%"
+					}
+				},
+				{
+					"name": "smoothing_window",
+					"type": "number",
+					"label": "Smoothing Window (days)",
+					"required": false,
+					"default": 7,
+					"min": 1,
+					"max": 30,
+					"step": 1,
+					"validation": {
+						"rules": ["integer"],
+						"message": "Must be between 1 and 30 days"
+					}
+				},
+				{
+					"name": "show_residuals",
+					"type": "checkbox",
+					"label": "Show Residuals",
+					"default": false
+				},
+				{
+					"name": "outlier_threshold",
+					"type": "slider",
+					"label": "Outlier Detection Threshold",
+					"required": false,
+					"default": 95,
+					"min": 90,
+					"max": 99,
+					"step": 1,
+					"unit": "%",
+					"validation": {
+						"message": "Must be between 90% and 99%"
+					}
+				}
+			]
+		},
+		{
+			"id": "advanced",
+			"title": "Advanced Settings",
+			"description": "Optional advanced parameters for model tuning",
+			"triggers_rerun": true,
+			"collapsible": true,
+			"collapsed": true,
+			"fields": [
+				{
+					"name": "learning_rate",
+					"type": "number",
+					"label": "Learning Rate",
+					"required": false,
+					"default": 0.001,
+					"min": 0.0001,
+					"max": 0.1,
+					"step": 0.0001,
+					"validation": {
+						"message": "Must be between 0.0001 and 0.1"
+					}
+				},
+				{
+					"name": "train_split",
+					"type": "slider",
+					"label": "Training Data Split",
+					"required": false,
+					"default": 80,
+					"min": 50,
+					"max": 95,
+					"step": 5,
+					"unit": "%",
+					"validation": {
+						"message": "Must be between 50% and 95%"
+					}
+				},
+				{
+					"name": "seasonal_periods",
+					"type": "text",
+					"label": "Seasonal Periods",
+					"required": false,
+					"placeholder": "e.g., 7,365 (comma-separated)",
+					"validation": {
+						"rules": ["comma_separated_integers"],
+						"message": "Must be comma-separated integers"
+					}
+				},
+				{
+					"name": "use_external_regressors",
+					"type": "checkbox",
+					"label": "Use External Regressors",
+					"default": false
+				},
+				{
+					"name": "max_iterations",
+					"type": "number",
+					"label": "Maximum Iterations",
+					"required": false,
+					"default": 1000,
+					"min": 100,
+					"max": 10000,
+					"step": 100,
+					"validation": {
+						"rules": ["integer"],
+						"message": "Must be between 100 and 10,000"
+					}
+				}
+			]
+		},
+		{
+			"id": "visualization",
+			"title": "Visualization Options",
+			"description": "Control how results are displayed",
+			"triggers_rerun": false,
+			"collapsible": true,
+			"collapsed": false,
+			"fields": [
+				{
+					"name": "chart_type",
+					"type": "select",
+					"label": "Chart Type",
+					"required": false,
+					"default": "line",
+					"options": [
+						{ "value": "line", "label": "Line Chart" },
+						{ "value": "area", "label": "Area Chart" },
+						{ "value": "candlestick", "label": "Candlestick" },
+						{ "value": "scatter", "label": "Scatter Plot" }
+					]
+				},
+				{
+					"name": "show_confidence_bands",
+					"type": "checkbox",
+					"label": "Show Confidence Bands",
+					"default": true
+				},
+				{
+					"name": "color_scheme",
+					"type": "select",
+					"label": "Color Scheme",
+					"required": false,
+					"default": "blue",
+					"options": [
+						{ "value": "blue", "label": "Blue" },
+						{ "value": "green", "label": "Green" },
+						{ "value": "red", "label": "Red" },
+						{ "value": "purple", "label": "Purple" }
+					]
+				},
+				{
+					"name": "line_thickness",
+					"type": "slider",
+					"label": "Line Thickness",
+					"required": false,
+					"default": 2,
+					"min": 1,
+					"max": 5,
+					"step": 1,
+					"unit": "px"
+				}
+			]
+		}
+	],
+	"validation_rules": {
+		"must_be_before_end_date": {
+			"type": "cross_field",
+			"compare_field": "end_date",
+			"operator": "<",
+			"message": "Start date must be before end date"
+		},
+		"must_be_after_start_date": {
+			"type": "cross_field",
+			"compare_field": "start_date",
+			"operator": ">",
+			"message": "End date must be after start date"
+		},
+		"comma_separated_integers": {
+			"type": "regex",
+			"pattern": "^\\d+(,\\s*\\d+)*$",
+			"message": "Must be comma-separated integers (e.g., 7,365)"
+		}
+	}
+}
