@@ -23,10 +23,7 @@ export const formSchema = {
 							default: 20000,
 							min: 0,
 							max: 1e9,
-							validation: {
-								rules: ['integer'],
-								message: 'Population must be an integer between 0 and 1 billion.'
-							}
+							integer: true
 						},
 						{
 							id: 'is_seasonal',
@@ -47,10 +44,7 @@ export const formSchema = {
 							max: 100,
 							step: 1,
 							unit: '%',
-							validation: {
-								rules: ['integer'],
-								message: 'Current malaria prevalence must be an integer between 0 and 100.'
-							}
+							integer: true
 						}
 					]
 				},
@@ -71,10 +65,7 @@ export const formSchema = {
 							max: 90,
 							step: 1,
 							unit: '%',
-							validation: {
-								rules: ['integer'],
-								message: 'Preference for biting in bed must be an integer between 40 and 90.'
-							}
+							integer: true
 						},
 						{
 							id: 'preference_for_biting',
@@ -87,10 +78,7 @@ export const formSchema = {
 							max: 100,
 							step: 1,
 							unit: '%',
-							validation: {
-								rules: ['integer'],
-								message: 'Preference for biting must be an integer between 60 and 100.'
-							}
+							integer: true
 						},
 						{
 							id: 'pyrethroid_resistance',
@@ -103,10 +91,7 @@ export const formSchema = {
 							max: 100,
 							step: 1,
 							unit: '%',
-							validation: {
-								rules: ['integer'],
-								message: 'Pyrethroid resistance must be an integer between 0 and 100.'
-							}
+							integer: true
 						}
 					]
 				},
@@ -128,11 +113,7 @@ export const formSchema = {
 							max: 100,
 							step: 1,
 							unit: '%',
-							validation: {
-								rules: ['integer'],
-								message: 'Pyrethroid ITN population usage must be an integer between 0 and 100.',
-								custom: ['itn_total_under_100']
-							}
+							integer: true
 						},
 						{
 							id: 'py_pbo',
@@ -145,11 +126,7 @@ export const formSchema = {
 							max: 100,
 							step: 1,
 							unit: '%',
-							validation: {
-								rules: ['integer'],
-								message: 'Pyrethroid-PBO ITN population usage must be an integer between 0 and 100.',
-								custom: ['itn_total_under_100']
-							}
+							integer: true
 						},
 						{
 							id: 'py_pyrrole',
@@ -162,11 +139,7 @@ export const formSchema = {
 							max: 100,
 							step: 1,
 							unit: '%',
-							validation: {
-								rules: ['integer'],
-								message: 'Pyrethroid-Pyrrole ITN population usage must be an integer between 0 and 100.',
-								custom: ['itn_total_under_100']
-							}
+							integer: true
 						},
 						{
 							id: 'py_ppf',
@@ -179,11 +152,7 @@ export const formSchema = {
 							max: 100,
 							step: 1,
 							unit: '%',
-							validation: {
-								rules: ['integer'],
-								message: 'Pyrethroid-pyriproxyfen ITN population usage must be an integer between 0 and 100.',
-								custom: ['itn_total_under_100']
-							}
+							integer: true
 						},
 						{
 							id: 'itn_total',
@@ -207,10 +176,7 @@ export const formSchema = {
 							max: 100,
 							step: 1,
 							unit: '%',
-							validation: {
-								rules: ['integer'],
-								message: 'IRS coverage must be an integer between 0 and 100.'
-							}
+							integer: true
 						}
 					]
 				}
@@ -220,6 +186,7 @@ export const formSchema = {
 			id: 'intervention_options',
 			title: 'Intervention Options',
 			triggersRerun: true,
+			collapsible: true,
 			description: 'These are the intervention options for the form.',
 			helpText: 'Configure the intervention options for the form.',
 			subGroups: [
@@ -241,10 +208,7 @@ export const formSchema = {
 							max: 100,
 							step: 1,
 							unit: '%',
-							validation: {
-								rules: ['integer'],
-								message: 'Expected ITN population use must be an integer between 0 and 100.'
-							}
+							integer: true
 						},
 						{
 							id: 'itn_future_types',
@@ -294,10 +258,7 @@ export const formSchema = {
 							max: 100,
 							step: 1,
 							unit: '%',
-							validation: {
-								rules: ['integer'],
-								message: 'Expected IRS coverage must be an integer between 0 and 100.'
-							}
+							integer: true
 						},
 						{
 							id: 'lsm',
@@ -310,11 +271,7 @@ export const formSchema = {
 							max: 100,
 							step: 1,
 							unit: '%',
-							validation: {
-								rules: ['integer'],
-								message:
-									'Expected reduction in mosquito density from larval source management must be an integer between 0 and 100.'
-							}
+							integer: true
 						}
 					]
 				}
@@ -322,10 +279,11 @@ export const formSchema = {
 		},
 		{
 			id: 'cost_options',
-			description: 'Cost Options',
 			title: 'Cost Options',
+			description: 'Cost Options',
 			helpText: 'Configure the cost options for the form.',
 			triggersRerun: false,
+			collapsible: true,
 			subGroups: [
 				{
 					id: 'procurement_distribution',
@@ -361,10 +319,7 @@ export const formSchema = {
 							max: 100,
 							step: 1,
 							unit: '%',
-							validation: {
-								rules: ['integer'],
-								message: 'Procurement buffer must be an integer between 0 and 100.'
-							}
+							integer: true
 						}
 					]
 				},
@@ -442,6 +397,7 @@ export const formSchema = {
 			fields: ['py_only', 'py_pbo', 'py_pyrrole', 'py_ppf'],
 			operator: 'sum_lte',
 			threshold: 100,
+			errorFields: ['py_only', 'py_pbo', 'py_pyrrole', 'py_ppf', 'itn_total'],
 			message: 'Total ITN population usage must be less than or equal to 100%.'
 		}
 	}
