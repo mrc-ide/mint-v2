@@ -27,7 +27,7 @@ export const formSchema = {
 						},
 						{
 							id: 'is_seasonal',
-							label: 'Is Seasonal?',
+							label: 'Seasonal',
 							helpText: 'Indicate whether the population is seasonal.',
 							type: 'checkbox',
 							required: true,

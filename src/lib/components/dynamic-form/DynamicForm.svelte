@@ -1,14 +1,13 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
-	import { cn } from '$lib/utils';
 	import type {
-		SchemaField,
-		SchemaSubGroup,
-		SchemaGroup,
+		CustomDisabled,
 		CustomValidationRule,
-		Schema,
 		CustomValue,
-		CustomDisabled
+		Schema,
+		SchemaField,
+		SchemaGroup,
+		SchemaSubGroup
 	} from './types';
 
 	type Props = {
@@ -43,12 +42,12 @@
 		// For display fields, we won't assign default here (computed later)
 		switch (field.type) {
 			case 'checkbox':
-				return typeof field.default === 'boolean' ? field.default : false;
+				return field.default ?? false;
 			case 'number':
 			case 'slider':
-				return typeof field.default === 'number' ? field.default : 0;
+				return field.default ?? 0;
 			case 'multiselect':
-				return Array.isArray(field.default) ? field.default : [];
+				return field.default ?? [];
 			default:
 				return field.default ?? null; // For 'display' or any other type, return default or null
 		}
@@ -78,7 +77,7 @@
 		return Number.isFinite(n) ? n : 0;
 	}
 
-	function evalValueExpr(field: SchemaField): unknown {
+	function evaluateValueExpression(field: SchemaField): unknown {
 		if (field.type !== 'display' || !field.value || typeof field.value !== 'object') return form[field.id];
 		const expr = field.value as CustomValue;
 		const vals = expr.fields.map((id) => getNumber(form[id]));
@@ -99,8 +98,8 @@
 	const isDisabled = (field: SchemaField): boolean => {
 		if (typeof field.disabled === 'boolean') return field.disabled;
 		if (!field.disabled || typeof field.disabled !== 'object') return false;
-		const expr = field.disabled as CustomDisabled;
-		const vals = expr.fields?.map((id) => form[id]);
+		const expr = field.disabled;
+		const vals = expr.fields.map((id) => form[id]);
 		switch (expr.operator) {
 			case 'falsy':
 				return vals.every((val) => !val) ?? false;
@@ -115,24 +114,31 @@
 
 	// Validation
 	function validateField(field: SchemaField) {
-		let message: string | null = null;
 		const val = form[field.id];
+		let message: string | null = null;
 
+		// Required field validation
 		if (field.required && (val === null || val === undefined || val === '' || Number.isNaN(val))) {
-			message = `${field.label ?? field.id} is required`;
+			message = `${field.label} is required`;
 		}
 
+		// Numeric field validation
 		if (!message && (field.type === 'number' || field.type === 'slider')) {
-			const n = getNumber(val);
-			console.log(n);
-			if (typeof field.min === 'number' && n < field.min) {
-				message = `${field.label ?? field.id} must be ≥ ${field.min}`;
+			const numValue = getNumber(val);
+
+			// Min value check
+			if (typeof field.min === 'number' && numValue < field.min) {
+				message = `${field.label} must be ≥ ${field.min}`;
 			}
-			if (!message && typeof field.max === 'number' && n > field.max) {
-				message = `${field.label ?? field.id} must be ≤ ${field.max}`;
+
+			// Max value check
+			if (!message && typeof field.max === 'number' && numValue > field.max) {
+				message = `${field.label} must be ≤ ${field.max}`;
 			}
-			if (!message && field.integer) {
-				if (!Number.isInteger(n)) message = `${field.label} must be an integer`;
+
+			// Integer check
+			if (!message && field.integer && !Number.isInteger(numValue)) {
+				message = `${field.label} must be an integer`;
 			}
 		}
 
@@ -190,8 +196,8 @@
 
 		// rerun if this group triggers reruns and there are no validation errors
 		const group = fieldToGroup[field.id];
-		const hasErrors = Object.values(errors).some((error) => error !== null);
-		if (group.triggersRerun && !hasErrors) {
+		const isFormInvalid = Object.values(errors).some((error) => error !== null);
+		if (group.triggersRerun && !isFormInvalid) {
 			rerunModel();
 		}
 	};
@@ -324,7 +330,7 @@
 												</div>
 											{:else if field.type === 'display'}
 												<div class="rounded bg-white px-2 py-1 text-sm tabular-nums">
-													{evalValueExpr(field) as number}{field.unit ?? ''}
+													{evaluateValueExpression(field) as number}{field.unit ?? ''}
 												</div>
 											{/if}
 

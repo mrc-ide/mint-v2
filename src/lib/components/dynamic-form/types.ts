@@ -1,45 +1,40 @@
-export type SchemaField = {
+export type BaseField = {
 	id: string;
 	label: string;
 	helpText?: string;
-	type: 'number' | 'checkbox' | 'slider' | 'multiselect' | 'display';
 	required?: boolean;
-	default?: unknown;
-	min?: number;
-	max?: number;
-	step?: number;
-	unit?: string;
-	integer?: boolean;
-	options?: { label: string; value: string }[];
 	disabled?: boolean | CustomDisabled;
-	value?: unknown | CustomValue;
+	value: unknown | CustomValue;
+	default?: unknown;
 };
 
-export type NumericField = SchemaField & {
+export type NumericField = BaseField & {
 	type: 'number' | 'slider';
 	max?: number;
 	min?: number;
 	step?: number;
 	unit?: string;
 	default?: number;
+	integer?: boolean;
 };
 
-export type CheckboxField = SchemaField & {
+export type CheckboxField = BaseField & {
 	type: 'checkbox';
 	default?: boolean;
 };
 
-export type MultiselectField = SchemaField & {
+export type MultiselectField = BaseField & {
 	type: 'multiselect';
 	options: { label: string; value: string }[];
 	default?: string[];
 };
 
-export type DisplayField = SchemaField & {
+export type DisplayField = BaseField & {
 	type: 'display';
 	unit?: string;
 	value: unknown | CustomValue;
 };
+export type SchemaField = NumericField | CheckboxField | MultiselectField | DisplayField;
 
 export type CustomValidationRule = {
 	type: 'cross_field';
