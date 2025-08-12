@@ -67,3 +67,12 @@ npm run test:e2e     # End-to-end tests with Playwright
 
 **E2E Tests**: Full application testing with Playwright
 
+## Component Management
+
+**Adding shadcn-svelte Components**: Use the CLI to install components from the [shadcn-svelte documentation](https://www.shadcn-svelte.com/docs/components):
+
+```sh
+npx shadcn-svelte@latest add [component-name]
+```
+
+These components will be added to `src/lib/components/ui/` and automatically registered in the SvelteKit app.
