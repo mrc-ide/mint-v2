@@ -16,7 +16,8 @@ redis.on('reconnecting', () => {
 });
 export default redis;
 
-export const loadOrSetupUserState = async (userId: string = '', cookies: Cookies): Promise<UserState> => {
+export const loadOrSetupUserState = async (cookies: Cookies): Promise<UserState> => {
+	const userId = cookies.get('userId') || '';
 	const cachedUserState = await redis.get(userId);
 	if (cachedUserState) {
 		try {
