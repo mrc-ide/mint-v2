@@ -1,5 +1,12 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
+	import { Button } from '../ui/button';
+	import { Checkbox } from '$lib/components/ui/checkbox';
+	import { Input } from '../ui/input';
+	import { Label } from '../ui/label';
+	import { Slider } from '$lib/components/ui/slider';
+	import ChevronsUpDownIcon from '@lucide/svelte/icons/chevrons-up-down';
+	import * as Select from '$lib/components/ui/select';
 	import type {
 		CustomDisabled,
 		CustomValidationRule,
@@ -15,7 +22,7 @@
 		initialValues: Record<string, unknown>;
 		hasRun: boolean;
 	};
-	let { schema, initialValues, hasRun = false }: Props = $props();
+	let { schema, initialValues, hasRun = $bindable(false) }: Props = $props();
 
 	// Helpers to iterate fields and to map field->group
 	function forEachField(callback: (f: SchemaField, g: SchemaGroup, sg: SchemaSubGroup) => void) {
@@ -203,153 +210,161 @@
 	$inspect(form);
 </script>
 
-<form class="space-y-6">
+<form class="grid grid-cols-4 gap-4">
 	{#each schema.groups as group}
-		<section class="rounded-md border p-4">
-			{#if group.collapsible}
-				<div class="mb-1 flex items-center justify-between">
+		{#if group.preRun || hasRun}
+			<section class={['rounded-md border p-3', group.preRun ? 'col-span-4' : 'col-span-1 col-start-1']}>
+				{#if group.collapsible}
 					<button
 						type="button"
-						class="inline-flex items-center gap-2 text-left text-lg font-semibold"
+						class="inline-flex items-center gap-1 text-left text-lg font-semibold hover:text-muted-foreground"
 						aria-expanded={!isGroupCollapsed(group)}
 						aria-controls={`group-${group.id}`}
 						onclick={() => (collapsedGroups[group.id] = !isGroupCollapsed(group))}
 					>
-						<span class="inline-block w-4 text-center">{isGroupCollapsed(group) ? '▸' : '▾'}</span>
+						<ChevronsUpDownIcon
+							class={[
+								'inline-block w-5 text-center transition-transform duration-200',
+								{ 'rotate-180': isGroupCollapsed(group) }
+							]}
+						/>
 						{group.title}
 					</button>
-					{#if group.triggersRerun}
-						<span class="text-[10px] tracking-wide text-amber-600 uppercase">Triggers re-run</span>
-					{/if}
-				</div>
-			{:else if group.title}<h2 class="mb-1 text-lg font-semibold">{group.title}</h2>{/if}
-			{#if group.description}<p class="mb-2 text-sm text-slate-600">{group.description}</p>{/if}
-			{#if group.helpText}<p class="mb-4 text-xs text-slate-500">{group.helpText}</p>{/if}
+				{:else if group.title}<h2 class="mb-1 text-lg font-semibold">{group.title}</h2>{/if}
+				{#if group.description}<p class="mb-1 text-sm text-muted-foreground">{group.description}</p>{/if}
+				{#if group.helpText}<p class="mb-2 text-xs text-muted-foreground">{group.helpText}</p>{/if}
 
-			{#if !isGroupCollapsed(group)}
-				<div id={`group-${group.id}`}>
-					{#each group.subGroups as subGroup}
-						<div class="mb-4 rounded-md bg-slate-50 p-3">
-							{#if subGroup.title}
-								<div class="mb-2 flex items-center justify-between">
-									{#if subGroup.collapsible}
-										<button
-											type="button"
-											class="inline-flex items-center gap-2 font-medium"
-											aria-expanded={!isSubGroupCollapsed(group.id, subGroup.id)}
-											aria-controls={`subgroup-${group.id}-${subGroup.id}`}
-											onclick={() =>
-												(collapsedSubGroups[`${group.id}:${subGroup.id}`] = !isSubGroupCollapsed(
-													group.id,
-													subGroup.id
-												))}
-										>
-											<span class="inline-block w-4 text-center"
-												>{isSubGroupCollapsed(group.id, subGroup.id) ? '▸' : '▾'}</span
+				{#if !isGroupCollapsed(group)}
+					<div
+						id={`group-${group.id}`}
+						class={['mx-2 flex justify-between gap-5', group.preRun ? 'flex-row' : 'flex-col']}
+					>
+						{#each group.subGroups as subGroup}
+							<div>
+								{#if subGroup.title}
+									<div class="mb-0.5">
+										{#if subGroup.collapsible}
+											<button
+												type="button"
+												class="inline-flex items-center gap-2 font-medium hover:text-muted-foreground"
+												aria-expanded={!isSubGroupCollapsed(group.id, subGroup.id)}
+												aria-controls={`subgroup-${group.id}-${subGroup.id}`}
+												onclick={() =>
+													(collapsedSubGroups[`${group.id}:${subGroup.id}`] = !isSubGroupCollapsed(
+														group.id,
+														subGroup.id
+													))}
 											>
-											{subGroup.title}
-										</button>
-									{:else}
-										<h3 class="font-medium">{subGroup.title}</h3>
-									{/if}
-									{#if group.triggersRerun}
-										<span class="text-[10px] tracking-wide text-amber-600 uppercase">Triggers re-run</span>
-									{/if}
-								</div>
-							{/if}
-							{#if subGroup.description}<p class="mb-2 text-xs text-slate-600">{subGroup.description}</p>{/if}
-							{#if subGroup.helpText}<p class="mb-3 text-[11px] text-slate-500">{subGroup.helpText}</p>{/if}
-
-							{#if !isSubGroupCollapsed(group.id, subGroup.id)}
-								<div id={`subgroup-${group.id}-${subGroup.id}`} class="grid grid-cols-1 gap-4 md:grid-cols-2">
-									{#each subGroup.fields as field}
-										<div class="flex flex-col gap-1">
-											{#if field.label}<label class="text-sm font-medium" for={field.id}>{field.label}</label>{/if}
-											{#if field.helpText}<p class="text-xs text-slate-500">{field.helpText}</p>{/if}
-
-											{#if field.type === 'number'}
-												<input
-													id={field.id}
-													type="number"
-													class="h-9 rounded border px-2"
-													min={field.min}
-													max={field.max}
-													step={field.step ?? 'any'}
-													disabled={isDisabled(field)}
-													value={String(form[field.id] ?? '')}
-													oninput={(e) =>
-														onChange(field, e.currentTarget.value === '' ? '' : Number(e.currentTarget.value))}
+												<ChevronsUpDownIcon
+													class={[
+														'inline-block w-5 text-center transition-transform duration-200',
+														{ 'rotate-180': isSubGroupCollapsed(group.id, subGroup.id) }
+													]}
 												/>
-											{:else if field.type === 'checkbox'}
-												<input
-													id={field.id}
-													type="checkbox"
-													class="h-4 w-4"
-													disabled={isDisabled(field)}
-													checked={Boolean(form[field.id])}
-													onchange={(e) => onChange(field, e.currentTarget.checked)}
-												/>
-											{:else if field.type === 'slider'}
-												<div class="flex items-center gap-3">
-													<input
+												{subGroup.title}
+											</button>
+										{:else}
+											<h3 class="font-medium">{subGroup.title}</h3>
+										{/if}
+									</div>
+								{/if}
+								{#if subGroup.description}<p class="mb-1 text-xs text-muted-foreground">{subGroup.description}</p>{/if}
+								{#if subGroup.helpText}<p class="mb-1 text-[11px] text-muted-foreground">{subGroup.helpText}</p>{/if}
+
+								{#if !isSubGroupCollapsed(group.id, subGroup.id)}
+									<div id={`subgroup-${group.id}-${subGroup.id}`} class="flex flex-col gap-2">
+										{#each subGroup.fields as field}
+											<div class="flex flex-col gap-2">
+												<Label for={field.id}>{field.label}</Label>
+												{#if field.helpText}<p class="text-xs text-muted-foreground">{field.helpText}</p>{/if}
+
+												{#if field.type === 'number'}
+													<Input
 														id={field.id}
-														type="range"
-														class="flex-1"
+														type="number"
 														min={field.min}
 														max={field.max}
-														step={field.step ?? 1}
+														step={field.step ?? 'any'}
 														disabled={isDisabled(field)}
-														value={Number(form[field.id] ?? 0)}
-														oninput={(e) => onChange(field, Number(e.currentTarget.value))}
+														value={String(form[field.id] ?? '')}
+														oninput={(e) =>
+															onChange(field, e.currentTarget.value === '' ? '' : Number(e.currentTarget.value))}
 													/>
-													<span class="w-14 text-right text-sm tabular-nums"
-														>{form[field.id] as number}{field.unit ?? ''}</span
-													>
-												</div>
-											{:else if field.type === 'multiselect'}
-												<div class="flex flex-wrap gap-3">
-													{#each field.options ?? [] as opt}
-														<label class="inline-flex items-center gap-2 text-sm">
-															<input
-																type="checkbox"
-																class="h-4 w-4"
-																disabled={isDisabled(field)}
-																checked={(form[field.id] as string[] | undefined)?.includes(opt.value)}
-																onchange={(e) => {
-																	const current = new Set<string>((form[field.id] as string[] | undefined) ?? []);
-																	if (e.currentTarget.checked) current.add(opt.value);
-																	else current.delete(opt.value);
-																	onChange(field, Array.from(current));
-																}}
-															/>
-															{opt.label}
-														</label>
-													{/each}
-												</div>
-											{:else if field.type === 'display'}
-												<div class="rounded bg-white px-2 py-1 text-sm tabular-nums">
-													{evaluateValueExpression(field) as number}{field.unit ?? ''}
-												</div>
-											{/if}
+												{:else if field.type === 'checkbox'}
+													<Checkbox
+														id={field.id}
+														disabled={isDisabled(field)}
+														checked={Boolean(form[field.id])}
+														onCheckedChange={(checked) => onChange(field, checked)}
+													/>
+												{:else if field.type === 'slider'}
+													<div class="flex items-center gap-3">
+														<Slider
+															id={field.id}
+															type="single"
+															min={field.min}
+															max={field.max}
+															step={field.step ?? 1}
+															disabled={isDisabled(field)}
+															value={Number(form[field.id] ?? 0)}
+															onValueChange={(value) => onChange(field, value)}
+														/>
+														<span class="w-14 text-right text-sm tabular-nums"
+															>{form[field.id] as number}{field.unit ?? ''}</span
+														>
+													</div>
+												{:else if field.type === 'multiselect'}
+													<div class="flex flex-wrap gap-3">
+														{#each field.options ?? [] as opt}
+															<label class="inline-flex items-center gap-2 text-sm">
+																<input
+																	type="checkbox"
+																	class="h-4 w-4"
+																	disabled={isDisabled(field)}
+																	checked={(form[field.id] as string[] | undefined)?.includes(opt.value)}
+																	onchange={(e) => {
+																		const current = new Set<string>((form[field.id] as string[] | undefined) ?? []);
+																		if (e.currentTarget.checked) current.add(opt.value);
+																		else current.delete(opt.value);
+																		onChange(field, Array.from(current));
+																	}}
+																/>
+																{opt.label}
+															</label>
+														{/each}
+													</div>
+												{:else if field.type === 'display'}
+													<div class="rounded-md bg-slate-50 px-2 py-1 text-sm tabular-nums dark:bg-slate-950">
+														{evaluateValueExpression(field) as number}{field.unit ?? ''}
+													</div>
+												{/if}
 
-											{#if errors[field.id]}
-												<p class="text-xs text-red-600">{errors[field.id]}</p>
-											{/if}
-										</div>
-									{/each}
-								</div>
-							{/if}
-						</div>
-					{/each}
-				</div>
-			{/if}
-		</section>
+												{#if errors[field.id]}
+													<p class="text-xs text-destructive">{errors[field.id]}</p>
+												{/if}
+											</div>
+										{/each}
+									</div>
+								{/if}
+							</div>
+						{/each}
+					</div>
+				{/if}
+			</section>
+		{/if}
 	{/each}
 
-	<div class="flex items-center justify-end gap-2">
-		<button type="button" class="rounded border px-3 py-1 text-sm" onclick={() => invalidateAll()}>
-			Force re-run
-		</button>
-		<button type="submit" class="rounded bg-slate-900 px-3 py-1 text-sm text-white">Submit</button>
+	<div class="col-span-4 flex justify-center">
+		{#if !hasRun}
+			<Button
+				onclick={() => {
+					hasRun = true;
+					invalidateAll();
+				}}
+				size="lg"
+			>
+				Run baseline
+			</Button>
+		{/if}
 	</div>
 </form>

@@ -4,7 +4,7 @@ export type BaseField = {
 	helpText?: string;
 	required?: boolean;
 	disabled?: boolean | CustomDisabled;
-	value: unknown | CustomValue;
+	value?: unknown | CustomValue;
 	default?: unknown;
 };
 
@@ -72,6 +72,7 @@ export type SchemaGroup = {
 	helpText?: string;
 	collapsible?: boolean;
 	triggersRerun?: boolean;
+	preRun?: boolean;
 	subGroups: SchemaSubGroup[];
 };
 

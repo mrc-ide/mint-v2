@@ -1,4 +1,6 @@
-export const formSchema = {
+import type { Schema } from '$lib/components/dynamic-form/types';
+
+export const formSchema: Schema = {
 	groups: [
 		{
 			id: 'baseline_options',
@@ -7,6 +9,7 @@ export const formSchema = {
 			helpText: 'Configure the baseline options for the form.',
 			collapsible: true,
 			triggersRerun: true,
+			preRun: true,
 			subGroups: [
 				{
 					id: 'site_inputs',
@@ -23,11 +26,12 @@ export const formSchema = {
 							default: 20000,
 							min: 0,
 							max: 1e9,
+							step: 100,
 							integer: true
 						},
 						{
 							id: 'is_seasonal',
-							label: 'Seasonal',
+							label: 'Transmission seasonal?',
 							helpText: 'Indicate whether the population is seasonal.',
 							type: 'checkbox',
 							required: true,
@@ -187,6 +191,7 @@ export const formSchema = {
 			title: 'Intervention Options',
 			triggersRerun: true,
 			collapsible: true,
+			preRun: false,
 			description: 'These are the intervention options for the form.',
 			helpText: 'Configure the intervention options for the form.',
 			subGroups: [
@@ -284,6 +289,7 @@ export const formSchema = {
 			helpText: 'Configure the cost options for the form.',
 			triggersRerun: false,
 			collapsible: true,
+			preRun: false,
 			subGroups: [
 				{
 					id: 'procurement_distribution',
@@ -294,7 +300,7 @@ export const formSchema = {
 					fields: [
 						{
 							id: 'people_per_bednet',
-							label: 'Number of People per Bed Net',
+							label: 'Number of People per bed net',
 							helpText: 'When planning procurement, what number of people per net is used?',
 							type: 'number',
 							required: true,
@@ -302,7 +308,7 @@ export const formSchema = {
 						},
 						{
 							id: 'people_per_household',
-							label: 'Number of People per Household',
+							label: 'Number of People per household',
 							helpText: 'When planning procurement, what number of people per household is used?',
 							type: 'number',
 							required: true,

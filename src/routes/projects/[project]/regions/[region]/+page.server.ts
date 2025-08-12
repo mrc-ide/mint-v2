@@ -3,6 +3,7 @@ import { error, redirect, type Actions } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { fail, setError, superValidate } from 'sveltekit-superforms';
 import { addRegionSchema } from '$routes/projects/[project]/regions/[region]/schema';
+import { formSchema } from '$lib/schemas/testForm';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const { project, region } = params;
@@ -18,7 +19,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	return {
 		project: projectData,
 		region: regionData,
-		addRegionForm
+		addRegionForm,
+		formSchema
 	};
 };
 
