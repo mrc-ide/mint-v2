@@ -2,8 +2,7 @@ import { loadOrSetupUserState, saveUserState } from '$lib/server/redis';
 import type { Handle } from '@sveltejs/kit';
 
 export const handle: Handle = async ({ event, resolve }) => {
-	const userId = event.cookies.get('userId');
-	event.locals.userState = await loadOrSetupUserState(userId, event.cookies);
+	event.locals.userState = await loadOrSetupUserState(event.cookies);
 
 	const response = await resolve(event);
 
