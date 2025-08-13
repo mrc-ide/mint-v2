@@ -23,7 +23,7 @@ export const load: PageServerLoad = async ({ params, locals, fetch }) => {
 		region: regionData,
 		addRegionForm,
 		formSchema: formSchema as Schema,
-		timeSeriesData: await runModels(project, region, regionData, fetch)
+		timeSeriesData: runModels(project, region, regionData, fetch)
 	};
 };
 const runModels = async (project: string, region: string, regionData: Region, fetch: typeof window.fetch) => {
