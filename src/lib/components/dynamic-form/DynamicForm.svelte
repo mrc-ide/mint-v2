@@ -1,13 +1,16 @@
 <script lang="ts">
-	import { invalidateAll } from '$app/navigation';
-	import { Button } from '../ui/button';
 	import { Checkbox } from '$lib/components/ui/checkbox';
-	import { Input } from '../ui/input';
-	import { Label } from '../ui/label';
 	import { Slider } from '$lib/components/ui/slider';
+	import * as Tooltip from '$lib/components/ui/tooltip';
+	import { cn } from '$lib/utils';
 	import ChevronsUpDownIcon from '@lucide/svelte/icons/chevrons-up-down';
 	import Info from '@lucide/svelte/icons/info';
-	import * as Tooltip from '$lib/components/ui/tooltip';
+	import debounce from 'debounce';
+	import type { Snippet } from 'svelte';
+	import { slide } from 'svelte/transition';
+	import { Button } from '../ui/button';
+	import { Input } from '../ui/input';
+	import { Label } from '../ui/label';
 	import type {
 		CustomDisabled,
 		CustomValidationRule,
@@ -17,16 +20,16 @@
 		SchemaGroup,
 		SchemaSubGroup
 	} from './types';
-	import { slide } from 'svelte/transition';
-	import { cn } from '$lib/utils';
 
 	type Props = {
 		schema: Schema;
 		initialValues: Record<string, unknown>;
 		hasRun: boolean;
+		children: Snippet;
+		runModels: (form: Record<string, unknown>) => Promise<void>;
 	};
-	let { schema, initialValues, hasRun = $bindable(false) }: Props = $props();
-
+	let { schema, initialValues, hasRun = $bindable(false), children, runModels }: Props = $props();
+	const debouncedModelRun = debounce(runModels, 500);
 	// Helpers to iterate fields and to map field->group
 	function forEachField(callback: (f: SchemaField, g: SchemaGroup, sg: SchemaSubGroup) => void) {
 		for (const g of schema.groups) {
@@ -41,10 +44,11 @@
 	});
 
 	// Initialize state from defaults + initialValues override
-	const form = $state<Record<string, unknown>>({});
-	const errors = $state<Record<string, string | null>>({});
-	const collapsedGroups = $state<Record<string, boolean>>({});
-	const collapsedSubGroups = $state<Record<string, boolean>>({});
+	let form = $state<Record<string, unknown>>({});
+	let errors = $state<Record<string, string | null>>({});
+	let collapsedGroups = $state<Record<string, boolean>>({});
+	let collapsedSubGroups = $state<Record<string, boolean>>({});
+	let hasFormErrors = $derived(Object.values(errors).some((error) => error !== null));
 
 	const coerceDefaults = (field: SchemaField): unknown => {
 		// For display fields, we won't assign default here (computed later)
@@ -187,16 +191,6 @@
 		}
 	}
 
-	// Debounced rerun on changes within triggersRerun groups
-	let rerunTimer: ReturnType<typeof setTimeout> | null = null;
-	const rerunModel = (waitMs: number = 500) => {
-		if (rerunTimer) clearTimeout(rerunTimer);
-		rerunTimer = setTimeout(() => {
-			// Re-run page data loading (e.g. refetch timeseries)
-			invalidateAll();
-		}, waitMs);
-	};
-
 	const onChange = (field: SchemaField, value: unknown) => {
 		form[field.id] = value;
 		validateField(field);
@@ -204,13 +198,11 @@
 
 		// rerun if this group triggers reruns and there are no validation errors
 		const group = fieldToGroup[field.id];
-		const isFormInvalid = Object.values(errors).some((error) => error !== null);
-		if (group.triggersRerun && !isFormInvalid) {
-			rerunModel();
+		console.log(hasFormErrors);
+		if (group.triggersRerun && hasRun && !hasFormErrors) {
+			debouncedModelRun(form);
 		}
 	};
-
-	$inspect(form);
 </script>
 
 <form class="grid grid-cols-4 gap-4">
@@ -395,18 +387,25 @@
 		{/if}
 	{/each}
 
+	{#if hasRun}
+		<div class="col-span-3 col-start-2 row-span-2 row-start-2">
+			{@render children()}
+		</div>
+	{/if}
 	<div class="col-span-4 flex justify-center">
 		{#if !hasRun}
 			<Button
 				onclick={() => {
+					if (hasFormErrors) return;
 					hasRun = true;
-					invalidateAll();
+					runModels(form);
 					const preRunGroup = schema.groups.find((g) => g.preRun);
 					if (preRunGroup) {
 						collapsedGroups[preRunGroup.id] = true; // Collapse pre-run group after running
 					}
 				}}
 				size="lg"
+				disabled={hasFormErrors}
 			>
 				Run baseline
 			</Button>
