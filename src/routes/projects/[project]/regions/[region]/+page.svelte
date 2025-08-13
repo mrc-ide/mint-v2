@@ -39,6 +39,10 @@
 		<div class="text-muted-foreground">Loading results...</div>
 	</div>
 {/snippet}
+{#snippet timeSeriesDisplay(timeSeries: TimeSeriesData)}
+	CasesData: {JSON.stringify(timeSeries.casesData)}
+	PrevalenceData: {JSON.stringify(timeSeries.prevalenceData)}
+{/snippet}
 {#key page.url.pathname}
 	<DynamicForm schema={data.formSchema} initialValues={data.region.formValues} bind:hasRun {runModels}>
 		{#await data.timeSeriesData}
@@ -47,11 +51,9 @@
 			{#if isLoading}
 				{@render loading()}
 			{:else if timeSeries}
-				CasesData: {JSON.stringify(timeSeries.casesData)}
-				PrevalenceData: {JSON.stringify(timeSeries.prevalenceData)}
+				{@render timeSeriesDisplay(timeSeries)}
 			{:else if initialTimeSeries}
-				CasesData: {JSON.stringify(initialTimeSeries.casesData)}
-				PrevalenceData: {JSON.stringify(initialTimeSeries.prevalenceData)}
+				{@render timeSeriesDisplay(initialTimeSeries)}
 			{/if}
 		{:catch _err}
 			<div class="flex items-center justify-center p-8">
