@@ -216,7 +216,7 @@
 <form class="grid grid-cols-4 gap-4">
 	{#each schema.groups as group}
 		{#if group.preRun || hasRun}
-			<section class={['rounded-md border p-3', group.preRun ? 'col-span-4' : 'col-span-1 col-start-1']}>
+			<section class={['rounded-md border p-8', group.preRun ? 'col-span-4' : 'col-span-1 col-start-1']}>
 				{#if group.collapsible}
 					<button
 						type="button"
@@ -279,17 +279,19 @@
 									<div id={`subgroup-${group.id}-${subGroup.id}`} class="flex flex-col gap-3" transition:slide>
 										{#each subGroup.fields as field}
 											<div class="flex flex-col gap-2">
-												<Label for={field.id} class={errors[field.id] ? 'text-destructive' : ''}>{field.label}</Label>
-												{#if field.helpText}
-													<Tooltip.Provider>
-														<Tooltip.Root>
-															<Tooltip.Trigger><Info class="h-4 w-4 text-muted-foreground" /></Tooltip.Trigger>
-															<Tooltip.Content>
-																<p>{field.helpText}</p>
-															</Tooltip.Content>
-														</Tooltip.Root>
-													</Tooltip.Provider>
-												{/if}
+												<div class="flex gap-2">
+													<Label for={field.id} class={errors[field.id] ? 'text-destructive' : ''}>{field.label}</Label>
+													{#if field.helpText}
+														<Tooltip.Provider>
+															<Tooltip.Root>
+																<Tooltip.Trigger><Info class="h-4 w-4 text-muted-foreground" /></Tooltip.Trigger>
+																<Tooltip.Content>
+																	<p>{field.helpText}</p>
+																</Tooltip.Content>
+															</Tooltip.Root>
+														</Tooltip.Provider>
+													{/if}
+												</div>
 
 												{#if field.type === 'number'}
 													<Input
@@ -325,7 +327,7 @@
 															aria-invalid={Boolean(errors[field.id])}
 															onValueChange={(value) => onChange(field, value)}
 														/>
-														<span class="w-14 text-right text-sm tabular-nums"
+														<span class="w-10 text-right text-sm tabular-nums"
 															>{form[field.id] as number}{field.unit ?? ''}</span
 														>
 													</div>
