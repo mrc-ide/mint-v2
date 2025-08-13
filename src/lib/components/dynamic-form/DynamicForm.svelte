@@ -6,7 +6,8 @@
 	import { Label } from '../ui/label';
 	import { Slider } from '$lib/components/ui/slider';
 	import ChevronsUpDownIcon from '@lucide/svelte/icons/chevrons-up-down';
-	import * as Select from '$lib/components/ui/select';
+	import Info from '@lucide/svelte/icons/info';
+	import * as Tooltip from '$lib/components/ui/tooltip';
 	import type {
 		CustomDisabled,
 		CustomValidationRule,
@@ -16,6 +17,8 @@
 		SchemaGroup,
 		SchemaSubGroup
 	} from './types';
+	import { slide } from 'svelte/transition';
+	import { cn } from '$lib/utils';
 
 	type Props = {
 		schema: Schema;
@@ -237,6 +240,7 @@
 				{#if !isGroupCollapsed(group)}
 					<div
 						id={`group-${group.id}`}
+						transition:slide
 						class={['mx-2 flex justify-between gap-5', group.preRun ? 'flex-row' : 'flex-col']}
 					>
 						{#each group.subGroups as subGroup}
@@ -272,11 +276,20 @@
 								{#if subGroup.helpText}<p class="mb-1 text-[11px] text-muted-foreground">{subGroup.helpText}</p>{/if}
 
 								{#if !isSubGroupCollapsed(group.id, subGroup.id)}
-									<div id={`subgroup-${group.id}-${subGroup.id}`} class="flex flex-col gap-2">
+									<div id={`subgroup-${group.id}-${subGroup.id}`} class="flex flex-col gap-3" transition:slide>
 										{#each subGroup.fields as field}
 											<div class="flex flex-col gap-2">
-												<Label for={field.id}>{field.label}</Label>
-												{#if field.helpText}<p class="text-xs text-muted-foreground">{field.helpText}</p>{/if}
+												<Label for={field.id} class={errors[field.id] ? 'text-destructive' : ''}>{field.label}</Label>
+												{#if field.helpText}
+													<Tooltip.Provider>
+														<Tooltip.Root>
+															<Tooltip.Trigger><Info class="h-4 w-4 text-muted-foreground" /></Tooltip.Trigger>
+															<Tooltip.Content>
+																<p>{field.helpText}</p>
+															</Tooltip.Content>
+														</Tooltip.Root>
+													</Tooltip.Provider>
+												{/if}
 
 												{#if field.type === 'number'}
 													<Input
@@ -287,6 +300,7 @@
 														step={field.step ?? 'any'}
 														disabled={isDisabled(field)}
 														value={String(form[field.id] ?? '')}
+														aria-invalid={Boolean(errors[field.id])}
 														oninput={(e) =>
 															onChange(field, e.currentTarget.value === '' ? '' : Number(e.currentTarget.value))}
 													/>
@@ -294,6 +308,7 @@
 													<Checkbox
 														id={field.id}
 														disabled={isDisabled(field)}
+														aria-invalid={Boolean(errors[field.id])}
 														checked={Boolean(form[field.id])}
 														onCheckedChange={(checked) => onChange(field, checked)}
 													/>
@@ -307,6 +322,7 @@
 															step={field.step ?? 1}
 															disabled={isDisabled(field)}
 															value={Number(form[field.id] ?? 0)}
+															aria-invalid={Boolean(errors[field.id])}
 															onValueChange={(value) => onChange(field, value)}
 														/>
 														<span class="w-14 text-right text-sm tabular-nums"
@@ -314,27 +330,31 @@
 														>
 													</div>
 												{:else if field.type === 'multiselect'}
-													<div class="flex flex-wrap gap-3">
+													<div class="flex flex-wrap gap-2">
 														{#each field.options ?? [] as opt}
-															<label class="inline-flex items-center gap-2 text-sm">
-																<input
-																	type="checkbox"
-																	class="h-4 w-4"
+															{@const selectedValues = (form[field.id] as string[]) ?? []}
+															<Label class="inline-flex items-center gap-2 text-sm font-normal">
+																<Checkbox
 																	disabled={isDisabled(field)}
-																	checked={(form[field.id] as string[] | undefined)?.includes(opt.value)}
-																	onchange={(e) => {
-																		const current = new Set<string>((form[field.id] as string[] | undefined) ?? []);
-																		if (e.currentTarget.checked) current.add(opt.value);
+																	checked={selectedValues.includes(opt.value)}
+																	onCheckedChange={(checked) => {
+																		const current = new Set<string>(selectedValues);
+																		if (checked) current.add(opt.value);
 																		else current.delete(opt.value);
 																		onChange(field, Array.from(current));
 																	}}
 																/>
 																{opt.label}
-															</label>
+															</Label>
 														{/each}
 													</div>
 												{:else if field.type === 'display'}
-													<div class="rounded-md bg-slate-50 px-2 py-1 text-sm tabular-nums dark:bg-slate-950">
+													<div
+														class={cn(
+															'rounded-md bg-slate-50 px-2 py-1 text-sm tabular-nums dark:bg-slate-950',
+															errors[field.id] && 'border border-destructive'
+														)}
+													>
 														{evaluateValueExpression(field) as number}{field.unit ?? ''}
 													</div>
 												{/if}
@@ -360,6 +380,10 @@
 				onclick={() => {
 					hasRun = true;
 					invalidateAll();
+					const preRunGroup = schema.groups.find((g) => g.preRun);
+					if (preRunGroup) {
+						collapsedGroups[preRunGroup.id] = true; // Collapse pre-run group after running
+					}
 				}}
 				size="lg"
 			>
@@ -368,3 +392,5 @@
 		{/if}
 	</div>
 </form>
+
+<style></style>
