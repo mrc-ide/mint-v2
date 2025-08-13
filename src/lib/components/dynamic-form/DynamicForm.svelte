@@ -217,25 +217,36 @@
 	{#each schema.groups as group}
 		{#if group.preRun || hasRun}
 			<section class={['rounded-md border p-8', group.preRun ? 'col-span-4' : 'col-span-1 col-start-1']}>
-				{#if group.collapsible}
-					<button
-						type="button"
-						class="inline-flex items-center gap-1 text-left text-lg font-semibold hover:text-muted-foreground"
-						aria-expanded={!isGroupCollapsed(group)}
-						aria-controls={`group-${group.id}`}
-						onclick={() => (collapsedGroups[group.id] = !isGroupCollapsed(group))}
-					>
-						<ChevronsUpDownIcon
-							class={[
-								'inline-block w-5 text-center transition-transform duration-200',
-								{ 'rotate-180': isGroupCollapsed(group) }
-							]}
-						/>
-						{group.title}
-					</button>
-				{:else if group.title}<h2 class="mb-1 text-lg font-semibold">{group.title}</h2>{/if}
+				<div class="flex gap-2">
+					{#if group.collapsible}
+						<button
+							type="button"
+							class="inline-flex items-center gap-1 text-left text-lg font-semibold hover:text-muted-foreground"
+							aria-expanded={!isGroupCollapsed(group)}
+							aria-controls={`group-${group.id}`}
+							onclick={() => (collapsedGroups[group.id] = !isGroupCollapsed(group))}
+						>
+							<ChevronsUpDownIcon
+								class={[
+									'inline-block w-5 text-center transition-transform duration-200',
+									{ 'rotate-180': isGroupCollapsed(group) }
+								]}
+							/>
+							{group.title}
+						</button>
+					{:else if group.title}<h2 class="mb-1 text-lg font-semibold">{group.title}</h2>{/if}
+					{#if group.helpText}
+						<Tooltip.Provider>
+							<Tooltip.Root>
+								<Tooltip.Trigger><Info class="h-4 w-4 text-muted-foreground" /></Tooltip.Trigger>
+								<Tooltip.Content>
+									<p>{group.helpText}</p>
+								</Tooltip.Content>
+							</Tooltip.Root>
+						</Tooltip.Provider>
+					{/if}
+				</div>
 				{#if group.description}<p class="mb-1 text-sm text-muted-foreground">{group.description}</p>{/if}
-				{#if group.helpText}<p class="mb-2 text-xs text-muted-foreground">{group.helpText}</p>{/if}
 
 				{#if !isGroupCollapsed(group)}
 					<div
@@ -245,35 +256,43 @@
 					>
 						{#each group.subGroups as subGroup}
 							<div>
-								{#if subGroup.title}
-									<div class="mb-0.5">
-										{#if subGroup.collapsible}
-											<button
-												type="button"
-												class="inline-flex items-center gap-2 font-medium hover:text-muted-foreground"
-												aria-expanded={!isSubGroupCollapsed(group.id, subGroup.id)}
-												aria-controls={`subgroup-${group.id}-${subGroup.id}`}
-												onclick={() =>
-													(collapsedSubGroups[`${group.id}:${subGroup.id}`] = !isSubGroupCollapsed(
-														group.id,
-														subGroup.id
-													))}
-											>
-												<ChevronsUpDownIcon
-													class={[
-														'inline-block w-5 text-center transition-transform duration-200',
-														{ 'rotate-180': isSubGroupCollapsed(group.id, subGroup.id) }
-													]}
-												/>
-												{subGroup.title}
-											</button>
-										{:else}
-											<h3 class="font-medium">{subGroup.title}</h3>
-										{/if}
-									</div>
-								{/if}
+								<div class="mb-0.5 flex gap-2">
+									{#if subGroup.collapsible}
+										<button
+											type="button"
+											class="inline-flex items-center gap-2 font-medium hover:text-muted-foreground"
+											aria-expanded={!isSubGroupCollapsed(group.id, subGroup.id)}
+											aria-controls={`subgroup-${group.id}-${subGroup.id}`}
+											onclick={() =>
+												(collapsedSubGroups[`${group.id}:${subGroup.id}`] = !isSubGroupCollapsed(
+													group.id,
+													subGroup.id
+												))}
+										>
+											<ChevronsUpDownIcon
+												class={[
+													'inline-block w-5 text-center transition-transform duration-200',
+													{ 'rotate-180': isSubGroupCollapsed(group.id, subGroup.id) }
+												]}
+											/>
+											{subGroup.title}
+										</button>
+									{:else}
+										<h3 class="font-medium">{subGroup.title}</h3>
+									{/if}
+									{#if subGroup.helpText}
+										<Tooltip.Provider>
+											<Tooltip.Root>
+												<Tooltip.Trigger><Info class="h-4 w-4 text-muted-foreground" /></Tooltip.Trigger>
+												<Tooltip.Content>
+													<p>{subGroup.helpText}</p>
+												</Tooltip.Content>
+											</Tooltip.Root>
+										</Tooltip.Provider>
+									{/if}
+								</div>
+
 								{#if subGroup.description}<p class="mb-1 text-xs text-muted-foreground">{subGroup.description}</p>{/if}
-								{#if subGroup.helpText}<p class="mb-1 text-[11px] text-muted-foreground">{subGroup.helpText}</p>{/if}
 
 								{#if !isSubGroupCollapsed(group.id, subGroup.id)}
 									<div id={`subgroup-${group.id}-${subGroup.id}`} class="flex flex-col gap-3" transition:slide>
