@@ -1,6 +1,6 @@
 import type { Schema } from '$lib/components/dynamic-form/types';
 import formSchema from '$lib/server/testRegionForm.json';
-import type { TimeSeriesData } from '$lib/types';
+import type { Region, TimeSeriesData } from '$lib/types';
 import { addRegionSchema } from '$routes/projects/[project]/regions/[region]/schema';
 import { error, redirect, type Actions } from '@sveltejs/kit';
 import { fail, setError, superValidate } from 'sveltekit-superforms';
@@ -18,30 +18,30 @@ export const load: PageServerLoad = async ({ params, locals, fetch }) => {
 	const regionData = projectData.regions.find((r) => r.name === region);
 	if (!regionData) error(404, `Region "${region}" not found in project "${project}"`);
 
-	let timeSeriesData: TimeSeriesData | null = null;
-	if (regionData.hasRun) {
-		// if region has run, run models to get time series data
-		const res = await fetch(`/projects/${project}/regions/${region}`, {
-			method: 'POST',
-			body: JSON.stringify({
-				formValues: regionData.formValues
-			}),
-			headers: {
-				'Content-Type': 'application/json'
-			}
-		});
-		// todo handle correctly.. refresh form probably
-		if (!res.ok) error(res.status, `Failed to fetch data for region "${region}" in project "${project}"`);
-		timeSeriesData = (await res.json()) as TimeSeriesData;
-	}
-
 	return {
 		project: projectData,
 		region: regionData,
 		addRegionForm,
 		formSchema: formSchema as Schema,
-		timeSeriesData
+		timeSeriesData: await runModels(project, region, regionData, fetch)
 	};
+};
+const runModels = async (project: string, region: string, regionData: Region, fetch: typeof window.fetch) => {
+	if (!regionData.hasRun) return null;
+	// if region has run, run models to get time series data
+	const res = await fetch(`/projects/${project}/regions/${region}`, {
+		method: 'POST',
+		body: JSON.stringify({
+			formValues: regionData.formValues
+		}),
+		headers: {
+			'Content-Type': 'application/json'
+		}
+	});
+	// todo handle correctly.. refresh form probably
+	if (!res.ok) error(res.status, `Failed to fetch data for region "${region}" in project "${project}"`);
+	const timeSeriesData = (await res.json()) as TimeSeriesData;
+	return timeSeriesData;
 };
 
 export const actions: Actions = {

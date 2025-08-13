@@ -197,9 +197,8 @@
 		validateCustomRules();
 
 		// rerun if this group triggers reruns and there are no validation errors
-		const group = fieldToGroup[field.id];
-		console.log(hasFormErrors);
-		if (group.triggersRerun && hasRun && !hasFormErrors) {
+		// TODO: sort what to do with cost calculations that don't trigger model runs (group.triggersReRun)
+		if (hasRun && !hasFormErrors) {
 			debouncedModelRun(form);
 		}
 	};

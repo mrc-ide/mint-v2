@@ -1,6 +1,6 @@
 <script lang="ts">
 	// This component must be used within a project and region context
-	import { page } from '$app/state';
+	import { navigating, page } from '$app/state';
 	import { Button } from '$lib/components/ui/button';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import * as Form from '$lib/components/ui/form';
@@ -11,6 +11,7 @@
 	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import { addRegionSchema } from '../schema';
+	import LoaderCircle from '@lucide/svelte/icons/loader-circle';
 
 	const form = superForm(page.data.addRegionForm ?? { name: '' }, {
 		validators: zodClient(addRegionSchema),
@@ -32,9 +33,17 @@
 	<DropdownMenu.Root bind:open={isOpen}>
 		<DropdownMenu.Trigger>
 			{#snippet child({ props })}
-				<Button {...props} variant="ghost" size="sm"
-					>{project.name}: {page.data.region.name} <ChevronsUpDownIcon /></Button
-				>
+				{#if navigating.to}
+					{@const params = navigating.to.params}
+					<Button {...props} variant="ghost" size="sm"
+						>{params?.project}: {params?.region}
+						<LoaderCircle class="h-4 w-4 animate-spin" />
+					</Button>
+				{:else}
+					<Button {...props} variant="ghost" size="sm"
+						>{project.name}: {page.data.region.name} <ChevronsUpDownIcon /></Button
+					>
+				{/if}
 			{/snippet}
 		</DropdownMenu.Trigger>
 		<DropdownMenu.Content class="max-w-64">
