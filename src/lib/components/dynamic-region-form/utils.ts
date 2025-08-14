@@ -1,4 +1,11 @@
-import type { CustomDisabled, CustomValue, SchemaField, SchemaGroup, SchemaSubGroup } from './types';
+import type {
+	CustomDisabled,
+	CustomValidationRule,
+	CustomValue,
+	SchemaField,
+	SchemaGroup,
+	SchemaSubGroup
+} from './types';
 
 export const forEachField = (
 	groups: SchemaGroup[],
@@ -100,4 +107,36 @@ export const getFieldErrorMessage = (field: SchemaField, value: unknown): string
 		}
 	}
 	return message;
+};
+
+export const isCustomCrossFieldRuleViolated = (form: Record<string, unknown>, rule: CustomValidationRule): boolean => {
+	const sum = rule.fields.reduce((a: number, id: string) => a + getNumber(form[id]), 0);
+
+	switch (rule.operator) {
+		case 'sum_lte':
+			return sum > rule.threshold;
+		case 'sum_lt':
+			return sum >= rule.threshold;
+		case 'sum_gte':
+			return sum < rule.threshold;
+		case 'sum_gt':
+			return sum <= rule.threshold;
+		case 'sum_eq':
+			return sum !== rule.threshold;
+		default:
+			return false;
+	}
+};
+
+export const checkCrossFieldValidation = (
+	form: Record<string, unknown>,
+	rule: CustomValidationRule,
+	errors: Record<string, string | null>
+) => {
+	const violated = isCustomCrossFieldRuleViolated(form, rule);
+	for (const fid of rule.errorFields) {
+		// attach or clear the custom error per involved field
+		if (violated) errors[fid] = rule.message;
+		else if (errors[fid] === rule.message) errors[fid] = null;
+	}
 };
