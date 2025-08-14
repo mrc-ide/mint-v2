@@ -8,7 +8,7 @@
 	let { data, params }: PageProps = $props();
 
 	let hasRun = $derived(data.region.hasRun);
-	let runPromise = $derived(data.runDataPromise);
+	let runPromise = $derived(data.runPromise);
 
 	const processModelRuns = async (formValues: Record<string, unknown>, triggerRun = true) => {
 		hasRun = true;

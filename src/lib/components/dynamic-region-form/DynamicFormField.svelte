@@ -8,6 +8,7 @@
 	import Info from '@lucide/svelte/icons/info';
 	import { evaluateValueExpression, isDisabled } from './utils';
 	import { cn } from '$lib/utils';
+	import Switch from '../ui/switch/switch.svelte';
 
 	interface Props {
 		field: SchemaField;
@@ -45,8 +46,8 @@
 			aria-invalid={Boolean(errors[field.id])}
 			oninput={(e) => onFieldChange(field, e.currentTarget.value === '' ? '' : Number(e.currentTarget.value))}
 		/>
-	{:else if field.type === 'checkbox'}
-		<Checkbox
+	{:else if field.type === 'toggle'}
+		<Switch
 			id={field.id}
 			disabled={isDisabled(form, field)}
 			aria-invalid={Boolean(errors[field.id])}

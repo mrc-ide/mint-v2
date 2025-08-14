@@ -29,9 +29,9 @@
 						},
 						{
 							"id": "is_seasonal",
-							"label": "Transmission seasonal?",
+							"label": "Transmission seasonal",
 							"helpText": "Indicate whether the population is seasonal.",
-							"type": "checkbox",
+							"type": "toggle",
 							"required": true,
 							"default": false
 						},
@@ -229,7 +229,7 @@
 							"id": "routine_coverage",
 							"label": "Continuous distribution of ITNs",
 							"helpText": "Indicate whether continuous distribution of ITNs will be implemented.",
-							"type": "checkbox",
+							"type": "toggle",
 							"required": true,
 							"disabled": { "type": "cross_field", "fields": ["itn_future"], "operator": "falsy" },
 							"default": false

@@ -19,8 +19,8 @@ export type NumericField = BaseField & {
 	integer?: boolean;
 };
 
-export type CheckboxField = BaseField & {
-	type: 'checkbox';
+export type ToggleField = BaseField & {
+	type: 'toggle';
 	default?: boolean;
 };
 
@@ -35,7 +35,7 @@ export type DisplayField = BaseField & {
 	unit?: string;
 	value: unknown | CustomValue;
 };
-export type SchemaField = NumericField | CheckboxField | MultiselectField | DisplayField;
+export type SchemaField = NumericField | ToggleField | MultiselectField | DisplayField;
 
 export type CustomValidationRule = {
 	type: 'cross_field'; // todo: make more generic when more show up

@@ -16,7 +16,7 @@ export const load: PageServerLoad = async ({ params, locals, fetch }) => {
 		formSchema: await getRegionFormSchema(project, region, fetch),
 		region: regionData,
 		addRegionForm,
-		runDataPromise: runModelsOnLoad(project, region, regionData, fetch) // stream as it resolves
+		runPromise: runModelsOnLoad(project, region, regionData, fetch) // stream as it resolves
 	};
 };
 export const actions: Actions = {
