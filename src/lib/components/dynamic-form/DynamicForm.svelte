@@ -11,15 +11,16 @@
 	import { Button } from '../ui/button';
 	import { Input } from '../ui/input';
 	import { Label } from '../ui/label';
-	import type {
-		CustomDisabled,
-		CustomValidationRule,
-		CustomValue,
-		Schema,
-		SchemaField,
-		SchemaGroup,
-		SchemaSubGroup
-	} from './types';
+	import type { CustomValidationRule, Schema, SchemaField, SchemaGroup } from './types';
+	import {
+		coerceDefaults,
+		evaluateValueExpression,
+		forEachField,
+		getNumber,
+		isDisabled,
+		isGroupCollapsed,
+		isSubGroupCollapsed
+	} from './utils';
 
 	type Props = {
 		schema: Schema;
@@ -28,104 +29,36 @@
 		children: Snippet;
 		submit: (formValues: Record<string, unknown>, rerun?: boolean) => Promise<void>;
 	};
-	let { schema, initialValues, hasRun = $bindable(false), children, submit }: Props = $props();
-	const debouncedSubmit = debounce(submit, 500);
-	// Helpers to iterate fields and to map field->group
-	function forEachField(callback: (f: SchemaField, g: SchemaGroup, sg: SchemaSubGroup) => void) {
-		for (const g of schema.groups) {
-			for (const sg of g.subGroups) {
-				for (const f of sg.fields) callback(f, g, sg);
-			}
-		}
-	}
-	const fieldToGroup: Record<string, SchemaGroup> = {};
-	forEachField((field, group) => {
-		fieldToGroup[field.id] = group;
-	});
 
+	let { schema, initialValues, hasRun, children, submit }: Props = $props();
+	const debouncedSubmit = debounce(submit, 500);
 	// Initialize state from defaults + initialValues override
 	let form = $state<Record<string, unknown>>({});
 	let errors = $state<Record<string, string | null>>({});
 	let collapsedGroups = $state<Record<string, boolean>>({});
 	let collapsedSubGroups = $state<Record<string, boolean>>({});
 	let hasFormErrors = $derived(Object.values(errors).some((error) => error !== null));
-
-	const coerceDefaults = (field: SchemaField): unknown => {
-		// For display fields, we won't assign default here (computed later)
-		switch (field.type) {
-			case 'checkbox':
-				return field.default ?? false;
-			case 'number':
-			case 'slider':
-				return field.default ?? 0;
-			case 'multiselect':
-				return field.default ?? [];
-			default:
-				return field.default ?? null; // For 'display' or any other type, return default or null
-		}
-	};
-
-	// init
-	forEachField((field, group, subGroup) => {
+	// Helpers to iterate fields and to map field->group
+	const fieldToGroup: Record<string, SchemaGroup> = {};
+	forEachField(schema.groups, (field, group) => {
+		fieldToGroup[field.id] = group;
+	});
+	// initialize form values and errors
+	forEachField(schema.groups, (field, group, subGroup) => {
 		form[field.id] = initialValues[field.id] ?? coerceDefaults(field);
 		errors[field.id] = null;
 		// initialize collapse states (default expanded)
-		if (group.collapsible && collapsedGroups[group.id] === undefined) collapsedGroups[group.id] = false;
+		if (group.collapsible) {
+			collapsedGroups[group.id] = Boolean(group.preRun) && hasRun;
+		}
 		const key = `${group.id}:${subGroup.id}`;
-		if (subGroup.collapsible && collapsedSubGroups[key] === undefined) collapsedSubGroups[key] = false;
+		if (subGroup.collapsible && collapsedSubGroups[key] === undefined) {
+			collapsedSubGroups[key] = false;
+		}
 	});
 
-	function isGroupCollapsed(group: SchemaGroup) {
-		return collapsedGroups[group.id] === true;
-	}
-
-	function isSubGroupCollapsed(groupId: string, subGroupId: string) {
-		return collapsedSubGroups[`${groupId}:${subGroupId}`] === true;
-	}
-
-	// Util: evaluate display and disabled expressions
-	function getNumber(val: unknown): number {
-		const n = typeof val === 'number' ? val : Number(val);
-		return Number.isFinite(n) ? n : 0;
-	}
-
-	function evaluateValueExpression(field: SchemaField): unknown {
-		if (field.type !== 'display' || !field.value || typeof field.value !== 'object') return form[field.id];
-		const expr = field.value as CustomValue;
-		const vals = expr.fields.map((id) => getNumber(form[id]));
-		switch (expr.operator) {
-			case 'sum':
-				return vals.reduce((a, b) => a + b, 0);
-			case 'avg':
-				return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : 0;
-			case 'min':
-				return vals.length ? Math.min(...vals) : 0;
-			case 'max':
-				return vals.length ? Math.max(...vals) : 0;
-			default:
-				return null;
-		}
-	}
-
-	const isDisabled = (field: SchemaField): boolean => {
-		if (typeof field.disabled === 'boolean') return field.disabled;
-		if (!field.disabled || typeof field.disabled !== 'object') return false;
-		const expr: CustomDisabled = field.disabled;
-		const vals = expr.fields.map((id) => form[id]);
-		switch (expr.operator) {
-			case 'falsy':
-				return vals.every((val) => !val) ?? false;
-			case 'all':
-				return vals.every((val) => Boolean(val)) ?? false;
-			case 'any':
-				return vals.some((val) => Boolean(val)) ?? false;
-			default:
-				return false;
-		}
-	};
-
 	// Validation
-	function validateField(field: SchemaField) {
+	const validateField = (field: SchemaField) => {
 		const val = form[field.id];
 		let message: string | null = null;
 
@@ -155,9 +88,9 @@
 		}
 
 		errors[field.id] = message;
-	}
+	};
 
-	function validateCustomRules() {
+	const validateCustomRules = () => {
 		const rules: Record<string, CustomValidationRule> = schema.customValidationRules ?? {};
 		for (const key of Object.keys(rules)) {
 			const rule = rules[key];
@@ -189,9 +122,9 @@
 				}
 			}
 		}
-	}
+	};
 
-	const onChange = (field: SchemaField, value: unknown) => {
+	const onFieldChange = (field: SchemaField, value: unknown) => {
 		form[field.id] = value;
 		validateField(field);
 		validateCustomRules();
@@ -199,11 +132,7 @@
 		if (!hasRun || hasFormErrors) return;
 
 		const group = fieldToGroup[field.id];
-		if (group.triggersRerun) {
-			debouncedSubmit(form, true);
-		} else {
-			debouncedSubmit(form, false);
-		}
+		debouncedSubmit(form, group.triggersRerun);
 	};
 </script>
 
@@ -216,14 +145,14 @@
 						<button
 							type="button"
 							class="inline-flex items-center gap-1 text-left text-lg font-semibold hover:text-muted-foreground"
-							aria-expanded={!isGroupCollapsed(group)}
+							aria-expanded={!isGroupCollapsed(collapsedGroups, group)}
 							aria-controls={`group-${group.id}`}
-							onclick={() => (collapsedGroups[group.id] = !isGroupCollapsed(group))}
+							onclick={() => (collapsedGroups[group.id] = !isGroupCollapsed(collapsedGroups, group))}
 						>
 							<ChevronsUpDownIcon
 								class={[
 									'inline-block w-5 text-center transition-transform duration-200',
-									{ 'rotate-180': isGroupCollapsed(group) }
+									{ 'rotate-180': isGroupCollapsed(collapsedGroups, group) }
 								]}
 							/>
 							{group.title}
@@ -242,7 +171,7 @@
 				</div>
 				{#if group.description}<p class="mb-1 text-sm text-muted-foreground">{group.description}</p>{/if}
 
-				{#if !isGroupCollapsed(group)}
+				{#if !isGroupCollapsed(collapsedGroups, group)}
 					<div
 						id={`group-${group.id}`}
 						transition:slide
@@ -255,10 +184,11 @@
 										<button
 											type="button"
 											class="inline-flex items-center gap-2 font-medium hover:text-muted-foreground"
-											aria-expanded={!isSubGroupCollapsed(group.id, subGroup.id)}
+											aria-expanded={!isSubGroupCollapsed(collapsedSubGroups, group.id, subGroup.id)}
 											aria-controls={`subgroup-${group.id}-${subGroup.id}`}
 											onclick={() =>
 												(collapsedSubGroups[`${group.id}:${subGroup.id}`] = !isSubGroupCollapsed(
+													collapsedSubGroups,
 													group.id,
 													subGroup.id
 												))}
@@ -266,7 +196,7 @@
 											<ChevronsUpDownIcon
 												class={[
 													'inline-block w-5 text-center transition-transform duration-200',
-													{ 'rotate-180': isSubGroupCollapsed(group.id, subGroup.id) }
+													{ 'rotate-180': isSubGroupCollapsed(collapsedSubGroups, group.id, subGroup.id) }
 												]}
 											/>
 											{subGroup.title}
@@ -288,7 +218,7 @@
 
 								{#if subGroup.description}<p class="mb-1 text-xs text-muted-foreground">{subGroup.description}</p>{/if}
 
-								{#if !isSubGroupCollapsed(group.id, subGroup.id)}
+								{#if !isSubGroupCollapsed(collapsedSubGroups, group.id, subGroup.id)}
 									<div id={`subgroup-${group.id}-${subGroup.id}`} class="flex flex-col gap-3" transition:slide>
 										{#each subGroup.fields as field}
 											<div class="flex flex-col gap-2">
@@ -313,19 +243,19 @@
 														min={field.min}
 														max={field.max}
 														step={field.step ?? 'any'}
-														disabled={isDisabled(field)}
+														disabled={isDisabled(form, field)}
 														value={String(form[field.id] ?? '')}
 														aria-invalid={Boolean(errors[field.id])}
 														oninput={(e) =>
-															onChange(field, e.currentTarget.value === '' ? '' : Number(e.currentTarget.value))}
+															onFieldChange(field, e.currentTarget.value === '' ? '' : Number(e.currentTarget.value))}
 													/>
 												{:else if field.type === 'checkbox'}
 													<Checkbox
 														id={field.id}
-														disabled={isDisabled(field)}
+														disabled={isDisabled(form, field)}
 														aria-invalid={Boolean(errors[field.id])}
 														checked={Boolean(form[field.id])}
-														onCheckedChange={(checked) => onChange(field, checked)}
+														onCheckedChange={(checked) => onFieldChange(field, checked)}
 													/>
 												{:else if field.type === 'slider'}
 													<div class="flex items-center gap-3">
@@ -335,10 +265,10 @@
 															min={field.min}
 															max={field.max}
 															step={field.step ?? 1}
-															disabled={isDisabled(field)}
+															disabled={isDisabled(form, field)}
 															value={Number(form[field.id] ?? 0)}
 															aria-invalid={Boolean(errors[field.id])}
-															onValueChange={(value) => onChange(field, value)}
+															onValueChange={(value) => onFieldChange(field, value)}
 														/>
 														<span class="w-10 text-right text-sm tabular-nums"
 															>{form[field.id] as number}{field.unit ?? ''}</span
@@ -350,13 +280,13 @@
 															{@const selectedValues = (form[field.id] as string[]) ?? []}
 															<Label class="inline-flex items-center gap-2 text-sm font-normal">
 																<Checkbox
-																	disabled={isDisabled(field)}
+																	disabled={isDisabled(form, field)}
 																	checked={selectedValues.includes(opt.value)}
 																	onCheckedChange={(checked) => {
 																		const current = new Set<string>(selectedValues);
 																		if (checked) current.add(opt.value);
 																		else current.delete(opt.value);
-																		onChange(field, Array.from(current));
+																		onFieldChange(field, Array.from(current));
 																	}}
 																/>
 																{opt.label}
@@ -370,7 +300,7 @@
 															errors[field.id] && 'border border-destructive'
 														)}
 													>
-														{evaluateValueExpression(field) as number}{field.unit ?? ''}
+														{evaluateValueExpression(form, field) as number}{field.unit ?? ''}
 													</div>
 												{/if}
 
@@ -399,7 +329,6 @@
 			<Button
 				onclick={() => {
 					if (hasFormErrors) return;
-					hasRun = true;
 					submit(form, true);
 					const preRunGroup = schema.groups.find((g) => g.preRun);
 					if (preRunGroup) {

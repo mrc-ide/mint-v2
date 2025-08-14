@@ -3,9 +3,7 @@ import { error } from '@sveltejs/kit';
 import type { RequestEvent } from '../../routes/projects/[project]/regions/[region]/$types';
 import { saveUserState } from '$lib/server/redis';
 import type { Schema } from '$lib/components/dynamic-form/types';
-
-export const getRegionUrl = (projectName: string, regionName: string) =>
-	`/projects/${projectName}/regions/${regionName}`;
+import { getRegionUrl } from '$lib/url';
 
 export const getRegionFormSchema = async (projectName: string, regionName: string, fetch: RequestEvent['fetch']) => {
 	const res = await fetch(getRegionUrl(projectName, regionName));

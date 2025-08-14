@@ -3,6 +3,7 @@
 	import { DynamicForm } from '$lib/components/dynamic-form';
 	import { toast } from 'svelte-sonner';
 	import type { PageProps } from './$types';
+	import { getRegionUrl } from '$lib/url';
 
 	let { data, params }: PageProps = $props();
 
@@ -10,8 +11,9 @@
 	let runPromise = $derived(data.runDataPromise);
 
 	const runModels = async (formValues: Record<string, unknown>, rerun = true) => {
+		hasRun = true;
 		try {
-			const res = await fetch(`/projects/${params.project}/regions/${params.region}`, {
+			const res = await fetch(getRegionUrl(params.project, params.region), {
 				method: 'POST',
 				body: JSON.stringify({ formValues, rerun }),
 				headers: { 'Content-Type': 'application/json' }
@@ -31,7 +33,7 @@
 	<DynamicForm
 		schema={data.formSchema}
 		initialValues={data.region.formValues}
-		bind:hasRun
+		{hasRun}
 		submit={(formValues, rerun = true) => (runPromise = runModels(formValues, rerun))}
 	>
 		{#await runPromise}
