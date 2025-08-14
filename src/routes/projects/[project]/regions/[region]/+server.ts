@@ -8,10 +8,11 @@ import { saveUserState } from '$lib/server/redis';
  * @returns A JSON response with the time series data for the region.
  */
 export const POST: RequestHandler = async ({ request, locals, params }) => {
-	const { formValues } = await request.json();
+	const { formValues, rerun = true } = await request.json();
 	const { project, region } = params;
 	// simulate delay to run model and fetch time series data. TODO: will be getting from r api
 	// TODO: depending on if model params changed or not then call another endpoint that just updates cost calculation (cost)
+	console.log(rerun, 'rerun');
 	await new Promise((resolve) => setTimeout(resolve, 2000));
 	const { dummyCasesData, dummyPrevalenceData } = getDummyRunData();
 

@@ -26,7 +26,7 @@
 		initialValues: Record<string, unknown>;
 		hasRun: boolean;
 		children: Snippet;
-		submit: (formValues: Record<string, unknown>) => Promise<void>;
+		submit: (formValues: Record<string, unknown>, rerun?: boolean) => Promise<void>;
 	};
 	let { schema, initialValues, hasRun = $bindable(false), children, submit }: Props = $props();
 	const debouncedSubmit = debounce(submit, 500);
@@ -196,11 +196,13 @@
 		validateField(field);
 		validateCustomRules();
 
-		// rerun if this group triggers reruns and there are no validation errors
+		if (!hasRun || hasFormErrors) return;
+
 		const group = fieldToGroup[field.id];
-		// TODO: sort what to do with cost calculations that don't trigger model runs
-		if (group.triggersRerun && hasRun && !hasFormErrors) {
-			debouncedSubmit(form);
+		if (group.triggersRerun) {
+			debouncedSubmit(form, true);
+		} else {
+			debouncedSubmit(form, false);
 		}
 	};
 </script>
@@ -398,7 +400,7 @@
 				onclick={() => {
 					if (hasFormErrors) return;
 					hasRun = true;
-					submit(form);
+					submit(form, true);
 					const preRunGroup = schema.groups.find((g) => g.preRun);
 					if (preRunGroup) {
 						collapsedGroups[preRunGroup.id] = true; // Collapse pre-run group after running
