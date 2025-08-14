@@ -1,29 +1,22 @@
-import type { Schema } from '$lib/components/dynamic-form/types';
 import { addRegionSchema } from '$routes/projects/[project]/regions/[region]/schema';
-import { error, redirect, type Actions } from '@sveltejs/kit';
+import { redirect, type Actions } from '@sveltejs/kit';
 import { fail, setError, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
-import formSchema from './testRegionForm.json'; // TODO: will fetch from R api
-import { runModelsOnLoad } from './utils';
+import { getRegionFormSchema, getValidatedRegionData, runModelsOnLoad } from '$lib/server/region';
 
 export const load: PageServerLoad = async ({ params, locals, fetch }) => {
 	const { project, region } = params;
 	const addRegionForm = await superValidate(zod(addRegionSchema));
 
 	const userState = locals.userState;
-	const projectData = userState.projects.find((p) => p.name === project);
-	if (!projectData) error(404, `Project "${project}" not found`);
-
-	const regionData = projectData.regions.find((r) => r.name === region);
-	if (!regionData) error(404, `Region "${region}" not found in project "${project}"`);
+	const regionData = getValidatedRegionData(userState, project, region);
 
 	return {
-		project: projectData,
+		formSchema: await getRegionFormSchema(project, region, fetch),
 		region: regionData,
 		addRegionForm,
-		formSchema: formSchema as Schema,
-		runDataPromise: runModelsOnLoad(project, region, regionData, fetch)
+		runDataPromise: runModelsOnLoad(project, region, regionData, fetch) // stream as it resolves
 	};
 };
 export const actions: Actions = {

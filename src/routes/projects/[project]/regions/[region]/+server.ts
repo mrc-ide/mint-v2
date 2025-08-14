@@ -1,6 +1,16 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { saveRegionFormState } from './utils';
+import { saveRegionFormState } from '$lib/server/region';
+import formSchema from './testRegionForm.json';
+
+/**
+ * Handle GET requests to fetch the form schema for a specific region in a project.
+ *
+ * @returns A JSON response with the form schema for the region.
+ */
+export const GET: RequestHandler = async () => {
+	return json(formSchema);
+};
 
 /**
  * Handle POST requests to run models for a specific region in a project.
