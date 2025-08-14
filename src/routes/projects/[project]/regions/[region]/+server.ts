@@ -2,12 +2,17 @@ import { error, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { saveUserState } from '$lib/server/redis';
 
+/**
+ * Handle POST requests to run models for a specific region in a project.
+ *
+ * @returns A JSON response with the time series data for the region.
+ */
 export const POST: RequestHandler = async ({ request, locals, params }) => {
 	const { formValues } = await request.json();
 	const { project, region } = params;
 	// simulate delay to run model and fetch time series data. TODO: will be getting from r api
 	// TODO: depending on if model params changed or not then call another endpoint that just updates cost calculation (cost)
-	await new Promise((resolve) => setTimeout(resolve, 3000));
+	await new Promise((resolve) => setTimeout(resolve, 2000));
 	const { dummyCasesData, dummyPrevalenceData } = getDummyTimeSeriesData();
 
 	// save in state after getting data
@@ -29,22 +34,22 @@ export const POST: RequestHandler = async ({ request, locals, params }) => {
 const getDummyTimeSeriesData = () => {
 	const dummyPrevalenceData = {
 		run1: [
-			{ time: '2023-01-01', value: Math.floor(Math.random() * 200) + 50 },
-			{ time: '2023-01-02', value: Math.floor(Math.random() * 200) + 50 }
+			{ id: crypto.randomUUID(), time: '2023-01-01', value: Math.floor(Math.random() * 200) + 50 },
+			{ id: crypto.randomUUID(), time: '2023-01-02', value: Math.floor(Math.random() * 200) + 50 }
 		],
 		run2: [
-			{ time: '2023-01-01', value: Math.floor(Math.random() * 200) + 50 },
-			{ time: '2023-01-02', value: Math.floor(Math.random() * 200) + 50 }
+			{ id: crypto.randomUUID(), time: '2023-01-01', value: Math.floor(Math.random() * 200) + 50 },
+			{ id: crypto.randomUUID(), time: '2023-01-02', value: Math.floor(Math.random() * 200) + 50 }
 		]
 	};
 	const dummyCasesData = {
 		run1: [
-			{ time: '2023-01-01', value: Math.floor(Math.random() * 100) + 10 },
-			{ time: '2023-01-02', value: Math.floor(Math.random() * 100) + 10 }
+			{ id: crypto.randomUUID(), time: '2023-01-01', value: Math.floor(Math.random() * 100) + 10 },
+			{ id: crypto.randomUUID(), time: '2023-01-02', value: Math.floor(Math.random() * 100) + 10 }
 		],
 		run2: [
-			{ time: '2023-01-01', value: Math.floor(Math.random() * 100) + 10 },
-			{ time: '2023-01-02', value: Math.floor(Math.random() * 100) + 10 }
+			{ id: crypto.randomUUID(), time: '2023-01-01', value: Math.floor(Math.random() * 100) + 10 },
+			{ id: crypto.randomUUID(), time: '2023-01-02', value: Math.floor(Math.random() * 100) + 10 }
 		]
 	};
 
