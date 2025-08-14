@@ -1,4 +1,4 @@
-export interface TimeSeriesData {
+export interface RunData {
 	prevalenceData: Record<string, unknown[]>; // key of run and timeseries value
 	casesData: Record<string, unknown[]>; // key of run and timeseries value
 }

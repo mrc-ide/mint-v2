@@ -13,7 +13,7 @@ export const POST: RequestHandler = async ({ request, locals, params }) => {
 	// simulate delay to run model and fetch time series data. TODO: will be getting from r api
 	// TODO: depending on if model params changed or not then call another endpoint that just updates cost calculation (cost)
 	await new Promise((resolve) => setTimeout(resolve, 2000));
-	const { dummyCasesData, dummyPrevalenceData } = getDummyTimeSeriesData();
+	const { dummyCasesData, dummyPrevalenceData } = getDummyRunData();
 
 	// save in state after getting data
 	const userState = locals.userState;
@@ -31,25 +31,25 @@ export const POST: RequestHandler = async ({ request, locals, params }) => {
 
 // create dummy timeseries data for prevalenceData and casesData that is keyed
 // by run and timeseries value
-const getDummyTimeSeriesData = () => {
+const getDummyRunData = () => {
 	const dummyPrevalenceData = {
 		run1: [
-			{ id: crypto.randomUUID(), time: '2023-01-01', value: Math.floor(Math.random() * 200) + 50 },
-			{ id: crypto.randomUUID(), time: '2023-01-02', value: Math.floor(Math.random() * 200) + 50 }
+			{ id: crypto.randomUUID(), value: Math.floor(Math.random() * 200) + 50 },
+			{ id: crypto.randomUUID(), value: Math.floor(Math.random() * 200) + 50 }
 		],
 		run2: [
-			{ id: crypto.randomUUID(), time: '2023-01-01', value: Math.floor(Math.random() * 200) + 50 },
-			{ id: crypto.randomUUID(), time: '2023-01-02', value: Math.floor(Math.random() * 200) + 50 }
+			{ id: crypto.randomUUID(), value: Math.floor(Math.random() * 200) + 50 },
+			{ id: crypto.randomUUID(), value: Math.floor(Math.random() * 200) + 50 }
 		]
 	};
 	const dummyCasesData = {
 		run1: [
-			{ id: crypto.randomUUID(), time: '2023-01-01', value: Math.floor(Math.random() * 100) + 10 },
-			{ id: crypto.randomUUID(), time: '2023-01-02', value: Math.floor(Math.random() * 100) + 10 }
+			{ id: crypto.randomUUID(), value: Math.floor(Math.random() * 100) + 10 },
+			{ id: crypto.randomUUID(), value: Math.floor(Math.random() * 100) + 10 }
 		],
 		run2: [
-			{ id: crypto.randomUUID(), time: '2023-01-01', value: Math.floor(Math.random() * 100) + 10 },
-			{ id: crypto.randomUUID(), time: '2023-01-02', value: Math.floor(Math.random() * 100) + 10 }
+			{ id: crypto.randomUUID(), value: Math.floor(Math.random() * 100) + 10 },
+			{ id: crypto.randomUUID(), value: Math.floor(Math.random() * 100) + 10 }
 		]
 	};
 
