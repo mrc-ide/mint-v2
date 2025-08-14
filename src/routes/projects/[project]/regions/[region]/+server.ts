@@ -1,6 +1,6 @@
-import { error, json } from '@sveltejs/kit';
+import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { saveUserState } from '$lib/server/redis';
+import { saveRegionFormState } from './utils';
 
 /**
  * Handle POST requests to run models for a specific region in a project.
@@ -10,28 +10,20 @@ import { saveUserState } from '$lib/server/redis';
 export const POST: RequestHandler = async ({ request, locals, params }) => {
 	const { formValues, rerun = true } = await request.json();
 	const { project, region } = params;
-	// simulate delay to run model and fetch time series data. TODO: will be getting from r api
 	// TODO: depending on if model params changed or not then call another endpoint that just updates cost calculation (cost)
 	console.log(rerun, 'rerun');
+	// simulate delay to run model and fetch time series data. TODO: will be getting from r api
 	await new Promise((resolve) => setTimeout(resolve, 2000));
 	const { dummyCasesData, dummyPrevalenceData } = getDummyRunData();
 
-	// save in state after getting data
-	const userState = locals.userState;
-	const projectData = userState.projects.find((p) => p.name === project);
-	if (!projectData) error(404, `Project "${project}" not found`);
-
-	const regionData = projectData.regions.find((r) => r.name === region);
-	if (!regionData) error(404, `Region "${region}" not found in project "${project}"`);
-	regionData.formValues = formValues;
-	regionData.hasRun = true;
-	saveUserState(userState);
+	await saveRegionFormState(locals.userState, project, region, formValues);
 
 	return json({ prevalenceData: dummyPrevalenceData, casesData: dummyCasesData });
 };
 
 // create dummy timeseries data for prevalenceData and casesData that is keyed
 // by run and timeseries value
+// TODO: remove after hooked with R
 const getDummyRunData = () => {
 	const dummyPrevalenceData = {
 		run1: [

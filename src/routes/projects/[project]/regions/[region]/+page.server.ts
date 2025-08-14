@@ -1,11 +1,11 @@
 import type { Schema } from '$lib/components/dynamic-form/types';
-import formSchema from './testRegionForm.json'; // TODO: will fetch from R api
-import type { Region, RunData } from '$lib/types';
 import { addRegionSchema } from '$routes/projects/[project]/regions/[region]/schema';
 import { error, redirect, type Actions } from '@sveltejs/kit';
 import { fail, setError, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
-import type { PageServerLoad, RequestEvent } from './$types';
+import type { PageServerLoad } from './$types';
+import formSchema from './testRegionForm.json'; // TODO: will fetch from R api
+import { runModelsOnLoad } from './utils';
 
 export const load: PageServerLoad = async ({ params, locals, fetch }) => {
 	const { project, region } = params;
@@ -23,7 +23,7 @@ export const load: PageServerLoad = async ({ params, locals, fetch }) => {
 		region: regionData,
 		addRegionForm,
 		formSchema: formSchema as Schema,
-		runDataPromise: runModels(project, region, regionData, fetch)
+		runDataPromise: runModelsOnLoad(project, region, regionData, fetch)
 	};
 };
 export const actions: Actions = {
@@ -52,26 +52,4 @@ export const actions: Actions = {
 
 		return redirect(303, `/projects/${project}/regions/${addRegionForm.data.name}`);
 	}
-};
-
-const runModels = async (
-	project: string,
-	region: string,
-	regionData: Region,
-	fetch: RequestEvent['fetch']
-): Promise<RunData | null> => {
-	if (!regionData.hasRun) return null;
-	// if region has run, run models to get time series data
-	const res = await fetch(`/projects/${project}/regions/${region}`, {
-		method: 'POST',
-		body: JSON.stringify({
-			formValues: regionData.formValues
-		}),
-		headers: {
-			'Content-Type': 'application/json'
-		}
-	});
-	// todo handle correctly.. refresh form probably
-	if (!res.ok) error(res.status, `Failed to fetch data for region "${region}" in project "${project}"`);
-	return (await res.json()) as RunData;
 };
