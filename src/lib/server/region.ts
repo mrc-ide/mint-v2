@@ -2,7 +2,7 @@ import type { Region, RunData, UserState } from '$lib/types';
 import { error } from '@sveltejs/kit';
 import type { RequestEvent } from '../../routes/projects/[project]/regions/[region]/$types';
 import { saveUserState } from '$lib/server/redis';
-import type { Schema } from '$lib/components/dynamic-form/types';
+import type { Schema } from '$lib/components/dynamic-region-form/types';
 import { getRegionUrl } from '$lib/url';
 
 export const getRegionFormSchema = async (projectName: string, regionName: string, fetch: RequestEvent['fetch']) => {

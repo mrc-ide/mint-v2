@@ -4,9 +4,9 @@ export const forEachField = (
 	groups: SchemaGroup[],
 	callback: (f: SchemaField, g: SchemaGroup, sg: SchemaSubGroup) => void
 ) => {
-	for (const g of groups) {
-		for (const sg of g.subGroups) {
-			for (const f of sg.fields) callback(f, g, sg);
+	for (const group of groups) {
+		for (const subGroup of group.subGroups) {
+			for (const f of subGroup.fields) callback(f, group, subGroup);
 		}
 	}
 };
@@ -71,3 +71,33 @@ export const isGroupCollapsed = (collapsedGroups: Record<string, boolean>, group
 
 export const isSubGroupCollapsed = (collapsedSubGroups: Record<string, boolean>, groupId: string, subGroupId: string) =>
 	!!collapsedSubGroups[`${groupId}:${subGroupId}`];
+
+export const getFieldErrorMessage = (field: SchemaField, value: unknown): string | null => {
+	let message: string | null = null;
+
+	// Required field validation
+	if (field.required && (value === null || value === undefined || value === '' || Number.isNaN(value))) {
+		message = `${field.label} is required`;
+	}
+
+	// Numeric field validation
+	if (!message && (field.type === 'number' || field.type === 'slider')) {
+		const numValue = getNumber(value);
+
+		// Min value check
+		if (typeof field.min === 'number' && numValue < field.min) {
+			message = `${field.label} must be ≥ ${field.min}`;
+		}
+
+		// Max value check
+		if (!message && typeof field.max === 'number' && numValue > field.max) {
+			message = `${field.label} must be ≤ ${field.max}`;
+		}
+
+		// Integer check
+		if (!message && field.integer && !Number.isInteger(numValue)) {
+			message = `${field.label} must be an integer`;
+		}
+	}
+	return message;
+};

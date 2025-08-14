@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { DynamicForm } from '$lib/components/dynamic-form';
+	import { DynamicForm } from '$lib/components/dynamic-region-form';
 	import { toast } from 'svelte-sonner';
 	import type { PageProps } from './$types';
 	import { getRegionUrl } from '$lib/url';
@@ -10,12 +10,12 @@
 	let hasRun = $derived(data.region.hasRun);
 	let runPromise = $derived(data.runDataPromise);
 
-	const runModels = async (formValues: Record<string, unknown>, rerun = true) => {
+	const processModelRuns = async (formValues: Record<string, unknown>, triggerRun = true) => {
 		hasRun = true;
 		try {
 			const res = await fetch(getRegionUrl(params.project, params.region), {
 				method: 'POST',
-				body: JSON.stringify({ formValues, rerun }),
+				body: JSON.stringify({ formValues, triggerRun }),
 				headers: { 'Content-Type': 'application/json' }
 			});
 			if (!res.ok) {
@@ -34,7 +34,8 @@
 		schema={data.formSchema}
 		initialValues={data.region.formValues}
 		{hasRun}
-		submit={(formValues, rerun = true) => (runPromise = runModels(formValues, rerun))}
+		submit={(formValues, triggerRun = true) => (runPromise = processModelRuns(formValues, triggerRun))}
+		submitText="Run baseline"
 	>
 		{#await runPromise}
 			<div class="flex items-center justify-center p-8">
