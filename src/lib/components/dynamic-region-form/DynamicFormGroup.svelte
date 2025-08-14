@@ -26,7 +26,7 @@
 	}: Props = $props();
 </script>
 
-<section class={['rounded-md border p-8', group.preRun ? 'col-span-4' : 'col-span-1 col-start-1']}>
+<section class={['rounded-md border', group.preRun ? 'col-span-4 p-10' : 'col-span-1 col-start-1 p-5']}>
 	<div class="flex gap-2">
 		{#if group.collapsible}
 			<button
