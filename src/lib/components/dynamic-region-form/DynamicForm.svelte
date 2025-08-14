@@ -54,31 +54,30 @@
 		for (const key of Object.keys(rules)) {
 			const rule = rules[key];
 			if (rule.type !== 'cross_field') continue;
-			if (rule.type === 'cross_field') {
-				const sum = rule.fields.reduce((a: number, id: string) => a + getNumber(form[id]), 0);
-				let violated = false;
-				switch (rule.operator) {
-					case 'sum_lte':
-						violated = !(sum <= rule.threshold);
-						break;
-					case 'sum_lt':
-						violated = !(sum < rule.threshold);
-						break;
-					case 'sum_gte':
-						violated = !(sum >= rule.threshold);
-						break;
-					case 'sum_gt':
-						violated = !(sum > rule.threshold);
-						break;
-					case 'sum_eq':
-						violated = !(sum === rule.threshold);
-						break;
-				}
-				for (const fid of rule.errorFields) {
-					// attach or clear the custom error per involved field
-					if (violated) errors[fid] = rule.message;
-					else if (errors[fid] === rule.message) errors[fid] = null;
-				}
+
+			const sum = rule.fields.reduce((a: number, id: string) => a + getNumber(form[id]), 0);
+			let violated = false;
+			switch (rule.operator) {
+				case 'sum_lte':
+					violated = !(sum <= rule.threshold);
+					break;
+				case 'sum_lt':
+					violated = !(sum < rule.threshold);
+					break;
+				case 'sum_gte':
+					violated = !(sum >= rule.threshold);
+					break;
+				case 'sum_gt':
+					violated = !(sum > rule.threshold);
+					break;
+				case 'sum_eq':
+					violated = !(sum === rule.threshold);
+					break;
+			}
+			for (const fid of rule.errorFields) {
+				// attach or clear the custom error per involved field
+				if (violated) errors[fid] = rule.message;
+				else if (errors[fid] === rule.message) errors[fid] = null;
 			}
 		}
 	};
