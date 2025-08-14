@@ -19,7 +19,7 @@
 	let { subGroup, group, form, collapsedSubGroups = $bindable(), errors, onFieldChange }: Props = $props();
 </script>
 
-<div>
+<div class="xl:flex-1">
 	<div class="mb-0.5 flex gap-2">
 		{#if subGroup.collapsible}
 			<button
