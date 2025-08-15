@@ -1,9 +1,9 @@
+import { getRegionFormSchema, getValidatedRegionData, runModelsOnLoad } from '$lib/server/region';
 import { addRegionSchema } from '$routes/projects/[project]/regions/[region]/schema';
 import { redirect, type Actions } from '@sveltejs/kit';
 import { fail, setError, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
-import { getRegionFormSchema, getValidatedRegionData, runModelsOnLoad } from '$lib/server/region';
 
 export const load: PageServerLoad = async ({ params, locals, fetch }) => {
 	const { project, region } = params;

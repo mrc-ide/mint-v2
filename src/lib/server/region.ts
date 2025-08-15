@@ -1,14 +1,20 @@
-import type { Region, RunData, UserState } from '$lib/types';
+import type { Schema } from '$lib/components/dynamic-region-form/types';
+import { saveUserState } from '$lib/server/redis';
+import type { Region, ResponseBodySuccess, RunData, UserState } from '$lib/types';
+import { regionFormOptions, regionUrl } from '$lib/url';
 import { error } from '@sveltejs/kit';
 import type { RequestEvent } from '../../routes/projects/[project]/regions/[region]/$types';
-import { saveUserState } from '$lib/server/redis';
-import type { Schema } from '$lib/components/dynamic-region-form/types';
-import { getRegionUrl } from '$lib/url';
 
-export const getRegionFormSchema = async (projectName: string, regionName: string, fetch: RequestEvent['fetch']) => {
-	const res = await fetch(getRegionUrl(projectName, regionName));
+// TODO: sort out types
+export const getRegionFormSchema = async (
+	projectName: string,
+	regionName: string,
+	fetch: RequestEvent['fetch']
+): Promise<Schema> => {
+	const res = await fetch(regionFormOptions());
 	if (!res.ok) error(res.status, `Failed to fetch form schema for region "${regionName}" in project "${projectName}"`);
-	return (await res.json()) as Schema;
+	const form = (await res.json()) as ResponseBodySuccess;
+	return form.data as Schema;
 };
 
 export const runModelsOnLoad = async (
@@ -19,7 +25,7 @@ export const runModelsOnLoad = async (
 ): Promise<RunData | null> => {
 	if (!regionData.hasRun) return null;
 	// if region has run, run models to get time series data
-	const res = await fetch(getRegionUrl(projectName, regionName), {
+	const res = await fetch(regionUrl(projectName, regionName), {
 		method: 'POST',
 		body: JSON.stringify({
 			formValues: regionData.formValues
