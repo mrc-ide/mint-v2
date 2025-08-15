@@ -21,7 +21,7 @@ export const forEachField = (
 export const coerceDefaults = (field: SchemaField): unknown => {
 	// For display fields, we won't assign default here (computed later)
 	switch (field.type) {
-		case 'checkbox':
+		case 'toggle':
 			return field.default ?? false;
 		case 'number':
 		case 'slider':
@@ -133,6 +133,7 @@ export const checkCrossFieldValidation = (
 	rule: CustomValidationRule,
 	errors: Record<string, string | null>
 ) => {
+	if (rule.type !== 'cross_field') return;
 	const violated = isCustomCrossFieldRuleViolated(form, rule);
 	for (const fid of rule.errorFields) {
 		// attach or clear the custom error per involved field

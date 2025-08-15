@@ -53,9 +53,8 @@
 		const rules: Record<string, CustomValidationRule> = schema.customValidationRules ?? {};
 		for (const key of Object.keys(rules)) {
 			const rule = rules[key];
-			if (rule.type === 'cross_field') {
-				checkCrossFieldValidation(form, rule, errors);
-			}
+			// add checks for different types of validation rules
+			checkCrossFieldValidation(form, rule, errors);
 		}
 	};
 
@@ -79,7 +78,7 @@
 </script>
 
 <form class="grid grid-cols-4 gap-4">
-	{#each schema.groups as group}
+	{#each schema.groups as group (group.id)}
 		{#if group.preRun || hasRun}
 			<DynamicFormGroup {group} {form} bind:collapsedGroups bind:collapsedSubGroups {errors} {onFieldChange} />
 		{/if}

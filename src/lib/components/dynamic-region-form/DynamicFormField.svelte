@@ -71,7 +71,7 @@
 		</div>
 	{:else if field.type === 'multiselect'}
 		<div class="flex flex-wrap gap-2">
-			{#each field.options ?? [] as opt}
+			{#each field.options ?? [] as opt (opt.value)}
 				{@const selectedValues = (form[field.id] as string[]) ?? []}
 				<Label class="inline-flex items-center gap-2 text-sm font-normal">
 					<Checkbox

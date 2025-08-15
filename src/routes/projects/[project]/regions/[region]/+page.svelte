@@ -23,7 +23,8 @@
 			}
 			return await res.json();
 		} catch (e) {
-			toast.error(`Failed to run models for region "${params.region}" in project "${params.project}"`);
+			console.error('Failed to process models:', e);
+			toast.error(`Failed to process models for region "${params.region}" in project "${params.project}"`);
 			hasRun = false;
 		}
 	};

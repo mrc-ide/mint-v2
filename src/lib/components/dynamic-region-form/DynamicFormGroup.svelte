@@ -64,7 +64,7 @@
 			transition:slide
 			class={['mx-2 flex justify-between gap-5 xl:gap-20', group.preRun ? 'flex-row' : 'flex-col']}
 		>
-			{#each group.subGroups as subGroup}
+			{#each group.subGroups as subGroup (subGroup.id)}
 				<DynamicFormSubGroup {subGroup} {group} {form} bind:collapsedSubGroups {errors} {onFieldChange} />
 			{/each}
 		</div>
