@@ -6,14 +6,14 @@
 	import type { CustomValidationRule, Schema, SchemaField, SchemaGroup } from './types';
 	import { checkCrossFieldValidation, coerceDefaults, forEachField, getFieldErrorMessage } from './utils';
 
-	type Props = {
+	interface Props {
 		schema: Schema;
 		initialValues: Record<string, unknown>;
 		hasRun: boolean;
 		children: Snippet;
 		submit: (formValues: Record<string, unknown>, triggerRun?: boolean) => Promise<void>;
 		submitText: string;
-	};
+	}
 
 	let { schema, initialValues, hasRun, children, submit, submitText }: Props = $props();
 	const debouncedSubmit = debounce(submit, 500);

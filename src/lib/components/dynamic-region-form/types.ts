@@ -1,5 +1,5 @@
 // TODO: these types are hardcoded.. will need to be generated once moved to r api
-export type BaseField = {
+export interface BaseField {
 	id: string;
 	label: string;
 	helpText?: string;
@@ -7,9 +7,9 @@ export type BaseField = {
 	disabled?: boolean | CustomDisabled;
 	value?: unknown | CustomValue;
 	default?: unknown;
-};
+}
 
-export type NumericField = BaseField & {
+export interface NumericField extends BaseField {
 	type: 'number' | 'slider';
 	max?: number;
 	min?: number;
@@ -17,56 +17,59 @@ export type NumericField = BaseField & {
 	unit?: string;
 	default?: number;
 	integer?: boolean;
-};
+}
 
-export type ToggleField = BaseField & {
+export interface ToggleField extends BaseField {
 	type: 'toggle';
 	default?: boolean;
-};
+}
 
-export type MultiselectField = BaseField & {
+export interface MultiselectField extends BaseField {
 	type: 'multiselect';
 	options: { label: string; value: string }[];
 	default?: string[];
-};
+}
 
-export type DisplayField = BaseField & {
+export interface DisplayField extends BaseField {
 	type: 'display';
 	unit?: string;
 	value: unknown | CustomValue;
-};
+}
+
 export type SchemaField = NumericField | ToggleField | MultiselectField | DisplayField;
 
-export type CustomValidationRule = {
+export interface CustomValidationRule {
 	type: 'cross_field'; // todo: make more generic when more show up
 	fields: string[];
 	errorFields: string[];
 	operator: 'sum_lte' | 'sum_lt' | 'sum_gte' | 'sum_gt' | 'sum_eq';
 	threshold: number;
 	message: string;
-};
-export type CustomValue = {
+}
+
+export interface CustomValue {
 	type: 'cross_field'; // todo: make more generic when more show up
 	fields: string[];
 	operator: 'sum' | 'avg' | 'min' | 'max';
-};
-export type CustomDisabled = {
+}
+
+export interface CustomDisabled {
 	type: 'cross_field'; // todo: make more generic when more show up
 	fields: string[];
 	operator: 'falsy' | 'all' | 'any';
 	threshold?: number;
-};
+}
 
-export type SchemaSubGroup = {
+export interface SchemaSubGroup {
 	id: string;
 	title: string;
 	description: string;
 	helpText?: string;
 	collapsible?: boolean;
 	fields: SchemaField[];
-};
+}
 
-export type SchemaGroup = {
+export interface SchemaGroup {
 	id: string;
 	title: string;
 	description: string;
@@ -75,9 +78,9 @@ export type SchemaGroup = {
 	triggersRerun?: boolean;
 	preRun?: boolean;
 	subGroups: SchemaSubGroup[];
-};
+}
 
-export type Schema = {
+export interface Schema {
 	groups: SchemaGroup[];
 	customValidationRules?: Record<string, CustomValidationRule>;
-};
+}
