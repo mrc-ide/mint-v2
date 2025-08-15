@@ -5,7 +5,7 @@
 	import '../app.css';
 	import Header from './_components/Header.svelte';
 
-	let { children } = $props();
+	let { children, data } = $props();
 </script>
 
 <svelte:head>
@@ -19,7 +19,7 @@
 
 <ModeWatcher />
 <Toaster richColors />
-<Header />
+<Header userData={data.userData} />
 <main class="flex min-h-svh px-5 pt-18 pb-5">
 	<div class="flex-1">{@render children?.()}</div>
 </main>
