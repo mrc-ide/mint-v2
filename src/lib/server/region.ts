@@ -1,20 +1,20 @@
-import type { Schema } from '$lib/components/dynamic-region-form/types';
+import type { DynamicFormSchema } from '$lib/components/dynamic-region-form/types';
 import { saveUserState } from '$lib/server/redis';
-import type { Region, ResponseBodySuccess, RunData, UserState } from '$lib/types';
-import { regionFormOptions, regionUrl } from '$lib/url';
+import type { Region, RunData, UserState } from '$lib/types/userState';
+import { regionFormUrl, regionUrl } from '$lib/url';
 import { error } from '@sveltejs/kit';
 import type { RequestEvent } from '../../routes/projects/[project]/regions/[region]/$types';
+import type { ResponseBodySuccess } from '$lib/types/api';
 
-// TODO: sort out types
 export const getRegionFormSchema = async (
 	projectName: string,
 	regionName: string,
 	fetch: RequestEvent['fetch']
-): Promise<Schema> => {
-	const res = await fetch(regionFormOptions());
+): Promise<DynamicFormSchema> => {
+	const res = await fetch(regionFormUrl());
 	if (!res.ok) error(res.status, `Failed to fetch form schema for region "${regionName}" in project "${projectName}"`);
 	const form = (await res.json()) as ResponseBodySuccess;
-	return form.data as Schema;
+	return form.data as DynamicFormSchema;
 };
 
 export const runModelsOnLoad = async (

@@ -6,7 +6,7 @@
 	import * as Form from '$lib/components/ui/form';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
-	import type { Project, Region } from '$lib/types';
+	import type { Project, Region } from '$lib/types/userState';
 	import ChevronsUpDownIcon from '@lucide/svelte/icons/chevrons-up-down';
 	import Plus from '@lucide/svelte/icons/plus';
 	import { superForm } from 'sveltekit-superforms';

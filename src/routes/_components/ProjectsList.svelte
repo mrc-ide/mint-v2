@@ -1,6 +1,6 @@
 <script lang="ts">
 	import * as Collapsible from '$lib/components/ui/collapsible/';
-	import type { Project } from '$lib/types';
+	import type { Project } from '$lib/types/userState';
 	import ChevronsUpDownIcon from '@lucide/svelte/icons/chevrons-up-down';
 	import ProjectsListDelete from './ProjectsListDelete.svelte';
 	interface Props {

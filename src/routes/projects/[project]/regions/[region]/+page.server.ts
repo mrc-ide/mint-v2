@@ -16,6 +16,7 @@ export const load: PageServerLoad = async ({ params, locals, fetch }) => {
 		formSchema: await getRegionFormSchema(project, region, fetch),
 		region: regionData,
 		addRegionForm,
+		// TODO: will go directly to R api to run
 		runPromise: runModelsOnLoad(project, region, regionData, fetch) // stream as it resolves
 	};
 };

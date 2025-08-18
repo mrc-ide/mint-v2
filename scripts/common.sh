@@ -3,7 +3,7 @@
 REGISTRY=ghcr.io
 ORG=mrc-ide
 API=mintr
-API_VERSION=mrc-6689-options-json
+API_VERSION=mrc-6689-options-json # TODO: revert before merge
 NETWORK=mint_network
 NAME_REDIS=mint-redis
 

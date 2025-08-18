@@ -1,4 +1,3 @@
-// TODO: these types are hardcoded.. will need to be generated once moved to r api
 export interface BaseField {
 	id: string;
 	label: string;
@@ -38,27 +37,30 @@ export interface DisplayField extends BaseField {
 
 export type SchemaField = NumericField | ToggleField | MultiselectField | DisplayField;
 
-export interface CustomValidationRule {
-	type: 'cross_field'; // todo: make more generic when more show up
+export interface CrossFieldValidationRule {
+	type: 'cross_field';
 	fields: string[];
 	errorFields: string[];
 	operator: 'sum_lte' | 'sum_lt' | 'sum_gte' | 'sum_gt' | 'sum_eq';
 	threshold: number;
 	message: string;
 }
+export type CustomValidationRule = CrossFieldValidationRule; // union as more types are added
 
-export interface CustomValue {
-	type: 'cross_field'; // todo: make more generic when more show up
+export interface CrossFieldValue {
+	type: 'cross_field';
 	fields: string[];
 	operator: 'sum' | 'avg' | 'min' | 'max';
 }
+export type CustomValue = CrossFieldValue; // union as more types are added
 
-export interface CustomDisabled {
-	type: 'cross_field'; // todo: make more generic when more show up
+export interface CrossFieldDisabled {
+	type: 'cross_field';
 	fields: string[];
 	operator: 'falsy' | 'all' | 'any';
 	threshold?: number;
 }
+export type CustomDisabled = CrossFieldDisabled; // union as more types are added
 
 export interface SchemaSubGroup {
 	id: string;
@@ -80,7 +82,7 @@ export interface SchemaGroup {
 	subGroups: SchemaSubGroup[];
 }
 
-export interface Schema {
+export interface DynamicFormSchema {
 	groups: SchemaGroup[];
 	customValidationRules?: Record<string, CustomValidationRule>;
 }
