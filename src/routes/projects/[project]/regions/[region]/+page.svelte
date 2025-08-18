@@ -3,7 +3,7 @@
 	import { DynamicForm } from '$lib/components/dynamic-region-form';
 	import { toast } from 'svelte-sonner';
 	import type { PageProps } from './$types';
-	import { getRegionUrl } from '$lib/url';
+	import { regionUrl } from '$lib/url';
 
 	let { data, params }: PageProps = $props();
 
@@ -13,7 +13,7 @@
 	const processModelRuns = async (formValues: Record<string, unknown>, triggerRun = true) => {
 		hasRun = true;
 		try {
-			const res = await fetch(getRegionUrl(params.project, params.region), {
+			const res = await fetch(regionUrl(params.project, params.region), {
 				method: 'POST',
 				body: JSON.stringify({ formValues, triggerRun }),
 				headers: { 'Content-Type': 'application/json' }

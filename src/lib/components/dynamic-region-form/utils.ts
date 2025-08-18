@@ -1,6 +1,6 @@
 import type {
 	CustomDisabled,
-	CustomValidationRule,
+	CrossFieldValidationRule,
 	CustomValue,
 	SchemaField,
 	SchemaGroup,
@@ -109,7 +109,10 @@ export const getFieldErrorMessage = (field: SchemaField, value: unknown): string
 	return message;
 };
 
-export const isCustomCrossFieldRuleViolated = (form: Record<string, unknown>, rule: CustomValidationRule): boolean => {
+export const isCustomCrossFieldRuleViolated = (
+	form: Record<string, unknown>,
+	rule: CrossFieldValidationRule
+): boolean => {
 	const sum = rule.fields.reduce((a: number, id: string) => a + getNumber(form[id]), 0);
 
 	switch (rule.operator) {
@@ -130,7 +133,7 @@ export const isCustomCrossFieldRuleViolated = (form: Record<string, unknown>, ru
 
 export const checkCrossFieldValidation = (
 	form: Record<string, unknown>,
-	rule: CustomValidationRule,
+	rule: CrossFieldValidationRule,
 	errors: Record<string, string | null>
 ) => {
 	if (rule.type !== 'cross_field') return;

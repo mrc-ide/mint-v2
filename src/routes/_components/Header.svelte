@@ -6,7 +6,7 @@
 	import SunIcon from '@lucide/svelte/icons/sun';
 	import { toggleMode } from 'mode-watcher';
 	import HeaderRegionsDropdown from '../projects/[project]/regions/[region]/_components/HeaderRegionsDropdown.svelte';
-	import type { UserState } from '$lib/types';
+	import type { UserState } from '$lib/types/userState';
 
 	interface Props {
 		userData: UserState;

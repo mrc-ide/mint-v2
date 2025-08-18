@@ -3,11 +3,11 @@
 	import type { Snippet } from 'svelte';
 	import { Button } from '../ui/button';
 	import DynamicFormGroup from './DynamicFormGroup.svelte';
-	import type { CustomValidationRule, Schema, SchemaField, SchemaGroup } from './types';
+	import type { CustomValidationRule, DynamicFormSchema, SchemaField, SchemaGroup } from './types';
 	import { checkCrossFieldValidation, coerceDefaults, forEachField, getFieldErrorMessage } from './utils';
 
 	interface Props {
-		schema: Schema;
+		schema: DynamicFormSchema;
 		initialValues: Record<string, unknown>;
 		hasRun: boolean;
 		children: Snippet;
