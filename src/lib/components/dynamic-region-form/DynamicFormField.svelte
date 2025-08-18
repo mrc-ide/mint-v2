@@ -1,14 +1,13 @@
 <script lang="ts">
+	import { Checkbox } from '$lib/components/ui/checkbox';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
-	import * as Tooltip from '$lib/components/ui/tooltip';
-	import { Checkbox } from '$lib/components/ui/checkbox';
 	import { Slider } from '$lib/components/ui/slider';
-	import type { SchemaField } from './types';
-	import Info from '@lucide/svelte/icons/info';
-	import { evaluateValueExpression, isDisabled } from './utils';
 	import { cn } from '$lib/utils';
+	import InfoTooltip from '../InfoTooltip.svelte';
 	import Switch from '../ui/switch/switch.svelte';
+	import type { SchemaField } from './types';
+	import { evaluateValueExpression, isDisabled } from './utils';
 
 	interface Props {
 		field: SchemaField;
@@ -23,14 +22,7 @@
 	<div class="flex gap-2">
 		<Label for={field.id} class={errors[field.id] ? 'text-destructive' : ''}>{field.label}</Label>
 		{#if field.helpText}
-			<Tooltip.Provider delayDuration={200}>
-				<Tooltip.Root>
-					<Tooltip.Trigger><Info class="h-4 w-4 text-muted-foreground" /></Tooltip.Trigger>
-					<Tooltip.Content>
-						<p>{field.helpText}</p>
-					</Tooltip.Content>
-				</Tooltip.Root>
-			</Tooltip.Provider>
+			<InfoTooltip text={field.helpText} />
 		{/if}
 	</div>
 
@@ -66,6 +58,7 @@
 				value={Number(form[field.id] ?? 0)}
 				aria-invalid={Boolean(errors[field.id])}
 				onValueChange={(value) => onFieldChange(field, value)}
+				thumbClass={Boolean(errors[field.id]) ? 'border-destructive' : ''}
 			/>
 			<span class="w-10 text-right text-sm tabular-nums">{form[field.id] as number}{field.unit ?? ''}</span>
 		</div>

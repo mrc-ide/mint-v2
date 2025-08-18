@@ -1,4 +1,5 @@
 import { getRegionFormSchema, getValidatedRegionData, runModelsOnLoad } from '$lib/server/region';
+import { regionUrl } from '$lib/url';
 import { addRegionSchema } from '$routes/projects/[project]/regions/[region]/schema';
 import { redirect, type Actions } from '@sveltejs/kit';
 import { fail, setError, superValidate } from 'sveltekit-superforms';
@@ -44,6 +45,6 @@ export const actions: Actions = {
 			hasRun: false
 		});
 
-		return redirect(303, `/projects/${project}/regions/${addRegionForm.data.name}`);
+		return redirect(303, regionUrl(projectData.name, addRegionForm.data.name));
 	}
 };

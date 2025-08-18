@@ -1,12 +1,11 @@
 <script lang="ts">
-	import DynamicFormField from './DynamicFormField.svelte';
-	import { isSubGroupCollapsed } from './utils';
-	import ChevronRight from '@lucide/svelte/icons/chevron-right';
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
-	import * as Tooltip from '$lib/components/ui/tooltip';
-	import type { SchemaField, SchemaGroup, SchemaSubGroup } from './types';
-	import Info from '@lucide/svelte/icons/info';
+	import ChevronRight from '@lucide/svelte/icons/chevron-right';
 	import { slide } from 'svelte/transition';
+	import InfoTooltip from '../InfoTooltip.svelte';
+	import DynamicFormField from './DynamicFormField.svelte';
+	import type { SchemaField, SchemaGroup, SchemaSubGroup } from './types';
+	import { isSubGroupCollapsed } from './utils';
 
 	interface Props {
 		subGroup: SchemaSubGroup;
@@ -46,14 +45,7 @@
 			<h3 class="font-medium">{subGroup.title}</h3>
 		{/if}
 		{#if subGroup.helpText}
-			<Tooltip.Provider delayDuration={200}>
-				<Tooltip.Root>
-					<Tooltip.Trigger><Info class="h-4 w-4 text-muted-foreground" /></Tooltip.Trigger>
-					<Tooltip.Content>
-						<p>{subGroup.helpText}</p>
-					</Tooltip.Content>
-				</Tooltip.Root>
-			</Tooltip.Provider>
+			<InfoTooltip text={subGroup.helpText} />
 		{/if}
 	</div>
 

@@ -1,11 +1,12 @@
+export type FormValue = string | number | string[] | number[] | boolean;
 export interface BaseField {
 	id: string;
 	label: string;
 	helpText?: string;
 	required?: boolean;
 	disabled?: boolean | CustomDisabled;
-	value?: unknown | CustomValue;
-	default?: unknown;
+	value?: FormValue | CustomValue;
+	default?: FormValue;
 }
 
 export interface NumericField extends BaseField {
@@ -32,7 +33,7 @@ export interface MultiselectField extends BaseField {
 export interface DisplayField extends BaseField {
 	type: 'display';
 	unit?: string;
-	value: unknown | CustomValue;
+	value: FormValue | CustomValue;
 }
 
 export type SchemaField = NumericField | ToggleField | MultiselectField | DisplayField;

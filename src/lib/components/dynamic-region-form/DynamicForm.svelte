@@ -4,11 +4,19 @@
 	import { Button } from '../ui/button';
 	import DynamicFormGroup from './DynamicFormGroup.svelte';
 	import type { CustomValidationRule, DynamicFormSchema, SchemaField, SchemaGroup } from './types';
-	import { checkCrossFieldValidation, coerceDefaults, forEachField, getFieldErrorMessage } from './utils';
+	import {
+		checkCrossFieldValidation,
+		coerceDefaults,
+		forEachField,
+		forEachGroup,
+		forEachSubGroup,
+		getFieldErrorMessage
+	} from './utils';
 
 	interface Props {
 		schema: DynamicFormSchema;
 		initialValues: Record<string, unknown>;
+		// The first run is user-initiated after entering preRun values, subsequent runs are triggered automatically when fields change - this prop tracks these life cycle stages.
 		hasRun: boolean;
 		children: Snippet;
 		submit: (formValues: Record<string, unknown>, triggerRun?: boolean) => Promise<void>;
@@ -29,16 +37,20 @@
 		fieldToGroup[field.id] = group;
 	});
 	// initialize form values and errors
-	forEachField(schema.groups, (field, group, subGroup) => {
+	forEachField(schema.groups, (field) => {
 		form[field.id] = initialValues[field.id] ?? coerceDefaults(field);
 		errors[field.id] = null;
+	});
+	forEachGroup(schema.groups, (group) => {
 		// initialize collapse states (default expanded)
 		if (group.collapsible) {
 			collapsedGroups[group.id] = Boolean(group.preRun) && hasRun;
 		}
-		const key = `${group.id}:${subGroup.id}`;
-		if (subGroup.collapsible && collapsedSubGroups[key] === undefined) {
-			collapsedSubGroups[key] = false;
+	});
+	forEachSubGroup(schema.groups, (group, subGroup) => {
+		// initialize collapse states (default expanded)
+		if (subGroup.collapsible && collapsedSubGroups[`${group.id}:${subGroup.id}`] === undefined) {
+			collapsedSubGroups[`${group.id}:${subGroup.id}`] = false;
 		}
 	});
 
@@ -69,11 +81,11 @@
 		debouncedSubmit(form, group.triggersRerun);
 	};
 	const collapsePreRunGroups = () => {
-		for (const group of schema.groups) {
+		forEachGroup(schema.groups, (group) => {
 			if (group.collapsible && group.preRun) {
 				collapsedGroups[group.id] = true;
 			}
-		}
+		});
 	};
 </script>
 
@@ -94,8 +106,9 @@
 			<Button
 				onclick={() => {
 					if (hasFormErrors) return;
-					submit(form, true);
-					collapsePreRunGroups();
+					submit(form, true).then(() => {
+						collapsePreRunGroups();
+					});
 				}}
 				size="lg"
 				disabled={hasFormErrors}

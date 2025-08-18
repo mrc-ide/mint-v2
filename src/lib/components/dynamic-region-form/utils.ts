@@ -18,6 +18,18 @@ export const forEachField = (
 	}
 };
 
+export const forEachGroup = (groups: SchemaGroup[], callback: (g: SchemaGroup) => void) => {
+	for (const group of groups) {
+		callback(group);
+	}
+};
+
+export const forEachSubGroup = (groups: SchemaGroup[], callback: (g: SchemaGroup, sg: SchemaSubGroup) => void) => {
+	for (const group of groups) {
+		for (const subGroup of group.subGroups) callback(group, subGroup);
+	}
+};
+
 export const coerceDefaults = (field: SchemaField): unknown => {
 	// For display fields, we won't assign default here (computed later)
 	switch (field.type) {
