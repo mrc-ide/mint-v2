@@ -1,5 +1,5 @@
 import { REDIS_URL } from '$env/static/private';
-import type { UserState } from '$lib/types';
+import type { UserState } from '$lib/types/userState';
 import Redis from 'ioredis';
 import { setNewUserIdCookie } from './session';
 import type { Cookies } from '@sveltejs/kit';
