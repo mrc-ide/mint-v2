@@ -23,7 +23,7 @@
 	<div class="flex gap-2">
 		<Label for={field.id} class={errors[field.id] ? 'text-destructive' : ''}>{field.label}</Label>
 		{#if field.helpText}
-			<Tooltip.Provider>
+			<Tooltip.Provider delayDuration={200}>
 				<Tooltip.Root>
 					<Tooltip.Trigger><Info class="h-4 w-4 text-muted-foreground" /></Tooltip.Trigger>
 					<Tooltip.Content>

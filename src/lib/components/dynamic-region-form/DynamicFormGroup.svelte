@@ -1,5 +1,7 @@
 <script lang="ts">
-	import ChevronsUpDownIcon from '@lucide/svelte/icons/chevrons-up-down';
+	import ChevronRight from '@lucide/svelte/icons/chevron-right';
+	import ChevronDown from '@lucide/svelte/icons/chevron-down';
+
 	import * as Tooltip from '$lib/components/ui/tooltip';
 	import DynamicFormSubGroup from './DynamicFormSubGroup.svelte';
 	import { slide } from 'svelte/transition';
@@ -27,7 +29,7 @@
 </script>
 
 <section class={['rounded-md border', group.preRun ? 'col-span-4 p-10' : 'col-span-1 col-start-1 p-5']}>
-	<div class="flex gap-2">
+	<div class="flex gap-4">
 		{#if group.collapsible}
 			<button
 				type="button"
@@ -36,17 +38,16 @@
 				aria-controls={`group-${group.id}`}
 				onclick={() => (collapsedGroups[group.id] = !isGroupCollapsed(collapsedGroups, group))}
 			>
-				<ChevronsUpDownIcon
-					class={[
-						'inline-block w-5 text-center transition-transform duration-200',
-						{ 'rotate-180': isGroupCollapsed(collapsedGroups, group) }
-					]}
-				/>
+				{#if isGroupCollapsed(collapsedGroups, group)}
+					<ChevronRight class="h-4 w-4" />
+				{:else}
+					<ChevronDown class="h-4 w-4" />
+				{/if}
 				{group.title}
 			</button>
-		{:else if group.title}<h2 class="mb-1 text-lg font-semibold">{group.title}</h2>{/if}
+		{:else if group.title}<h2 class="mb-2 text-lg font-semibold">{group.title}</h2>{/if}
 		{#if group.helpText}
-			<Tooltip.Provider>
+			<Tooltip.Provider delayDuration={200}>
 				<Tooltip.Root>
 					<Tooltip.Trigger><Info class="h-4 w-4 text-muted-foreground" /></Tooltip.Trigger>
 					<Tooltip.Content>
@@ -56,13 +57,13 @@
 			</Tooltip.Provider>
 		{/if}
 	</div>
-	{#if group.description}<p class="mb-1 text-sm text-muted-foreground">{group.description}</p>{/if}
+	{#if group.description}<p class="mb-2 text-sm text-muted-foreground">{group.description}</p>{/if}
 
 	{#if !isGroupCollapsed(collapsedGroups, group)}
 		<div
 			id={`group-${group.id}`}
 			transition:slide
-			class={['mx-2 flex justify-between gap-5 xl:gap-20', group.preRun ? 'flex-row' : 'flex-col']}
+			class={['mx-2 flex justify-between gap-6 xl:gap-x-20', group.preRun ? 'flex-row' : 'flex-col']}
 		>
 			{#each group.subGroups as subGroup (subGroup.id)}
 				<DynamicFormSubGroup {subGroup} {group} {form} bind:collapsedSubGroups {errors} {onFieldChange} />
