@@ -3,7 +3,7 @@
 	import type { Snippet } from 'svelte';
 	import { Button } from '../ui/button';
 	import DynamicFormGroup from './DynamicFormGroup.svelte';
-	import type { CrossFieldValidationRule, DynamicFormSchema, SchemaField, SchemaGroup } from './types';
+	import type { CustomValidationRule, DynamicFormSchema, SchemaField, SchemaGroup } from './types';
 	import { checkCrossFieldValidation, coerceDefaults, forEachField, getFieldErrorMessage } from './utils';
 
 	interface Props {
@@ -50,7 +50,7 @@
 	};
 
 	const validateCustomRules = () => {
-		const rules: Record<string, CrossFieldValidationRule> = schema.customValidationRules ?? {};
+		const rules: Record<string, CustomValidationRule> = schema.customValidationRules ?? {};
 		for (const key of Object.keys(rules)) {
 			const rule = rules[key];
 			// add checks for different types of validation rules
