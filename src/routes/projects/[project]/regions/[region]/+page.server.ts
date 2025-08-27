@@ -1,27 +1,26 @@
-import { zod } from 'sveltekit-superforms/adapters';
-import { error, redirect, type Actions } from '@sveltejs/kit';
-import type { PageServerLoad } from './$types';
-import { fail, setError, superValidate } from 'sveltekit-superforms';
+import { getRegionFormSchema, getValidatedRegionData, runModelsOnLoad } from '$lib/server/region';
+import { regionUrl } from '$lib/url';
 import { addRegionSchema } from '$routes/projects/[project]/regions/[region]/schema';
+import { redirect, type Actions } from '@sveltejs/kit';
+import { fail, setError, superValidate } from 'sveltekit-superforms';
+import { zod } from 'sveltekit-superforms/adapters';
+import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ params, locals }) => {
+export const load: PageServerLoad = async ({ params, locals, fetch }) => {
 	const { project, region } = params;
 	const addRegionForm = await superValidate(zod(addRegionSchema));
 
 	const userState = locals.userState;
-	const projectData = userState.projects.find((p) => p.name === project);
-	if (!projectData) error(404, `Project "${project}" not found`);
-
-	const regionData = projectData.regions.find((r) => r.name === region);
-	if (!regionData) error(404, `Region "${region}" not found in project "${project}"`);
+	const regionData = getValidatedRegionData(userState, project, region);
 
 	return {
-		project: projectData,
+		formSchema: await getRegionFormSchema(project, region, fetch),
 		region: regionData,
-		addRegionForm
+		addRegionForm,
+		// TODO: will go directly to R api to run
+		runPromise: runModelsOnLoad(project, region, regionData, fetch) // stream as it resolves
 	};
 };
-
 export const actions: Actions = {
 	addRegion: async ({ request, params, locals }) => {
 		const { project } = params;
@@ -40,8 +39,12 @@ export const actions: Actions = {
 			return fail(400, { addRegionForm });
 		}
 
-		projectData.regions.push({ name: addRegionForm.data.name });
+		projectData.regions.push({
+			name: addRegionForm.data.name,
+			formValues: {},
+			hasRun: false
+		});
 
-		return redirect(303, `/projects/${project}/regions/${addRegionForm.data.name}`);
+		return redirect(303, regionUrl(projectData.name, addRegionForm.data.name));
 	}
 };

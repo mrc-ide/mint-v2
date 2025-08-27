@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
-ORG=mrcide
+REGISTRY=ghcr.io
+ORG=mrc-ide
 API=mintr
-API_VERSION=master
+API_VERSION=main 
 NETWORK=mint_network
 NAME_REDIS=mint-redis
 

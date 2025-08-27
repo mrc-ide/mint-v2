@@ -30,7 +30,11 @@ export const actions: Actions = {
 		// if successful, then update local user data
 		locals.userState.projects.push({
 			name: form.data.name,
-			regions: form.data.regions.map((region) => ({ name: region })),
+			regions: form.data.regions.map((region) => ({
+				name: region,
+				formValues: {},
+				hasRun: false
+			})),
 			budget: 2000000, // default budget (TODO: place somewhere better with other defaults)
 			canStrategize: false
 		});

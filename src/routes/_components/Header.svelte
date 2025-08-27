@@ -6,6 +6,14 @@
 	import SunIcon from '@lucide/svelte/icons/sun';
 	import { toggleMode } from 'mode-watcher';
 	import HeaderRegionsDropdown from '../projects/[project]/regions/[region]/_components/HeaderRegionsDropdown.svelte';
+	import type { UserState } from '$lib/types/userState';
+
+	interface Props {
+		userData: UserState;
+	}
+	let { userData }: Props = $props();
+	let project = $derived(userData.projects.find((p) => p.name === page.params.project));
+	let region = $derived(project?.regions.find((r) => r.name === page.params.region));
 </script>
 
 <header>
@@ -17,14 +25,11 @@
 			class="ml-2 flex items-center justify-center px-2 text-xl font-extrabold text-primary hover:text-primary/80"
 			><img src={logo} alt="MINT logo" class="h-12 w-12" />MINT</a
 		>
-		{#if page.data.project && page.data.region}
-			<HeaderRegionsDropdown />
+		{#if project && region}
+			<HeaderRegionsDropdown {project} {region} />
 		{/if}
-		{#if page.data.project && page.data.project.canStrategize}
-			<a
-				class={buttonVariants({ variant: 'link', class: 'p-1' })}
-				href={`/projects/${page.data.project.name}/strategize`}
-			>
+		{#if project && project.canStrategize}
+			<a class={buttonVariants({ variant: 'link', class: 'p-1' })} href={`/projects/${project.name}/strategize`}>
 				Strategize across regions
 			</a>
 		{/if}
