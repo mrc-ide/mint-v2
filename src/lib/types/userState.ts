@@ -1,3 +1,5 @@
+import type { FormValue } from '$lib/components/dynamic-region-form/types';
+
 export interface RunData {
 	prevalenceData: Record<string, unknown[]>; // key of run and timeseries value
 	casesData: Record<string, unknown[]>; // key of run and timeseries value
@@ -5,7 +7,7 @@ export interface RunData {
 export interface Region {
 	name: string;
 	hasRun: boolean;
-	formValues: Record<string, unknown>;
+	formValues: Record<string, FormValue>;
 }
 export interface Project {
 	name: string;

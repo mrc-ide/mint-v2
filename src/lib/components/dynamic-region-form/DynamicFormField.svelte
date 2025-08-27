@@ -3,7 +3,6 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { Slider } from '$lib/components/ui/slider';
-	import { cn } from '$lib/utils';
 	import InfoTooltip from '../InfoTooltip.svelte';
 	import Switch from '../ui/switch/switch.svelte';
 	import type { SchemaField } from './types';
@@ -82,12 +81,7 @@
 			{/each}
 		</div>
 	{:else if field.type === 'display'}
-		<div
-			class={cn(
-				'rounded-md bg-slate-50 px-2 py-1 text-sm tabular-nums dark:bg-slate-950',
-				errors[field.id] && 'border border-destructive'
-			)}
-		>
+		<div class="rounded-md bg-slate-50 px-2 py-1 text-sm tabular-nums dark:bg-slate-950">
 			{evaluateValueExpression(form, field) as number}{field.unit ?? ''}
 		</div>
 	{/if}

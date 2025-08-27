@@ -1,4 +1,4 @@
-import type { DynamicFormSchema } from '$lib/components/dynamic-region-form/types';
+import type { DynamicFormSchema, FormValue } from '$lib/components/dynamic-region-form/types';
 import { saveUserState } from '$lib/server/redis';
 import type { Region, RunData, UserState } from '$lib/types/userState';
 import { regionFormUrl, regionUrl } from '$lib/url';
@@ -43,7 +43,7 @@ export const saveRegionFormState = async (
 	userState: UserState,
 	projectName: string,
 	regionName: string,
-	formValues: Record<string, unknown>
+	formValues: Record<string, FormValue>
 ) => {
 	const regionData = getValidatedRegionData(userState, projectName, regionName);
 	regionData.formValues = formValues;
@@ -51,7 +51,7 @@ export const saveRegionFormState = async (
 	await saveUserState(userState);
 };
 
-export const getValidatedRegionData = (userState: UserState, projectName: string, regionName: string) => {
+export const getValidatedRegionData = (userState: UserState, projectName: string, regionName: string): Region => {
 	const projectData = userState.projects.find((p) => p.name === projectName);
 	if (!projectData) error(404, `Project "${projectName}" not found`);
 

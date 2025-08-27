@@ -3,7 +3,7 @@
 	import type { Snippet } from 'svelte';
 	import { Button } from '../ui/button';
 	import DynamicFormGroup from './DynamicFormGroup.svelte';
-	import type { CustomValidationRule, DynamicFormSchema, SchemaField, SchemaGroup } from './types';
+	import type { CustomValidationRule, DynamicFormSchema, FormValue, SchemaField, SchemaGroup } from './types';
 	import {
 		checkCrossFieldValidation,
 		coerceDefaults,
@@ -16,7 +16,7 @@
 
 	interface Props {
 		schema: DynamicFormSchema;
-		initialValues: Record<string, unknown>;
+		initialValues: Record<string, FormValue>;
 		// The first run is user-initiated after entering preRun values, subsequent runs are triggered automatically when fields change - this prop tracks these life cycle stages.
 		hasRun: boolean;
 		children: Snippet;
