@@ -4,14 +4,14 @@
 	import { toast } from 'svelte-sonner';
 	import type { PageProps } from './$types';
 	import { regionUrl } from '$lib/url';
+	import type { RunData } from '$lib/types/userState';
 
 	let { data, params }: PageProps = $props();
 
 	let hasRun = $derived(data.region.hasRun);
 	let runPromise = $derived(data.runPromise);
 
-	const processModelRuns = async (formValues: Record<string, unknown>, triggerRun = true) => {
-		hasRun = true;
+	const processModelRuns = async (formValues: Record<string, unknown>, triggerRun = true): Promise<RunData | null> => {
 		try {
 			const res = await fetch(regionUrl(params.project, params.region), {
 				method: 'POST',
@@ -25,7 +25,7 @@
 		} catch (e) {
 			console.error('Failed to process models:', e);
 			toast.error(`Failed to process models for region "${params.region}" in project "${params.project}"`);
-			hasRun = false;
+			return null;
 		}
 	};
 </script>
@@ -34,7 +34,7 @@
 	<DynamicForm
 		schema={data.formSchema}
 		initialValues={data.region.formValues}
-		{hasRun}
+		bind:hasRun
 		submit={(formValues, triggerRun = true) => (runPromise = processModelRuns(formValues, triggerRun))}
 		submitText="Run baseline"
 	>

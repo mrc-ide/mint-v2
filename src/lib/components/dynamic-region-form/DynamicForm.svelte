@@ -12,6 +12,7 @@
 		forEachSubGroup,
 		getFieldErrorMessage
 	} from './utils';
+	import type { RunData } from '$lib/types/userState';
 
 	interface Props {
 		schema: DynamicFormSchema;
@@ -19,11 +20,11 @@
 		// The first run is user-initiated after entering preRun values, subsequent runs are triggered automatically when fields change - this prop tracks these life cycle stages.
 		hasRun: boolean;
 		children: Snippet;
-		submit: (formValues: Record<string, unknown>, triggerRun?: boolean) => Promise<void>;
+		submit: (formValues: Record<string, unknown>, triggerRun?: boolean) => Promise<RunData | null>;
 		submitText: string;
 	}
 
-	let { schema, initialValues, hasRun, children, submit, submitText }: Props = $props();
+	let { schema, initialValues, hasRun = $bindable(), children, submit, submitText }: Props = $props();
 	const debouncedSubmit = debounce(submit, 500);
 	// Initialize state from defaults + initialValues override
 	let form = $state<Record<string, unknown>>({});
@@ -104,11 +105,18 @@
 	<div class="col-span-4 flex justify-center">
 		{#if !hasRun}
 			<Button
-				onclick={() => {
+				onclick={async () => {
 					if (hasFormErrors) return;
-					submit(form, true).then(() => {
-						collapsePreRunGroups();
-					});
+
+					hasRun = true;
+					const data = await submit(form, true);
+
+					if (data === null) {
+						hasRun = false;
+						return;
+					}
+
+					collapsePreRunGroups();
 				}}
 				size="lg"
 				disabled={hasFormErrors}
