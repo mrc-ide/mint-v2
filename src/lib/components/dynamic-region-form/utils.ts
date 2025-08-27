@@ -7,27 +7,23 @@ import type {
 	SchemaSubGroup
 } from './types';
 
+export const forEachGroup = (groups: SchemaGroup[], callback: (g: SchemaGroup) => void) => {
+	groups.forEach((group) => callback(group));
+};
+
+export const forEachSubGroup = (groups: SchemaGroup[], callback: (g: SchemaGroup, sg: SchemaSubGroup) => void) => {
+	forEachGroup(groups, (group) => {
+		group.subGroups.forEach((subGroup) => callback(group, subGroup));
+	});
+};
+
 export const forEachField = (
 	groups: SchemaGroup[],
 	callback: (f: SchemaField, g: SchemaGroup, sg: SchemaSubGroup) => void
 ) => {
-	for (const group of groups) {
-		for (const subGroup of group.subGroups) {
-			for (const f of subGroup.fields) callback(f, group, subGroup);
-		}
-	}
-};
-
-export const forEachGroup = (groups: SchemaGroup[], callback: (g: SchemaGroup) => void) => {
-	for (const group of groups) {
-		callback(group);
-	}
-};
-
-export const forEachSubGroup = (groups: SchemaGroup[], callback: (g: SchemaGroup, sg: SchemaSubGroup) => void) => {
-	for (const group of groups) {
-		for (const subGroup of group.subGroups) callback(group, subGroup);
-	}
+	forEachSubGroup(groups, (group, subGroup) => {
+		subGroup.fields.forEach((field) => callback(field, group, subGroup));
+	});
 };
 
 export const coerceDefaults = (field: SchemaField): unknown => {
