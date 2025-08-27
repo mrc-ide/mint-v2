@@ -107,16 +107,13 @@
 			<Button
 				onclick={async () => {
 					if (hasFormErrors) return;
-
 					hasRun = true;
-					const data = await submit(form, true);
-
-					if (data === null) {
+					try {
+						await submit(form, true);
+						collapsePreRunGroups();
+					} catch (error) {
 						hasRun = false;
-						return;
 					}
-
-					collapsePreRunGroups();
 				}}
 				size="lg"
 				disabled={hasFormErrors}

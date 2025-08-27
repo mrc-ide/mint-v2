@@ -11,7 +11,7 @@
 	let hasRun = $derived(data.region.hasRun);
 	let runPromise = $derived(data.runPromise);
 
-	const processModelRuns = async (formValues: Record<string, unknown>, triggerRun = true): Promise<RunData | null> => {
+	const processModelRuns = async (formValues: Record<string, unknown>, triggerRun = true): Promise<RunData> => {
 		try {
 			const res = await fetch(regionUrl(params.project, params.region), {
 				method: 'POST',
@@ -25,7 +25,7 @@
 		} catch (e) {
 			console.error('Failed to process models:', e);
 			toast.error(`Failed to process models for region "${params.region}" in project "${params.project}"`);
-			return null;
+			throw e;
 		}
 	};
 </script>
