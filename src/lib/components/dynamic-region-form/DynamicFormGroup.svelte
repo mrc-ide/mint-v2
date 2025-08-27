@@ -1,5 +1,4 @@
 <script lang="ts">
-	import ChevronDown from '@lucide/svelte/icons/chevron-down';
 	import ChevronRight from '@lucide/svelte/icons/chevron-right';
 
 	import { slide } from 'svelte/transition';
@@ -37,11 +36,12 @@
 				aria-controls={`group-${group.id}`}
 				onclick={() => (collapsedGroups[group.id] = !isGroupCollapsed(collapsedGroups, group))}
 			>
-				{#if isGroupCollapsed(collapsedGroups, group)}
-					<ChevronRight class="h-4 w-4" />
-				{:else}
-					<ChevronDown class="h-4 w-4" />
-				{/if}
+				<ChevronRight
+					class={[
+						'h-4 w-4 transition-transform duration-300',
+						isGroupCollapsed(collapsedGroups, group) ? 'rotate-0' : 'rotate-90'
+					]}
+				/>
 				{group.title}
 			</button>
 		{:else if group.title}<h2 class="mb-2 text-lg font-semibold">{group.title}</h2>{/if}
