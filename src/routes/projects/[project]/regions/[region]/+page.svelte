@@ -5,17 +5,19 @@
 	import type { PageProps } from './$types';
 	import { regionUrl } from '$lib/url';
 	import type { RunData } from '$lib/types/userState';
+	import type { FormValue } from '$lib/components/dynamic-region-form/types';
 
 	let { data, params }: PageProps = $props();
 
 	let hasRun = $derived(data.region.hasRun);
 	let runPromise = $derived(data.runPromise);
 
-	const processModelRuns = async (formValues: Record<string, unknown>, triggerRun = true): Promise<RunData> => {
+	// TODO: disable inputs when processing model runs. only submit triggers info
+	const runEmulator = async (formValues: Record<string, unknown>): Promise<RunData> => {
 		try {
 			const res = await fetch(regionUrl(params.project, params.region), {
 				method: 'POST',
-				body: JSON.stringify({ formValues, triggerRun }),
+				body: JSON.stringify({ formValues }),
 				headers: { 'Content-Type': 'application/json' }
 			});
 			if (!res.ok) {
@@ -28,6 +30,10 @@
 			throw e;
 		}
 	};
+	const processCosts = (formValues: Record<string, FormValue>) => {
+		// TODO: Implement cost processing logic here
+		console.log(formValues);
+	};
 </script>
 
 {#key page.url.pathname}
@@ -35,7 +41,8 @@
 		schema={data.formSchema}
 		initialValues={data.region.formValues}
 		bind:hasRun
-		submit={(formValues, triggerRun = true) => (runPromise = processModelRuns(formValues, triggerRun))}
+		run={(formValues) => (runPromise = runEmulator(formValues))}
+		process={processCosts}
 		submitText="Run baseline"
 	>
 		{#await runPromise}
@@ -44,8 +51,7 @@
 			</div>
 		{:then runData}
 			{#if runData}
-				CasesData: {JSON.stringify(runData.casesData)}
-				PrevalenceData: {JSON.stringify(runData.prevalenceData)}
+				{JSON.stringify(runData)}
 			{/if}
 		{:catch _err}
 			<div class="flex items-center justify-center p-8">

@@ -5,14 +5,14 @@
 	import { Slider } from '$lib/components/ui/slider';
 	import InfoTooltip from '../InfoTooltip.svelte';
 	import Switch from '../ui/switch/switch.svelte';
-	import type { SchemaField } from './types';
+	import type { FormValue, SchemaField } from './types';
 	import { evaluateValueExpression, isDisabled } from './utils';
 
 	interface Props {
 		field: SchemaField;
-		form: Record<string, unknown>;
+		form: Record<string, FormValue>;
 		errors: Record<string, string | null>;
-		onFieldChange: (field: SchemaField, value: unknown) => void;
+		onFieldChange: (field: SchemaField, value: FormValue) => void;
 	}
 	let { field, form, errors, onFieldChange }: Props = $props();
 </script>

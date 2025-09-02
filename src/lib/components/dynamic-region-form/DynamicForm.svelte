@@ -20,14 +20,16 @@
 		// The first run is user-initiated after entering preRun values, subsequent runs are triggered automatically when fields change - this prop tracks these life cycle stages.
 		hasRun: boolean;
 		children: Snippet;
-		submit: (formValues: Record<string, unknown>, triggerRun?: boolean) => Promise<RunData | null>;
+		run: (formValues: Record<string, unknown>) => Promise<RunData | null>;
+		process: (formValues: Record<string, FormValue>) => void;
 		submitText: string;
 	}
 
-	let { schema, initialValues, hasRun = $bindable(), children, submit, submitText }: Props = $props();
-	const debouncedSubmit = debounce(submit, 500);
+	let { schema, initialValues, hasRun = $bindable(), children, run, process, submitText }: Props = $props();
+	const debouncedRun = debounce(run, 500);
+	const debouncedProcess = debounce(process, 500);
 	// Initialize state from defaults + initialValues override
-	let form = $state<Record<string, unknown>>({});
+	let form = $state<Record<string, FormValue>>({});
 	let errors = $state<Record<string, string | null>>({});
 	let collapsedGroups = $state<Record<string, boolean>>({});
 	let collapsedSubGroups = $state<Record<string, boolean>>({});
@@ -37,6 +39,15 @@
 	forEachField(schema.groups, (field, group) => {
 		fieldToGroup[field.id] = group;
 	});
+	let triggerRunFormValues = $derived<Record<string, FormValue>>(
+		Object.fromEntries(
+			Object.entries(form).filter(([key, _value]) => {
+				const group = fieldToGroup[key];
+				return group && group.triggersRerun;
+			})
+		)
+	);
+
 	// initialize form values and errors
 	forEachField(schema.groups, (field) => {
 		form[field.id] = initialValues[field.id] ?? coerceDefaults(field);
@@ -71,7 +82,7 @@
 		}
 	};
 
-	const onFieldChange = (field: SchemaField, value: unknown) => {
+	const onFieldChange = (field: SchemaField, value: FormValue) => {
 		form[field.id] = value;
 		validateField(field);
 		validateCustomRules();
@@ -79,7 +90,11 @@
 		if (!hasRun || hasFormErrors) return;
 
 		const group = fieldToGroup[field.id];
-		debouncedSubmit(form, group.triggersRerun);
+		if (group.triggersRerun) {
+			debouncedRun(triggerRunFormValues);
+		} else {
+			debouncedProcess(form);
+		}
 	};
 	const collapsePreRunGroups = () => {
 		forEachGroup(schema.groups, (group) => {
@@ -109,7 +124,7 @@
 					if (hasFormErrors) return;
 					hasRun = true;
 					try {
-						await submit(form, true);
+						await run(triggerRunFormValues);
 						collapsePreRunGroups();
 					} catch (error) {
 						hasRun = false;

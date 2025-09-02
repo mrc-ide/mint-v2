@@ -4,16 +4,16 @@
 	import { slide } from 'svelte/transition';
 	import InfoTooltip from '../InfoTooltip.svelte';
 	import DynamicFormSubGroup from './DynamicFormSubGroup.svelte';
-	import type { SchemaField, SchemaGroup } from './types';
+	import type { FormValue, SchemaField, SchemaGroup } from './types';
 	import { isGroupCollapsed } from './utils';
 
 	interface Props {
 		group: SchemaGroup;
-		form: Record<string, unknown>;
+		form: Record<string, FormValue>;
 		collapsedGroups: Record<string, boolean>;
 		collapsedSubGroups: Record<string, boolean>;
 		errors: Record<string, string | null>;
-		onFieldChange: (field: SchemaField, value: unknown) => void;
+		onFieldChange: (field: SchemaField, value: FormValue) => void;
 	}
 
 	let {
