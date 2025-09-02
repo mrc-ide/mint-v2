@@ -1,10 +1,10 @@
 import type { DynamicFormSchema, FormValue } from '$lib/components/dynamic-region-form/types';
 import { saveUserState } from '$lib/server/redis';
-import type { Region, EmulatorResults, UserState } from '$lib/types/userState';
-import { regionFormUrl, regionUrl } from '$lib/url';
+import type { ResponseBodySuccess } from '$lib/types/api';
+import type { EmulatorResults, Region, UserState } from '$lib/types/userState';
+import { regionFormUrl, runEmulatorUrl } from '$lib/url';
 import { error } from '@sveltejs/kit';
 import type { RequestEvent } from '../../routes/projects/[project]/regions/[region]/$types';
-import type { ResponseBodySuccess } from '$lib/types/api';
 
 export const getRegionFormSchema = async (
 	projectName: string,
@@ -17,7 +17,7 @@ export const getRegionFormSchema = async (
 	return form.data as DynamicFormSchema;
 };
 
-export const runModelsOnLoad = async (
+export const runEmulatorOnLoad = async (
 	projectName: string,
 	regionName: string,
 	regionData: Region,
@@ -25,16 +25,14 @@ export const runModelsOnLoad = async (
 ): Promise<EmulatorResults | null> => {
 	if (!regionData.hasRunBaseline) return null;
 	// if region has run, run models to get time series data
-	const res = await fetch(regionUrl(projectName, regionName), {
+	const res = await fetch(runEmulatorUrl(), {
 		method: 'POST',
-		body: JSON.stringify({
-			formValues: regionData.formValues
-		}),
+		body: JSON.stringify(regionData.formValues),
 		headers: {
 			'Content-Type': 'application/json'
 		}
 	});
-	// todo handle correctly.. refresh form probably
+	// TODO: handle correctly.. refresh form probably
 	if (!res.ok) error(res.status, `Failed to fetch data for region "${regionName}" in project "${projectName}"`);
 	return (await res.json()) as EmulatorResults;
 };
