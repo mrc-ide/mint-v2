@@ -4,16 +4,16 @@
 	import { toast } from 'svelte-sonner';
 	import type { PageProps } from './$types';
 	import { regionUrl } from '$lib/url';
-	import type { RunData } from '$lib/types/userState';
+	import type { EmulatorResults } from '$lib/types/userState';
 	import type { FormValue } from '$lib/components/dynamic-region-form/types';
 
 	let { data, params }: PageProps = $props();
 
-	let hasRun = $derived(data.region.hasRun);
+	let hasRunBaseline = $derived(data.region.hasRunBaseline);
 	let runPromise = $derived(data.runPromise);
 
 	// TODO: disable inputs when processing model runs. only submit triggers info
-	const runEmulator = async (formValues: Record<string, unknown>): Promise<RunData> => {
+	const runEmulator = async (formValues: Record<string, unknown>): Promise<EmulatorResults> => {
 		try {
 			const res = await fetch(regionUrl(params.project, params.region), {
 				method: 'POST',
@@ -40,7 +40,7 @@
 	<DynamicForm
 		schema={data.formSchema}
 		initialValues={data.region.formValues}
-		bind:hasRun
+		bind:hasRunBaseline
 		run={(formValues) => (runPromise = runEmulator(formValues))}
 		process={processCosts}
 		submitText="Run baseline"
@@ -49,9 +49,9 @@
 			<div class="flex items-center justify-center p-8">
 				<div class="text-muted-foreground">Loading results...</div>
 			</div>
-		{:then runData}
-			{#if runData}
-				{JSON.stringify(runData)}
+		{:then emulatorResults}
+			{#if emulatorResults}
+				{JSON.stringify(emulatorResults)}
 			{/if}
 		{:catch _err}
 			<div class="flex items-center justify-center p-8">

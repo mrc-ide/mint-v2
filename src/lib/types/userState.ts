@@ -10,14 +10,14 @@ export interface CasesData {
 	year: number;
 	cases: number;
 }
-export interface RunData {
+export interface EmulatorResults {
 	prevalence: PrevalenceData[];
 	cases: CasesData[];
 }
 
 export interface Region {
 	name: string;
-	hasRun: boolean;
+	hasRunBaseline: boolean;
 	formValues: Record<string, FormValue>;
 }
 export interface Project {

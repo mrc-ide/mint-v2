@@ -12,20 +12,19 @@
 		forEachSubGroup,
 		getFieldErrorMessage
 	} from './utils';
-	import type { RunData } from '$lib/types/userState';
+	import type { EmulatorResults } from '$lib/types/userState';
 
 	interface Props {
 		schema: DynamicFormSchema;
 		initialValues: Record<string, FormValue>;
-		// The first run is user-initiated after entering preRun values, subsequent runs are triggered automatically when fields change - this prop tracks these life cycle stages.
-		hasRun: boolean;
+		hasRunBaseline: boolean;
 		children: Snippet;
-		run: (formValues: Record<string, unknown>) => Promise<RunData | null>;
+		run: (formValues: Record<string, unknown>) => Promise<EmulatorResults | null>;
 		process: (formValues: Record<string, FormValue>) => void;
 		submitText: string;
 	}
 
-	let { schema, initialValues, hasRun = $bindable(), children, run, process, submitText }: Props = $props();
+	let { schema, initialValues, hasRunBaseline = $bindable(), children, run, process, submitText }: Props = $props();
 	const debouncedRun = debounce(run, 500);
 	const debouncedProcess = debounce(process, 500);
 	// Initialize state from defaults + initialValues override
@@ -47,7 +46,6 @@
 			})
 		)
 	);
-
 	// initialize form values and errors
 	forEachField(schema.groups, (field) => {
 		form[field.id] = initialValues[field.id] ?? coerceDefaults(field);
@@ -56,7 +54,7 @@
 	forEachGroup(schema.groups, (group) => {
 		// initialize collapse states (default expanded)
 		if (group.collapsible) {
-			collapsedGroups[group.id] = Boolean(group.preRun) && hasRun;
+			collapsedGroups[group.id] = Boolean(group.preRun) && hasRunBaseline;
 		}
 	});
 	forEachSubGroup(schema.groups, (group, subGroup) => {
@@ -87,7 +85,7 @@
 		validateField(field);
 		validateCustomRules();
 
-		if (!hasRun || hasFormErrors) return;
+		if (!hasRunBaseline || hasFormErrors) return;
 
 		const group = fieldToGroup[field.id];
 		if (group.triggersRerun) {
@@ -107,27 +105,27 @@
 
 <form class="grid grid-cols-4 gap-4">
 	{#each schema.groups as group (group.id)}
-		{#if group.preRun || hasRun}
+		{#if group.preRun || hasRunBaseline}
 			<DynamicFormGroup {group} {form} bind:collapsedGroups bind:collapsedSubGroups {errors} {onFieldChange} />
 		{/if}
 	{/each}
 
-	{#if hasRun}
+	{#if hasRunBaseline}
 		<div class="col-span-3 col-start-2 row-span-2 row-start-2">
 			{@render children()}
 		</div>
 	{/if}
 	<div class="col-span-4 flex justify-center">
-		{#if !hasRun}
+		{#if !hasRunBaseline}
 			<Button
 				onclick={async () => {
 					if (hasFormErrors) return;
-					hasRun = true;
+					hasRunBaseline = true;
 					try {
 						await run(triggerRunFormValues);
 						collapsePreRunGroups();
 					} catch (error) {
-						hasRun = false;
+						hasRunBaseline = false;
 					}
 				}}
 				size="lg"
