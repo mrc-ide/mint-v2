@@ -17,7 +17,7 @@ export const load: PageServerLoad = async ({ params, locals, fetch }) => {
 		formSchema: await getRegionFormSchema(project, region, fetch),
 		region: regionData,
 		addRegionForm,
-		runPromise: runEmulatorOnLoad(project, region, regionData, fetch) // stream as it resolves
+		runPromise: runEmulatorOnLoad(regionData, fetch) // stream as it resolves
 	};
 };
 export const actions: Actions = {

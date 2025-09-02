@@ -2,6 +2,8 @@ import { saveRegionFormState } from '$lib/server/region';
 import { error, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { runEmulatorUrl } from '$lib/url';
+import type { EmulatorResults } from '$lib/types/userState';
+import type { ResponseBody } from '$lib/types/api';
 
 /**
  * Handle POST requests to run models for a specific region in a project.
@@ -18,12 +20,12 @@ export const POST: RequestHandler = async ({ request, locals, params, fetch }) =
 		headers: { 'Content-Type': 'application/json' }
 	});
 
-	const data = await res.json();
+	const body = (await res.json()) as ResponseBody<EmulatorResults>;
 	if (!res.ok) {
-		console.error(data);
+		console.error(body);
 		error(res.status, 'Failed to run emulator for region');
 	}
 	await saveRegionFormState(locals.userState, project, region, formValues);
 
-	return json(data);
+	return json(body.data);
 };

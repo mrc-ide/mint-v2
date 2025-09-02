@@ -21,6 +21,7 @@
 				body: JSON.stringify({ formValues }),
 				headers: { 'Content-Type': 'application/json' }
 			});
+
 			if (!res.ok) {
 				throw new Error('Non-OK response');
 			}
@@ -59,6 +60,10 @@
 		{:then emulatorResults}
 			{#if emulatorResults}
 				{JSON.stringify(emulatorResults)}
+			{:else}
+				<div class="flex items-center justify-center p-8">
+					<div class="text-destructive">Failed to load results.</div>
+				</div>
 			{/if}
 		{:catch _err}
 			<div class="flex items-center justify-center p-8">

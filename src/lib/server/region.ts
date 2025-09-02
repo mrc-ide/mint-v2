@@ -1,6 +1,6 @@
 import type { DynamicFormSchema, FormValue } from '$lib/components/dynamic-region-form/types';
 import { saveUserState } from '$lib/server/redis';
-import type { ResponseBodySuccess } from '$lib/types/api';
+import type { ResponseBody, ResponseBodySuccess } from '$lib/types/api';
 import type { EmulatorResults, Region, UserState } from '$lib/types/userState';
 import { regionFormUrl, runEmulatorUrl } from '$lib/url';
 import { error } from '@sveltejs/kit';
@@ -13,13 +13,11 @@ export const getRegionFormSchema = async (
 ): Promise<DynamicFormSchema> => {
 	const res = await fetch(regionFormUrl());
 	if (!res.ok) error(res.status, `Failed to fetch form schema for region "${regionName}" in project "${projectName}"`);
-	const form = (await res.json()) as ResponseBodySuccess;
-	return form.data as DynamicFormSchema;
+	const form = (await res.json()) as ResponseBodySuccess<DynamicFormSchema>;
+	return form.data;
 };
 
 export const runEmulatorOnLoad = async (
-	projectName: string,
-	regionName: string,
 	regionData: Region,
 	fetch: RequestEvent['fetch']
 ): Promise<EmulatorResults | null> => {
@@ -33,8 +31,11 @@ export const runEmulatorOnLoad = async (
 		}
 	});
 	// TODO: handle correctly.. refresh form probably
-	if (!res.ok) error(res.status, `Failed to fetch data for region "${regionName}" in project "${projectName}"`);
-	return (await res.json()) as EmulatorResults;
+	const body = (await res.json()) as ResponseBody<EmulatorResults>;
+	if (!res.ok) {
+		console.error(body.errors);
+	}
+	return body.data;
 };
 
 export const saveRegionFormState = async (
