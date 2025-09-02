@@ -26,7 +26,7 @@
 			isRunning = false;
 			return res.data;
 		} catch (e) {
-			toast.error(`Failed to process models for region "${params.region}" in project "${params.project}"`);
+			toast.error(`Failed to run emulator for region "${params.region}" in project "${params.project}"`);
 			isRunning = false;
 			throw e;
 		}
