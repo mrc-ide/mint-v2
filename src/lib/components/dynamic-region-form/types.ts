@@ -78,7 +78,7 @@ export interface SchemaGroup {
 	description: string;
 	helpText?: string;
 	collapsible?: boolean;
-	triggersRerun?: boolean;
+	triggersRun?: boolean;
 	preRun?: boolean;
 	subGroups: SchemaSubGroup[];
 }

@@ -22,11 +22,19 @@
 		run: (formValues: Record<string, unknown>) => Promise<EmulatorResults | null>;
 		process: (formValues: Record<string, FormValue>) => void;
 		submitText: string;
+		isInputsDisabled: boolean;
 	}
 
-	let { schema, initialValues, hasRunBaseline = $bindable(), children, run, process, submitText }: Props = $props();
-	const debouncedRun = debounce(run, 500);
-	const debouncedProcess = debounce(process, 500);
+	let {
+		schema,
+		initialValues,
+		hasRunBaseline = $bindable(),
+		children,
+		run,
+		process,
+		submitText,
+		isInputsDisabled
+	}: Props = $props();
 	// Initialize state from defaults + initialValues override
 	let form = $state<Record<string, FormValue>>({});
 	let errors = $state<Record<string, string | null>>({});
@@ -42,7 +50,7 @@
 		Object.fromEntries(
 			Object.entries(form).filter(([key, _value]) => {
 				const group = fieldToGroup[key];
-				return group && group.triggersRerun;
+				return group && group.triggersRun;
 			})
 		)
 	);
@@ -63,6 +71,11 @@
 			collapsedSubGroups[`${group.id}:${subGroup.id}`] = false;
 		}
 	});
+
+	// Debounced functions
+	const DEBOUNCE_DELAY = 800;
+	const debouncedRun = debounce(run, DEBOUNCE_DELAY);
+	const debouncedProcess = debounce(process, DEBOUNCE_DELAY);
 
 	// Validation
 	const validateField = (field: SchemaField) => {
@@ -88,7 +101,7 @@
 		if (!hasRunBaseline || hasFormErrors) return;
 
 		const group = fieldToGroup[field.id];
-		if (group.triggersRerun) {
+		if (group.triggersRun) {
 			debouncedRun(triggerRunFormValues);
 		} else {
 			debouncedProcess(form);
@@ -106,7 +119,15 @@
 <form class="grid grid-cols-4 gap-4">
 	{#each schema.groups as group (group.id)}
 		{#if group.preRun || hasRunBaseline}
-			<DynamicFormGroup {group} {form} bind:collapsedGroups bind:collapsedSubGroups {errors} {onFieldChange} />
+			<DynamicFormGroup
+				{group}
+				{form}
+				bind:collapsedGroups
+				bind:collapsedSubGroups
+				{errors}
+				{onFieldChange}
+				{isInputsDisabled}
+			/>
 		{/if}
 	{/each}
 
@@ -136,5 +157,3 @@
 		{/if}
 	</div>
 </form>
-
-<style></style>

@@ -9,11 +9,12 @@
 
 	let { data, params }: PageProps = $props();
 
+	let isRunning = $state(false);
 	let hasRunBaseline = $derived(data.region.hasRunBaseline);
 	let runPromise = $derived(data.runPromise);
 
-	// TODO: disable inputs when processing model runs. only submit triggers info
 	const runEmulator = async (formValues: Record<string, unknown>): Promise<EmulatorResults> => {
+		isRunning = true;
 		try {
 			const res = await fetch(regionUrl(params.project, params.region), {
 				method: 'POST',
@@ -23,10 +24,12 @@
 			if (!res.ok) {
 				throw new Error('Non-OK response');
 			}
+			isRunning = false;
 			return await res.json();
 		} catch (e) {
 			console.error('Failed to process models:', e);
 			toast.error(`Failed to process models for region "${params.region}" in project "${params.project}"`);
+			isRunning = false;
 			throw e;
 		}
 	};
@@ -43,6 +46,7 @@
 		bind:hasRunBaseline
 		run={(formValues) => (runPromise = runEmulator(formValues))}
 		process={processCosts}
+		isInputsDisabled={isRunning}
 		submitText="Run baseline"
 	>
 		{#await runPromise}

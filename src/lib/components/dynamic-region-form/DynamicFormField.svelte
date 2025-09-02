@@ -13,8 +13,9 @@
 		form: Record<string, FormValue>;
 		errors: Record<string, string | null>;
 		onFieldChange: (field: SchemaField, value: FormValue) => void;
+		isInputsDisabled: boolean;
 	}
-	let { field, form, errors, onFieldChange }: Props = $props();
+	let { field, form, errors, onFieldChange, isInputsDisabled }: Props = $props();
 </script>
 
 <div class="flex flex-col gap-2">
@@ -32,7 +33,7 @@
 			min={field.min}
 			max={field.max}
 			step={field.step ?? 'any'}
-			disabled={isDisabled(form, field)}
+			disabled={isInputsDisabled || isDisabled(form, field)}
 			value={String(form[field.id] ?? '')}
 			aria-invalid={Boolean(errors[field.id])}
 			oninput={(e) => onFieldChange(field, e.currentTarget.value === '' ? '' : Number(e.currentTarget.value))}
@@ -40,7 +41,7 @@
 	{:else if field.type === 'toggle'}
 		<Switch
 			id={field.id}
-			disabled={isDisabled(form, field)}
+			disabled={isInputsDisabled || isDisabled(form, field)}
 			aria-invalid={Boolean(errors[field.id])}
 			checked={Boolean(form[field.id])}
 			onCheckedChange={(checked) => onFieldChange(field, checked)}
@@ -53,7 +54,7 @@
 				min={field.min}
 				max={field.max}
 				step={field.step ?? 1}
-				disabled={isDisabled(form, field)}
+				disabled={isInputsDisabled || isDisabled(form, field)}
 				value={Number(form[field.id] ?? 0)}
 				aria-invalid={Boolean(errors[field.id])}
 				onValueChange={(value) => onFieldChange(field, value)}
@@ -67,7 +68,7 @@
 				{@const selectedValues = (form[field.id] as string[]) ?? []}
 				<Label class="inline-flex items-center gap-2 text-sm font-normal">
 					<Checkbox
-						disabled={isDisabled(form, field)}
+						disabled={isInputsDisabled || isDisabled(form, field)}
 						checked={selectedValues.includes(opt.value)}
 						onCheckedChange={(checked) => {
 							const current = new Set<string>(selectedValues);
