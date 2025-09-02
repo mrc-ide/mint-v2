@@ -7,6 +7,7 @@
 	import {
 		checkCrossFieldValidation,
 		coerceDefaults,
+		DEBOUNCE_DELAY,
 		forEachField,
 		forEachGroup,
 		forEachSubGroup,
@@ -19,7 +20,7 @@
 		initialValues: Record<string, FormValue>;
 		hasRunBaseline: boolean;
 		children: Snippet;
-		run: (formValues: Record<string, unknown>) => Promise<EmulatorResults | null>;
+		run: (formValues: Record<string, FormValue>) => Promise<EmulatorResults | null>;
 		process: (formValues: Record<string, FormValue>) => void;
 		submitText: string;
 		isInputsDisabled: boolean;
@@ -73,7 +74,6 @@
 	});
 
 	// Debounced functions
-	const DEBOUNCE_DELAY = 800;
 	const debouncedRun = debounce(run, DEBOUNCE_DELAY);
 	const debouncedProcess = debounce(process, DEBOUNCE_DELAY);
 

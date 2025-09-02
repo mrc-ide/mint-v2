@@ -13,7 +13,7 @@
 	let hasRunBaseline = $derived(data.region.hasRunBaseline);
 	let runPromise = $derived(data.runPromise);
 
-	const runEmulator = async (formValues: Record<string, unknown>): Promise<EmulatorResults> => {
+	const runEmulator = async (formValues: Record<string, FormValue>): Promise<EmulatorResults> => {
 		isRunning = true;
 		try {
 			const res = await fetch(regionUrl(params.project, params.region), {

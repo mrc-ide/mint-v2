@@ -16,6 +16,8 @@
 		isInputsDisabled: boolean;
 	}
 	let { field, form, errors, onFieldChange, isInputsDisabled }: Props = $props();
+
+	let isFieldDisabled = $derived(isInputsDisabled || isDisabled(form, field));
 </script>
 
 <div class="flex flex-col gap-2">
@@ -33,7 +35,7 @@
 			min={field.min}
 			max={field.max}
 			step={field.step ?? 'any'}
-			disabled={isInputsDisabled || isDisabled(form, field)}
+			disabled={isFieldDisabled}
 			value={String(form[field.id] ?? '')}
 			aria-invalid={Boolean(errors[field.id])}
 			oninput={(e) => onFieldChange(field, e.currentTarget.value === '' ? '' : Number(e.currentTarget.value))}
@@ -41,7 +43,7 @@
 	{:else if field.type === 'toggle'}
 		<Switch
 			id={field.id}
-			disabled={isInputsDisabled || isDisabled(form, field)}
+			disabled={isFieldDisabled}
 			aria-invalid={Boolean(errors[field.id])}
 			checked={Boolean(form[field.id])}
 			onCheckedChange={(checked) => onFieldChange(field, checked)}
@@ -54,7 +56,7 @@
 				min={field.min}
 				max={field.max}
 				step={field.step ?? 1}
-				disabled={isInputsDisabled || isDisabled(form, field)}
+				disabled={isInputsDisabled}
 				value={Number(form[field.id] ?? 0)}
 				aria-invalid={Boolean(errors[field.id])}
 				onValueChange={(value) => onFieldChange(field, value)}
@@ -68,7 +70,7 @@
 				{@const selectedValues = (form[field.id] as string[]) ?? []}
 				<Label class="inline-flex items-center gap-2 text-sm font-normal">
 					<Checkbox
-						disabled={isInputsDisabled || isDisabled(form, field)}
+						disabled={isInputsDisabled}
 						checked={selectedValues.includes(opt.value)}
 						onCheckedChange={(checked) => {
 							const current = new Set<string>(selectedValues);

@@ -8,7 +8,7 @@ export interface PrevalenceData {
 export interface CasesData {
 	scenario: string;
 	year: number;
-	cases: number;
+	cases_per_1000: number;
 }
 export interface EmulatorResults {
 	prevalence: PrevalenceData[];
