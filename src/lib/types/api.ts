@@ -11,4 +11,4 @@ export interface ResponseBodySuccess<T> {
 	data: T;
 	errors: null;
 }
-export type ResponseBody<T> = ResponseBodySuccess<T> | ResponseBodyFailure;
+export type ResponseBody<T> = ResponseBodySuccess<T> | ResponseBodyFailure | App.Error;

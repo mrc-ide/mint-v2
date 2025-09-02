@@ -6,6 +6,7 @@
 	import { regionUrl } from '$lib/url';
 	import type { EmulatorResults } from '$lib/types/userState';
 	import type { FormValue } from '$lib/components/dynamic-region-form/types';
+	import { apiFetch } from '$lib/fetch';
 
 	let { data, params }: PageProps = $props();
 
@@ -16,19 +17,15 @@
 	const runEmulator = async (formValues: Record<string, FormValue>): Promise<EmulatorResults> => {
 		isRunning = true;
 		try {
-			const res = await fetch(regionUrl(params.project, params.region), {
+			const res = await apiFetch<EmulatorResults>({
+				url: regionUrl(params.project, params.region),
 				method: 'POST',
-				body: JSON.stringify({ formValues }),
-				headers: { 'Content-Type': 'application/json' }
+				body: { formValues }
 			});
 
-			if (!res.ok) {
-				throw new Error('Non-OK response');
-			}
 			isRunning = false;
-			return await res.json();
+			return res.data;
 		} catch (e) {
-			console.error('Failed to process models:', e);
 			toast.error(`Failed to process models for region "${params.region}" in project "${params.project}"`);
 			isRunning = false;
 			throw e;

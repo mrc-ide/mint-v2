@@ -1,20 +1,23 @@
 import type { DynamicFormSchema, FormValue } from '$lib/components/dynamic-region-form/types';
 import { saveUserState } from '$lib/server/redis';
-import type { ResponseBody, ResponseBodySuccess } from '$lib/types/api';
 import type { EmulatorResults, Region, UserState } from '$lib/types/userState';
 import { regionFormUrl, runEmulatorUrl } from '$lib/url';
 import { error } from '@sveltejs/kit';
 import type { RequestEvent } from '../../routes/projects/[project]/regions/[region]/$types';
+import { ApiError, apiFetch } from '$lib/fetch';
 
 export const getRegionFormSchema = async (
 	projectName: string,
 	regionName: string,
 	fetch: RequestEvent['fetch']
 ): Promise<DynamicFormSchema> => {
-	const res = await fetch(regionFormUrl());
-	if (!res.ok) error(res.status, `Failed to fetch form schema for region "${regionName}" in project "${projectName}"`);
-	const form = (await res.json()) as ResponseBodySuccess<DynamicFormSchema>;
-	return form.data;
+	try {
+		const res = await apiFetch<DynamicFormSchema>({ url: regionFormUrl(), fetcher: fetch });
+		return res.data;
+	} catch (e) {
+		const errorStatus = e instanceof ApiError ? e.status : 500;
+		error(errorStatus, `Failed to fetch form schema for region "${regionName}" in project "${projectName}"`);
+	}
 };
 
 export const runEmulatorOnLoad = async (
@@ -23,19 +26,19 @@ export const runEmulatorOnLoad = async (
 ): Promise<EmulatorResults | null> => {
 	if (!regionData.hasRunBaseline) return null;
 	// if region has run, run models to get time series data
-	const res = await fetch(runEmulatorUrl(), {
-		method: 'POST',
-		body: JSON.stringify(regionData.formValues),
-		headers: {
-			'Content-Type': 'application/json'
-		}
-	});
-	// TODO: handle correctly.. refresh form probably
-	const body = (await res.json()) as ResponseBody<EmulatorResults>;
-	if (!res.ok) {
-		console.error(body.errors);
+	try {
+		const res = await apiFetch<EmulatorResults>({
+			url: runEmulatorUrl(),
+			method: 'POST',
+			body: regionData.formValues,
+			fetcher: fetch
+		});
+		return res.data;
+	} catch (e) {
+		// This promise cannot throw as its during page load & will cause app to crash. Thus return null for data
+		console.error(e);
 	}
-	return body.data;
+	return null;
 };
 
 export const saveRegionFormState = async (

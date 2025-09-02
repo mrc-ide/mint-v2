@@ -60,7 +60,7 @@
 				value={Number(form[field.id] ?? 0)}
 				aria-invalid={Boolean(errors[field.id])}
 				onValueChange={(value) => onFieldChange(field, value)}
-				thumbClass={Boolean(errors[field.id]) ? 'border-destructive' : ''}
+				thumbClass={errors[field.id] ? 'border-destructive' : ''}
 			/>
 			<span class="w-10 text-right text-sm tabular-nums">{form[field.id] as number}{field.unit ?? ''}</span>
 		</div>

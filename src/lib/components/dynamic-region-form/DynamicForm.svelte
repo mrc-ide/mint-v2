@@ -145,7 +145,7 @@
 					try {
 						await run(triggerRunFormValues);
 						collapsePreRunGroups();
-					} catch (error) {
+					} catch (_e) {
 						hasRunBaseline = false;
 					}
 				}}
