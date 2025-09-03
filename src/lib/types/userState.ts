@@ -1,12 +1,24 @@
 import type { FormValue } from '$lib/components/dynamic-region-form/types';
 
+export type Scenario =
+	| 'no_intervention'
+	| 'irs_only'
+	| 'lsm_only'
+	| 'py_only_only'
+	| 'py_only_with_lsm'
+	| 'py_pbo_only'
+	| 'py_pbo_with_lsm'
+	| 'py_pyrrole_only'
+	| 'py_pyrrole_with_lsm'
+	| 'py_ppf_only'
+	| 'py_ppf_with_lsm';
 export interface PrevalenceData {
-	scenario: string;
+	scenario: Scenario;
 	days: number;
 	prevalence: number;
 }
 export interface CasesData {
-	scenario: string;
+	scenario: Scenario;
 	year: number;
 	cases_per_1000: number;
 }
