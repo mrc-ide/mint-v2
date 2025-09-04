@@ -40,52 +40,52 @@ export const ScenarioToColor: Record<Scenario, string> = {
 	py_ppf_with_lsm: 'var(--chart-6)'
 };
 
-export const PrevalenceScenarioSeriesOptions: Record<string, Highcharts.SeriesLineOptions> = {
+export const PrevalenceScenarioSeriesOptions: Record<string, Highcharts.SeriesSplineOptions> = {
 	no_intervention: {
-		type: 'line'
+		type: 'spline'
 	},
 	irs_only: {
-		type: 'line',
+		type: 'spline',
 		dashStyle: 'ShortDash'
 	},
 	lsm_only: {
-		type: 'line',
+		type: 'spline',
 		dashStyle: 'ShortDash'
 	},
 	py_only_only: {
-		type: 'line'
+		type: 'spline'
 	},
 	py_only_with_lsm: {
-		type: 'line',
+		type: 'spline',
 		dashStyle: 'ShortDash'
 	},
 	py_pbo_only: {
-		type: 'line'
+		type: 'spline'
 	},
 	py_pbo_with_lsm: {
-		type: 'line',
+		type: 'spline',
 		dashStyle: 'ShortDash'
 	},
 	py_pyrrole_only: {
-		type: 'line'
+		type: 'spline'
 	},
 	py_pyrrole_with_lsm: {
-		type: 'line',
+		type: 'spline',
 		dashStyle: 'ShortDash'
 	},
 	py_ppf_only: {
-		type: 'line'
+		type: 'spline'
 	},
 	py_ppf_with_lsm: {
 		name: ScenarioToLabel['py_ppf_with_lsm'],
 		color: ScenarioToColor['py_ppf_with_lsm'],
-		type: 'line',
+		type: 'spline',
 		dashStyle: 'ShortDash'
 	}
 };
 
-const createPrevalenceSeries = (data: PrevalenceData[]): Highcharts.SeriesLineOptions[] => {
-	const seriesMap = new Map<Scenario, Highcharts.SeriesLineOptions>();
+const createPrevalenceSeries = (data: PrevalenceData[]): Highcharts.SeriesSplineOptions[] => {
+	const seriesMap = new Map<Scenario, Highcharts.SeriesSplineOptions>();
 
 	data.forEach(({ scenario, days, prevalence }) => {
 		if (!seriesMap.has(scenario)) {
@@ -104,7 +104,7 @@ const createPrevalenceSeries = (data: PrevalenceData[]): Highcharts.SeriesLineOp
 
 export const getPrevalenceConfig = (prevalence: PrevalenceData[]): Highcharts.Options => ({
 	chart: {
-		type: 'line',
+		type: 'spline',
 		zooming: {
 			type: 'x'
 		}
