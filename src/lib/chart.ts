@@ -2,7 +2,72 @@ import type { Attachment } from 'svelte/attachments';
 import type { PrevalenceData, Scenario } from './types/userState';
 import Highcharts from 'highcharts';
 
-// TODO: sort dark + light mode
+Highcharts.setOptions({
+	title: {
+		style: {
+			color: 'var(--foreground)'
+		}
+	},
+	legend: {
+		itemStyle: {
+			color: 'var(--foreground)'
+		},
+		itemHoverStyle: {
+			color: 'var(--foreground)'
+		}
+	},
+	xAxis: {
+		labels: {
+			style: {
+				color: 'var(--foreground)'
+			}
+		},
+		title: {
+			style: {
+				color: 'var(--foreground)'
+			}
+		},
+		lineColor: 'var(--muted-foreground)',
+		tickColor: 'var(--muted-foreground)'
+	},
+	yAxis: {
+		labels: {
+			style: {
+				color: 'var(--foreground)'
+			}
+		},
+		title: {
+			style: {
+				color: 'var(--foreground)'
+			}
+		},
+		gridLineColor: 'var(--muted-foreground)'
+	},
+	tooltip: {
+		backgroundColor: 'var(--background)',
+		style: {
+			color: 'var(--foreground)'
+		}
+	},
+	chart: {
+		zooming: {
+			type: 'x',
+			resetButton: {
+				theme: {
+					r: 5,
+					style: {
+						color: 'var(--foreground)',
+						fontWeight: '600',
+						fontSize: '12px'
+						// textOutline: 'none'
+					}
+				}
+			}
+		},
+		backgroundColor: 'var(--background)'
+	}
+});
+
 export const createHighchart = (config: Highcharts.Options): Attachment => {
 	return (element) => {
 		const chart = Highcharts.chart(element as HTMLElement, config);
@@ -46,41 +111,39 @@ export const PrevalenceScenarioSeriesOptions: Record<string, Highcharts.SeriesSp
 	},
 	irs_only: {
 		type: 'spline',
-		dashStyle: 'ShortDash'
+		dashStyle: 'Dash'
 	},
 	lsm_only: {
 		type: 'spline',
-		dashStyle: 'ShortDash'
+		dashStyle: 'Dash'
 	},
 	py_only_only: {
 		type: 'spline'
 	},
 	py_only_with_lsm: {
 		type: 'spline',
-		dashStyle: 'ShortDash'
+		dashStyle: 'Dash'
 	},
 	py_pbo_only: {
 		type: 'spline'
 	},
 	py_pbo_with_lsm: {
 		type: 'spline',
-		dashStyle: 'ShortDash'
+		dashStyle: 'Dash'
 	},
 	py_pyrrole_only: {
 		type: 'spline'
 	},
 	py_pyrrole_with_lsm: {
 		type: 'spline',
-		dashStyle: 'ShortDash'
+		dashStyle: 'Dash'
 	},
 	py_ppf_only: {
 		type: 'spline'
 	},
 	py_ppf_with_lsm: {
-		name: ScenarioToLabel['py_ppf_with_lsm'],
-		color: ScenarioToColor['py_ppf_with_lsm'],
 		type: 'spline',
-		dashStyle: 'ShortDash'
+		dashStyle: 'Dash'
 	}
 };
 
@@ -104,10 +167,7 @@ const createPrevalenceSeries = (data: PrevalenceData[]): Highcharts.SeriesSpline
 
 export const getPrevalenceConfig = (prevalence: PrevalenceData[]): Highcharts.Options => ({
 	chart: {
-		type: 'spline',
-		zooming: {
-			type: 'x'
-		}
+		type: 'spline'
 	},
 	title: {
 		text: 'Projected prevalence in under 5 year olds'
