@@ -7,7 +7,8 @@
 	import type { EmulatorResults } from '$lib/types/userState';
 	import type { FormValue } from '$lib/components/dynamic-region-form/types';
 	import { apiFetch } from '$lib/fetch';
-
+	import resultsJson from '$lib/results/new-full.json';
+	import Results from './_components/Results.svelte';
 	let { data, params }: PageProps = $props();
 
 	let isRunning = $state(false);
@@ -17,14 +18,14 @@
 	const runEmulator = async (formValues: Record<string, FormValue>): Promise<EmulatorResults> => {
 		isRunning = true;
 		try {
-			const res = await apiFetch<EmulatorResults>({
-				url: regionUrl(params.project, params.region),
-				method: 'POST',
-				body: { formValues }
-			});
+			// const res = await apiFetch<EmulatorResults>({
+			// 	url: regionUrl(params.project, params.region),
+			// 	method: 'POST',
+			// 	body: { formValues }
+			// });
 
 			isRunning = false;
-			return res.data;
+			return resultsJson;
 		} catch (e) {
 			toast.error(`Failed to run emulator for region "${params.region}" in project "${params.project}"`);
 			isRunning = false;
@@ -36,6 +37,12 @@
 		console.log(formValues);
 	};
 </script>
+
+{#snippet failedLoad()}
+	<div class="flex items-center justify-center p-8">
+		<div class="text-destructive">Failed to load results.</div>
+	</div>
+{/snippet}
 
 {#key page.url.pathname}
 	<DynamicForm
@@ -56,16 +63,12 @@
 			</div>
 		{:then emulatorResults}
 			{#if emulatorResults}
-				{JSON.stringify(emulatorResults)}
+				<Results {emulatorResults} />
 			{:else}
-				<div class="flex items-center justify-center p-8">
-					<div class="text-destructive">Failed to load results.</div>
-				</div>
+				{@render failedLoad()}
 			{/if}
 		{:catch _err}
-			<div class="flex items-center justify-center p-8">
-				<div class="text-destructive">Failed to load results.</div>
-			</div>
+			{@render failedLoad()}
 		{/await}
 	</DynamicForm>
 {/key}

@@ -5,6 +5,7 @@ import { regionFormUrl, runEmulatorUrl } from '$lib/url';
 import { error } from '@sveltejs/kit';
 import type { RequestEvent } from '../../routes/projects/[project]/regions/[region]/$types';
 import { ApiError, apiFetch } from '$lib/fetch';
+import resultsJson from '$lib/results/new-irs-only.json';
 
 export const getRegionFormSchema = async (
 	projectName: string,
@@ -27,13 +28,13 @@ export const runEmulatorOnLoad = async (
 	if (!regionData.hasRunBaseline) return null;
 	// if region has run, run models to get time series data
 	try {
-		const res = await apiFetch<EmulatorResults>({
-			url: runEmulatorUrl(),
-			method: 'POST',
-			body: regionData.formValues,
-			fetcher: fetch
-		});
-		return res.data;
+		// const res = await apiFetch<EmulatorResults>({
+		// 	url: runEmulatorUrl(),
+		// 	method: 'POST',
+		// 	body: regionData.formValues,
+		// 	fetcher: fetch
+		// });
+		return resultsJson;
 	} catch (e) {
 		// This promise cannot throw as its during page load & will cause app to crash. Thus return null for data
 		console.error(e);

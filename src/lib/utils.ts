@@ -7,7 +7,7 @@ export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
 }
 
-// TODO: sort theming
+// TODO: sort dark + light mode
 export const createHighchart = (config: Highcharts.Options): Attachment => {
 	return (element) => {
 		const chart = Highcharts.chart(element as HTMLElement, config);
