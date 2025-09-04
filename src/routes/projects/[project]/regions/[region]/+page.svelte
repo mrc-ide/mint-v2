@@ -7,7 +7,7 @@
 	import type { EmulatorResults } from '$lib/types/userState';
 	import type { FormValue } from '$lib/components/dynamic-region-form/types';
 	import { apiFetch } from '$lib/fetch';
-	import resultsJson from '$lib/results/new-full.json';
+	import resultsJson from '$lib/results/full.json';
 	import Results from './_components/Results.svelte';
 	let { data, params }: PageProps = $props();
 
@@ -16,6 +16,7 @@
 	let runPromise = $derived(data.runPromise);
 
 	const runEmulator = async (formValues: Record<string, FormValue>): Promise<EmulatorResults> => {
+		console.log(formValues);
 		isRunning = true;
 		try {
 			// const res = await apiFetch<EmulatorResults>({

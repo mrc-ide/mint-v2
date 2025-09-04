@@ -5,7 +5,7 @@ import { regionFormUrl, runEmulatorUrl } from '$lib/url';
 import { error } from '@sveltejs/kit';
 import type { RequestEvent } from '../../routes/projects/[project]/regions/[region]/$types';
 import { ApiError, apiFetch } from '$lib/fetch';
-import resultsJson from '$lib/results/new-irs-only.json';
+import resultsJson from '$lib/results/lsm-irs.json';
 
 export const getRegionFormSchema = async (
 	projectName: string,

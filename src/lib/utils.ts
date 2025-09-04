@@ -1,22 +1,9 @@
 import { clsx, type ClassValue } from 'clsx';
-import Highcharts from 'highcharts';
-import type { Attachment } from 'svelte/attachments';
 import { twMerge } from 'tailwind-merge';
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
 }
-
-// TODO: sort dark + light mode
-export const createHighchart = (config: Highcharts.Options): Attachment => {
-	return (element) => {
-		const chart = Highcharts.chart(element as HTMLElement, config);
-
-		return () => {
-			chart.destroy();
-		};
-	};
-};
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type WithoutChild<T> = T extends { child?: any } ? Omit<T, 'child'> : T;
