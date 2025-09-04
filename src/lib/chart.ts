@@ -50,6 +50,7 @@ Highcharts.setOptions({
 		}
 	},
 	chart: {
+		height: 500,
 		zooming: {
 			type: 'x',
 			resetButton: {
