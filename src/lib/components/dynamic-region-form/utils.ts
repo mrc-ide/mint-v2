@@ -152,3 +152,5 @@ export const checkCrossFieldValidation = (
 		else if (errors[fid] === rule.message) errors[fid] = null;
 	}
 };
+
+export const DEBOUNCE_DELAY = 2000;

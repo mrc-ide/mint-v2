@@ -1,42 +1,44 @@
 import type { DynamicFormSchema, FormValue } from '$lib/components/dynamic-region-form/types';
 import { saveUserState } from '$lib/server/redis';
-import type { Region, RunData, UserState } from '$lib/types/userState';
-import { regionFormUrl, regionUrl } from '$lib/url';
+import type { EmulatorResults, Region, UserState } from '$lib/types/userState';
+import { regionFormUrl, runEmulatorUrl } from '$lib/url';
 import { error } from '@sveltejs/kit';
 import type { RequestEvent } from '../../routes/projects/[project]/regions/[region]/$types';
-import type { ResponseBodySuccess } from '$lib/types/api';
+import { ApiError, apiFetch } from '$lib/fetch';
 
 export const getRegionFormSchema = async (
 	projectName: string,
 	regionName: string,
 	fetch: RequestEvent['fetch']
 ): Promise<DynamicFormSchema> => {
-	const res = await fetch(regionFormUrl());
-	if (!res.ok) error(res.status, `Failed to fetch form schema for region "${regionName}" in project "${projectName}"`);
-	const form = (await res.json()) as ResponseBodySuccess;
-	return form.data as DynamicFormSchema;
+	try {
+		const res = await apiFetch<DynamicFormSchema>({ url: regionFormUrl(), fetcher: fetch });
+		return res.data;
+	} catch (e) {
+		const errorStatus = e instanceof ApiError ? e.status : 500;
+		error(errorStatus, `Failed to fetch form schema for region "${regionName}" in project "${projectName}"`);
+	}
 };
 
-export const runModelsOnLoad = async (
-	projectName: string,
-	regionName: string,
+export const runEmulatorOnLoad = async (
 	regionData: Region,
 	fetch: RequestEvent['fetch']
-): Promise<RunData | null> => {
-	if (!regionData.hasRun) return null;
+): Promise<EmulatorResults | null> => {
+	if (!regionData.hasRunBaseline) return null;
 	// if region has run, run models to get time series data
-	const res = await fetch(regionUrl(projectName, regionName), {
-		method: 'POST',
-		body: JSON.stringify({
-			formValues: regionData.formValues
-		}),
-		headers: {
-			'Content-Type': 'application/json'
-		}
-	});
-	// todo handle correctly.. refresh form probably
-	if (!res.ok) error(res.status, `Failed to fetch data for region "${regionName}" in project "${projectName}"`);
-	return (await res.json()) as RunData;
+	try {
+		const res = await apiFetch<EmulatorResults>({
+			url: runEmulatorUrl(),
+			method: 'POST',
+			body: regionData.formValues,
+			fetcher: fetch
+		});
+		return res.data;
+	} catch (e) {
+		// This promise cannot throw as its during page load & will cause app to crash. Thus return null for data
+		console.error(e);
+	}
+	return null;
 };
 
 export const saveRegionFormState = async (
@@ -47,7 +49,7 @@ export const saveRegionFormState = async (
 ) => {
 	const regionData = getValidatedRegionData(userState, projectName, regionName);
 	regionData.formValues = formValues;
-	regionData.hasRun = true;
+	regionData.hasRunBaseline = true;
 	await saveUserState(userState);
 };
 

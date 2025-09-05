@@ -4,16 +4,17 @@
 	import { slide } from 'svelte/transition';
 	import InfoTooltip from '../InfoTooltip.svelte';
 	import DynamicFormSubGroup from './DynamicFormSubGroup.svelte';
-	import type { SchemaField, SchemaGroup } from './types';
+	import type { FormValue, SchemaField, SchemaGroup } from './types';
 	import { isGroupCollapsed } from './utils';
 
 	interface Props {
 		group: SchemaGroup;
-		form: Record<string, unknown>;
+		form: Record<string, FormValue>;
 		collapsedGroups: Record<string, boolean>;
 		collapsedSubGroups: Record<string, boolean>;
 		errors: Record<string, string | null>;
-		onFieldChange: (field: SchemaField, value: unknown) => void;
+		onFieldChange: (field: SchemaField, value: FormValue) => void;
+		isInputsDisabled: boolean;
 	}
 
 	let {
@@ -22,7 +23,8 @@
 		collapsedGroups = $bindable(),
 		collapsedSubGroups = $bindable(),
 		errors,
-		onFieldChange
+		onFieldChange,
+		isInputsDisabled
 	}: Props = $props();
 </script>
 
@@ -58,7 +60,15 @@
 			class={['mx-2 flex justify-between gap-6 xl:gap-x-20', group.preRun ? 'flex-row' : 'flex-col']}
 		>
 			{#each group.subGroups as subGroup (subGroup.id)}
-				<DynamicFormSubGroup {subGroup} {group} {form} bind:collapsedSubGroups {errors} {onFieldChange} />
+				<DynamicFormSubGroup
+					{subGroup}
+					{group}
+					{form}
+					bind:collapsedSubGroups
+					{errors}
+					{onFieldChange}
+					{isInputsDisabled}
+				/>
 			{/each}
 		</div>
 	{/if}

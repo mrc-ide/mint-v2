@@ -4,29 +4,36 @@
 	import { toast } from 'svelte-sonner';
 	import type { PageProps } from './$types';
 	import { regionUrl } from '$lib/url';
-	import type { RunData } from '$lib/types/userState';
+	import type { EmulatorResults } from '$lib/types/userState';
+	import type { FormValue } from '$lib/components/dynamic-region-form/types';
+	import { apiFetch } from '$lib/fetch';
 
 	let { data, params }: PageProps = $props();
 
-	let hasRun = $derived(data.region.hasRun);
+	let isRunning = $state(false);
+	let hasRunBaseline = $derived(data.region.hasRunBaseline);
 	let runPromise = $derived(data.runPromise);
 
-	const processModelRuns = async (formValues: Record<string, unknown>, triggerRun = true): Promise<RunData> => {
+	const runEmulator = async (formValues: Record<string, FormValue>): Promise<EmulatorResults> => {
+		isRunning = true;
 		try {
-			const res = await fetch(regionUrl(params.project, params.region), {
+			const res = await apiFetch<EmulatorResults>({
+				url: regionUrl(params.project, params.region),
 				method: 'POST',
-				body: JSON.stringify({ formValues, triggerRun }),
-				headers: { 'Content-Type': 'application/json' }
+				body: { formValues }
 			});
-			if (!res.ok) {
-				throw new Error('Non-OK response');
-			}
-			return await res.json();
+
+			isRunning = false;
+			return res.data;
 		} catch (e) {
-			console.error('Failed to process models:', e);
-			toast.error(`Failed to process models for region "${params.region}" in project "${params.project}"`);
+			toast.error(`Failed to run emulator for region "${params.region}" in project "${params.project}"`);
+			isRunning = false;
 			throw e;
 		}
+	};
+	const processCosts = (formValues: Record<string, FormValue>) => {
+		// TODO: Implement cost processing logic here
+		console.log(formValues);
 	};
 </script>
 
@@ -34,18 +41,26 @@
 	<DynamicForm
 		schema={data.formSchema}
 		initialValues={data.region.formValues}
-		bind:hasRun
-		submit={(formValues, triggerRun = true) => (runPromise = processModelRuns(formValues, triggerRun))}
+		bind:hasRunBaseline
+		run={(formValues) => (runPromise = runEmulator(formValues))}
+		process={processCosts}
+		isInputsDisabled={isRunning}
 		submitText="Run baseline"
 	>
 		{#await runPromise}
 			<div class="flex items-center justify-center p-8">
-				<div class="text-muted-foreground">Loading results...</div>
+				<div class="flex flex-col items-center gap-3">
+					<div class="h-8 w-8 animate-spin rounded-full border-2 border-muted border-t-primary"></div>
+					<div class="text-sm text-muted-foreground">Running...</div>
+				</div>
 			</div>
-		{:then runData}
-			{#if runData}
-				CasesData: {JSON.stringify(runData.casesData)}
-				PrevalenceData: {JSON.stringify(runData.prevalenceData)}
+		{:then emulatorResults}
+			{#if emulatorResults}
+				{JSON.stringify(emulatorResults)}
+			{:else}
+				<div class="flex items-center justify-center p-8">
+					<div class="text-destructive">Failed to load results.</div>
+				</div>
 			{/if}
 		{:catch _err}
 			<div class="flex items-center justify-center p-8">

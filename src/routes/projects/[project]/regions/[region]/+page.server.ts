@@ -1,4 +1,4 @@
-import { getRegionFormSchema, getValidatedRegionData, runModelsOnLoad } from '$lib/server/region';
+import { getRegionFormSchema, getValidatedRegionData, runEmulatorOnLoad } from '$lib/server/region';
 import { regionUrl } from '$lib/url';
 import { addRegionSchema } from '$routes/projects/[project]/regions/[region]/schema';
 import { redirect, type Actions } from '@sveltejs/kit';
@@ -17,8 +17,7 @@ export const load: PageServerLoad = async ({ params, locals, fetch }) => {
 		formSchema: await getRegionFormSchema(project, region, fetch),
 		region: regionData,
 		addRegionForm,
-		// TODO: will go directly to R api to run
-		runPromise: runModelsOnLoad(project, region, regionData, fetch) // stream as it resolves
+		runPromise: runEmulatorOnLoad(regionData, fetch) // stream as it resolves
 	};
 };
 export const actions: Actions = {
@@ -42,7 +41,7 @@ export const actions: Actions = {
 		projectData.regions.push({
 			name: addRegionForm.data.name,
 			formValues: {},
-			hasRun: false
+			hasRunBaseline: false
 		});
 
 		return redirect(303, regionUrl(projectData.name, addRegionForm.data.name));

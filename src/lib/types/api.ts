@@ -6,9 +6,9 @@ export interface ResponseBodyFailure {
 		detail: string | null;
 	}[];
 }
-export interface ResponseBodySuccess {
+export interface ResponseBodySuccess<T> {
 	status: 'success';
-	data: unknown;
+	data: T;
 	errors: null;
 }
-export type ResponseBody = ResponseBodySuccess | ResponseBodyFailure;
+export type ResponseBody<T> = ResponseBodySuccess<T> | ResponseBodyFailure | App.Error;

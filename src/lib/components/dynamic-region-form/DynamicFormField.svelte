@@ -5,16 +5,19 @@
 	import { Slider } from '$lib/components/ui/slider';
 	import InfoTooltip from '../InfoTooltip.svelte';
 	import Switch from '../ui/switch/switch.svelte';
-	import type { SchemaField } from './types';
+	import type { FormValue, SchemaField } from './types';
 	import { evaluateValueExpression, isDisabled } from './utils';
 
 	interface Props {
 		field: SchemaField;
-		form: Record<string, unknown>;
+		form: Record<string, FormValue>;
 		errors: Record<string, string | null>;
-		onFieldChange: (field: SchemaField, value: unknown) => void;
+		onFieldChange: (field: SchemaField, value: FormValue) => void;
+		isInputsDisabled: boolean;
 	}
-	let { field, form, errors, onFieldChange }: Props = $props();
+	let { field, form, errors, onFieldChange, isInputsDisabled }: Props = $props();
+
+	let isFieldDisabled = $derived(isInputsDisabled || isDisabled(form, field));
 </script>
 
 <div class="flex flex-col gap-2">
@@ -32,7 +35,7 @@
 			min={field.min}
 			max={field.max}
 			step={field.step ?? 'any'}
-			disabled={isDisabled(form, field)}
+			disabled={isFieldDisabled}
 			value={String(form[field.id] ?? '')}
 			aria-invalid={Boolean(errors[field.id])}
 			oninput={(e) => onFieldChange(field, e.currentTarget.value === '' ? '' : Number(e.currentTarget.value))}
@@ -40,7 +43,7 @@
 	{:else if field.type === 'toggle'}
 		<Switch
 			id={field.id}
-			disabled={isDisabled(form, field)}
+			disabled={isFieldDisabled}
 			aria-invalid={Boolean(errors[field.id])}
 			checked={Boolean(form[field.id])}
 			onCheckedChange={(checked) => onFieldChange(field, checked)}
@@ -53,11 +56,11 @@
 				min={field.min}
 				max={field.max}
 				step={field.step ?? 1}
-				disabled={isDisabled(form, field)}
+				disabled={isInputsDisabled}
 				value={Number(form[field.id] ?? 0)}
 				aria-invalid={Boolean(errors[field.id])}
 				onValueChange={(value) => onFieldChange(field, value)}
-				thumbClass={Boolean(errors[field.id]) ? 'border-destructive' : ''}
+				thumbClass={errors[field.id] ? 'border-destructive' : ''}
 			/>
 			<span class="w-10 text-right text-sm tabular-nums">{form[field.id] as number}{field.unit ?? ''}</span>
 		</div>
@@ -67,7 +70,7 @@
 				{@const selectedValues = (form[field.id] as string[]) ?? []}
 				<Label class="inline-flex items-center gap-2 text-sm font-normal">
 					<Checkbox
-						disabled={isDisabled(form, field)}
+						disabled={isInputsDisabled}
 						checked={selectedValues.includes(opt.value)}
 						onCheckedChange={(checked) => {
 							const current = new Set<string>(selectedValues);

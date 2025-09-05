@@ -3,19 +3,28 @@
 	import { slide } from 'svelte/transition';
 	import InfoTooltip from '../InfoTooltip.svelte';
 	import DynamicFormField from './DynamicFormField.svelte';
-	import type { SchemaField, SchemaGroup, SchemaSubGroup } from './types';
+	import type { FormValue, SchemaField, SchemaGroup, SchemaSubGroup } from './types';
 	import { isSubGroupCollapsed } from './utils';
 
 	interface Props {
 		subGroup: SchemaSubGroup;
 		group: SchemaGroup;
 		collapsedSubGroups: Record<string, boolean>;
-		form: Record<string, unknown>;
+		form: Record<string, FormValue>;
 		errors: Record<string, string | null>;
-		onFieldChange: (field: SchemaField, value: unknown) => void;
+		onFieldChange: (field: SchemaField, value: FormValue) => void;
+		isInputsDisabled: boolean;
 	}
 
-	let { subGroup, group, form, collapsedSubGroups = $bindable(), errors, onFieldChange }: Props = $props();
+	let {
+		subGroup,
+		group,
+		form,
+		collapsedSubGroups = $bindable(),
+		errors,
+		onFieldChange,
+		isInputsDisabled
+	}: Props = $props();
 </script>
 
 <div class="xl:flex-1">
@@ -54,7 +63,7 @@
 	{#if !isSubGroupCollapsed(collapsedSubGroups, group.id, subGroup.id)}
 		<div id={`subgroup-${group.id}-${subGroup.id}`} class="flex flex-col gap-5" transition:slide>
 			{#each subGroup.fields as field (field.id)}
-				<DynamicFormField {field} {form} {errors} {onFieldChange} />
+				<DynamicFormField {field} {form} {errors} {onFieldChange} {isInputsDisabled} />
 			{/each}
 		</div>
 	{/if}
