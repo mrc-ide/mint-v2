@@ -52,7 +52,7 @@ Highcharts.setOptions({
 	chart: {
 		height: 500,
 		zooming: {
-			type: 'x',
+			type: 'xy',
 			resetButton: {
 				theme: {
 					r: 5,
@@ -60,7 +60,6 @@ Highcharts.setOptions({
 						color: 'var(--foreground)',
 						fontWeight: '600',
 						fontSize: '12px'
-						// textOutline: 'none'
 					}
 				}
 			}
@@ -225,7 +224,7 @@ export const getPrevalenceConfig = (prevalence: PrevalenceData[]): Highcharts.Op
 		}
 	},
 	tooltip: {
-		headerFormat: '',
+		headerFormat: '{point.x:.2f} years <br/>',
 		valueSuffix: '%',
 		valueDecimals: 1
 	},

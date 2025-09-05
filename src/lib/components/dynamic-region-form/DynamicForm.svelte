@@ -7,7 +7,7 @@
 	import {
 		checkCrossFieldValidation,
 		coerceDefaults,
-		DEBOUNCE_DELAY,
+		DEBOUNCE_DELAY_MS,
 		forEachField,
 		forEachGroup,
 		forEachSubGroup,
@@ -74,8 +74,8 @@
 	});
 
 	// Debounced functions
-	const debouncedRun = debounce(run, DEBOUNCE_DELAY);
-	const debouncedProcess = debounce(process, DEBOUNCE_DELAY);
+	const debouncedRun = debounce(run, DEBOUNCE_DELAY_MS);
+	const debouncedProcess = debounce(process, DEBOUNCE_DELAY_MS);
 
 	// Validation
 	const validateField = (field: SchemaField) => {
