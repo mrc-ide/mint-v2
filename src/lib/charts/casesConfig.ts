@@ -16,14 +16,20 @@ const getCasesSeriesData = (
 			data: scenarios.map((scenario) => ({
 				name: ScenarioToLabel[scenario],
 				y: casesAverted[scenario]!.average,
-				color: ScenarioToColor[scenario],
-				...(scenario.includes('with_lsm')
-					? {
-							dashStyle: 'Dash',
-							borderColor: 'var(--secondary-foreground)',
-							borderWidth: 1.5
-						}
-					: {})
+				color: {
+					pattern: {
+						color: ScenarioToColor[scenario],
+						width: 10,
+						height: 10,
+						...(scenario.includes('with_lsm')
+							? {
+									path: {
+										d: 'M 0 0 L 10 10 M 9 -1 L 11 1 M -1 9 L 1 11'
+									}
+								}
+							: {})
+					}
+				}
 			}))
 		},
 		...scenarios.map((scenario, scenarioIndex) => ({

@@ -1,4 +1,6 @@
-import Highcharts from 'highcharts';
+import Highcharts from 'highcharts/esm/highcharts.js';
+import 'highcharts/esm/modules/accessibility';
+import 'highcharts/esm/modules/pattern-fill.js';
 import type { Attachment } from 'svelte/attachments';
 import type { Scenario } from '../types/userState';
 
