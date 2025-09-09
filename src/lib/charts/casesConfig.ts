@@ -51,6 +51,7 @@ export const getCasesConfig = (casesAverted: Partial<Record<Scenario, CasesAvert
 	return {
 		chart: {
 			type: 'column',
+			height: 500,
 			spacingBottom: 30
 		},
 		title: {

@@ -53,7 +53,6 @@ export const configureHighcharts = () => {
 			}
 		},
 		chart: {
-			height: 500,
 			zooming: {
 				type: 'xy',
 				resetButton: {
