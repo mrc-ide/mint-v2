@@ -1,48 +1,6 @@
 import type { PrevalenceData, Scenario } from '$lib/types/userState';
 import { ScenarioToColor, ScenarioToLabel } from './baseChart';
 
-export const PrevalenceScenarioSeriesOptions: Record<string, Highcharts.SeriesSplineOptions> = {
-	no_intervention: {
-		type: 'spline'
-	},
-	irs_only: {
-		type: 'spline',
-		dashStyle: 'Dash'
-	},
-	lsm_only: {
-		type: 'spline',
-		dashStyle: 'Dash'
-	},
-	py_only_only: {
-		type: 'spline'
-	},
-	py_only_with_lsm: {
-		type: 'spline',
-		dashStyle: 'Dash'
-	},
-	py_pbo_only: {
-		type: 'spline'
-	},
-	py_pbo_with_lsm: {
-		type: 'spline',
-		dashStyle: 'Dash'
-	},
-	py_pyrrole_only: {
-		type: 'spline'
-	},
-	py_pyrrole_with_lsm: {
-		type: 'spline',
-		dashStyle: 'Dash'
-	},
-	py_ppf_only: {
-		type: 'spline'
-	},
-	py_ppf_with_lsm: {
-		type: 'spline',
-		dashStyle: 'Dash'
-	}
-};
-
 const createPrevalenceSeries = (data: PrevalenceData[]): Highcharts.SeriesSplineOptions[] => {
 	const seriesMap = new Map<Scenario, Highcharts.SeriesSplineOptions>();
 
@@ -52,7 +10,8 @@ const createPrevalenceSeries = (data: PrevalenceData[]): Highcharts.SeriesSpline
 				name: ScenarioToLabel[scenario],
 				color: ScenarioToColor[scenario],
 				data: [],
-				...PrevalenceScenarioSeriesOptions[scenario]
+				type: 'spline',
+				...(scenario.includes('with_lsm') ? { dashStyle: 'Dash' } : {})
 			});
 		}
 		seriesMap.get(scenario)!.data!.push([days / 365 - 1, prevalence * 100]);
