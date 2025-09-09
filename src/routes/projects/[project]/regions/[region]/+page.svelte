@@ -1,13 +1,12 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { DynamicForm } from '$lib/components/dynamic-region-form';
-	import { toast } from 'svelte-sonner';
-	import type { PageProps } from './$types';
-	import { regionUrl } from '$lib/url';
-	import type { EmulatorResults } from '$lib/types/userState';
 	import type { FormValue } from '$lib/components/dynamic-region-form/types';
 	import { apiFetch } from '$lib/fetch';
-	import resultsJson from '$lib/results/full.json';
+	import type { EmulatorResults } from '$lib/types/userState';
+	import { regionUrl } from '$lib/url';
+	import { toast } from 'svelte-sonner';
+	import type { PageProps } from './$types';
 	import Results from './_components/Results.svelte';
 	let { data, params }: PageProps = $props();
 
@@ -16,17 +15,16 @@
 	let runPromise = $derived(data.runPromise);
 
 	const runEmulator = async (formValues: Record<string, FormValue>): Promise<EmulatorResults> => {
-		console.log(formValues);
 		isRunning = true;
 		try {
-			// const res = await apiFetch<EmulatorResults>({
-			// 	url: regionUrl(params.project, params.region),
-			// 	method: 'POST',
-			// 	body: { formValues }
-			// });
+			const res = await apiFetch<EmulatorResults>({
+				url: regionUrl(params.project, params.region),
+				method: 'POST',
+				body: { formValues }
+			});
 
 			isRunning = false;
-			return resultsJson;
+			return res.data;
 		} catch (e) {
 			toast.error(`Failed to run emulator for region "${params.region}" in project "${params.project}"`);
 			isRunning = false;

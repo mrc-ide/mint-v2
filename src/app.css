@@ -1,4 +1,4 @@
-@import url('https://code.highcharts.com/css/highcharts.css');
+/* @import url('https://code.highcharts.com/css/highcharts.css');  */ 
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
@@ -28,7 +28,7 @@
 	--chart-2: oklch(0.459 0.138 265.4);
 	--chart-3: oklch(0.785 0.197 149.9);
 	--chart-4: oklch(0.658 0.173 35.2);
-	--chart-5: oklch(0.588 0.076 242.5);
+	--chart-5: oklch(0.8271 0.125 65.32);
 	--chart-6: oklch(0.714 0.202 299.8);
 	--sidebar: oklch(0.985 0 0);
 	--sidebar-foreground: oklch(0.141 0.005 285.823);

@@ -6,6 +6,7 @@
 	import ImpactTable from './ImpactTable.svelte';
 	import CostGraph from './CostGraph.svelte';
 	import CostTable from './CostTable.svelte';
+	import { getCasesAverted } from '$lib/process-results/processCases';
 
 	type Category = 'impact' | 'cost';
 	type View = 'graph' | 'table';
@@ -17,6 +18,8 @@
 	let category: Category = $state('impact');
 	let view: View = $state('graph');
 	const combinedValue = $derived(`${category}:${view}`);
+
+	const casesAverted = $derived(getCasesAverted(emulatorResults.cases));
 </script>
 
 <div class="flex flex-col gap-3 md:gap-4">
@@ -37,7 +40,7 @@
 
 	<Tabs.Root value={combinedValue} aria-label="Results content panels" class="w-full">
 		<Tabs.Content value="impact:graph">
-			<ImpactGraph {emulatorResults} />
+			<ImpactGraph prevalence={emulatorResults.prevalence} {casesAverted} />
 		</Tabs.Content>
 
 		<Tabs.Content value="impact:table">

@@ -1,10 +1,9 @@
+import { ApiError, apiFetch } from '$lib/fetch';
 import { saveRegionFormState } from '$lib/server/region';
 import type { EmulatorResults } from '$lib/types/userState';
 import { runEmulatorUrl } from '$lib/url';
 import { error, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { ApiError, apiFetch } from '$lib/fetch';
-import fs from 'fs';
 
 /**
  * Handle POST requests to run models for a specific region in a project.
@@ -22,15 +21,6 @@ export const POST: RequestHandler = async ({ request, locals, params, fetch }) =
 			body: formValues,
 			fetcher: fetch
 		});
-		// Create results directory if it doesn't exist
-		const resultsDir = 'results';
-		fs.mkdirSync(resultsDir, { recursive: true });
-
-		// Write results to JSON file
-		const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-		const filename = `${project}-${region}-${timestamp}.json`;
-		const filepath = `${resultsDir}/${filename}`;
-		fs.writeFileSync(filepath, JSON.stringify(res.data, null, 2));
 
 		await saveRegionFormState(locals.userState, project, region, formValues);
 		return json(res);

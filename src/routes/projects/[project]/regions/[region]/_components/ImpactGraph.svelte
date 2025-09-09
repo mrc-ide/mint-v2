@@ -1,16 +1,19 @@
 <script lang="ts">
-	import { createHighchart, getPrevalenceConfig } from '$lib/chart';
-	import type { EmulatorResults } from '$lib/types/userState';
+	import { getCasesConfig } from '$lib/charts/casesConfig';
+	import { createHighchart } from '$lib/charts/chart';
+	import { getPrevalenceConfig } from '$lib/charts/prevalenceConfig';
+	import type { CasesAverted } from '$lib/process-results/processCases';
+	import type { PrevalenceData, Scenario } from '$lib/types/userState';
 	import { mode } from 'mode-watcher';
 
 	interface Props {
-		emulatorResults: EmulatorResults;
+		prevalence: PrevalenceData[];
+		casesAverted: Partial<Record<Scenario, CasesAverted>>;
 	}
 
-	// TODO: dont need full results probs
-	let { emulatorResults }: Props = $props();
-	$inspect(emulatorResults);
-	let prevalenceConfig = $derived(getPrevalenceConfig(emulatorResults.prevalence));
+	let { prevalence, casesAverted }: Props = $props();
+	let prevalenceConfig = $derived(getPrevalenceConfig(prevalence));
+	let casesConfig = $derived(getCasesConfig(casesAverted));
 	let chartTheme = $derived(mode.current === 'dark' ? 'highcharts-dark' : 'highcharts-light');
 </script>
 
@@ -20,6 +23,6 @@
 	</section>
 
 	<section aria-label="Impact cases graph" class="rounded-lg border p-4">
-		<div {@attach createHighchart(prevalenceConfig)} class={chartTheme}></div>
+		<div {@attach createHighchart(casesConfig)} class={chartTheme}></div>
 	</section>
 </div>

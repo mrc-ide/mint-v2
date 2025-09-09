@@ -19,7 +19,7 @@ export interface PrevalenceData {
 }
 export interface CasesData {
 	scenario: Scenario;
-	year: number;
+	year: 1 | 2 | 3 | 4;
 	casesPer1000: number;
 }
 export interface EmulatorResults {
