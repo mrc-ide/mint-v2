@@ -1,5 +1,5 @@
 import type { PrevalenceData, Scenario } from '$lib/types/userState';
-import { ScenarioToColor, ScenarioToLabel } from './chart';
+import { ScenarioToColor, ScenarioToLabel } from './baseChart';
 
 export const PrevalenceScenarioSeriesOptions: Record<string, Highcharts.SeriesSplineOptions> = {
 	no_intervention: {

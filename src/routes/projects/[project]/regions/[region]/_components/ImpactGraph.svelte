@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getCasesConfig } from '$lib/charts/casesConfig';
-	import { createHighchart } from '$lib/charts/chart';
+	import { createHighchart } from '$lib/charts/baseChart';
 	import { getPrevalenceConfig } from '$lib/charts/prevalenceConfig';
 	import type { CasesAverted } from '$lib/process-results/processCases';
 	import type { PrevalenceData, Scenario } from '$lib/types/userState';
