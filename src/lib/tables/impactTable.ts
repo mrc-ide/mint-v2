@@ -103,7 +103,7 @@ export const impactTableColumns: ColumnDef<ImpactTableMetrics>[] = Object.entrie
 
 			const formatter = new Intl.NumberFormat('en-US', {
 				style: headerInfo.formatStyle,
-				maximumFractionDigits: 1
+				maximumSignificantDigits: 3
 			});
 			const formattedValue = headerInfo.formatStyle === 'percent' ? (value as number) / 100 : (value as number);
 			return value !== undefined ? formatter.format(formattedValue) : 'N/A';
