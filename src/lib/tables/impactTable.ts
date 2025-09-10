@@ -12,10 +12,10 @@ export interface ImpactTableMetrics {
 	netUse?: number;
 	irs?: number;
 	lsm?: number;
-	casesAvertedMean: number;
-	casesAvertedYear1: number;
-	casesAvertedYear2: number;
-	casesAvertedYear3: number;
+	casesAvertedMeanPer1000: number;
+	casesAvertedYear1Per1000: number;
+	casesAvertedYear2Per1000: number;
+	casesAvertedYear3Per1000: number;
 	relativeReductionInCases: number;
 	meanCasesPerYearPerPerson: number;
 	relativeReductionInPrevalence: number;
@@ -28,12 +28,12 @@ export const buildImpactTableData = (
 	form: Record<string, FormValue>
 ): ImpactTableMetrics[] => {
 	const meanPrevalenceNoIntervention = getMeanPrevalencePostIntervention(prevalenceData, 'no_intervention');
-	const noInterventionAverageCases = getMeanCasesPostIntervention(postInterventionCasesMap['no_intervention']) ?? 0;
+	const noInterventionMeanCases = getMeanCasesPostIntervention(postInterventionCasesMap['no_intervention']) ?? 0;
 
 	return Object.entries(casesAverted).map(
 		([
 			scenario,
-			{ average: averageCasesAverted, year1: casesAvertedYear1, year2: casesAvertedYear2, year3: casesAvertedYear3 }
+			{ casesAvertedMeanPer1000, casesAvertedYear1Per1000, casesAvertedYear2Per1000, casesAvertedYear3Per1000 }
 		]) => {
 			const meanPrevalence = getMeanPrevalencePostIntervention(prevalenceData, scenario as Scenario);
 			const meanCasesPer1000Year = getMeanCasesPostIntervention(postInterventionCasesMap[scenario as Scenario]) ?? 0;
@@ -43,11 +43,11 @@ export const buildImpactTableData = (
 				netUse: scenario.includes('py') ? (form.itn_future as number) : undefined,
 				irs: scenario === 'irs_only' ? (form.irs_future as number) : undefined,
 				lsm: scenario.includes('with_lsm') ? (form.lsm as number) : undefined,
-				casesAvertedMean: averageCasesAverted,
-				casesAvertedYear1: casesAvertedYear1,
-				casesAvertedYear2: casesAvertedYear2,
-				casesAvertedYear3: casesAvertedYear3,
-				relativeReductionInCases: (averageCasesAverted / noInterventionAverageCases) * 100,
+				casesAvertedMeanPer1000,
+				casesAvertedYear1Per1000,
+				casesAvertedYear2Per1000,
+				casesAvertedYear3Per1000,
+				relativeReductionInCases: (casesAvertedMeanPer1000 / noInterventionMeanCases) * 100,
 				meanCasesPerYearPerPerson: meanCasesPer1000Year / 1000,
 				relativeReductionInPrevalence:
 					((meanPrevalenceNoIntervention - meanPrevalence) / meanPrevalenceNoIntervention) * 100
@@ -55,18 +55,30 @@ export const buildImpactTableData = (
 		}
 	);
 };
-export const ImpactTableInfo = {
+export const ImpactTableInfo: Record<
+	keyof ImpactTableMetrics,
+	{ label: string; formatStyle: 'string' | 'percent' | 'decimal' }
+> = {
 	intervention: { label: 'Interventions', formatStyle: 'string' },
 	netUse: { label: 'Net use (%)', formatStyle: 'percent' },
 	irs: { label: 'IRS cover (%)', formatStyle: 'percent' },
 	lsm: { label: 'Reduction in mosquitoes from LSM (%)', formatStyle: 'percent' },
-	casesAvertedMean: {
+	casesAvertedMeanPer1000: {
 		label: 'Mean cases averted per 1,000 people annually across 3 years since intervention',
 		formatStyle: 'decimal'
 	},
-	casesAvertedYear1: { label: 'Cases averted per 1,000 people: Year 1 post intervention', formatStyle: 'decimal' },
-	casesAvertedYear2: { label: 'Cases averted per 1,000 people: Year 2 post intervention', formatStyle: 'decimal' },
-	casesAvertedYear3: { label: 'Cases averted per 1,000 people: Year 3 post intervention', formatStyle: 'decimal' },
+	casesAvertedYear1Per1000: {
+		label: 'Cases averted per 1,000 people: Year 1 post intervention',
+		formatStyle: 'decimal'
+	},
+	casesAvertedYear2Per1000: {
+		label: 'Cases averted per 1,000 people: Year 2 post intervention',
+		formatStyle: 'decimal'
+	},
+	casesAvertedYear3Per1000: {
+		label: 'Cases averted per 1,000 people: Year 3 post intervention',
+		formatStyle: 'decimal'
+	},
 	relativeReductionInCases: {
 		label: 'Relative reduction in clinical cases across 3 years since intervention',
 		formatStyle: 'percent'

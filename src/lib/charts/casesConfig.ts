@@ -10,12 +10,11 @@ const getCasesSeriesData = (
 
 	return [
 		{
-			name: 'Average',
+			name: 'Mean',
 			type: 'column',
-
 			data: scenarios.map((scenario) => ({
 				name: ScenarioToLabel[scenario],
-				y: casesAverted[scenario]!.average,
+				y: casesAverted[scenario]!.casesAvertedMeanPer1000,
 				color: {
 					pattern: {
 						color: ScenarioToColor[scenario],
@@ -34,9 +33,9 @@ const getCasesSeriesData = (
 			name: ScenarioToLabel[scenario],
 			type: 'line' as const,
 			data: [
-				{ x: scenarioIndex - 0.3, y: casesAverted[scenario]!.year1, name: 'Year 1' },
-				{ x: scenarioIndex, y: casesAverted[scenario]!.year2, name: 'Year 2' },
-				{ x: scenarioIndex + 0.3, y: casesAverted[scenario]!.year3, name: 'Year 3' }
+				{ x: scenarioIndex - 0.3, y: casesAverted[scenario]!.casesAvertedYear1Per1000, name: 'Year 1' },
+				{ x: scenarioIndex, y: casesAverted[scenario]!.casesAvertedYear2Per1000, name: 'Year 2' },
+				{ x: scenarioIndex + 0.3, y: casesAverted[scenario]!.casesAvertedYear3Per1000, name: 'Year 3' }
 			],
 			color: 'var(--foreground)',
 			marker: {

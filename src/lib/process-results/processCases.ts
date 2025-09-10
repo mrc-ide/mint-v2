@@ -1,10 +1,10 @@
 import type { CasesData, Scenario } from '$lib/types/userState';
 
 export interface CasesAverted {
-	year1: number;
-	year2: number;
-	year3: number;
-	average: number;
+	casesAvertedYear1Per1000: number;
+	casesAvertedYear2Per1000: number;
+	casesAvertedYear3Per1000: number;
+	casesAvertedMeanPer1000: number;
 }
 
 export const getMeanCasesPostIntervention = (postInterventionCases: CasesData[]) =>
@@ -32,7 +32,7 @@ export const getAvertedCasesData = (
 
 	// Pre-calculate no intervention data
 	const noInterventionByYear = new Map(noInterventionCases.map((c) => [c.year, c.casesPer1000]));
-	const noInterventionAverageCases = getMeanCasesPostIntervention(noInterventionCases);
+	const meanNoInterventionCases = getMeanCasesPostIntervention(noInterventionCases);
 
 	// Calculate cases averted for each intervention scenario
 	const casesAverted: Partial<Record<Scenario, CasesAverted>> = {};
@@ -41,13 +41,13 @@ export const getAvertedCasesData = (
 		if (scenario === 'no_intervention' || !scenarioCases.length) continue;
 
 		const casesByYear = new Map(scenarioCases.map((c) => [c.year, c.casesPer1000]));
-		const scenarioAverage = getMeanCasesPostIntervention(scenarioCases);
+		const meanCasesForScenario = getMeanCasesPostIntervention(scenarioCases);
 
 		casesAverted[scenario as Scenario] = {
-			year1: (noInterventionByYear.get(2) ?? 0) - (casesByYear.get(2) ?? 0),
-			year2: (noInterventionByYear.get(3) ?? 0) - (casesByYear.get(3) ?? 0),
-			year3: (noInterventionByYear.get(4) ?? 0) - (casesByYear.get(4) ?? 0),
-			average: noInterventionAverageCases - scenarioAverage
+			casesAvertedYear1Per1000: (noInterventionByYear.get(2) ?? 0) - (casesByYear.get(2) ?? 0),
+			casesAvertedYear2Per1000: (noInterventionByYear.get(3) ?? 0) - (casesByYear.get(3) ?? 0),
+			casesAvertedYear3Per1000: (noInterventionByYear.get(4) ?? 0) - (casesByYear.get(4) ?? 0),
+			casesAvertedMeanPer1000: meanNoInterventionCases - meanCasesForScenario
 		};
 	}
 
