@@ -7,7 +7,7 @@
 	let { label, variant = 'ghost', ...restProps }: Props = $props();
 </script>
 
-<Button {variant} {...restProps} class="flex h-full  whitespace-normal">
+<Button {variant} {...restProps} size="sm" class="h-full whitespace-normal ">
 	{label}
 	<ArrowUpDownIcon class="flex-shrink-0" />
 </Button>

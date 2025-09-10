@@ -7,46 +7,18 @@ import { getMeanPrevalencePostIntervention } from '$lib/process-results/processP
 import type { CasesData, PrevalenceData, Scenario } from '$lib/types/userState';
 import type { ColumnDef } from '@tanstack/table-core';
 
-export const impactTableHeaders = [
-	'Interventions',
-	'Net use (%)',
-	'IRS cover (%)',
-	'Reduction in mosquitoes from LSM (%)',
-	'Mean cases averted per 1,000 people annually across 3 years since intervention',
-	'Cases averted per 1,000 people: Year 1 post intervention',
-	'Cases averted per 1,000 people: Year 2 post intervention',
-	'Cases averted per 1,000 people: Year 3 post intervention',
-	'Relative reduction in clinical cases across 3 years since intervention',
-	'Mean cases per person per year averaged across 3 years',
-	'Relative reduction in prevalence across 36 months post intervention'
-] as const;
-
-export const ImpactTableHeaders = {
-	intervention: 'Interventions',
-	netUse: 'Net use (%)',
-	irs: 'IRS cover (%)',
-	lsm: 'Reduction in mosquitoes from LSM (%)',
-	casesAvertedMean: 'Mean cases averted per 1,000 people annually across 3 years since intervention',
-	casesAvertedYear1: 'Cases averted per 1,000 people: Year 1 post intervention',
-	casesAvertedYear2: 'Cases averted per 1,000 people: Year 2 post intervention',
-	casesAvertedYear3: 'Cases averted per 1,000 people: Year 3 post intervention',
-	relativeReductionInCases: 'Relative reduction in clinical cases across 3 years since intervention',
-	meanCasesPerYearPerPerson: 'Mean cases per person per year averaged across 3 years',
-	relativeReductionInPrevalence: 'Relative reduction in prevalence across 36 months post intervention'
-} as const;
-
 export interface ImpactTableMetrics {
 	intervention: string;
-	netUse: string;
-	irs: string;
-	lsm: string;
-	casesAvertedMean: string;
-	casesAvertedYear1: string;
-	casesAvertedYear2: string;
-	casesAvertedYear3: string;
-	relativeReductionInCases: string;
-	meanCasesPerYearPerPerson: string;
-	relativeReductionInPrevalence: string;
+	netUse?: number;
+	irs?: number;
+	lsm?: number;
+	casesAvertedMean: number;
+	casesAvertedYear1: number;
+	casesAvertedYear2: number;
+	casesAvertedYear3: number;
+	relativeReductionInCases: number;
+	meanCasesPerYearPerPerson: number;
+	relativeReductionInPrevalence: number;
 }
 
 export const buildImpactTableData = (
@@ -68,29 +40,66 @@ export const buildImpactTableData = (
 
 			return {
 				intervention: ScenarioToLabel[scenario as Scenario],
-				netUse: scenario.includes('py') && form.itn_future ? form.itn_future + '%' : 'N/A',
-				irs: scenario === 'irs_only' && form.irs_future ? form.irs_future + '%' : 'N/A',
-				lsm: scenario.includes('with_lsm') && form.lsm ? form.lsm + '%' : 'N/A',
-				casesAvertedMean: averageCasesAverted.toFixed(1),
-				casesAvertedYear1: casesAvertedYear1.toFixed(1),
-				casesAvertedYear2: casesAvertedYear2.toFixed(1),
-				casesAvertedYear3: casesAvertedYear3.toFixed(1),
-				relativeReductionInCases: ((averageCasesAverted / noInterventionAverageCases) * 100).toFixed(1) + '%',
-				meanCasesPerYearPerPerson: (meanCasesPer1000Year / 1000).toFixed(1),
+				netUse: scenario.includes('py') ? (form.itn_future as number) : undefined,
+				irs: scenario === 'irs_only' ? (form.irs_future as number) : undefined,
+				lsm: scenario.includes('with_lsm') ? (form.lsm as number) : undefined,
+				casesAvertedMean: averageCasesAverted,
+				casesAvertedYear1: casesAvertedYear1,
+				casesAvertedYear2: casesAvertedYear2,
+				casesAvertedYear3: casesAvertedYear3,
+				relativeReductionInCases: (averageCasesAverted / noInterventionAverageCases) * 100,
+				meanCasesPerYearPerPerson: meanCasesPer1000Year / 1000,
 				relativeReductionInPrevalence:
-					(((meanPrevalenceNoIntervention - meanPrevalence) / meanPrevalenceNoIntervention) * 100).toFixed(1) + '%'
+					((meanPrevalenceNoIntervention - meanPrevalence) / meanPrevalenceNoIntervention) * 100
 			};
 		}
 	);
 };
+export const ImpactTableInfo = {
+	intervention: { label: 'Interventions', formatStyle: 'string' },
+	netUse: { label: 'Net use (%)', formatStyle: 'percent' },
+	irs: { label: 'IRS cover (%)', formatStyle: 'percent' },
+	lsm: { label: 'Reduction in mosquitoes from LSM (%)', formatStyle: 'percent' },
+	casesAvertedMean: {
+		label: 'Mean cases averted per 1,000 people annually across 3 years since intervention',
+		formatStyle: 'decimal'
+	},
+	casesAvertedYear1: { label: 'Cases averted per 1,000 people: Year 1 post intervention', formatStyle: 'decimal' },
+	casesAvertedYear2: { label: 'Cases averted per 1,000 people: Year 2 post intervention', formatStyle: 'decimal' },
+	casesAvertedYear3: { label: 'Cases averted per 1,000 people: Year 3 post intervention', formatStyle: 'decimal' },
+	relativeReductionInCases: {
+		label: 'Relative reduction in clinical cases across 3 years since intervention',
+		formatStyle: 'percent'
+	},
+	meanCasesPerYearPerPerson: {
+		label: 'Mean cases per person per year averaged across 3 years',
+		formatStyle: 'decimal'
+	},
+	relativeReductionInPrevalence: {
+		label: 'Relative reduction in prevalence across 36 months post intervention',
+		formatStyle: 'percent'
+	}
+} as const;
 
-export const impactTableColumns: ColumnDef<ImpactTableMetrics>[] = Object.entries(ImpactTableHeaders).map(
-	([key, headerTitle]) => ({
+export const impactTableColumns: ColumnDef<ImpactTableMetrics>[] = Object.entries(ImpactTableInfo).map(
+	([key, headerInfo]) => ({
 		accessorKey: key,
+		cell: ({ getValue }) => {
+			const value = getValue();
+
+			if (headerInfo.formatStyle === 'string') return value;
+
+			const formatter = new Intl.NumberFormat('en-US', {
+				style: headerInfo.formatStyle,
+				maximumFractionDigits: 1
+			});
+			const formattedValue = headerInfo.formatStyle === 'percent' ? (value as number) / 100 : (value as number);
+			return value !== undefined ? formatter.format(formattedValue) : 'N/A';
+		},
 		header: ({ column }) => {
 			return renderComponent(DataTableSortHeader, {
 				onclick: column.getToggleSortingHandler(),
-				label: headerTitle
+				label: headerInfo.label
 			});
 		}
 	})

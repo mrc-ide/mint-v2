@@ -1,9 +1,8 @@
 <script lang="ts">
 	import DataTable from '$lib/components/data-table/DataTable.svelte';
 	import type { FormValue } from '$lib/components/dynamic-region-form/types';
-	import * as Table from '$lib/components/ui/table/index';
 	import type { CasesAverted } from '$lib/process-results/processCases';
-	import { buildImpactTableData, impactTableColumns, impactTableHeaders } from '$lib/tables/impactTable';
+	import { buildImpactTableData, impactTableColumns } from '$lib/tables/impactTable';
 	import type { CasesData, EmulatorResults, Scenario } from '$lib/types/userState';
 
 	interface Props {
