@@ -21,7 +21,7 @@ const getCasesSeriesData = (
 						color: ScenarioToColor[scenario],
 						width: 10,
 						height: 10,
-						...(scenario.includes('with_lsm') && {
+						...(scenario.includes('lsm') && {
 							path: {
 								d: 'M 0 0 L 10 10 M 9 -1 L 11 1 M -1 9 L 1 11'
 							}
@@ -92,7 +92,6 @@ export const getCasesConfig = (casesAverted: Partial<Record<Scenario, CasesAvert
 			enabled: false
 		},
 		tooltip: {
-			shared: true,
 			valueDecimals: 1
 		}
 	};
