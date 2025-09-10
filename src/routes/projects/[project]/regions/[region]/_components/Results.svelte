@@ -6,20 +6,23 @@
 	import ImpactTable from './ImpactTable.svelte';
 	import CostGraph from './CostGraph.svelte';
 	import CostTable from './CostTable.svelte';
-	import { getCasesAverted } from '$lib/process-results/processCases';
+	import { collectPostInterventionCases, getAvertedCasesData } from '$lib/process-results/processCases';
+	import type { FormValue } from '$lib/components/dynamic-region-form/types';
 
 	type Category = 'impact' | 'cost';
 	type View = 'graph' | 'table';
 	interface Props {
 		emulatorResults: EmulatorResults;
+		form: Record<string, FormValue>;
 	}
 
-	let { emulatorResults }: Props = $props();
+	let { emulatorResults, form }: Props = $props();
 	let category: Category = $state('impact');
 	let view: View = $state('graph');
 	const combinedValue = $derived(`${category}:${view}`);
 
-	const casesAverted = $derived(getCasesAverted(emulatorResults.cases));
+	const postInterventionCasesMap = $derived(collectPostInterventionCases(emulatorResults.cases));
+	const casesAverted = $derived(getAvertedCasesData(postInterventionCasesMap));
 </script>
 
 <div class="flex flex-col gap-3 md:gap-4">
@@ -44,7 +47,7 @@
 		</Tabs.Content>
 
 		<Tabs.Content value="impact:table">
-			<ImpactTable />
+			<ImpactTable {casesAverted} {emulatorResults} {postInterventionCasesMap} {form} />
 		</Tabs.Content>
 
 		<Tabs.Content value="cost:graph">

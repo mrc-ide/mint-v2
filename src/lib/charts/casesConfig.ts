@@ -1,11 +1,11 @@
 import type { CasesAverted } from '$lib/process-results/processCases';
 import type { Scenario } from '$lib/types/userState';
-import Highcharts from 'highcharts';
+import type { SeriesLineOptions, SeriesColumnOptions, Options } from 'highcharts';
 import { ScenarioToColor, ScenarioToLabel } from './baseChart';
 
 const getCasesSeriesData = (
 	casesAverted: Partial<Record<Scenario, CasesAverted>>
-): Array<Highcharts.SeriesLineOptions | Highcharts.SeriesColumnOptions> => {
+): Array<SeriesLineOptions | SeriesColumnOptions> => {
 	const scenarios = Object.keys(casesAverted) as Scenario[];
 
 	return [
@@ -49,7 +49,7 @@ const getCasesSeriesData = (
 	];
 };
 
-export const getCasesConfig = (casesAverted: Partial<Record<Scenario, CasesAverted>>): Highcharts.Options => {
+export const getCasesConfig = (casesAverted: Partial<Record<Scenario, CasesAverted>>): Options => {
 	const scenarios = Object.keys(casesAverted) as Scenario[];
 
 	return {
