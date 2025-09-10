@@ -16,6 +16,6 @@
 	const data = $derived(buildImpactTableData(casesAverted, emulatorResults.prevalence, postInterventionCasesMap, form));
 </script>
 
-<section aria-label="Impact results table" class="rounded-lg border p-4">
+<section aria-label="Impact results table">
 	<DataTable columns={impactTableColumns} {data} />
 </section>
