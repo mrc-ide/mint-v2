@@ -3,7 +3,7 @@
 	import { DynamicForm } from '$lib/components/dynamic-region-form';
 	import type { FormValue } from '$lib/components/dynamic-region-form/types';
 	import { apiFetch } from '$lib/fetch';
-	import type { EmulatorResults, Scenario } from '$lib/types/userState';
+	import type { EmulatorResults } from '$lib/types/userState';
 	import { regionUrl } from '$lib/url';
 	import { toast } from 'svelte-sonner';
 	import type { PageProps } from './$types';

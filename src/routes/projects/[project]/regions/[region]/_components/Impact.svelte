@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { getCasesConfig } from '$lib/charts/casesConfig';
 	import { createHighchart } from '$lib/charts/baseChart';
+	import { getCasesConfig } from '$lib/charts/casesConfig';
 	import { getPrevalenceConfig } from '$lib/charts/prevalenceConfig';
-	import type { CasesAverted } from '$lib/process-results/processCases';
-	import type { CasesData, EmulatorResults, PrevalenceData, Scenario } from '$lib/types/userState';
-	import { mode } from 'mode-watcher';
-	import { buildImpactTableData, impactTableColumns } from '$lib/tables/impactTable';
 	import DataTable from '$lib/components/data-table/DataTable.svelte';
+	import type { CasesAverted } from '$lib/process-results/processCases';
+	import { buildImpactTableData, impactTableColumns } from '$lib/tables/impactTable';
+	import type { CasesData, EmulatorResults, Scenario } from '$lib/types/userState';
+	import { mode } from 'mode-watcher';
 
 	interface Props {
 		casesAverted: Partial<Record<Scenario, CasesAverted>>;
