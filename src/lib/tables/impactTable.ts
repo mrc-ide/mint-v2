@@ -1,6 +1,5 @@
 import { ScenarioToLabel } from '$lib/charts/baseChart';
 import DataTableSortHeader from '$lib/components/data-table/DataTableSortHeader.svelte';
-import type { FormValue } from '$lib/components/dynamic-region-form/types';
 import { renderComponent } from '$lib/components/ui/data-table';
 import { getMeanCasesPostIntervention, type CasesAverted } from '$lib/process-results/processCases';
 import { getMeanPrevalencePostIntervention } from '$lib/process-results/processPrevalence';
@@ -9,9 +8,6 @@ import type { ColumnDef } from '@tanstack/table-core';
 
 export interface ImpactTableMetrics {
 	intervention: string;
-	netUse?: number;
-	irs?: number;
-	lsm?: number;
 	casesAvertedMeanPer1000: number;
 	casesAvertedYear1Per1000: number;
 	casesAvertedYear2Per1000: number;
@@ -24,8 +20,7 @@ export interface ImpactTableMetrics {
 export const buildImpactTableData = (
 	casesAverted: Partial<Record<Scenario, CasesAverted>>,
 	prevalenceData: PrevalenceData[],
-	postInterventionCasesMap: Record<Scenario, CasesData[]>,
-	form: Record<string, FormValue>
+	postInterventionCasesMap: Record<Scenario, CasesData[]>
 ): ImpactTableMetrics[] => {
 	const meanPrevalenceNoIntervention = getMeanPrevalencePostIntervention(prevalenceData, 'no_intervention');
 	const noInterventionMeanCases = getMeanCasesPostIntervention(postInterventionCasesMap['no_intervention']) ?? 0;
@@ -40,9 +35,6 @@ export const buildImpactTableData = (
 
 			return {
 				intervention: ScenarioToLabel[scenario as Scenario],
-				netUse: scenario.includes('py') ? (form.itn_future as number) : undefined,
-				irs: scenario === 'irs_only' ? (form.irs_future as number) : undefined,
-				lsm: scenario.includes('with_lsm') ? (form.lsm as number) : undefined,
 				casesAvertedMeanPer1000,
 				casesAvertedYear1Per1000,
 				casesAvertedYear2Per1000,
@@ -60,9 +52,6 @@ export const ImpactTableInfo: Record<
 	{ label: string; formatStyle: 'string' | 'percent' | 'decimal' }
 > = {
 	intervention: { label: 'Interventions', formatStyle: 'string' },
-	netUse: { label: 'Net use (%)', formatStyle: 'percent' },
-	irs: { label: 'IRS cover (%)', formatStyle: 'percent' },
-	lsm: { label: 'Reduction in mosquitoes from LSM (%)', formatStyle: 'percent' },
 	casesAvertedMeanPer1000: {
 		label: 'Mean cases averted per 1,000 people annually across 3 years since intervention',
 		formatStyle: 'decimal'
@@ -97,7 +86,7 @@ export const impactTableColumns: ColumnDef<ImpactTableMetrics>[] = Object.entrie
 	([key, headerInfo]) => ({
 		accessorKey: key,
 		cell: ({ getValue }) => {
-			const value = getValue();
+			const value = getValue() as string | number;
 
 			if (headerInfo.formatStyle === 'string') return value;
 

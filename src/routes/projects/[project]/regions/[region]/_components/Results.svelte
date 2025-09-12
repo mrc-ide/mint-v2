@@ -47,7 +47,7 @@
 		</Tabs.Content>
 
 		<Tabs.Content value="impact:table">
-			<ImpactTable {casesAverted} {emulatorResults} {postInterventionCasesMap} {form} />
+			<ImpactTable {casesAverted} {emulatorResults} {postInterventionCasesMap} />
 		</Tabs.Content>
 
 		<Tabs.Content value="cost:graph">
