@@ -11,7 +11,7 @@ const createPrevalenceSeries = (data: PrevalenceData[]): Highcharts.SeriesSpline
 				color: ScenarioToColor[scenario],
 				data: [],
 				type: 'spline',
-				...(scenario.includes('with_lsm') ? { dashStyle: 'Dash' } : {})
+				...(scenario.includes('lsm') ? { dashStyle: 'Dash' } : {})
 			});
 		}
 		seriesMap.get(scenario)!.data!.push([days / 365 - 1, prevalence * 100]);
