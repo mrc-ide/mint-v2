@@ -22,7 +22,9 @@
 		<div {@attach createHighchart(prevalenceConfig)} class={chartTheme}></div>
 	</section>
 
-	<section aria-label="Impact cases graph" class="rounded-lg border p-4">
-		<div {@attach createHighchart(casesConfig)} class={chartTheme}></div>
-	</section>
+	{#if Object.keys(casesAverted).length > 0}
+		<section aria-label="Impact cases graph" class="rounded-lg border p-4">
+			<div {@attach createHighchart(casesConfig)} class={chartTheme}></div>
+		</section>
+	{/if}
 </div>

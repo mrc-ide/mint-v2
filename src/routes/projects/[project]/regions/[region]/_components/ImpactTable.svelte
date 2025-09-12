@@ -1,8 +1,19 @@
 <script lang="ts">
+	import DataTable from '$lib/components/data-table/DataTable.svelte';
+	import type { CasesAverted } from '$lib/process-results/processCases';
+	import { buildImpactTableData, impactTableColumns } from '$lib/tables/impactTable';
+	import type { CasesData, EmulatorResults, Scenario } from '$lib/types/userState';
+
+	interface Props {
+		casesAverted: Partial<Record<Scenario, CasesAverted>>;
+		emulatorResults: EmulatorResults;
+		postInterventionCasesMap: Record<Scenario, CasesData[]>;
+	}
+	let { casesAverted, emulatorResults, postInterventionCasesMap }: Props = $props();
+
+	const data = $derived(buildImpactTableData(casesAverted, emulatorResults.prevalence, postInterventionCasesMap));
 </script>
 
-<section aria-label="Impact results table" class="rounded-lg border p-4">
-	<h3 class="mb-2 text-base font-semibold">Impact — Table</h3>
-	<!-- Replace with your real table component -->
-	<div class="text-sm text-muted-foreground">Table view of impact based on emulator results.</div>
+<section aria-label="Impact results table">
+	<DataTable columns={impactTableColumns} {data} />
 </section>
