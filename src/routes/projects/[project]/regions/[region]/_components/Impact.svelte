@@ -3,17 +3,21 @@
 	import { createHighchart } from '$lib/charts/baseChart';
 	import { getPrevalenceConfig } from '$lib/charts/prevalenceConfig';
 	import type { CasesAverted } from '$lib/process-results/processCases';
-	import type { PrevalenceData, Scenario } from '$lib/types/userState';
+	import type { CasesData, EmulatorResults, PrevalenceData, Scenario } from '$lib/types/userState';
 	import { mode } from 'mode-watcher';
+	import { buildImpactTableData, impactTableColumns } from '$lib/tables/impactTable';
+	import DataTable from '$lib/components/data-table/DataTable.svelte';
 
 	interface Props {
-		prevalence: PrevalenceData[];
 		casesAverted: Partial<Record<Scenario, CasesAverted>>;
+		emulatorResults: EmulatorResults;
+		postInterventionCasesMap: Record<Scenario, CasesData[]>;
 	}
 
-	let { prevalence, casesAverted }: Props = $props();
-	let prevalenceConfig = $derived(getPrevalenceConfig(prevalence));
+	let { casesAverted, emulatorResults, postInterventionCasesMap }: Props = $props();
+	let prevalenceConfig = $derived(getPrevalenceConfig(emulatorResults.prevalence));
 	let casesConfig = $derived(getCasesConfig(casesAverted));
+	const tableData = $derived(buildImpactTableData(casesAverted, emulatorResults.prevalence, postInterventionCasesMap));
 	let chartTheme = $derived(mode.current === 'dark' ? 'highcharts-dark' : 'highcharts-light');
 </script>
 
@@ -25,6 +29,9 @@
 	{#if Object.keys(casesAverted).length > 0}
 		<section aria-label="Impact cases graph" class="rounded-lg border p-4">
 			<div {@attach createHighchart(casesConfig)} class={chartTheme}></div>
+		</section>
+		<section aria-label="Impact results table">
+			<DataTable columns={impactTableColumns} data={tableData} />
 		</section>
 	{/if}
 </div>
