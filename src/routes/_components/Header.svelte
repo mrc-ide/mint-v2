@@ -18,7 +18,7 @@
 
 <header>
 	<div
-		class="fixed top-0 right-0 left-0 flex h-16 items-center border-b border-accent bg-background shadow-sm dark:shadow-gray-800"
+		class="fixed top-0 right-0 left-0 z-1 flex h-15 items-center border-b border-accent bg-background shadow-sm dark:shadow-gray-800"
 	>
 		<a
 			href="/"

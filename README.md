@@ -33,7 +33,7 @@ A modern SvelteKit application built with Svelte 5, TypeScript, TailwindCSS 4, a
 
 3. **Set up environment variables**:
 
-   Create a `.env` file, use the `example.env` as a template:
+   Create a `.env` file, use the `.env.example` as a template:
 
 4. **Start development server**:
 

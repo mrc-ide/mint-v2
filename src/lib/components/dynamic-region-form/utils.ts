@@ -153,4 +153,4 @@ export const checkCrossFieldValidation = (
 	}
 };
 
-export const DEBOUNCE_DELAY = 2000;
+export const DEBOUNCE_DELAY_MS = 1500;

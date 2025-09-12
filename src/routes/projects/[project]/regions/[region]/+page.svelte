@@ -1,18 +1,19 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { DynamicForm } from '$lib/components/dynamic-region-form';
-	import { toast } from 'svelte-sonner';
-	import type { PageProps } from './$types';
-	import { regionUrl } from '$lib/url';
-	import type { EmulatorResults } from '$lib/types/userState';
 	import type { FormValue } from '$lib/components/dynamic-region-form/types';
 	import { apiFetch } from '$lib/fetch';
-
+	import type { EmulatorResults } from '$lib/types/userState';
+	import { regionUrl } from '$lib/url';
+	import { toast } from 'svelte-sonner';
+	import type { PageProps } from './$types';
+	import Results from './_components/Results.svelte';
 	let { data, params }: PageProps = $props();
 
 	let isRunning = $state(false);
 	let hasRunBaseline = $derived(data.region.hasRunBaseline);
 	let runPromise = $derived(data.runPromise);
+	let form = $derived(data.region.formValues);
 
 	const runEmulator = async (formValues: Record<string, FormValue>): Promise<EmulatorResults> => {
 		isRunning = true;
@@ -24,6 +25,7 @@
 			});
 
 			isRunning = false;
+			form = formValues;
 			return res.data;
 		} catch (e) {
 			toast.error(`Failed to run emulator for region "${params.region}" in project "${params.project}"`);
@@ -33,9 +35,19 @@
 	};
 	const processCosts = (formValues: Record<string, FormValue>) => {
 		// TODO: Implement cost processing logic here
+		form = formValues;
 		console.log(formValues);
 	};
 </script>
+
+{#snippet failedLoad(err?: Error)}
+	<div class="flex flex-col items-center justify-center gap-2 p-8">
+		<div class="text-destructive">Failed to load results.</div>
+		{#if err}
+			<div class="text-sm text-destructive">{err.message}</div>
+		{/if}
+	</div>
+{/snippet}
 
 {#key page.url.pathname}
 	<DynamicForm
@@ -56,16 +68,12 @@
 			</div>
 		{:then emulatorResults}
 			{#if emulatorResults}
-				{JSON.stringify(emulatorResults)}
+				<Results {emulatorResults} {form} />
 			{:else}
-				<div class="flex items-center justify-center p-8">
-					<div class="text-destructive">Failed to load results.</div>
-				</div>
+				{@render failedLoad()}
 			{/if}
 		{:catch _err}
-			<div class="flex items-center justify-center p-8">
-				<div class="text-destructive">Failed to load results.</div>
-			</div>
+			{@render failedLoad(_err)}
 		{/await}
 	</DynamicForm>
 {/key}

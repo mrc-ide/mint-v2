@@ -4,8 +4,10 @@
 	import { ModeWatcher } from 'mode-watcher';
 	import '../app.css';
 	import Header from './_components/Header.svelte';
+	import { configureHighcharts } from '$lib/charts/baseChart';
 
 	let { children, data } = $props();
+	configureHighcharts();
 </script>
 
 <svelte:head>

@@ -1,9 +1,9 @@
+import { ApiError, apiFetch } from '$lib/fetch';
 import { saveRegionFormState } from '$lib/server/region';
 import type { EmulatorResults } from '$lib/types/userState';
 import { runEmulatorUrl } from '$lib/url';
 import { error, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { ApiError, apiFetch } from '$lib/fetch';
 
 /**
  * Handle POST requests to run models for a specific region in a project.
@@ -21,6 +21,7 @@ export const POST: RequestHandler = async ({ request, locals, params, fetch }) =
 			body: formValues,
 			fetcher: fetch
 		});
+
 		await saveRegionFormState(locals.userState, project, region, formValues);
 		return json(res);
 	} catch (e) {

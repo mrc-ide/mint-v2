@@ -1,10 +1,10 @@
 import type { DynamicFormSchema, FormValue } from '$lib/components/dynamic-region-form/types';
+import { ApiError, apiFetch } from '$lib/fetch';
 import { saveUserState } from '$lib/server/redis';
 import type { EmulatorResults, Region, UserState } from '$lib/types/userState';
 import { regionFormUrl, runEmulatorUrl } from '$lib/url';
 import { error } from '@sveltejs/kit';
 import type { RequestEvent } from '../../routes/projects/[project]/regions/[region]/$types';
-import { ApiError, apiFetch } from '$lib/fetch';
 
 export const getRegionFormSchema = async (
 	projectName: string,
@@ -25,7 +25,6 @@ export const runEmulatorOnLoad = async (
 	fetch: RequestEvent['fetch']
 ): Promise<EmulatorResults | null> => {
 	if (!regionData.hasRunBaseline) return null;
-	// if region has run, run models to get time series data
 	try {
 		const res = await apiFetch<EmulatorResults>({
 			url: runEmulatorUrl(),
