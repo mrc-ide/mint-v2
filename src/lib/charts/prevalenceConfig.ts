@@ -29,7 +29,6 @@ export const getPrevalenceConfig = (prevalence: PrevalenceData[]): Highcharts.Op
 		text: 'Projected prevalence in under 5 year olds'
 	},
 	xAxis: {
-		type: 'linear',
 		title: {
 			text: 'Years since intervention'
 		},
@@ -84,6 +83,8 @@ export const getPrevalenceConfig = (prevalence: PrevalenceData[]): Highcharts.Op
 		valueSuffix: '%',
 		valueDecimals: 1
 	},
-
+	legend: {
+		symbolWidth: 22
+	},
 	series: createPrevalenceSeries(prevalence)
 });

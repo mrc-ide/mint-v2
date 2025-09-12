@@ -16,10 +16,4 @@ declare global {
 	}
 }
 
-declare module 'highcharts' {
-	// interface Options {
-	// 	customOption: string;
-	// }
-}
-
 export {};

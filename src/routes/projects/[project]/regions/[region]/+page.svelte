@@ -40,9 +40,12 @@
 	};
 </script>
 
-{#snippet failedLoad()}
-	<div class="flex items-center justify-center p-8">
+{#snippet failedLoad(err?: Error)}
+	<div class="flex flex-col items-center justify-center gap-2 p-8">
 		<div class="text-destructive">Failed to load results.</div>
+		{#if err}
+			<div class="text-sm text-destructive">{err.message}</div>
+		{/if}
 	</div>
 {/snippet}
 
@@ -70,7 +73,7 @@
 				{@render failedLoad()}
 			{/if}
 		{:catch _err}
-			{@render failedLoad()}
+			{@render failedLoad(_err)}
 		{/await}
 	</DynamicForm>
 {/key}

@@ -56,7 +56,7 @@
 				min={field.min}
 				max={field.max}
 				step={field.step ?? 1}
-				disabled={isInputsDisabled}
+				disabled={isFieldDisabled}
 				value={Number(form[field.id] ?? 0)}
 				aria-invalid={Boolean(errors[field.id])}
 				onValueChange={(value) => onFieldChange(field, value)}
@@ -70,7 +70,7 @@
 				{@const selectedValues = (form[field.id] as string[]) ?? []}
 				<Label class="inline-flex items-center gap-2 text-sm font-normal">
 					<Checkbox
-						disabled={isInputsDisabled}
+						disabled={isFieldDisabled}
 						checked={selectedValues.includes(opt.value)}
 						onCheckedChange={(checked) => {
 							const current = new Set<string>(selectedValues);

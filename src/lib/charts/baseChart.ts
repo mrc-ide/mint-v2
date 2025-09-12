@@ -1,11 +1,42 @@
 import Highcharts from 'highcharts/esm/highcharts.js';
 import 'highcharts/esm/modules/accessibility';
 import 'highcharts/esm/modules/pattern-fill.js';
+import 'highcharts/esm/modules/exporting';
+
 import type { Attachment } from 'svelte/attachments';
 import type { Scenario } from '../types/userState';
 
 export const configureHighcharts = () => {
 	Highcharts.setOptions({
+		exporting: {
+			buttons: {
+				contextButton: {
+					height: 18,
+					width: 20,
+					symbolSize: 10,
+					symbolY: 9,
+					symbolX: 11,
+					symbolStrokeWidth: 2,
+					symbolStroke: 'var(--muted-foreground)',
+					symbolFill: 'var(--muted-foreground)',
+					useHTML: true,
+					theme: {
+						fill: 'var(--background)',
+						stroke: 'var(--muted-foreground)',
+						r: 3,
+						states: {
+							hover: {
+								fill: 'var(--accent)'
+							},
+							select: {
+								fill: 'var(--accent)',
+								stroke: 'var(--foreground)'
+							}
+						}
+					}
+				}
+			}
+		},
 		title: {
 			style: {
 				color: 'var(--foreground)'
