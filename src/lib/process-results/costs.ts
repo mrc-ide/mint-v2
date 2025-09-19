@@ -59,19 +59,28 @@ export const getIrsTotalCost = ({ irsAnnualCostPerHousehold, population, peopleP
 export const getLsmTotalCost = ({ lsmCostPerPerson, population }: CostOptions): number => lsmCostPerPerson * population;
 
 export const getItnTotalCost = (
-	{ itnCosts, population, peoplePerNet, isRoutine, procurementBuffer }: CostOptions,
+	{
+		itnCosts,
+		population,
+		peoplePerNet,
+		isRoutine,
+		procurementBuffer,
+		massDistributionCostPerPerson,
+		continuousDistributionCostPerPerson
+	}: CostOptions,
 	itnType: keyof CostOptions['itnCosts']
 ): number => {
-	const massCosts =
-		(itnCosts[itnType] * population + (itnCosts[itnType] * population) / peoplePerNet) * procurementBuffer;
+	const bedNetCost = (itnCosts[itnType] * population) / peoplePerNet;
+
+	const massCosts = (massDistributionCostPerPerson * population + bedNetCost) * procurementBuffer;
 	const continuousCosts = isRoutine
-		? 0.15 * (itnCosts[itnType] * population + (itnCosts[itnType] * population) / peoplePerNet) * procurementBuffer
+		? 0.15 * (continuousDistributionCostPerPerson * population + bedNetCost) * procurementBuffer
 		: 0;
 
 	return massCosts + continuousCosts;
 };
 
-export const getScenarioCalculators = (costOptions: CostOptions): Record<Scenario, () => number> => ({
+export const getScenarioCostCalculators = (costOptions: CostOptions): Record<Scenario, () => number> => ({
 	irs_only: () => getIrsTotalCost(costOptions),
 	lsm_only: () => getLsmTotalCost(costOptions),
 	py_only_only: () => getItnTotalCost(costOptions, 'pyOnly'),
@@ -90,13 +99,12 @@ export const getTotalCostsPerScenario = (
 	form: Record<string, FormValue>
 ): Partial<Record<Scenario, number>> => {
 	const costOptions = getFormCostOptions(form);
-	console.log('Cost Options:', costOptions);
-	const scenarioCalculators = getScenarioCalculators(costOptions);
+	const scenarioCostCalculators = getScenarioCostCalculators(costOptions);
 
 	return scenarios.reduce(
 		(costs, scenario) => ({
 			...costs,
-			[scenario]: scenarioCalculators[scenario]()
+			[scenario]: scenarioCostCalculators[scenario]()
 		}),
 		{} as Partial<Record<Scenario, number>>
 	);

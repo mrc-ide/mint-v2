@@ -25,7 +25,7 @@
 			});
 
 			isRunning = false;
-			form = formValues;
+			form = { ...formValues };
 			return res.data;
 		} catch (e) {
 			toast.error(`Failed to run emulator for region "${params.region}" in project "${params.project}"`);
@@ -33,10 +33,17 @@
 			throw e;
 		}
 	};
-	const processCosts = (formValues: Record<string, FormValue>) => {
-		// TODO: Implement cost processing logic here
-		form = formValues;
-		console.log(formValues);
+	const processCosts = async (formValues: Record<string, FormValue>) => {
+		form = { ...formValues };
+		try {
+			await apiFetch({
+				url: regionUrl(params.project, params.region),
+				method: 'PATCH',
+				body: { formValues }
+			});
+		} catch (e) {
+			toast.error('Failed to save form state');
+		}
 	};
 </script>
 
