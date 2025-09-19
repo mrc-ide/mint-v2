@@ -2,6 +2,7 @@
 	// ...existing code...
 	import type { FormValue } from '$lib/components/dynamic-region-form/types';
 	import * as Tabs from '$lib/components/ui/tabs/index.js';
+	import { DEFAULT_POPULATION } from '$lib/process-results/costs';
 	import { collectPostInterventionCases, getAvertedCasesData } from '$lib/process-results/processCases';
 	import type { EmulatorResults } from '$lib/types/userState';
 	import Cost from './Cost.svelte';
@@ -16,7 +17,9 @@
 	let tabSelected: 'impact' | 'cost' = $state('impact');
 
 	const postInterventionCasesMap = $derived(collectPostInterventionCases(emulatorResults.cases));
-	const casesAverted = $derived(getAvertedCasesData(postInterventionCasesMap));
+	const casesAverted = $derived(
+		getAvertedCasesData(postInterventionCasesMap, (form.population as number) || DEFAULT_POPULATION)
+	);
 </script>
 
 <Tabs.Root bind:value={tabSelected} aria-label="Results tabs" class="w-full">
@@ -31,6 +34,6 @@
 	</Tabs.Content>
 
 	<Tabs.Content value="cost">
-		<Cost />
+		<Cost {form} {casesAverted} />
 	</Tabs.Content>
 </Tabs.Root>
