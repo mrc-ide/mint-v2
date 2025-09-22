@@ -60,6 +60,16 @@ export const getIrsTotalCost = ({ irsAnnualCostPerHousehold, population, peopleP
 
 export const getLsmTotalCost = ({ lsmCostPerPerson, population }: CostOptions): number => lsmCostPerPerson * population;
 
+const calculateItnDistributionCosts = (
+	distributionCostPerPerson: number,
+	population: number,
+	bedNetCost: number,
+	procurementBuffer: number
+): number => (distributionCostPerPerson * population + bedNetCost) * procurementBuffer;
+
+export const calculateBedNetCost = (itnCost: number, population: number, peoplePerNet: number): number =>
+	(itnCost * population) / peoplePerNet;
+
 export const getItnTotalCost = (
 	{
 		itnCosts,
@@ -72,11 +82,17 @@ export const getItnTotalCost = (
 	}: CostOptions,
 	itnType: keyof CostOptions['itnCosts']
 ): number => {
-	const bedNetCost = (itnCosts[itnType] * population) / peoplePerNet;
+	const bedNetCost = calculateBedNetCost(itnCosts[itnType], population, peoplePerNet);
 
-	const massCosts = (massDistributionCostPerPerson * population + bedNetCost) * procurementBuffer;
+	const massCosts = calculateItnDistributionCosts(
+		massDistributionCostPerPerson,
+		population,
+		bedNetCost,
+		procurementBuffer
+	);
 	const continuousCosts = isRoutine
-		? 0.15 * (continuousDistributionCostPerPerson * population + bedNetCost) * procurementBuffer
+		? 0.15 *
+			calculateItnDistributionCosts(continuousDistributionCostPerPerson, population, bedNetCost, procurementBuffer)
 		: 0;
 
 	return massCosts + continuousCosts;
