@@ -1,7 +1,7 @@
 import type { FormValue } from '$lib/components/dynamic-region-form/types';
 import { POST_INTERVENTION_YEARS, type Scenario } from '$lib/types/userState';
 
-/** Fallback values for cost calculations */
+/** Fallback values for cost calculations, taken from mintr default */
 export const DEFAULT_POPULATION = 20000;
 export const DEFAULT_PEOPLE_PER_HOUSEHOLD = 4;
 export const DEFAULT_IRS_COST_PER_HOUSEHOLD = 20;
