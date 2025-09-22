@@ -7,6 +7,7 @@
 	import type { EmulatorResults } from '$lib/types/userState';
 	import Cost from './Cost.svelte';
 	import Impact from './Impact.svelte';
+	import { mode } from 'mode-watcher';
 
 	interface Props {
 		emulatorResults: EmulatorResults;
@@ -15,6 +16,7 @@
 
 	let { emulatorResults, form }: Props = $props();
 	let tabSelected: 'impact' | 'cost' = $state('impact');
+	let chartTheme = $derived(mode.current === 'dark' ? 'highcharts-dark' : 'highcharts-light');
 
 	const postInterventionCasesMap = $derived(collectPostInterventionCases(emulatorResults.cases));
 	const casesAverted = $derived(
@@ -30,10 +32,10 @@
 		</Tabs.List>
 	</div>
 	<Tabs.Content value="impact">
-		<Impact {casesAverted} {emulatorResults} {postInterventionCasesMap} />
+		<Impact {chartTheme} {casesAverted} {emulatorResults} {postInterventionCasesMap} />
 	</Tabs.Content>
 
 	<Tabs.Content value="cost">
-		<Cost {form} {casesAverted} />
+		<Cost {form} {casesAverted} {chartTheme} />
 	</Tabs.Content>
 </Tabs.Root>

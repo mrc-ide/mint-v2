@@ -6,19 +6,18 @@
 	import type { CasesAverted } from '$lib/process-results/processCases';
 	import { buildImpactTableData, impactTableColumns } from '$lib/tables/impactTable';
 	import type { CasesData, EmulatorResults, Scenario } from '$lib/types/userState';
-	import { mode } from 'mode-watcher';
 
 	interface Props {
 		casesAverted: Partial<Record<Scenario, CasesAverted>>;
 		emulatorResults: EmulatorResults;
 		postInterventionCasesMap: Record<Scenario, CasesData[]>;
+		chartTheme: string;
 	}
 
-	let { casesAverted, emulatorResults, postInterventionCasesMap }: Props = $props();
+	let { casesAverted, emulatorResults, postInterventionCasesMap, chartTheme }: Props = $props();
 	let prevalenceConfig = $derived(getPrevalenceConfig(emulatorResults.prevalence));
 	let casesConfig = $derived(getCasesConfig(casesAverted));
 	const tableData = $derived(buildImpactTableData(casesAverted, emulatorResults.prevalence, postInterventionCasesMap));
-	let chartTheme = $derived(mode.current === 'dark' ? 'highcharts-dark' : 'highcharts-light');
 </script>
 
 <div class="flex flex-col gap-6">
