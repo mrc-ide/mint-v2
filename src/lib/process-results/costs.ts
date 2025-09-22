@@ -1,6 +1,7 @@
 import type { FormValue } from '$lib/components/dynamic-region-form/types';
-import type { Scenario } from '$lib/types/userState';
+import { POST_INTERVENTION_YEARS, type Scenario } from '$lib/types/userState';
 
+/** Fallback values for cost calculations */
 export const DEFAULT_POPULATION = 20000;
 export const DEFAULT_PEOPLE_PER_HOUSEHOLD = 4;
 export const DEFAULT_IRS_COST_PER_HOUSEHOLD = 20;
@@ -15,6 +16,7 @@ export const DEFAULT_MASS_DISTRIBUTION_COST_PER_PERSON = 2.75;
 export const DEFAULT_CONTINUOUS_DISTRIBUTION_COST_PER_PERSON = 2.75;
 export const DEFAULT_PEOPLE_PER_NET = 1.8;
 
+/** Cost options for the various interventions */
 export interface CostOptions {
 	irsAnnualCostPerHousehold: number;
 	peoplePerHousehold: number;
@@ -54,7 +56,7 @@ export const getFormCostOptions = (form: Record<string, FormValue>): CostOptions
 });
 
 export const getIrsTotalCost = ({ irsAnnualCostPerHousehold, population, peoplePerHousehold }: CostOptions): number =>
-	3 * irsAnnualCostPerHousehold * (population / peoplePerHousehold);
+	POST_INTERVENTION_YEARS.length * irsAnnualCostPerHousehold * (population / peoplePerHousehold);
 
 export const getLsmTotalCost = ({ lsmCostPerPerson, population }: CostOptions): number => lsmCostPerPerson * population;
 

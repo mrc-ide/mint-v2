@@ -1,4 +1,4 @@
-import type { CasesData, Scenario } from '$lib/types/userState';
+import { PRE_INTERVENTION_YEAR, type CasesData, type Scenario } from '$lib/types/userState';
 
 export interface CasesAverted {
 	casesAvertedYear1Per1000: number;
@@ -16,7 +16,7 @@ export const getMeanCasesPostIntervention = (postInterventionCases: CasesData[])
 export const collectPostInterventionCases = (cases: CasesData[]) => {
 	return cases.reduce(
 		(acc, c) => {
-			if (c.year > 1) {
+			if (c.year > PRE_INTERVENTION_YEAR) {
 				acc[c.scenario] = acc[c.scenario] || [];
 				acc[c.scenario].push(c);
 			}
