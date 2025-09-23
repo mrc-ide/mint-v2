@@ -1,4 +1,4 @@
-import type { CasesAverted } from '$lib/process-results/processCases';
+import { convertPer1000ToTotal, convertTotalToPer1000, type CasesAverted } from '$lib/process-results/processCases';
 import type { Scenario } from '$lib/types/userState';
 import { getColumnColor, ScenarioToColor, ScenarioToLabel } from './baseChart';
 import type { SeriesScatterOptions, SeriesColumnOptions, Options } from 'highcharts';
@@ -17,7 +17,9 @@ const createCostsPer1000Series = (
 			color: ScenarioToColor[scenario],
 			type: 'scatter',
 			marker: { symbol: scenario.includes('lsm') ? 'diamond' : 'circle', radius: 6 },
-			data: [[casesAverted[scenario]!.totalAvertedCasesPer1000, (totalCosts[scenario]! / population) * 1000]]
+			data: [
+				[casesAverted[scenario]!.totalAvertedCasesPer1000, convertTotalToPer1000(totalCosts[scenario]!, population)]
+			]
 		}));
 };
 
@@ -63,7 +65,8 @@ const getCostPerCaseSeries = (
 				.filter((scenario) => casesAverted[scenario] && totalCosts[scenario]) // safety check
 				.map((scenario) => ({
 					name: ScenarioToLabel[scenario],
-					y: totalCosts[scenario]! / ((casesAverted[scenario]!.totalAvertedCasesPer1000 / 1000) * population),
+					y:
+						totalCosts[scenario]! / convertPer1000ToTotal(casesAverted[scenario]!.totalAvertedCasesPer1000, population),
 					color: getColumnColor(scenario),
 					dataLabels: {
 						enabled: true,

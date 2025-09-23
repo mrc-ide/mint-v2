@@ -13,7 +13,7 @@ export const getMeanCasesPostIntervention = (postInterventionCases: CasesData[])
 	postInterventionCases.reduce((sum, c) => sum + c.casesPer1000, 0) / postInterventionCases.length;
 
 // Group cases by scenario, filtering out year 1 (pre-intervention year)
-export const collectPostInterventionCases = (cases: CasesData[]) => {
+export const collectPostInterventionCases = (cases: CasesData[]): Record<Scenario, CasesData[]> => {
 	return cases.reduce(
 		(acc, c) => {
 			if (c.year > PRE_INTERVENTION_YEAR) {
@@ -60,3 +60,6 @@ export const getAvertedCasesData = (
 
 	return casesAverted;
 };
+
+export const convertPer1000ToTotal = (per1000: number, population: number) => (per1000 / 1000) * population;
+export const convertTotalToPer1000 = (total: number, population: number) => (total / population) * 1000;
