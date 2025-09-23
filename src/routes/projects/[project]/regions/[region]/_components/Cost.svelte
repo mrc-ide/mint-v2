@@ -17,7 +17,7 @@
 		getTotalCostsPerScenario(Object.keys(casesAverted) as Scenario[], form)
 	);
 	let costPer1000Config = $derived(
-		getCostPer1000Config(totalCosts, casesAverted, (form.population as number) || DEFAULT_POPULATION)
+		getCostPer1000Config(totalCosts, casesAverted, Number(form.population) || DEFAULT_POPULATION)
 	);
 </script>
 

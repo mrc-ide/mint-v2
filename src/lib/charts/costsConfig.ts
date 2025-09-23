@@ -14,9 +14,7 @@ export const createCostsPer1000Series = (
 			color: ScenarioToColor[scenario],
 			type: 'scatter',
 			marker: { symbol: scenario.includes('lsm') ? 'diamond' : 'circle', radius: 6 },
-			data: [
-				[(casesAverted[scenario]!.totalAvertedCases / population) * 1000, (totalCosts[scenario]! / population) * 1000]
-			]
+			data: [[casesAverted[scenario]!.totalAvertedCasesPer1000, (totalCosts[scenario]! / population) * 1000]]
 		}));
 
 export const getCostPer1000Config = (
