@@ -42,7 +42,7 @@
 				method: 'PATCH',
 				body: { formValues }
 			});
-		} catch (e) {
+		} catch (_e) {
 			toast.error('Failed to save form state');
 		}
 	};

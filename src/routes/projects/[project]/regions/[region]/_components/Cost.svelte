@@ -25,14 +25,14 @@
 </script>
 
 <div class="flex flex-col gap-6">
-	<section aria-label="Impact prevalence graph" class="rounded-lg border p-4">
+	<section aria-label="Cost per 1000 population graph" class="rounded-lg border p-4">
 		<div {@attach createHighchart(costPer1000Config)} class={chartTheme}></div>
 	</section>
 
-	<section aria-label="Impact cases graph" class="rounded-lg border p-4">
+	<section aria-label="Cost per case graph" class="rounded-lg border p-4">
 		<div {@attach createHighchart(costPerCaseConfig)} class={chartTheme}></div>
 	</section>
-	<section aria-label="Impact results table">
+	<section aria-label="Cost results table">
 		<DataTable columns={costTableColumns} data={tableData} />
 	</section>
 </div>
