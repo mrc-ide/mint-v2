@@ -29,3 +29,11 @@ export const POST: RequestHandler = async ({ request, locals, params, fetch }) =
 		error(status, 'Failed to run emulator for region');
 	}
 };
+
+export const PATCH: RequestHandler = async ({ request, locals, params }) => {
+	const { formValues } = await request.json();
+	const { project, region } = params;
+
+	await saveRegionFormState(locals.userState, project, region, formValues);
+	return new Response(null, { status: 204 });
+};

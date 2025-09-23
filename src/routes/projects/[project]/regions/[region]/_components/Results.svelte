@@ -10,16 +10,16 @@
 	interface Props {
 		emulatorResults: EmulatorResults;
 		form: Record<string, FormValue>;
+		activeTab: 'impact' | 'cost';
 	}
 
-	let { emulatorResults, form }: Props = $props();
-	let tabSelected: 'impact' | 'cost' = $state('impact');
+	let { emulatorResults, form, activeTab = $bindable() }: Props = $props();
 
 	const postInterventionCasesMap = $derived(collectPostInterventionCases(emulatorResults.cases));
 	const casesAverted = $derived(getAvertedCasesData(postInterventionCasesMap));
 </script>
 
-<Tabs.Root bind:value={tabSelected} aria-label="Results tabs" class="w-full">
+<Tabs.Root bind:value={activeTab} aria-label="Results tabs" class="w-full">
 	<div class="flex gap-2">
 		<Tabs.List class="w-full">
 			<Tabs.Trigger value="impact">Impact</Tabs.Trigger>
@@ -31,6 +31,6 @@
 	</Tabs.Content>
 
 	<Tabs.Content value="cost">
-		<Cost />
+		<Cost {form} {casesAverted} />
 	</Tabs.Content>
 </Tabs.Root>

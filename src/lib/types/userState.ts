@@ -17,9 +17,11 @@ export interface PrevalenceData {
 	days: number;
 	prevalence: number;
 }
+export const PRE_INTERVENTION_YEAR = 1 as const;
+export const POST_INTERVENTION_YEARS = [2, 3, 4] as const;
 export interface CasesData {
 	scenario: Scenario;
-	year: 1 | 2 | 3 | 4; // 1=baseline, 2-4=years post-intervention
+	year: typeof PRE_INTERVENTION_YEAR | (typeof POST_INTERVENTION_YEARS)[number]; // 1=baseline, 2-4=years post-intervention
 	casesPer1000: number;
 }
 export interface EmulatorResults {

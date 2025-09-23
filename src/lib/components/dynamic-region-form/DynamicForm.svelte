@@ -47,14 +47,6 @@
 	forEachField(schema.groups, (field, group) => {
 		fieldToGroup[field.id] = group;
 	});
-	let triggerRunFormValues = $derived<Record<string, FormValue>>(
-		Object.fromEntries(
-			Object.entries(form).filter(([key, _value]) => {
-				const group = fieldToGroup[key];
-				return group && group.triggersRun;
-			})
-		)
-	);
 	// initialize form values and errors
 	forEachField(schema.groups, (field) => {
 		form[field.id] = initialValues[field.id] ?? coerceDefaults(field);
@@ -102,7 +94,7 @@
 
 		const group = fieldToGroup[field.id];
 		if (group.triggersRun) {
-			debouncedRun(triggerRunFormValues);
+			debouncedRun(form);
 		} else {
 			debouncedProcess(form);
 		}
@@ -143,7 +135,7 @@
 					if (hasFormErrors) return;
 					hasRunBaseline = true;
 					try {
-						await run(triggerRunFormValues);
+						await run(form);
 						collapsePreRunGroups();
 					} catch (_e) {
 						hasRunBaseline = false;
