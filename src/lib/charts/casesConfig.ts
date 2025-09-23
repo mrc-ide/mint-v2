@@ -14,7 +14,7 @@ const getCasesSeriesData = (
 			type: 'column',
 			data: scenarios.map((scenario) => ({
 				name: ScenarioToLabel[scenario],
-				y: casesAverted[scenario]!.casesAvertedMeanPer1000,
+				y: casesAverted[scenario]?.casesAvertedMeanPer1000,
 				color: {
 					pattern: {
 						color: ScenarioToColor[scenario],
