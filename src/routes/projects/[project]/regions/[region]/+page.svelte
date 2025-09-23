@@ -14,6 +14,7 @@
 	let hasRunBaseline = $derived(data.region.hasRunBaseline);
 	let runPromise = $derived(data.runPromise);
 	let form = $derived(data.region.formValues);
+	let activeTab: 'impact' | 'cost' = $state('impact');
 
 	const runEmulator = async (formValues: Record<string, FormValue>): Promise<EmulatorResults> => {
 		isRunning = true;
@@ -25,7 +26,7 @@
 			});
 
 			isRunning = false;
-			form = { ...formValues };
+			form = formValues;
 			return res.data;
 		} catch (e) {
 			toast.error(`Failed to run emulator for region "${params.region}" in project "${params.project}"`);
@@ -34,7 +35,7 @@
 		}
 	};
 	const processCosts = async (formValues: Record<string, FormValue>) => {
-		form = { ...formValues };
+		form = formValues;
 		try {
 			await apiFetch({
 				url: regionUrl(params.project, params.region),
@@ -75,7 +76,7 @@
 			</div>
 		{:then emulatorResults}
 			{#if emulatorResults}
-				<Results {emulatorResults} {form} />
+				<Results {emulatorResults} {form} bind:activeTab />
 			{:else}
 				{@render failedLoad()}
 			{/if}

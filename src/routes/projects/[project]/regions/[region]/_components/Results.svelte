@@ -2,7 +2,6 @@
 	// ...existing code...
 	import type { FormValue } from '$lib/components/dynamic-region-form/types';
 	import * as Tabs from '$lib/components/ui/tabs/index.js';
-	import { DEFAULT_POPULATION } from '$lib/process-results/costs';
 	import { collectPostInterventionCases, getAvertedCasesData } from '$lib/process-results/processCases';
 	import type { EmulatorResults } from '$lib/types/userState';
 	import Cost from './Cost.svelte';
@@ -11,18 +10,16 @@
 	interface Props {
 		emulatorResults: EmulatorResults;
 		form: Record<string, FormValue>;
+		activeTab: 'impact' | 'cost';
 	}
 
-	let { emulatorResults, form }: Props = $props();
-	let tabSelected: 'impact' | 'cost' = $state('impact');
+	let { emulatorResults, form, activeTab = $bindable() }: Props = $props();
 
 	const postInterventionCasesMap = $derived(collectPostInterventionCases(emulatorResults.cases));
-	const casesAverted = $derived(
-		getAvertedCasesData(postInterventionCasesMap, (form.population as number) || DEFAULT_POPULATION)
-	);
+	const casesAverted = $derived(getAvertedCasesData(postInterventionCasesMap));
 </script>
 
-<Tabs.Root bind:value={tabSelected} aria-label="Results tabs" class="w-full">
+<Tabs.Root bind:value={activeTab} aria-label="Results tabs" class="w-full">
 	<div class="flex gap-2">
 		<Tabs.List class="w-full">
 			<Tabs.Trigger value="impact">Impact</Tabs.Trigger>

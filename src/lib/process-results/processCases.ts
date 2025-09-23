@@ -5,7 +5,7 @@ export interface CasesAverted {
 	casesAvertedYear2Per1000: number;
 	casesAvertedYear3Per1000: number;
 	casesAvertedMeanPer1000: number;
-	totalAvertedCases: number;
+	totalAvertedCasesPer1000: number;
 }
 const POST_INTERVENTION_YEARS = [2, 3, 4] as const;
 
@@ -27,8 +27,7 @@ export const collectPostInterventionCases = (cases: CasesData[]) => {
 };
 
 export const getAvertedCasesData = (
-	postInterventionCasesMap: Record<Scenario, CasesData[]>,
-	population: number
+	postInterventionCasesMap: Record<Scenario, CasesData[]>
 ): Partial<Record<Scenario, CasesAverted>> => {
 	const noInterventionCases = postInterventionCasesMap['no_intervention'];
 	if (!noInterventionCases?.length) return {};
@@ -55,8 +54,7 @@ export const getAvertedCasesData = (
 			casesAvertedYear2Per1000,
 			casesAvertedYear3Per1000,
 			casesAvertedMeanPer1000: meanNoInterventionCases - meanCasesForScenario,
-			totalAvertedCases:
-				(casesAvertedYear1Per1000 + casesAvertedYear2Per1000 + casesAvertedYear3Per1000) * (population / 1000)
+			totalAvertedCasesPer1000: casesAvertedYear1Per1000 + casesAvertedYear2Per1000 + casesAvertedYear3Per1000
 		};
 	}
 
