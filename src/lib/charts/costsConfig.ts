@@ -1,14 +1,16 @@
 import type { CasesAverted } from '$lib/process-results/processCases';
 import type { Scenario } from '$lib/types/userState';
-import { ScenarioToColor, ScenarioToLabel } from './baseChart';
+import { getColumnColor, ScenarioToColor, ScenarioToLabel } from './baseChart';
 import type { SeriesScatterOptions, SeriesColumnOptions, Options } from 'highcharts';
 
 const createCostsPer1000Series = (
 	totalCosts: Partial<Record<Scenario, number>>,
 	casesAverted: Partial<Record<Scenario, CasesAverted>>,
 	population: number
-): SeriesScatterOptions[] =>
-	(Object.keys(casesAverted) as Scenario[])
+): SeriesScatterOptions[] => {
+	const scenarios = Object.keys(casesAverted) as Scenario[];
+
+	return scenarios
 		.filter((scenario) => casesAverted[scenario] && totalCosts[scenario]) // safety check
 		.map((scenario) => ({
 			name: ScenarioToLabel[scenario],
@@ -17,6 +19,7 @@ const createCostsPer1000Series = (
 			marker: { symbol: scenario.includes('lsm') ? 'diamond' : 'circle', radius: 6 },
 			data: [[casesAverted[scenario]!.totalAvertedCasesPer1000, (totalCosts[scenario]! / population) * 1000]]
 		}));
+};
 
 const getCostPer1000Config = (
 	totalCosts: Partial<Record<Scenario, number>>,
@@ -54,28 +57,17 @@ const getCostPerCaseSeries = (
 	const scenarios = Object.keys(casesAverted) as Scenario[];
 	return [
 		{
-			name: 'Mean',
+			name: 'Cost',
 			type: 'column',
 			data: scenarios
 				.filter((scenario) => casesAverted[scenario] && totalCosts[scenario]) // safety check
 				.map((scenario) => ({
 					name: ScenarioToLabel[scenario],
 					y: totalCosts[scenario]! / ((casesAverted[scenario]!.totalAvertedCasesPer1000 / 1000) * population),
-					color: {
-						pattern: {
-							color: ScenarioToColor[scenario],
-							width: 10,
-							height: 10,
-							...(scenario.includes('lsm') && {
-								path: {
-									d: 'M 0 0 L 10 10 M 9 -1 L 11 1 M -1 9 L 1 11'
-								}
-							})
-						}
-					},
+					color: getColumnColor(scenario),
 					dataLabels: {
 						enabled: true,
-						format: '${point.y:.0f}'
+						format: '${point.y:.1f}'
 					}
 				}))
 		}

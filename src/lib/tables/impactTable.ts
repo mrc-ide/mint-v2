@@ -47,7 +47,7 @@ export const buildImpactTableData = (
 		}
 	);
 };
-export const ImpactTableInfo: Record<
+const ImpactTableInfo: Record<
 	keyof ImpactTableMetrics,
 	{ label: string; formatStyle: 'string' | 'percent' | 'decimal' }
 > = {
@@ -95,7 +95,7 @@ export const impactTableColumns: ColumnDef<ImpactTableMetrics>[] = Object.entrie
 				maximumSignificantDigits: 3
 			});
 			const formattedValue = headerInfo.formatStyle === 'percent' ? (value as number) / 100 : (value as number);
-			return value !== undefined ? formatter.format(formattedValue) : 'N/A';
+			return formatter.format(formattedValue);
 		},
 		header: ({ column }) => {
 			return renderComponent(DataTableSortHeader, {

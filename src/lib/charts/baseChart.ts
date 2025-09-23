@@ -144,3 +144,16 @@ export const ScenarioToColor: Record<Scenario, string> = {
 	py_ppf_only: 'var(--chart-6)',
 	py_ppf_with_lsm: 'var(--chart-6)'
 };
+
+export const getColumnColor = (scenario: Scenario) => ({
+	pattern: {
+		color: ScenarioToColor[scenario],
+		width: 10,
+		height: 10,
+		...(scenario.includes('lsm') && {
+			path: {
+				d: 'M 0 0 L 10 10 M 9 -1 L 11 1 M -1 9 L 1 11'
+			}
+		})
+	}
+});
