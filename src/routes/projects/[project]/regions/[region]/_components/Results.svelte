@@ -33,6 +33,12 @@
 	</Tabs.Content>
 
 	<Tabs.Content value="cost">
-		<Cost {form} {casesAverted} {chartTheme} />
+		{#if Object.keys(casesAverted).length === 0}
+			<p class="p-4 text-center text-sm text-muted-foreground">
+				Cost results are not available because no interventions were selected.
+			</p>
+		{:else}
+			<Cost {form} {casesAverted} {chartTheme} />
+		{/if}
 	</Tabs.Content>
 </Tabs.Root>
