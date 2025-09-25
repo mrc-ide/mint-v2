@@ -3,7 +3,11 @@
 	import { getCostConfigs } from '$lib/charts/costsConfig';
 	import DataTable from '$lib/components/data-table/DataTable.svelte';
 	import type { FormValue } from '$lib/components/dynamic-region-form/types';
-	import { DEFAULT_POPULATION, getTotalCostsPerScenario } from '$lib/process-results/costs';
+	import {
+		DEFAULT_POPULATION,
+		combineCostsAndCasesAverted,
+		getTotalCostsPerScenario
+	} from '$lib/process-results/costs';
 	import type { CasesAverted } from '$lib/process-results/processCases';
 	import { buildCostTableData, costTableColumns } from '$lib/tables/costTable';
 	import type { Scenario } from '$lib/types/userState';
@@ -15,13 +19,14 @@
 	}
 	let { form, casesAverted, chartTheme }: Props = $props();
 
-	let totalCosts: Partial<Record<Scenario, number>> = $derived(
-		getTotalCostsPerScenario(Object.keys(casesAverted) as Scenario[], form)
+	let costsAndCasesAverted = $derived(
+		combineCostsAndCasesAverted(getTotalCostsPerScenario(Object.keys(casesAverted) as Scenario[], form), casesAverted)
 	);
+
 	let { costPer1000Config, costPerCaseConfig } = $derived(
-		getCostConfigs(totalCosts, casesAverted, Number(form.population) || DEFAULT_POPULATION)
+		getCostConfigs(costsAndCasesAverted, Number(form.population) || DEFAULT_POPULATION)
 	);
-	let tableData = $derived(buildCostTableData(totalCosts, casesAverted, Number(form.population) || DEFAULT_POPULATION));
+	let tableData = $derived(buildCostTableData(costsAndCasesAverted, Number(form.population) || DEFAULT_POPULATION));
 </script>
 
 <div class="flex flex-col gap-6">

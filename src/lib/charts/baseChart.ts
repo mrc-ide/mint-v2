@@ -145,7 +145,7 @@ export const ScenarioToColor: Record<Scenario, string> = {
 	py_ppf_with_lsm: 'var(--chart-6)'
 };
 
-export const getColumnColor = (scenario: Scenario) => ({
+export const getColumnFill = (scenario: Scenario): Highcharts.PatternObject => ({
 	pattern: {
 		color: ScenarioToColor[scenario],
 		width: 10,

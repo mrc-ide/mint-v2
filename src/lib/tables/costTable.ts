@@ -1,9 +1,10 @@
-import { renderComponent } from '$lib/components/ui/data-table';
-import type { ColumnDef } from '@tanstack/table-core';
-import DataTableSortHeader from '$lib/components/data-table/DataTableSortHeader.svelte';
-import type { Scenario } from '$lib/types/userState';
-import { convertPer1000ToTotal, type CasesAverted } from '$lib/process-results/processCases';
 import { ScenarioToLabel } from '$lib/charts/baseChart';
+import DataTableSortHeader from '$lib/components/data-table/DataTableSortHeader.svelte';
+import { renderComponent } from '$lib/components/ui/data-table';
+import type { CostCasesAndAverted } from '$lib/process-results/costs';
+import { convertPer1000ToTotal } from '$lib/process-results/processCases';
+import type { Scenario } from '$lib/types/userState';
+import type { ColumnDef } from '@tanstack/table-core';
 
 export interface CostTableMetrics {
 	intervention: string;
@@ -12,24 +13,18 @@ export interface CostTableMetrics {
 	costPerCaseAverted: number;
 }
 export const buildCostTableData = (
-	totalCosts: Partial<Record<Scenario, number>>,
-	casesAverted: Partial<Record<Scenario, CasesAverted>>,
+	costsAndCasesAverted: Partial<Record<Scenario, CostCasesAndAverted>>,
 	population: number
-): CostTableMetrics[] => {
-	const scenarios = Object.keys(casesAverted) as Scenario[];
-
-	return scenarios
-		.filter((scenario) => casesAverted[scenario] && totalCosts[scenario]) // safety check
-		.map((scenario) => {
-			const casesAvertedTotal = convertPer1000ToTotal(casesAverted[scenario]!.totalAvertedCasesPer1000, population);
-			return {
-				intervention: ScenarioToLabel[scenario],
-				casesAvertedTotal,
-				totalCost: totalCosts[scenario]!,
-				costPerCaseAverted: totalCosts[scenario]! / casesAvertedTotal
-			};
-		});
-};
+): CostTableMetrics[] =>
+	Object.entries(costsAndCasesAverted).map(([scenario, { casesAverted, totalCost }]) => {
+		const casesAvertedTotal = convertPer1000ToTotal(casesAverted.totalAvertedCasesPer1000, population);
+		return {
+			intervention: ScenarioToLabel[scenario as Scenario],
+			casesAvertedTotal,
+			totalCost: totalCost,
+			costPerCaseAverted: totalCost / casesAvertedTotal
+		};
+	});
 
 const CostTableInfo: Record<keyof CostTableMetrics, { label: string; formatStyle: 'string' | 'decimal' | 'currency' }> =
 	{
@@ -48,9 +43,9 @@ export const costTableColumns: ColumnDef<CostTableMetrics>[] = Object.entries(Co
 
 			const formatter = new Intl.NumberFormat('en-US', {
 				style: headerInfo.formatStyle,
-				maximumFractionDigits: 1,
+				trailingZeroDisplay: 'stripIfInteger',
 				currency: 'USD',
-				notation: 'compact'
+				maximumFractionDigits: 2
 			});
 			return formatter.format(value as number);
 		},

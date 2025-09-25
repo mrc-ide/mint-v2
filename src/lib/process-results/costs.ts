@@ -1,5 +1,6 @@
 import type { FormValue } from '$lib/components/dynamic-region-form/types';
 import { POST_INTERVENTION_YEARS, type Scenario } from '$lib/types/userState';
+import type { CasesAverted } from './processCases';
 
 /** Fallback values for cost calculations, taken from mintr default */
 export const DEFAULT_POPULATION = 20000;
@@ -127,3 +128,18 @@ export const getTotalCostsPerScenario = (
 		{} as Partial<Record<Scenario, number>>
 	);
 };
+
+export interface CostCasesAndAverted {
+	totalCost: number;
+	casesAverted: CasesAverted;
+}
+
+export const combineCostsAndCasesAverted = (
+	totalCosts: Partial<Record<Scenario, number>>,
+	casesAverted: Partial<Record<Scenario, CasesAverted>>
+): Partial<Record<Scenario, CostCasesAndAverted>> =>
+	Object.fromEntries(
+		(Object.keys(totalCosts) as Scenario[])
+			.filter((scenario) => totalCosts[scenario] !== undefined && casesAverted[scenario])
+			.map((scenario) => [scenario, { totalCost: totalCosts[scenario], casesAverted: casesAverted[scenario] }])
+	);

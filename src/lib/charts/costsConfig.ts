@@ -1,31 +1,23 @@
-import { convertPer1000ToTotal, convertTotalToPer1000, type CasesAverted } from '$lib/process-results/processCases';
+import type { CostCasesAndAverted } from '$lib/process-results/costs';
+import { convertPer1000ToTotal, convertTotalToPer1000 } from '$lib/process-results/processCases';
 import type { Scenario } from '$lib/types/userState';
-import { getColumnColor, ScenarioToColor, ScenarioToLabel } from './baseChart';
-import type { SeriesScatterOptions, SeriesColumnOptions, Options } from 'highcharts';
+import type { Options, SeriesColumnOptions, SeriesScatterOptions } from 'highcharts';
+import { getColumnFill, ScenarioToColor, ScenarioToLabel } from './baseChart';
 
 const createCostsPer1000Series = (
-	totalCosts: Partial<Record<Scenario, number>>,
-	casesAverted: Partial<Record<Scenario, CasesAverted>>,
+	costsAndCasesAverted: Partial<Record<Scenario, CostCasesAndAverted>>,
 	population: number
-): SeriesScatterOptions[] => {
-	const scenarios = Object.keys(casesAverted) as Scenario[];
-
-	return scenarios
-		.filter((scenario) => casesAverted[scenario] && totalCosts[scenario]) // safety check
-		.map((scenario) => ({
-			name: ScenarioToLabel[scenario],
-			color: ScenarioToColor[scenario],
-			type: 'scatter',
-			marker: { symbol: scenario.includes('lsm') ? 'diamond' : 'circle', radius: 6 },
-			data: [
-				[casesAverted[scenario]!.totalAvertedCasesPer1000, convertTotalToPer1000(totalCosts[scenario]!, population)]
-			]
-		}));
-};
+): SeriesScatterOptions[] =>
+	Object.entries(costsAndCasesAverted).map(([scenario, { totalCost, casesAverted }]) => ({
+		name: ScenarioToLabel[scenario as Scenario],
+		color: ScenarioToColor[scenario as Scenario],
+		type: 'scatter',
+		marker: { symbol: scenario.includes('lsm') ? 'diamond' : 'circle', radius: 6 },
+		data: [[casesAverted.totalAvertedCasesPer1000, convertTotalToPer1000(totalCost, population)]]
+	}));
 
 const getCostPer1000Config = (
-	totalCosts: Partial<Record<Scenario, number>>,
-	casesAverted: Partial<Record<Scenario, CasesAverted>>,
+	costsAndCasesAverted: Partial<Record<Scenario, CostCasesAndAverted>>,
 	population: number
 ): Options => ({
 	chart: {
@@ -46,43 +38,34 @@ const getCostPer1000Config = (
 		}
 	},
 	tooltip: {
-		pointFormat: 'Cases averted: <b>{point.x:.1f}</b><br/>Cost: <b>${point.y:,.1f}</b>'
+		pointFormat: 'Cases averted: <b>{point.x:.2f}</b><br/>Cost: <b>${point.y:,.2f}</b>'
 	},
-	series: createCostsPer1000Series(totalCosts, casesAverted, population)
+	series: createCostsPer1000Series(costsAndCasesAverted, population)
 });
 
 const getCostPerCaseSeries = (
-	totalCosts: Partial<Record<Scenario, number>>,
-	casesAverted: Partial<Record<Scenario, CasesAverted>>,
+	costsAndCasesAverted: Partial<Record<Scenario, CostCasesAndAverted>>,
 	population: number
-): SeriesColumnOptions[] => {
-	const scenarios = Object.keys(casesAverted) as Scenario[];
-	return [
-		{
-			name: 'Cost',
-			type: 'column',
-			data: scenarios
-				.filter((scenario) => casesAverted[scenario] && totalCosts[scenario]) // safety check
-				.map((scenario) => ({
-					name: ScenarioToLabel[scenario],
-					y:
-						totalCosts[scenario]! / convertPer1000ToTotal(casesAverted[scenario]!.totalAvertedCasesPer1000, population),
-					color: getColumnColor(scenario),
-					dataLabels: {
-						enabled: true,
-						format: '${point.y:.1f}'
-					}
-				}))
-		}
-	];
-};
+): SeriesColumnOptions[] => [
+	{
+		name: 'Cost',
+		type: 'column',
+		data: Object.entries(costsAndCasesAverted).map(([scenario, { totalCost, casesAverted }]) => ({
+			name: ScenarioToLabel[scenario as Scenario],
+			y: totalCost / convertPer1000ToTotal(casesAverted.totalAvertedCasesPer1000, population),
+			color: getColumnFill(scenario as Scenario),
+			dataLabels: {
+				enabled: true,
+				format: '${point.y:.2f}'
+			}
+		}))
+	}
+];
+
 const getCostPerCaseConfig = (
-	totalCosts: Partial<Record<Scenario, number>>,
-	casesAverted: Partial<Record<Scenario, CasesAverted>>,
+	costsAndCasesAverted: Partial<Record<Scenario, CostCasesAndAverted>>,
 	population: number
 ): Options => {
-	const scenarios = Object.keys(casesAverted) as Scenario[];
-
 	return {
 		chart: {
 			type: 'column',
@@ -94,7 +77,7 @@ const getCostPerCaseConfig = (
 		},
 		xAxis: {
 			type: 'category',
-			categories: scenarios.map((scenario) => ScenarioToLabel[scenario]),
+			categories: (Object.keys(costsAndCasesAverted) as Scenario[]).map((scenario) => ScenarioToLabel[scenario]),
 			accessibility: {
 				description: 'Intervention types'
 			},
@@ -107,7 +90,7 @@ const getCostPerCaseConfig = (
 				text: 'Cost per case averted (USD)'
 			}
 		},
-		series: getCostPerCaseSeries(totalCosts, casesAverted, population),
+		series: getCostPerCaseSeries(costsAndCasesAverted, population),
 		plotOptions: {
 			column: {
 				groupPadding: 0.05
@@ -117,17 +100,16 @@ const getCostPerCaseConfig = (
 			enabled: false
 		},
 		tooltip: {
-			valueDecimals: 1,
+			valueDecimals: 2,
 			valuePrefix: '$'
 		}
 	};
 };
 
 export const getCostConfigs = (
-	totalCosts: Partial<Record<Scenario, number>>,
-	casesAverted: Partial<Record<Scenario, CasesAverted>>,
+	costsAndCasesAverted: Partial<Record<Scenario, CostCasesAndAverted>>,
 	population: number
 ): { costPer1000Config: Options; costPerCaseConfig: Options } => ({
-	costPer1000Config: getCostPer1000Config(totalCosts, casesAverted, population),
-	costPerCaseConfig: getCostPerCaseConfig(totalCosts, casesAverted, population)
+	costPer1000Config: getCostPer1000Config(costsAndCasesAverted, population),
+	costPerCaseConfig: getCostPerCaseConfig(costsAndCasesAverted, population)
 });
