@@ -1,7 +1,7 @@
 import type { DynamicFormSchema, FormValue } from '$lib/components/dynamic-region-form/types';
 import { ApiError, apiFetch } from '$lib/fetch';
 import { saveUserState } from '$lib/server/redis';
-import type { EmulatorResults, Region, UserState } from '$lib/types/userState';
+import type { CasesData, EmulatorResults, Region, UserState } from '$lib/types/userState';
 import { regionFormUrl, runEmulatorUrl } from '$lib/url';
 import { error } from '@sveltejs/kit';
 import type { RequestEvent } from '../../routes/projects/[project]/regions/[region]/$types';
@@ -40,6 +40,20 @@ export const runEmulatorOnLoad = async (
 	return null;
 };
 
+export const saveRegionRun = async (
+	userState: UserState,
+	project: string,
+	region: string,
+	formValues: Record<string, FormValue>,
+	cases: CasesData[]
+) => {
+	const regionData = getValidatedRegionData(userState, project, region);
+	regionData.formValues = formValues;
+	regionData.cases = cases;
+	regionData.hasRunBaseline = true;
+	await saveUserState(userState);
+};
+
 export const saveRegionFormState = async (
 	userState: UserState,
 	projectName: string,
@@ -48,16 +62,19 @@ export const saveRegionFormState = async (
 ) => {
 	const regionData = getValidatedRegionData(userState, projectName, regionName);
 	regionData.formValues = formValues;
-	regionData.hasRunBaseline = true;
 	await saveUserState(userState);
 };
 
 export const getValidatedRegionData = (userState: UserState, projectName: string, regionName: string): Region => {
-	const projectData = userState.projects.find((p) => p.name === projectName);
-	if (!projectData) error(404, `Project "${projectName}" not found`);
+	const projectData = getValidatedProjectData(userState, projectName);
 
 	const regionData = projectData.regions.find((r) => r.name === regionName);
 	if (!regionData) error(404, `Region "${regionName}" not found in project "${projectName}"`);
 
 	return regionData;
+};
+export const getValidatedProjectData = (userState: UserState, projectName: string) => {
+	const projectData = userState.projects.find((p) => p.name === projectName);
+	if (!projectData) error(404, `Project "${projectName}" not found`);
+	return projectData;
 };

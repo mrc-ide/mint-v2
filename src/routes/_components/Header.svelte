@@ -28,9 +28,9 @@
 		{#if project && region}
 			<HeaderRegionsDropdown {project} {region} />
 		{/if}
-		{#if project && project.canStrategize}
-			<a class={buttonVariants({ variant: 'link', class: 'p-1' })} href={`/projects/${project.name}/strategize`}>
-				Strategize across regions
+		{#if project && region}
+			<a class={buttonVariants({ variant: 'link', class: 'p-1' })} href={`/projects/${project.name}/strategise`}>
+				Strategise across regions
 			</a>
 		{/if}
 		<div class="ml-auto flex items-center gap-3 px-4">

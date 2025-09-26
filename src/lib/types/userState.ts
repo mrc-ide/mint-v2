@@ -33,12 +33,15 @@ export interface Region {
 	name: string;
 	hasRunBaseline: boolean;
 	formValues: Record<string, FormValue>;
+	cases: CasesData[];
+}
+export interface Strategy {
+	budget: number;
 }
 export interface Project {
 	name: string;
-	budget: number;
 	regions: Region[];
-	canStrategize?: boolean;
+	strategy: Strategy;
 }
 
 export interface UserState {

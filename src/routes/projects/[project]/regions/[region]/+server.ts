@@ -1,5 +1,5 @@
 import { ApiError, apiFetch } from '$lib/fetch';
-import { saveRegionFormState } from '$lib/server/region';
+import { saveRegionFormState, saveRegionRun } from '$lib/server/region';
 import type { EmulatorResults } from '$lib/types/userState';
 import { runEmulatorUrl } from '$lib/url';
 import { error, json } from '@sveltejs/kit';
@@ -22,7 +22,7 @@ export const POST: RequestHandler = async ({ request, locals, params, fetch }) =
 			fetcher: fetch
 		});
 
-		await saveRegionFormState(locals.userState, project, region, formValues);
+		await saveRegionRun(locals.userState, project, region, formValues, res.data.cases);
 		return json(res);
 	} catch (e) {
 		const status = e instanceof ApiError ? e.status : 500;
