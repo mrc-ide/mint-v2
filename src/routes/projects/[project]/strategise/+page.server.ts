@@ -1,30 +1,65 @@
+import { ApiError, apiFetch } from '$lib/fetch';
 import { getValidatedProjectData } from '$lib/server/region';
-import { superValidate } from 'sveltekit-superforms';
-import type { PageServerLoad } from './$types';
+import type { StrategiseResults } from '$lib/types/userState';
+import { strategiseUrl } from '$lib/url';
+import { message, superValidate, type ErrorStatus } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
+import type { Actions, PageServerLoad } from './$types';
 import { strategiseSchema } from './schema';
-import type { Actions } from '@sveltejs/kit';
+import { getCasesAvertedAndCostsForStrategise } from './utils';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const { project } = params;
 
 	const projectData = getValidatedProjectData(locals.userState, project);
+	const regionalStrategies = getCasesAvertedAndCostsForStrategise(projectData.regions);
 
 	return {
 		project: projectData,
-		form: await superValidate({ budget: projectData.strategy.budget }, zod(strategiseSchema))
+		form: await superValidate(
+			{
+				budget: projectData.strategy.budget,
+				regionalStrategies: regionalStrategies
+			},
+			zod(strategiseSchema)
+		)
 	};
 };
 
 export const actions: Actions = {
-	default: async ({ request, locals }) => {
+	default: async ({ request, locals, fetch, params }) => {
+		const { project } = params;
 		const form = await superValidate(request, zod(strategiseSchema));
 		if (!form.valid) {
 			return { form };
 		}
-		console.log(form.data);
-		// todo: get strategy results and save to user data
 
-		return { form };
+		try {
+			const res = await apiFetch<StrategiseResults[]>({
+				fetcher: fetch,
+				url: strategiseUrl(),
+				method: 'POST',
+				body: {
+					budget: form.data.budget,
+					regions: form.data.regionalStrategies
+				}
+			});
+			console.log(
+				JSON.stringify({
+					budget: form.data.budget,
+					regions: form.data.regionalStrategies
+				})
+			);
+			// save results to user state
+			const projectData = getValidatedProjectData(locals.userState, project);
+			projectData.strategy = {
+				budget: form.data.budget,
+				results: res.data
+			};
+			return { form };
+		} catch (e) {
+			const status = (e instanceof ApiError ? e.status : 500) as ErrorStatus;
+			return message(form, 'Failed to run strategise', { status });
+		}
 	}
 };

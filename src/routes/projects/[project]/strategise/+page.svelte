@@ -2,78 +2,29 @@
 	import * as Alert from '$lib/components/ui/alert/index';
 	import * as Form from '$lib/components/ui/form';
 	import { Input } from '$lib/components/ui/input';
-	import {
-		collectPostInterventionCases,
-		convertPer1000ToTotal,
-		getAvertedCasesData,
-		type CasesAverted
-	} from '$lib/process-results/processCases';
 	import CircleAlert from '@lucide/svelte/icons/circle-alert';
 	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import type { PageProps } from './$types';
-	import { strategiseSchema, type StrategiseRegions } from './schema';
-	import type { Scenario } from '$lib/types/userState';
-	import { z } from 'zod';
-	import {
-		combineCostsAndCasesAverted,
-		DEFAULT_POPULATION,
-		getTotalCostsPerScenario
-	} from '$lib/process-results/costs';
-
+	import { strategiseSchema } from './schema';
+	import Loader from '$lib/components/Loader.svelte';
+	import { toast } from 'svelte-sonner';
 	let { data }: PageProps = $props();
 
 	const form = superForm(data.form, {
 		validators: zodClient(strategiseSchema),
 		resetForm: false,
-		dataType: 'json'
-	});
-	const { form: formData, enhance } = form;
-
-	const allCasesAvertedData = $derived.by(() => {
-		const allCasesAvertedData: Record<string, Partial<Record<Scenario, CasesAverted>>> = {};
-
-		for (const region of data.project.regions) {
-			const postInterventionCases = collectPostInterventionCases(region.cases);
-			const casesAverted = getAvertedCasesData(postInterventionCases);
-			if (Object.keys(casesAverted).length > 0) {
-				allCasesAvertedData[region.name] = casesAverted;
+		dataType: 'json',
+		onUpdated({ form }) {
+			if (form.message && !form.valid) {
+				toast.error(form.message);
 			}
 		}
-
-		return allCasesAvertedData;
 	});
+	const { form: formData, enhance, delayed, message } = form;
 
-	let casesAvertedAndCostsPerRegion: StrategiseRegions = $derived.by(() => {
-		const result: StrategiseRegions = [];
-		for (const [region, casesAvertedForRegion] of Object.entries(allCasesAvertedData)) {
-			const regionForm = data.project.regions.find((r) => r.name === region)?.formValues ?? {};
-			const costsAndCasesAverted = combineCostsAndCasesAverted(
-				getTotalCostsPerScenario(Object.keys(casesAvertedForRegion) as Scenario[], regionForm),
-				casesAvertedForRegion
-			);
-
-			const interventions: StrategiseRegions[number]['interventions'] = [];
-			for (const [scenario, { casesAverted, totalCost }] of Object.entries(costsAndCasesAverted)) {
-				interventions.push({
-					intervention: scenario,
-					cost: totalCost,
-					casesAverted: convertPer1000ToTotal(
-						casesAverted.totalAvertedCasesPer1000,
-						Number(regionForm.population) || DEFAULT_POPULATION
-					)
-				});
-			}
-			result.push({
-				region,
-				interventions
-			});
-		}
-
-		return result;
-	});
-
-	$inspect(casesAvertedAndCostsPerRegion);
+	$inspect(data.project.strategy.results, 'results');
+	$inspect($formData.regionalStrategies, 'strategies');
 </script>
 
 <div class="mx-auto max-w-7xl px-4 py-8">
@@ -87,7 +38,7 @@
 			The regions must have run with interventions to be included in the strategise tool.
 		</p>
 	</div>
-	{#if Object.keys(allCasesAvertedData).length > 1}
+	{#if $formData.regionalStrategies.length > 1}
 		<form method="POST" use:enhance>
 			<div class="flex space-x-3">
 				<Form.Field {form} name="budget">
@@ -107,6 +58,13 @@
 				<Form.Button>Strategise</Form.Button>
 			</div>
 		</form>
+		{#if $delayed}
+			<Loader />
+		{/if}
+
+		{#if data.project.strategy.results}
+			{JSON.stringify(data.project.strategy.results)}
+		{/if}
 	{:else}
 		<Alert.Root variant="warning">
 			<CircleAlert />

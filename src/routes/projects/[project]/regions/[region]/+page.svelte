@@ -8,6 +8,7 @@
 	import { toast } from 'svelte-sonner';
 	import type { PageProps } from './$types';
 	import Results from './_components/Results.svelte';
+	import Loader from '$lib/components/Loader.svelte';
 	let { data, params }: PageProps = $props();
 
 	let isRunning = $state(false);
@@ -68,12 +69,7 @@
 		submitText="Run baseline"
 	>
 		{#await runPromise}
-			<div class="flex items-center justify-center p-8">
-				<div class="flex flex-col items-center gap-3">
-					<div class="h-8 w-8 animate-spin rounded-full border-2 border-muted border-t-primary"></div>
-					<div class="text-sm text-muted-foreground">Running...</div>
-				</div>
-			</div>
+			<Loader />
 		{:then emulatorResults}
 			{#if emulatorResults}
 				<Results {emulatorResults} {form} bind:activeTab />

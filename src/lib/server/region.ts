@@ -73,7 +73,7 @@ export const getValidatedRegionData = (userState: UserState, projectName: string
 
 	return regionData;
 };
-export const getValidatedProjectData = (userState: UserState, projectName: string) => {
+export const getValidatedProjectData = (userState: UserState, projectName?: string) => {
 	const projectData = userState.projects.find((p) => p.name === projectName);
 	if (!projectData) error(404, `Project "${projectName}" not found`);
 	return projectData;

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 export const strategiseSchema = z.object({
 	budget: z.number().min(1, 'Budget must greater than 0'),
-	regions: z
+	regionalStrategies: z
 		.object({
 			region: z.string(),
 			interventions: z
@@ -17,4 +17,4 @@ export const strategiseSchema = z.object({
 });
 
 // type for region
-export type StrategiseRegions = z.infer<typeof strategiseSchema>['regions'];
+export type StrategiseRegions = z.infer<typeof strategiseSchema>['regionalStrategies'];
