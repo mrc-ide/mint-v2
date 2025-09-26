@@ -13,7 +13,12 @@ const createCostsPer1000Series = (
 		color: ScenarioToColor[scenario as Scenario],
 		type: 'scatter',
 		marker: { symbol: scenario.includes('lsm') ? 'diamond' : 'circle', radius: 6 },
-		data: [[casesAverted.totalAvertedCasesPer1000, convertTotalToPer1000(totalCost, population)]]
+		data: [
+			[
+				Number(casesAverted.totalAvertedCasesPer1000.toFixed(2)),
+				Number(convertTotalToPer1000(totalCost, population).toFixed(2))
+			]
+		]
 	}));
 
 const getCostPer1000Config = (
@@ -30,6 +35,9 @@ const getCostPer1000Config = (
 	xAxis: {
 		title: {
 			text: 'Cases averted per 1,000 people over 3 years'
+		},
+		labels: {
+			format: '{value:.2f}'
 		}
 	},
 	yAxis: {
