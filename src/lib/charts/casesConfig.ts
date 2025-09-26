@@ -1,7 +1,7 @@
 import type { CasesAverted } from '$lib/process-results/processCases';
 import type { Scenario } from '$lib/types/userState';
-import type { SeriesLineOptions, SeriesColumnOptions, Options } from 'highcharts';
-import { ScenarioToColor, ScenarioToLabel } from './baseChart';
+import type { Options, SeriesColumnOptions, SeriesLineOptions } from 'highcharts';
+import { getColumnFill, ScenarioToLabel } from './baseChart';
 
 const getCasesSeriesData = (
 	casesAverted: Partial<Record<Scenario, CasesAverted>>
@@ -14,19 +14,8 @@ const getCasesSeriesData = (
 			type: 'column',
 			data: scenarios.map((scenario) => ({
 				name: ScenarioToLabel[scenario],
-				y: casesAverted[scenario]!.casesAvertedMeanPer1000,
-				color: {
-					pattern: {
-						color: ScenarioToColor[scenario],
-						width: 10,
-						height: 10,
-						...(scenario.includes('lsm') && {
-							path: {
-								d: 'M 0 0 L 10 10 M 9 -1 L 11 1 M -1 9 L 1 11'
-							}
-						})
-					}
-				}
+				y: casesAverted[scenario]?.casesAvertedMeanPer1000,
+				color: getColumnFill(scenario)
 			}))
 		},
 		...scenarios.map((scenario, scenarioIndex) => ({

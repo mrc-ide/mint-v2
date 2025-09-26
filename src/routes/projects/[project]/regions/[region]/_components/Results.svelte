@@ -6,6 +6,7 @@
 	import type { EmulatorResults } from '$lib/types/userState';
 	import Cost from './Cost.svelte';
 	import Impact from './Impact.svelte';
+	import { mode } from 'mode-watcher';
 
 	interface Props {
 		emulatorResults: EmulatorResults;
@@ -14,6 +15,7 @@
 	}
 
 	let { emulatorResults, form, activeTab = $bindable() }: Props = $props();
+	let chartTheme = $derived(mode.current === 'dark' ? 'highcharts-dark' : 'highcharts-light');
 
 	const postInterventionCasesMap = $derived(collectPostInterventionCases(emulatorResults.cases));
 	const casesAverted = $derived(getAvertedCasesData(postInterventionCasesMap));
@@ -27,10 +29,16 @@
 		</Tabs.List>
 	</div>
 	<Tabs.Content value="impact">
-		<Impact {casesAverted} {emulatorResults} {postInterventionCasesMap} />
+		<Impact {chartTheme} {casesAverted} {emulatorResults} {postInterventionCasesMap} />
 	</Tabs.Content>
 
 	<Tabs.Content value="cost">
-		<Cost {form} {casesAverted} />
+		{#if Object.keys(casesAverted).length === 0}
+			<p class="p-4 text-center text-sm text-muted-foreground">
+				Cost results are not available because no interventions were selected.
+			</p>
+		{:else}
+			<Cost {form} {casesAverted} {chartTheme} />
+		{/if}
 	</Tabs.Content>
 </Tabs.Root>

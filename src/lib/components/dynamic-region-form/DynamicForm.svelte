@@ -94,9 +94,9 @@
 
 		const group = fieldToGroup[field.id];
 		if (group.triggersRun) {
-			debouncedRun(form);
+			debouncedRun($state.snapshot(form));
 		} else {
-			debouncedProcess(form);
+			debouncedProcess($state.snapshot(form));
 		}
 	};
 	const collapsePreRunGroups = () => {
