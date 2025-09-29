@@ -1,6 +1,6 @@
 import { z } from 'zod';
 export const strategiseSchema = z.object({
-	budget: z.number().min(1, 'Budget must greater than 0'),
+	budget: z.number().min(1, 'Budget must be greater than 0'),
 	regionalStrategies: z
 		.object({
 			region: z.string(),
