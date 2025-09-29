@@ -9,6 +9,7 @@
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import type { PageProps } from './$types';
 	import { strategiseSchema } from './schema';
+	import StrategiseResults from './StrategiseResults.svelte';
 	let { data }: PageProps = $props();
 
 	const form = superForm(data.form, {
@@ -36,14 +37,21 @@
 		</p>
 	</div>
 	{#if $formData.regionalStrategies.length > 1}
-		<form method="POST" use:enhance>
+		<form method="POST" use:enhance novalidate>
 			<div class="flex space-x-3">
 				<Form.Field {form} name="budget">
 					<Form.Control>
 						{#snippet children({ props })}
 							<div class="flex space-x-2">
 								<Form.Label class="whitespace-nowrap" for="budget">Total available budget</Form.Label>
-								<Input type="number" step={100} {...props} placeholder="Enter budget" bind:value={$formData.budget} />
+								<Input
+									type="number"
+									min={0}
+									step={100}
+									{...props}
+									placeholder="Enter budget"
+									bind:value={$formData.budget}
+								/>
 							</div>
 						{/snippet}
 					</Form.Control>
@@ -60,7 +68,7 @@
 		{/if}
 
 		{#if data.project.strategy.results}
-			{JSON.stringify(data.project.strategy.results)}
+			<StrategiseResults strategiseResults={data.project.strategy.results} />
 		{/if}
 	{:else}
 		<Alert.Root variant="warning">

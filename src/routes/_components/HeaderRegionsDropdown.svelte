@@ -11,7 +11,7 @@
 	import Plus from '@lucide/svelte/icons/plus';
 	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
-	import { addRegionSchema } from '../schema';
+	import { addRegionSchema } from '../projects/[project]/regions/[region]/schema';
 
 	interface Props {
 		region: Region;
