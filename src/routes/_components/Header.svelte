@@ -25,10 +25,10 @@
 			class="ml-2 flex items-center justify-center px-2 text-xl font-extrabold text-primary hover:text-primary/80"
 			><img src={logo} alt="MINT logo" class="h-12 w-12" />MINT</a
 		>
-		{#if project && region}
+		{#if project}
 			<HeaderRegionsDropdown {project} {region} />
 		{/if}
-		{#if project && region}
+		{#if project}
 			<a class={buttonVariants({ variant: 'link', class: 'p-1' })} href={`/projects/${project.name}/strategise`}>
 				Strategise across regions
 			</a>
