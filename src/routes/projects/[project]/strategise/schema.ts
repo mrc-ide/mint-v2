@@ -16,5 +16,4 @@ export const strategiseSchema = z.object({
 		.array()
 });
 
-// type for region
 export type StrategiseRegions = z.infer<typeof strategiseSchema>['regionalStrategies'];

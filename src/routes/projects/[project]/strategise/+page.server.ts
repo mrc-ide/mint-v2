@@ -29,6 +29,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 export const actions: Actions = {
 	default: async ({ request, locals, fetch, params }) => {
 		const { project } = params;
+		const projectData = getValidatedProjectData(locals.userState, project);
 		const form = await superValidate(request, zod(strategiseSchema));
 		if (!form.valid) {
 			return { form };
@@ -44,22 +45,17 @@ export const actions: Actions = {
 					regions: form.data.regionalStrategies
 				}
 			});
-			console.log(
-				JSON.stringify({
-					budget: form.data.budget,
-					regions: form.data.regionalStrategies
-				})
-			);
+
 			// save results to user state
-			const projectData = getValidatedProjectData(locals.userState, project);
 			projectData.strategy = {
 				budget: form.data.budget,
 				results: res.data
 			};
-			return { form };
 		} catch (e) {
 			const status = (e instanceof ApiError ? e.status : 500) as ErrorStatus;
 			return message(form, 'Failed to run strategise', { status });
 		}
+
+		return { form };
 	}
 };

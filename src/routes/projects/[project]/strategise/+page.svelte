@@ -1,14 +1,14 @@
 <script lang="ts">
+	import Loader from '$lib/components/Loader.svelte';
 	import * as Alert from '$lib/components/ui/alert/index';
 	import * as Form from '$lib/components/ui/form';
 	import { Input } from '$lib/components/ui/input';
 	import CircleAlert from '@lucide/svelte/icons/circle-alert';
+	import { toast } from 'svelte-sonner';
 	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import type { PageProps } from './$types';
 	import { strategiseSchema } from './schema';
-	import Loader from '$lib/components/Loader.svelte';
-	import { toast } from 'svelte-sonner';
 	let { data }: PageProps = $props();
 
 	const form = superForm(data.form, {
@@ -21,10 +21,7 @@
 			}
 		}
 	});
-	const { form: formData, enhance, delayed, message } = form;
-
-	$inspect(data.project.strategy.results, 'results');
-	$inspect($formData.regionalStrategies, 'strategies');
+	const { form: formData, enhance, delayed } = form;
 </script>
 
 <div class="mx-auto max-w-7xl px-4 py-8">
