@@ -47,7 +47,7 @@ export const saveRegionRun = async (
 	formValues: Record<string, FormValue>,
 	cases: CasesData[]
 ) => {
-	const regionData = getValidatedRegionData(userState, project, region);
+	const regionData = getRegionFromUserState(userState, project, region);
 	regionData.formValues = formValues;
 	regionData.cases = cases;
 	regionData.hasRunBaseline = true;
@@ -60,20 +60,20 @@ export const saveRegionFormState = async (
 	regionName: string,
 	formValues: Record<string, FormValue>
 ) => {
-	const regionData = getValidatedRegionData(userState, projectName, regionName);
+	const regionData = getRegionFromUserState(userState, projectName, regionName);
 	regionData.formValues = formValues;
 	await saveUserState(userState);
 };
 
-export const getValidatedRegionData = (userState: UserState, projectName: string, regionName: string): Region => {
-	const projectData = getValidatedProjectData(userState, projectName);
+export const getRegionFromUserState = (userState: UserState, projectName: string, regionName: string): Region => {
+	const projectData = getProjectFromUserState(userState, projectName);
 
 	const regionData = projectData.regions.find((r) => r.name === regionName);
 	if (!regionData) error(404, `Region "${regionName}" not found in project "${projectName}"`);
 
 	return regionData;
 };
-export const getValidatedProjectData = (userState: UserState, projectName?: string) => {
+export const getProjectFromUserState = (userState: UserState, projectName?: string) => {
 	const projectData = userState.projects.find((p) => p.name === projectName);
 	if (!projectData) error(404, `Project "${projectName}" not found`);
 	return projectData;

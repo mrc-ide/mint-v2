@@ -22,15 +22,14 @@ export const configureHighcharts = () => {
 					useHTML: true,
 					theme: {
 						fill: 'var(--background)',
-						stroke: 'var(--muted-foreground)',
+						// @ts-expect-error: typeExportingButtonsOptionsObject missing r, states properties
 						r: 3,
 						states: {
 							hover: {
 								fill: 'var(--accent)'
 							},
 							select: {
-								fill: 'var(--accent)',
-								stroke: 'var(--foreground)'
+								fill: 'var(--accent)'
 							}
 						}
 					}

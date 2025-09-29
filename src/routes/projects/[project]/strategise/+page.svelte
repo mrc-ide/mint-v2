@@ -29,8 +29,8 @@
 	<div class="mb-6">
 		<h1 class="text-2xl font-bold">Strategise across regions for {data.project.name}</h1>
 		<p class="mb-1 leading-relaxed text-muted-foreground">
-			This tool can investigate how different interventions could be distributed across wider regions to minimise the
-			overall number of malaria cases whilst achieving local goals.
+			This tool can investigate how different interventions could be distributed across all project regions given a
+			total budget, to minimise the overall number of malaria cases whilst achieving local goals.
 		</p>
 		<p class="mb-1 leading-relaxed text-muted-foreground">
 			The regions must have run with interventions to be included in the strategise tool.

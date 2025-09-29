@@ -1,5 +1,5 @@
 import { ApiError, apiFetch } from '$lib/fetch';
-import { getValidatedProjectData } from '$lib/server/region';
+import { getProjectFromUserState } from '$lib/server/region';
 import type { StrategiseResults } from '$lib/types/userState';
 import { strategiseUrl } from '$lib/url';
 import { message, superValidate, type ErrorStatus } from 'sveltekit-superforms';
@@ -11,7 +11,7 @@ import { getCasesAvertedAndCostsForStrategise } from './utils';
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const { project } = params;
 
-	const projectData = getValidatedProjectData(locals.userState, project);
+	const projectData = getProjectFromUserState(locals.userState, project);
 	const regionalStrategies = getCasesAvertedAndCostsForStrategise(projectData.regions);
 
 	return {
@@ -29,7 +29,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 export const actions: Actions = {
 	default: async ({ request, locals, fetch, params }) => {
 		const { project } = params;
-		const projectData = getValidatedProjectData(locals.userState, project);
+		const projectData = getProjectFromUserState(locals.userState, project);
 		const form = await superValidate(request, zod(strategiseSchema));
 		if (!form.valid) {
 			return { form };
