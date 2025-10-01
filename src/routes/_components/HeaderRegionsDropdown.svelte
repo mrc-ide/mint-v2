@@ -11,10 +11,10 @@
 	import Plus from '@lucide/svelte/icons/plus';
 	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
-	import { addRegionSchema } from '../schema';
+	import { addRegionSchema } from '../projects/[project]/regions/[region]/schema';
 
 	interface Props {
-		region: Region;
+		region?: Region;
 		project: Project;
 	}
 
@@ -35,7 +35,13 @@
 <DropdownMenu.Root bind:open={isOpen}>
 	<DropdownMenu.Trigger>
 		{#snippet child({ props })}
-			<Button {...props} variant="ghost" size="sm">{project.name}: {region.name} <ChevronsUpDownIcon /></Button>
+			<Button {...props} variant="ghost" size="sm">
+				{project.name}
+				{#if region}
+					- {region.name}
+				{/if}
+				<ChevronsUpDownIcon /></Button
+			>
 		{/snippet}
 	</DropdownMenu.Trigger>
 	<DropdownMenu.Content class="max-w-64">
@@ -46,7 +52,7 @@
 		{/each}
 		<DropdownMenu.Separator />
 		<DropdownMenu.Sub>
-			<form class="flex flex-col gap-1" method="POST" action="?/addRegion" use:enhance>
+			<form class="flex flex-col gap-1" method="POST" action={`/projects/${project.name}?/addRegion`} use:enhance>
 				<Label for="name" class="mx-1 my-2">Add Region</Label>
 				<div class="flex gap-1.5">
 					<Form.Field {form} name="name">

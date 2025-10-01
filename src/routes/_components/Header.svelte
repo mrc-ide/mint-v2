@@ -5,7 +5,7 @@
 	import MoonIcon from '@lucide/svelte/icons/moon';
 	import SunIcon from '@lucide/svelte/icons/sun';
 	import { toggleMode } from 'mode-watcher';
-	import HeaderRegionsDropdown from '../projects/[project]/regions/[region]/_components/HeaderRegionsDropdown.svelte';
+	import HeaderRegionsDropdown from './HeaderRegionsDropdown.svelte';
 	import type { UserState } from '$lib/types/userState';
 
 	interface Props {
@@ -25,12 +25,12 @@
 			class="ml-2 flex items-center justify-center px-2 text-xl font-extrabold text-primary hover:text-primary/80"
 			><img src={logo} alt="MINT logo" class="h-12 w-12" />MINT</a
 		>
-		{#if project && region}
+		{#if project}
 			<HeaderRegionsDropdown {project} {region} />
 		{/if}
-		{#if project && project.canStrategize}
-			<a class={buttonVariants({ variant: 'link', class: 'p-1' })} href={`/projects/${project.name}/strategize`}>
-				Strategize across regions
+		{#if project}
+			<a class={buttonVariants({ variant: 'link', class: 'p-1' })} href={`/projects/${project.name}/strategise`}>
+				Strategise across regions
 			</a>
 		{/if}
 		<div class="ml-auto flex items-center gap-3 px-4">

@@ -33,10 +33,12 @@ export const actions: Actions = {
 			regions: form.data.regions.map((region) => ({
 				name: region,
 				formValues: {},
-				hasRunBaseline: false
+				hasRunBaseline: false,
+				cases: []
 			})),
-			budget: 2000000, // default budget (TODO: place somewhere better with other defaults)
-			canStrategize: false
+			strategy: {
+				budget: 200000
+			}
 		});
 
 		return { form };
