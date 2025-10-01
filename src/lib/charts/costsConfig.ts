@@ -26,7 +26,7 @@ const getCostPer1000Config = (
 	population: number
 ): Options => ({
 	chart: {
-		height: 500,
+		height: 450,
 		type: 'scatter'
 	},
 	title: {
@@ -77,8 +77,7 @@ const getCostPerCaseConfig = (
 	return {
 		chart: {
 			type: 'column',
-			height: 500,
-			spacingBottom: 30
+			height: 450
 		},
 		title: {
 			text: 'Strategy costs per case averted'

@@ -4,11 +4,33 @@ import type { StrategiseResults } from '$lib/types/userState';
 import { strategiseUrl } from '$lib/url';
 import { message, superValidate, type ErrorStatus } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
-import type { Actions, PageServerLoad } from './$types';
-import { strategiseSchema } from './schema';
+import type { Actions, PageServerLoad, RequestEvent } from './$types';
+import { strategiseSchema, type StrategiseRegions } from './schema';
 import { getCasesAvertedAndCostsForStrategise } from './utils';
 
-export const load: PageServerLoad = async ({ params, locals }) => {
+const strategise = async (
+	regionalStrategies: StrategiseRegions,
+	fetch: RequestEvent['fetch']
+): Promise<StrategiseResults[] | null> => {
+	if (regionalStrategies.length < 2) return null;
+	try {
+		const res = await apiFetch<StrategiseResults[]>({
+			fetcher: fetch,
+			url: strategiseUrl(),
+			method: 'POST',
+			body: {
+				budget: 0, // TODO: needs to be removed
+				regions: regionalStrategies
+			}
+		});
+		return res.data;
+	} catch (error) {
+		console.error('Error fetching strategise data:', error);
+	}
+	return null;
+};
+
+export const load: PageServerLoad = async ({ params, locals, fetch }) => {
 	const { project } = params;
 
 	const projectData = getProjectFromUserState(locals.userState, project);
@@ -22,7 +44,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 				regionalStrategies: regionalStrategies
 			},
 			zod(strategiseSchema)
-		)
+		),
+		strategisePromise: strategise(regionalStrategies, fetch) // stream as it resolves
 	};
 };
 

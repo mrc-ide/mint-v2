@@ -43,8 +43,7 @@ export const getCasesConfig = (casesAverted: Partial<Record<Scenario, CasesAvert
 	return {
 		chart: {
 			type: 'column',
-			height: 500,
-			spacingBottom: 30
+			height: 450
 		},
 		title: {
 			text: 'Clinical cases averted per 1000 people per year'
