@@ -1,8 +1,11 @@
 import type { StrategiseResults } from '$lib/types/userState';
 import { ScenarioToLabel } from './baseChart';
 
-export const getStrategiseSeries = (data: StrategiseResults[]): Highcharts.SeriesOptionsType[] => {
-	const seriesMap = new Map<string, Highcharts.SeriesOptionsType>();
+export const findClosestStrategiseResult = (strategiseResults: StrategiseResults[], xValue: number) =>
+	strategiseResults.find((result) => result.costThreshold >= xValue) ?? strategiseResults[strategiseResults.length - 1];
+
+export const getStrategiseSeries = (data: StrategiseResults[]): Highcharts.SeriesAreaOptions[] => {
+	const seriesMap = new Map<string, Highcharts.SeriesAreaOptions>();
 
 	data.forEach(({ costThreshold, interventions }) => {
 		interventions.forEach(({ casesAverted, region, intervention }) => {
@@ -13,10 +16,12 @@ export const getStrategiseSeries = (data: StrategiseResults[]): Highcharts.Serie
 					type: 'area'
 				});
 			}
-			seriesMap.get(region)!.data.push({
+			seriesMap.get(region)!.data!.push({
 				x: costThreshold,
 				y: casesAverted,
-				intervention: ScenarioToLabel[intervention]
+				custom: {
+					intervention: ScenarioToLabel[intervention]
+				}
 			});
 		});
 	});
@@ -34,19 +39,19 @@ export const getStrategyConfig = (
 			type: 'x'
 		},
 		events: {
-			click: function (event: any) {
-				const chart = this;
-				const xValue = Math.round(event.xAxis[0].value);
+			click: function (event) {
+				const xValue = Math.round((event as Highcharts.ChartClickEventObject).xAxis[0].value);
 
 				// Remove existing explored budget plot line by id
-				chart.xAxis[0].removePlotLine('explored-budget');
+				this.xAxis[0].removePlotLine('explored-budget');
 
 				// Add new plot line at clicked position with unique id
-				chart.xAxis[0].addPlotLine({
+				this.xAxis[0].addPlotLine({
 					id: 'explored-budget',
 					value: xValue,
 					color: 'var(--foreground)',
-					dashStyle: 'Dash',
+					dashStyle: 'ShortDot',
+					width: 2,
 					zIndex: 5,
 					label: {
 						text: 'Explored budget',
@@ -54,10 +59,7 @@ export const getStrategyConfig = (
 					}
 				});
 
-				setStrategy(
-					strategiseResults.find((result) => result.costThreshold >= xValue) ??
-						strategiseResults[strategiseResults.length - 1]
-				);
+				setStrategy(findClosestStrategiseResult(strategiseResults, xValue));
 			}
 		}
 	},
@@ -102,7 +104,7 @@ export const getStrategyConfig = (
 		headerFormat:
 			'<div class="font-bold  pb-1 border-b">Cost: ${point.key:,.0f} | Cases Averted: {point.stackTotal:,.1f}</div>',
 		pointFormat:
-			'<div class="flex items-center"><span style="color:{point.color}" class="mr-1">●</span><span class="font-medium">{series.name}:</span> <span class="ml-0.5">{point.y:,.1f} cases <span class="text-muted-foreground">{point.intervention}</span></span></div>'
+			'<div class="flex items-center"><span style="color:{point.color}" class="mr-1">●</span><span class="font-medium">{series.name}:</span> <span class="ml-0.5">{point.y:,.1f} cases <span class="text-muted-foreground">{point.custom.intervention}</span></span></div>'
 	},
 	plotOptions: {
 		area: {

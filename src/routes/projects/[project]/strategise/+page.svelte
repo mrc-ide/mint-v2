@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Loader from '$lib/components/Loader.svelte';
 	import * as Alert from '$lib/components/ui/alert/index';
+	import { mapRegionsToPopulation } from '$lib/project';
 	import CircleAlert from '@lucide/svelte/icons/circle-alert';
 	import { toast } from 'svelte-sonner';
 	import { superForm } from 'sveltekit-superforms';
@@ -9,7 +10,6 @@
 	import BudgetInput from './_components/BudgetInput.svelte';
 	import StrategiseResults from './_components/StrategiseResults.svelte';
 	import { strategiseSchema } from './schema';
-	import { DEFAULT_POPULATION } from '$lib/process-results/costs';
 	let { data }: PageProps = $props();
 
 	const form = superForm(data.form, {
@@ -23,15 +23,7 @@
 		}
 	});
 	const { form: formData, enhance, delayed } = form;
-	let populations = $derived(
-		data.project.regions.reduce(
-			(acc, region) => {
-				acc[region.name] = Number(region.formValues.population) || DEFAULT_POPULATION;
-				return acc;
-			},
-			{} as Record<string, number>
-		)
-	);
+	let populationsOfRegion = $derived(mapRegionsToPopulation(data.project.regions));
 </script>
 
 <div class="mx-auto px-15 py-8">
@@ -56,7 +48,7 @@
 		{#if $delayed}
 			<Loader />
 		{:else if data.project.strategy?.results}
-			<StrategiseResults strategiseResults={data.project.strategy.results} {populations} budget={$formData.budget} />
+			<StrategiseResults strategiseResults={data.project.strategy.results} populations={populationsOfRegion} />
 		{/if}
 	{:else}
 		<Alert.Root variant="warning">
