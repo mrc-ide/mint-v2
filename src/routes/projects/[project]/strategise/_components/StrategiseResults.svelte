@@ -6,20 +6,19 @@
 
 	interface Props {
 		strategiseResults: StrategiseResults[];
+		populations: Record<string, number>;
 	}
-	let { strategiseResults }: Props = $props();
+	let { strategiseResults, populations }: Props = $props();
 	let selectedStrategy = $state<StrategiseResults>();
 
 	const setStrategy = (strategy: StrategiseResults) => (selectedStrategy = strategy);
 
 	let config = $derived(getStrategyConfig(strategiseResults, setStrategy));
-
-	$inspect(selectedStrategy);
 </script>
 
-<div class="flex flex-col">
+<div>
 	<div {@attach createHighchart(config)}></div>
 	{#if selectedStrategy}
-		<SelectedStrategy {selectedStrategy} />
+		<SelectedStrategy {selectedStrategy} {populations} />
 	{/if}
 </div>

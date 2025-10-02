@@ -9,6 +9,7 @@
 	import BudgetInput from './_components/BudgetInput.svelte';
 	import StrategiseResults from './_components/StrategiseResults.svelte';
 	import { strategiseSchema } from './schema';
+	import { DEFAULT_POPULATION } from '$lib/process-results/costs';
 	let { data }: PageProps = $props();
 
 	const form = superForm(data.form, {
@@ -22,6 +23,15 @@
 		}
 	});
 	const { form: formData, enhance, delayed } = form;
+	let populations = $derived(
+		data.project.regions.reduce(
+			(acc, region) => {
+				acc[region.name] = Number(region.formValues.population) || DEFAULT_POPULATION;
+				return acc;
+			},
+			{} as Record<string, number>
+		)
+	);
 </script>
 
 <div class="mx-auto max-w-7xl py-8">
@@ -39,7 +49,7 @@
 		<Loader />
 	{:then strategiseResults}
 		{#if strategiseResults}
-			<StrategiseResults {strategiseResults} />
+			<StrategiseResults {strategiseResults} {populations} />
 		{:else}
 			<Alert.Root variant="warning">
 				<CircleAlert />

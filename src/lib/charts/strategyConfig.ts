@@ -1,4 +1,5 @@
 import type { StrategiseResults } from '$lib/types/userState';
+import { ScenarioToLabel } from './baseChart';
 
 export const getStrategiseSeries = (data: StrategiseResults[]): Highcharts.SeriesOptionsType[] => {
 	const seriesMap = new Map<string, Highcharts.SeriesOptionsType>();
@@ -15,7 +16,7 @@ export const getStrategiseSeries = (data: StrategiseResults[]): Highcharts.Serie
 			seriesMap.get(region)!.data.push({
 				x: costThreshold,
 				y: casesAverted,
-				intervention: intervention
+				intervention: ScenarioToLabel[intervention]
 			});
 		});
 	});
@@ -29,6 +30,9 @@ export const getStrategyConfig = (
 	chart: {
 		type: 'area',
 		height: 450,
+		zooming: {
+			type: 'x'
+		},
 		events: {
 			click: function (event: any) {
 				const chart = this;
@@ -115,7 +119,7 @@ export const getStrategyConfig = (
 		headerFormat:
 			'<div class="font-bold  pb-1 border-b">Cost: ${point.key:,.0f} | Cases Averted: {point.stackTotal:,.1f}</div>',
 		pointFormat:
-			'<div class="flex items-center"><span style="color:{point.color}" class="mr-1">●</span><span class="font-medium">{series.name}:</span> <span class="ml-0.5">{point.y:,.1f} cases ({point.intervention})</span></div>'
+			'<div class="flex items-center"><span style="color:{point.color}" class="mr-1">●</span><span class="font-medium">{series.name}:</span> <span class="ml-0.5">{point.y:,.1f} cases <span class="text-muted-foreground">{point.intervention}</span></span></div>'
 	},
 	plotOptions: {
 		area: {
@@ -127,26 +131,25 @@ export const getStrategyConfig = (
 		series: {
 			point: {
 				events: {
-					click: function (event) {
-						const xValue = Math.round(event.x);
-						console.log(this.series.chart.xAxis[0].plotLinesAndBands);
-
-						// Remove existing current budget plot line by id
-						this.series.chart.xAxis[0].removePlotLine('current-budget');
-						// Add new plot line at clicked position with unique id
-						this.series.chart.xAxis[0].addPlotLine({
-							id: 'current-budget',
-							value: xValue,
-							color: 'var(--foreground)',
-							width: 2,
-							zIndex: 5,
-							label: {
-								text: 'Current budget',
-								align: 'left',
-								style: { color: 'var(--foreground)' }
-							}
-						});
-					}
+					// click: function (event) {
+					// 	const xValue = Math.round(event.x);
+					// 	console.log(this.series.chart.xAxis[0].plotLinesAndBands);
+					// 	// Remove existing current budget plot line by id
+					// 	this.series.chart.xAxis[0].removePlotLine('current-budget');
+					// 	// Add new plot line at clicked position with unique id
+					// 	this.series.chart.xAxis[0].addPlotLine({
+					// 		id: 'current-budget',
+					// 		value: xValue,
+					// 		color: 'var(--foreground)',
+					// 		width: 2,
+					// 		zIndex: 5,
+					// 		label: {
+					// 			text: 'Current budget',
+					// 			align: 'left',
+					// 			style: { color: 'var(--foreground)' }
+					// 		}
+					// 	});
+					// }
 				}
 			}
 		}
