@@ -78,3 +78,8 @@ export const getProjectFromUserState = (userState: UserState, projectName?: stri
 	if (!projectData) error(404, `Project "${projectName}" not found`);
 	return projectData;
 };
+
+export const invalidateStrategyForProject = async (userState: UserState, projectName: string) => {
+	const projectData = getProjectFromUserState(userState, projectName);
+	projectData.strategy = undefined;
+};

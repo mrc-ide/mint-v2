@@ -34,7 +34,7 @@
 	);
 </script>
 
-<div class="mx-auto max-w-7xl py-8">
+<div class="mx-auto px-15 py-8">
 	<div class="mb-6">
 		<h1 class="text-2xl font-bold">Strategise across regions for {data.project.name}</h1>
 		<p class="mb-1 leading-relaxed text-muted-foreground">
@@ -45,37 +45,18 @@
 			The regions must have run with interventions to be included in the strategise tool.
 		</p>
 	</div>
-	{#await data.strategisePromise}
-		<Loader />
-	{:then strategiseResults}
-		{#if strategiseResults}
-			<StrategiseResults {strategiseResults} {populations} />
-		{:else}
-			<Alert.Root variant="warning">
-				<CircleAlert />
-				<Alert.Title>Strategise Tool Unavailable</Alert.Title>
-				<Alert.Description
-					>At least two regions must have run with interventions to use the strategise tool.</Alert.Description
-				>
-			</Alert.Root>
-		{/if}
-	{:catch err}
-		<div class="flex flex-col items-center justify-center gap-2 p-8">
-			<div class="text-destructive">Failed to load strategise results.</div>
-			{#if err}
-				<div class="text-sm text-destructive">{err.message}</div>
-			{/if}
-		</div>
-	{/await}
-
-	<!-- {#if $formData.regionalStrategies.length > 1}
-		<BudgetInput {form} bind:budget={$formData.budget} {enhance} />
+	{#if $formData.regionalStrategies.length > 1}
+		<BudgetInput
+			{form}
+			bind:budget={$formData.budget}
+			{enhance}
+			maxCost={$formData.maxCost}
+			minCost={$formData.minCost}
+		/>
 		{#if $delayed}
 			<Loader />
-		{/if}
-
-		{#if data.project.strategy.results}
-			<StrategiseResults strategiseResults={data.project.strategy.results} />
+		{:else if data.project.strategy?.results}
+			<StrategiseResults strategiseResults={data.project.strategy.results} {populations} budget={$formData.budget} />
 		{/if}
 	{:else}
 		<Alert.Root variant="warning">
@@ -85,5 +66,5 @@
 				>At least two regions must have run with interventions to use the strategise tool.</Alert.Description
 			>
 		</Alert.Root>
-	{/if} -->
+	{/if}
 </div>

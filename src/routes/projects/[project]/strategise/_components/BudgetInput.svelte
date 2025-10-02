@@ -7,8 +7,10 @@
 		form: SuperForm<StrategiseForm>;
 		budget: number;
 		enhance: SuperForm<StrategiseForm>['enhance'];
+		maxCost: number;
+		minCost: number;
 	}
-	let { form, budget = $bindable(), enhance }: Props = $props();
+	let { form, budget = $bindable(), enhance, minCost, maxCost }: Props = $props();
 </script>
 
 <form method="POST" use:enhance novalidate>
@@ -17,13 +19,21 @@
 			<Form.Control>
 				{#snippet children({ props })}
 					<div class="flex space-x-2">
-						<Form.Label class="whitespace-nowrap" for="budget">Total available budget</Form.Label>
-						<Input type="number" min={0} step={100} {...props} placeholder="Enter budget" bind:value={budget} />
+						<Form.Label class="whitespace-nowrap" for="budget">Total available budget (USD)</Form.Label>
+						<Input
+							type="number"
+							min={minCost}
+							max={maxCost}
+							step={100}
+							{...props}
+							placeholder="$"
+							bind:value={budget}
+						/>
 					</div>
 				{/snippet}
 			</Form.Control>
 			<Form.Description
-				>The total budget available to distribute across all regions over the 3-year period.</Form.Description
+				>Enter budget between ${minCost.toLocaleString()} and ${maxCost.toLocaleString()} (constrained by intervention costs)</Form.Description
 			>
 			<Form.FieldErrors />
 		</Form.Field>

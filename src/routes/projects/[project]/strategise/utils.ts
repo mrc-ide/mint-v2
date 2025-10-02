@@ -10,6 +10,33 @@ import type { Region, Scenario } from '$lib/types/userState';
 import type { StrategiseRegions } from './schema';
 
 /**
+ * Calculates the minimum cost across all interventions in all regions for strategy optimization.
+ * Used to determine the lower bound for cost-effectiveness analysis.
+ *
+ * @param strategiseRegions - Array of regions with their intervention data
+ * @returns The lowest intervention cost found across all regions
+ */
+export const getMinimumCostForStrategise = (strategiseRegions: StrategiseRegions): number => {
+	const costs = strategiseRegions.flatMap((region) => region.interventions.map((intervention) => intervention.cost));
+	return Math.round(Math.min(...costs));
+};
+
+/**
+ * Calculates the maximum total cost by selecting the most expensive intervention from each region.
+ * Used to determine the upper bound for budget allocation scenarios where the highest-cost
+ * intervention is chosen per region.
+ *
+ * @param strategiseRegions - Array of regions with their intervention data
+ * @returns The sum of the highest intervention costs from each region
+ */
+export const getMaximumCostForStrategise = (strategiseRegions: StrategiseRegions): number => {
+	const maxCostsPerRegion = strategiseRegions.map((region) =>
+		Math.max(...region.interventions.map((intervention) => intervention.cost))
+	);
+	return Math.round(maxCostsPerRegion.reduce((sum, cost) => sum + cost, 0));
+};
+
+/**
  * Processes a collection of regions to extract cases averted and cost data for strategy analysis.
  * Filters out regions that don't have valid cases averted data.
  *

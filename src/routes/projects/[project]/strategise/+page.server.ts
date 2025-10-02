@@ -4,48 +4,32 @@ import type { StrategiseResults } from '$lib/types/userState';
 import { strategiseUrl } from '$lib/url';
 import { message, superValidate, type ErrorStatus } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
-import type { Actions, PageServerLoad, RequestEvent } from './$types';
-import { strategiseSchema, type StrategiseRegions } from './schema';
-import { getCasesAvertedAndCostsForStrategise } from './utils';
+import type { Actions, PageServerLoad } from './$types';
+import { strategiseSchema } from './schema';
+import {
+	getCasesAvertedAndCostsForStrategise,
+	getMaximumCostForStrategise,
+	getMinimumCostForStrategise
+} from './utils';
 
-const strategise = async (
-	regionalStrategies: StrategiseRegions,
-	fetch: RequestEvent['fetch']
-): Promise<StrategiseResults[] | null> => {
-	if (regionalStrategies.length < 2) return null;
-	try {
-		const res = await apiFetch<StrategiseResults[]>({
-			fetcher: fetch,
-			url: strategiseUrl(),
-			method: 'POST',
-			body: {
-				budget: 0, // TODO: needs to be removed
-				regions: regionalStrategies
-			}
-		});
-		return res.data;
-	} catch (error) {
-		console.error('Error fetching strategise data:', error);
-	}
-	return null;
-};
-
-export const load: PageServerLoad = async ({ params, locals, fetch }) => {
+export const load: PageServerLoad = async ({ params, locals }) => {
 	const { project } = params;
 
 	const projectData = getProjectFromUserState(locals.userState, project);
 	const regionalStrategies = getCasesAvertedAndCostsForStrategise(projectData.regions);
+	const maximumCost = getMaximumCostForStrategise(regionalStrategies);
 
 	return {
 		project: projectData,
 		form: await superValidate(
 			{
-				budget: projectData.strategy.budget,
+				minCost: getMinimumCostForStrategise(regionalStrategies),
+				maxCost: maximumCost,
+				budget: projectData.strategy?.budget || maximumCost,
 				regionalStrategies: regionalStrategies
 			},
 			zod(strategiseSchema)
-		),
-		strategisePromise: strategise(regionalStrategies, fetch) // stream as it resolves
+		)
 	};
 };
 
@@ -64,12 +48,12 @@ export const actions: Actions = {
 				url: strategiseUrl(),
 				method: 'POST',
 				body: {
-					budget: form.data.budget,
+					minCost: form.data.minCost,
+					maxCost: form.data.budget,
 					regions: form.data.regionalStrategies
 				}
 			});
 
-			// save results to user state
 			projectData.strategy = {
 				budget: form.data.budget,
 				results: res.data

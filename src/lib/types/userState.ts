@@ -47,12 +47,12 @@ export interface StrategiseResults {
 }
 export interface Strategy {
 	budget: number;
-	results?: StrategiseResults[];
+	results: StrategiseResults[];
 }
 export interface Project {
 	name: string;
 	regions: Region[];
-	strategy: Strategy;
+	strategy?: Strategy;
 }
 
 export interface UserState {

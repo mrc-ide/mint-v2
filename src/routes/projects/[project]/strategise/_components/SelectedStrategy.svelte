@@ -54,7 +54,7 @@
 	</div>
 {/snippet}
 <div>
-	<h2 class="border-b py-1 text-xl font-bold">Optimal Strategy for Budget</h2>
+	<h2 class="border-b py-1 text-xl font-bold">Optimal Strategy for explored budget</h2>
 	<div class="mt-2 grid grid-cols-3 gap-4">
 		{@render metricCard('Total Cost', `$${totalMetrics.cost.toLocaleString('en-US', { maximumFractionDigits: 2 })}`)}
 		{@render metricCard(
@@ -68,7 +68,6 @@
 	</div>
 
 	<div class="mt-4">
-		<h3 class="mb-2 text-lg font-semibold">Interventions by Region</h3>
 		<div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
 			{#each Object.entries(totalMetrics.interventionsByRegion) as [region, intervention]}
 				<div class="relative rounded-lg border bg-card p-3">

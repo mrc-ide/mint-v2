@@ -38,18 +38,18 @@ export const getStrategyConfig = (
 				const chart = this;
 				const xValue = Math.round(event.xAxis[0].value);
 
-				// Remove existing current budget plot line by id
-				chart.xAxis[0].removePlotLine('current-budget');
+				// Remove existing explored budget plot line by id
+				chart.xAxis[0].removePlotLine('explored-budget');
 
 				// Add new plot line at clicked position with unique id
 				chart.xAxis[0].addPlotLine({
-					id: 'current-budget',
+					id: 'explored-budget',
 					value: xValue,
 					color: 'var(--foreground)',
 					dashStyle: 'Dash',
 					zIndex: 5,
 					label: {
-						text: 'Current budget',
+						text: 'Explored budget',
 						style: { color: 'var(--foreground)', fontWeight: '600' }
 					}
 				});
@@ -63,6 +63,9 @@ export const getStrategyConfig = (
 	},
 	title: {
 		text: 'Total Cases Averted vs Total Cost'
+	},
+	subtitle: {
+		text: 'Click on the chart to explore optimal strategies for different budgets'
 	},
 	xAxis: {
 		title: {
@@ -80,26 +83,6 @@ export const getStrategyConfig = (
 				label: {
 					text: 'Minimum cost-effective budget',
 					style: { color: 'var(--muted-foreground)' }
-				}
-			},
-			// {
-			// 	value: 60,
-			// 	color: 'blue',
-			// 	label: {
-			// 		text: 'Current budget',
-			// 		align: 'left',
-			// 		style: { color: 'blue' }
-			// 	}
-			// },
-			{
-				value: strategiseResults[strategiseResults.length - 1]?.costThreshold ?? 0,
-				dashStyle: 'Dash',
-				color: 'var(--primary)',
-
-				label: {
-					text: 'Maximum cost-effective budget',
-					align: 'left',
-					style: { color: 'var(--primary)' }
 				}
 			}
 		]
@@ -126,31 +109,6 @@ export const getStrategyConfig = (
 			stacking: 'normal',
 			marker: {
 				enabled: false
-			}
-		},
-		series: {
-			point: {
-				events: {
-					// click: function (event) {
-					// 	const xValue = Math.round(event.x);
-					// 	console.log(this.series.chart.xAxis[0].plotLinesAndBands);
-					// 	// Remove existing current budget plot line by id
-					// 	this.series.chart.xAxis[0].removePlotLine('current-budget');
-					// 	// Add new plot line at clicked position with unique id
-					// 	this.series.chart.xAxis[0].addPlotLine({
-					// 		id: 'current-budget',
-					// 		value: xValue,
-					// 		color: 'var(--foreground)',
-					// 		width: 2,
-					// 		zIndex: 5,
-					// 		label: {
-					// 			text: 'Current budget',
-					// 			align: 'left',
-					// 			style: { color: 'var(--foreground)' }
-					// 		}
-					// 	});
-					// }
-				}
 			}
 		}
 	},
