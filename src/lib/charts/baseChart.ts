@@ -107,9 +107,10 @@ export const configureHighcharts = () => {
 		}
 	});
 };
-export const createHighchart = (config: Highcharts.Options): Attachment => {
+export const createHighchart = (config: Highcharts.Options, onLoad?: () => void): Attachment => {
 	return (element) => {
 		const chart = Highcharts.chart(element as HTMLElement, config);
+		onLoad?.();
 
 		return () => {
 			chart.destroy();

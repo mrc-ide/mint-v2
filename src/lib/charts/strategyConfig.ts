@@ -90,6 +90,18 @@ export const getStrategyConfig = (
 					text: 'Minimum cost-effective budget',
 					style: { color: 'var(--muted-foreground)' }
 				}
+			},
+			{
+				id: 'explored-budget',
+				value: strategiseResults[strategiseResults.length - 1].costThreshold,
+				color: 'var(--foreground)',
+				dashStyle: 'ShortDot',
+				width: 2,
+				zIndex: 5,
+				label: {
+					text: 'Explored budget',
+					style: { color: 'var(--foreground)', fontWeight: '600' }
+				}
 			}
 		]
 	},

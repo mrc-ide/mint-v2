@@ -34,8 +34,9 @@
 			</Form.Control>
 			<Form.Description class="text-xs"
 				>Enter your maximum possible budget <span class="font-semibold">${minCost.toLocaleString()}</span> and
-				<span class="font-semibold">${maxCost.toLocaleString()}</span>. Tip: Set this to the highest budget you could
-				potentially secure to see all possible strategies.</Form.Description
+				<span class="font-semibold">${maxCost.toLocaleString()}</span>.
+				<br /><span class="font-semibold">Tip:</span> Set this to the highest budget you could potentially secure to see
+				all possible strategies.</Form.Description
 			>
 			<Form.FieldErrors />
 		</Form.Field>
