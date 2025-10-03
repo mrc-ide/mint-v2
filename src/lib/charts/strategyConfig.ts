@@ -67,7 +67,11 @@ export const getStrategyConfig = (
 		text: 'Total Cases Averted vs Total Cost'
 	},
 	subtitle: {
-		text: 'Click on the chart to explore optimal strategies for different budgets'
+		text:
+			'<b>Click anywhere on the chart to explore the optimal intervention strategy at that specific budget level.</b><br>' +
+			' The chart displays strategies from minimum cost to your maximum budget',
+		verticalAlign: 'bottom',
+		align: 'left'
 	},
 	xAxis: {
 		title: {

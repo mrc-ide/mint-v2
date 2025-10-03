@@ -15,11 +15,11 @@
 
 <form method="POST" use:enhance novalidate>
 	<div class="flex space-x-3">
-		<Form.Field {form} name="budget">
+		<Form.Field {form} name="budget" class="max-w-140">
 			<Form.Control>
 				{#snippet children({ props })}
 					<div class="flex space-x-2">
-						<Form.Label class="whitespace-nowrap" for="budget">Total available budget (USD)</Form.Label>
+						<Form.Label class="whitespace-nowrap" for="budget">Maximum available budget (USD)</Form.Label>
 						<Input
 							type="number"
 							min={minCost}
@@ -32,11 +32,13 @@
 					</div>
 				{/snippet}
 			</Form.Control>
-			<Form.Description
-				>Enter budget between ${minCost.toLocaleString()} and ${maxCost.toLocaleString()} (constrained by intervention costs)</Form.Description
+			<Form.Description class="text-xs"
+				>Enter your maximum possible budget <span class="font-semibold">${minCost.toLocaleString()}</span> and
+				<span class="font-semibold">${maxCost.toLocaleString()}</span>. Tip: Set this to the highest budget you could
+				potentially secure to see all possible strategies.</Form.Description
 			>
 			<Form.FieldErrors />
 		</Form.Field>
-		<Form.Button>Strategise</Form.Button>
+		<Form.Button>Show Full Budget Range</Form.Button>
 	</div>
 </form>

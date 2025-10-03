@@ -1,6 +1,7 @@
 <script lang="ts">
+	import { ScenarioToLabel } from '$lib/charts/baseChart';
 	import { convertToLocaleString } from '$lib/number';
-	import type { StrategiseResults } from '$lib/types/userState';
+	import type { Scenario, StrategiseResults } from '$lib/types/userState';
 	import SelectedStrategyRegionCards from './SelectedStrategyRegionCards.svelte';
 
 	interface Props {
@@ -22,7 +23,7 @@
 
 {#snippet metricCard(title: string, value: string)}
 	<div
-		class="rounded-lg border border-border/50 bg-card bg-gradient-to-br from-card to-card/80 p-2 text-center shadow-sm transition-all hover:border-border hover:shadow-md"
+		class="rounded-lg border border-border/50 bg-card p-2 text-center shadow-sm transition-all hover:border-border hover:shadow-md"
 	>
 		<h3 class="text-sm font-medium text-muted-foreground">{title}</h3>
 		<p class="text-lg font-bold">{value}</p>

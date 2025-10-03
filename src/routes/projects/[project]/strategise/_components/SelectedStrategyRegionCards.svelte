@@ -40,7 +40,7 @@
 	<div class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
 		{#each Object.entries(regionalMetrics) as [region, { casesAverted, cost, intervention, casesAvertedPerPerson, costPerCaseAverted, costPerPerson, population }]}
 			<div
-				class="group relative rounded-xl border border-border/50 bg-gradient-to-br from-card to-card/80 p-3 shadow-sm transition-all hover:border-border hover:shadow-md"
+				class="group relative rounded-xl border border-border/50 bg-card/80 p-3 shadow-sm transition-all hover:border-border hover:shadow-md"
 			>
 				<div class="absolute top-2 right-2">
 					<Badge variant="secondary" class="text-xs font-medium text-muted-foreground">

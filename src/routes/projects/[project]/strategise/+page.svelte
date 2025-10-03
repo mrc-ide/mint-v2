@@ -28,12 +28,13 @@
 
 <div class="mx-auto px-15 py-8">
 	<div class="mb-6">
-		<h1 class="text-2xl font-bold">Strategise across regions for {data.project.name}</h1>
-		<p class="mb-1 leading-relaxed text-muted-foreground">
-			This tool can investigate how different interventions could be distributed across all project regions given a
-			total budget, to minimise the overall number of malaria cases whilst achieving local goals.
+		<h1 class="text-2xl font-bold">Strategise across regions for optimal budget allocation</h1>
+		<p class="relaxed mb-1 text-muted-foreground">
+			This tool explores how interventions can be distributed across regions at every budget level from minimum to
+			maximum. The chart shows the full range from the lowest possible budget up to your specified maximum budget,
+			helping you understand trade-offs and optimal allocation strategies at each funding level.
 		</p>
-		<p class="mb-1 leading-relaxed text-muted-foreground">
+		<p class="mb-1 text-muted-foreground">
 			The regions must have run with interventions to be included in the strategise tool.
 		</p>
 	</div>
