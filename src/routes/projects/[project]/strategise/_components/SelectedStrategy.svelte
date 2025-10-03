@@ -1,7 +1,6 @@
 <script lang="ts">
-	import { ScenarioToLabel } from '$lib/charts/baseChart';
 	import { convertToLocaleString } from '$lib/number';
-	import type { Scenario, StrategiseResults } from '$lib/types/userState';
+	import type { StrategiseResults } from '$lib/types/userState';
 	import SelectedStrategyRegionCards from './SelectedStrategyRegionCards.svelte';
 
 	interface Props {

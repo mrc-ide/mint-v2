@@ -10,15 +10,14 @@
 		populations: Record<string, number>;
 	}
 	let { strategiseResults, populations }: Props = $props();
+	let isChartLoading = $state(true);
 	let selectedStrategy = $state<StrategiseResults>(strategiseResults[strategiseResults.length - 1]);
-	let loadingChart = $state(true);
-
 	let config = $derived(getStrategyConfig(strategiseResults, (strategy) => (selectedStrategy = strategy)));
 </script>
 
 <div>
-	<div {@attach createHighchart(config, () => (loadingChart = false))} class={getChartTheme()}></div>
-	{#if loadingChart}
+	<div {@attach createHighchart(config, () => (isChartLoading = false))} class={getChartTheme()}></div>
+	{#if isChartLoading}
 		<Loader />
 	{:else}
 		<SelectedStrategy {selectedStrategy} {populations} />

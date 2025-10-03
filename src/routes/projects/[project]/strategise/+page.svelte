@@ -29,7 +29,7 @@
 <div class="mx-auto px-15 py-8">
 	<div class="mb-6">
 		<h1 class="text-2xl font-bold">Strategise across regions for optimal budget allocation</h1>
-		<p class="relaxed mb-1 text-muted-foreground">
+		<p class="mb-1 text-muted-foreground">
 			This tool explores how interventions can be distributed across regions at every budget level from minimum to
 			maximum. The chart shows the full range from the lowest possible budget up to your specified maximum budget,
 			helping you understand trade-offs and optimal allocation strategies at each funding level.

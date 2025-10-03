@@ -38,7 +38,7 @@
 {/snippet}
 <div class="mt-4">
 	<div class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
-		{#each Object.entries(regionalMetrics) as [region, { casesAverted, cost, intervention, casesAvertedPerPerson, costPerCaseAverted, costPerPerson, population }]}
+		{#each Object.entries(regionalMetrics) as [region, { casesAverted, cost, intervention, casesAvertedPerPerson, costPerCaseAverted, costPerPerson, population }] (region)}
 			<div
 				class="group relative rounded-xl border border-border/50 bg-card/80 p-3 shadow-sm transition-all hover:border-border hover:shadow-md"
 			>
