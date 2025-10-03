@@ -1,7 +1,26 @@
 import type { StrategiseResults } from '$lib/types/userState';
 import { ScenarioToLabel } from './baseChart';
 
-export const findClosestStrategiseResult = (strategiseResults: StrategiseResults[], xValue: number) =>
+const BUDGET_PLOTLINE_ID = 'explored-budget';
+const getBudgetPlotLine = (budget: number): Highcharts.AxisPlotLinesOptions => ({
+	id: BUDGET_PLOTLINE_ID,
+	value: budget,
+	color: 'var(--foreground)',
+	dashStyle: 'ShortDot',
+	width: 2,
+	zIndex: 5,
+	label: {
+		text: 'Explored budget',
+		style: { color: 'var(--foreground)', fontWeight: '600' }
+	}
+});
+
+const addBudgetPlotLine = (chart: Highcharts.Chart, budget: number) => {
+	chart.xAxis[0].removePlotLine(BUDGET_PLOTLINE_ID);
+	chart.xAxis[0].addPlotLine(getBudgetPlotLine(budget));
+};
+
+const findClosestStrategiseResult = (strategiseResults: StrategiseResults[], xValue: number) =>
 	strategiseResults.find((result) => result.costThreshold >= xValue) ?? strategiseResults[strategiseResults.length - 1];
 
 export const getStrategiseSeries = (data: StrategiseResults[]): Highcharts.SeriesAreaOptions[] => {
@@ -41,24 +60,7 @@ export const getStrategyConfig = (
 		events: {
 			click: function (event) {
 				const xValue = Math.round((event as Highcharts.ChartClickEventObject).xAxis[0].value);
-
-				// Remove existing explored budget plot line by id
-				this.xAxis[0].removePlotLine('explored-budget');
-
-				// Add new plot line at clicked position with unique id
-				this.xAxis[0].addPlotLine({
-					id: 'explored-budget',
-					value: xValue,
-					color: 'var(--foreground)',
-					dashStyle: 'ShortDot',
-					width: 2,
-					zIndex: 5,
-					label: {
-						text: 'Explored budget',
-						style: { color: 'var(--foreground)', fontWeight: '600' }
-					}
-				});
-
+				addBudgetPlotLine(this, xValue);
 				setStrategy(findClosestStrategiseResult(strategiseResults, xValue));
 			}
 		}
@@ -91,18 +93,7 @@ export const getStrategyConfig = (
 					style: { color: 'var(--muted-foreground)' }
 				}
 			},
-			{
-				id: 'explored-budget',
-				value: strategiseResults[strategiseResults.length - 1].costThreshold,
-				color: 'var(--foreground)',
-				dashStyle: 'ShortDot',
-				width: 2,
-				zIndex: 5,
-				label: {
-					text: 'Explored budget',
-					style: { color: 'var(--foreground)', fontWeight: '600' }
-				}
-			}
+			getBudgetPlotLine(strategiseResults[strategiseResults.length - 1].costThreshold)
 		]
 	},
 	yAxis: {
@@ -127,6 +118,12 @@ export const getStrategyConfig = (
 			stacking: 'normal',
 			marker: {
 				enabled: false
+			},
+			events: {
+				click: function (event) {
+					addBudgetPlotLine(this.chart, event.point.x);
+					setStrategy(findClosestStrategiseResult(strategiseResults, event.point.x));
+				}
 			}
 		}
 	},

@@ -5,6 +5,7 @@ import 'highcharts/esm/modules/exporting';
 
 import type { Attachment } from 'svelte/attachments';
 import type { Scenario } from '../types/userState';
+import { mode } from 'mode-watcher';
 
 export const configureHighcharts = () => {
 	Highcharts.setOptions({
@@ -157,3 +158,5 @@ export const getColumnFill = (scenario: Scenario): Highcharts.PatternObject => (
 		})
 	}
 });
+
+export const getChartTheme = () => (mode.current === 'dark' ? 'highcharts-dark' : 'highcharts-light');
