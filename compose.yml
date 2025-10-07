@@ -2,18 +2,18 @@ services:
   mint-redis:
     image: redis:8.0
     ports:
-      - "6379:6379"
+      - 127.0.0.1:6379:6379
     volumes:
       - redis-data:/data
     container_name: mint-redis
   mint-frontend:
     build: .
     ports:
-      - 3000:3000
+      - 127.0.0.1:3000:3000
     environment:
       - REDIS_URL=redis://mint-redis:6379
       - PUBLIC_MINTR_URL=http://mintr:8888
-      - ORIGIN=http://0.0.0.0:3000
+      - ORIGIN=http://127.0.0.1:3000
     depends_on:
       - mint-redis
     container_name: mint-frontend
@@ -21,7 +21,7 @@ services:
     image: ghcr.io/mrc-ide/mintr:main
     container_name: mintr
     ports:
-      - 8888:8888
+      - 127.0.0.1:8888:8888
 
 volumes:
   redis-data:
