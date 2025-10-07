@@ -7,7 +7,7 @@ HERE=$(realpath "$(dirname $0)")
 
 docker network create $NETWORK > /dev/null || /bin/true
 
-docker run -d --rm --name $NAME_REDIS --network=$NETWORK -p 6379:6379 redis:5.0
+docker run -d --rm --name $NAME_REDIS --network=$NETWORK -p 6379:6379 redis:8.0
 
 MINTR_IMAGE=$REGISTRY/$ORG/$API:$API_VERSION
 docker run --rm -d \

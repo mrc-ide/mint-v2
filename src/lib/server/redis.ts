@@ -1,15 +1,15 @@
-import { REDIS_URL } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 import type { UserState } from '$lib/types/userState';
 import Redis from 'ioredis';
 import { setNewUserIdCookie } from './session';
 import type { Cookies } from '@sveltejs/kit';
 
-const redis = new Redis(REDIS_URL);
+const redis = new Redis(env.REDIS_URL, { lazyConnect: true });
 redis.on('error', (err: Error) => {
 	console.error('Redis connection error:', err);
 });
 redis.on('connect', () => {
-	console.log(`Connected to Redis server ${REDIS_URL}`);
+	console.log(`Connected to Redis server ${env.REDIS_URL}`);
 });
 redis.on('reconnecting', () => {
 	console.log('Reconnecting to Redis...');
@@ -18,6 +18,7 @@ export default redis;
 
 export const loadOrSetupUserState = async (cookies: Cookies): Promise<UserState> => {
 	const userId = cookies.get('userId') || '';
+	console.log(`User ID from cookie: ${userId}`);
 	const cachedUserState = await redis.get(userId);
 	if (cachedUserState) {
 		try {
@@ -37,6 +38,7 @@ const createAndPersistNewUserState = async (cookies: Cookies): Promise<UserState
 	const newUserId = setNewUserIdCookie(cookies);
 	const newUserState: UserState = { userId: newUserId, createdAt: new Date().toISOString(), projects: [] };
 	await redis.set(newUserId, JSON.stringify(newUserState));
+	console.log(`Created new user state for userId: ${newUserId}`);
 	return newUserState;
 };
 
