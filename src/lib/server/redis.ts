@@ -18,7 +18,6 @@ export default redis;
 
 export const loadOrSetupUserState = async (cookies: Cookies): Promise<UserState> => {
 	const userId = cookies.get('userId') || '';
-	console.log(`User ID from cookie: ${userId}`);
 	const cachedUserState = await redis.get(userId);
 	if (cachedUserState) {
 		try {
@@ -38,7 +37,6 @@ const createAndPersistNewUserState = async (cookies: Cookies): Promise<UserState
 	const newUserId = setNewUserIdCookie(cookies);
 	const newUserState: UserState = { userId: newUserId, createdAt: new Date().toISOString(), projects: [] };
 	await redis.set(newUserId, JSON.stringify(newUserState));
-	console.log(`Created new user state for userId: ${newUserId}`);
 	return newUserState;
 };
 
