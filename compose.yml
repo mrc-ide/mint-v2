@@ -2,7 +2,7 @@ services:
   mint-redis:
     image: redis:8.0
     ports:
-      - 127.0.0.1:6379:6379
+      - 6379:6379
     volumes:
       - redis-data:/data
     container_name: mint-redis
@@ -21,7 +21,6 @@ services:
     image: ghcr.io/mrc-ide/mintr:main
     container_name: mintr
     ports:
-      - 127.0.0.1:8888:8888
-
+      - 8888:8888
 volumes:
   redis-data:
