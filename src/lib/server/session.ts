@@ -6,7 +6,7 @@ export const setNewUserIdCookie = (cookies: Cookies) => {
 	cookies.set('userId', userId, {
 		httpOnly: true,
 		secure: true,
-		sameSite: 'none',
+		sameSite: 'lax',
 		path: '/',
 		maxAge: 60 * 60 * 24 * 365 // 1 year (TODO: chat and see if we want to do on this?)
 	});
