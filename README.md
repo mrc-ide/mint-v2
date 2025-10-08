@@ -86,7 +86,7 @@ A `compose.yml` file is provided to run the application along with its dependenc
 1. **Start services**:
 
    ```sh
-   docker-compose up 
+   docker-compose up
    ```
 
 2. **Access the application**:
