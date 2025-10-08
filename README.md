@@ -100,5 +100,6 @@ A `docker-compose.yml` file is provided to run the application along with its de
 ## Environment Variables
 
 Environment variables can be set in a `.env` file in the root directory or added to the environment. Example variables include:
+
 - `FRONTEND_REF`: Git reference for the frontend image (default: `main`)
 - `API_REF`: Git reference for the Mintr API image (default: `main`)

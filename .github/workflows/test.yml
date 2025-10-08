@@ -1,32 +1,32 @@
 name: test workflow
 on:
-    push:
-        branches:
-            - main
-            - "releases/*"
-    pull_request:
-        branches:
-            - "*"
+  push:
+    branches:
+      - main
+      - 'releases/*'
+  pull_request:
+    branches:
+      - '*'
 jobs:
-    test:
-        runs-on: ubuntu-latest
-        strategy:
-            matrix:
-                node-version: [22.x]
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v5
-            - name: Set up Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v5
-              with:
-                  node-version: ${{ matrix.node-version }}
-                  cache: "npm"
-            - name: Install dependencies
-              run: npm ci
-            - name: Run format + lint checks
-              run: npm run lint
-            - name: check svelte-check
-              run: npm run check
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [22.x]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v5
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm ci
+      - name: Run format + lint checks
+        run: npm run lint
+      - name: check svelte-check
+        run: npm run check
 
-            - name: Run tests
-              run: npm test
+      - name: Run tests
+        run: npm test
