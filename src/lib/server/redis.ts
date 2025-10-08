@@ -4,7 +4,7 @@ import Redis from 'ioredis';
 import { setNewUserIdCookie } from './session';
 import type { Cookies } from '@sveltejs/kit';
 
-const redis = new Redis(env.REDIS_URL, { lazyConnect: true });
+const redis = new Redis(env.REDIS_URL || '', { lazyConnect: true });
 redis.on('error', (err: Error) => {
 	console.error('Redis connection error:', err);
 });
