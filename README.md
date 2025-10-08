@@ -76,3 +76,29 @@ npx shadcn-svelte@latest add [component-name]
 ```
 
 These components will be added to `src/lib/components/ui/` and automatically registered in the SvelteKit app.
+
+## Docker
+
+#### Using Docker Compose
+
+A `docker-compose.yml` file is provided to run the application along with its dependencies (Redis and Mintr API).
+
+1. **Start services**:
+
+   ```sh
+   docker-compose up -d
+   ```
+
+2. **Access the application**:
+   Open your browser and navigate to `http://127.0.0.1:3000`.
+3. **Stop services**:
+
+   ```sh
+   docker-compose down
+   ```
+
+## Environment Variables
+
+Environment variables can be set in a `.env` file in the root directory or added to the environment. Example variables include:
+- `FRONTEND_REF`: Git reference for the frontend image (default: `main`)
+- `API_REF`: Git reference for the Mintr API image (default: `main`)
