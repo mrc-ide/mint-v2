@@ -1,38 +1,41 @@
 name: playwright tests
 on:
-    push:
-        branches:
-            - main
-            - "releases/*"
-    pull_request:
-        branches:
-            - "*"
+  push:
+    branches:
+      - main
+      - 'releases/*'
+  pull_request:
+    branches:
+      - '*'
 jobs:
-    test:
-        runs-on: ubuntu-latest
-        strategy:
-            matrix:
-                node-version: [22.x]
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v5
-            - name: Set up Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v5
-              with:
-                  node-version: ${{ matrix.node-version }}
-                  cache: "npm"
-            - name: Install dependencies
-              run: npm ci
-            - name: Start dependencies
-              run: ./scripts/run_dependencies.sh
-            - name: Install Playwright Browsers
-              run: npx playwright install --with-deps
-            - name: Run Playwright tests
-              run: npm run test:e2e
-            - name: Upload Playwright Report
-              if: ${{ !cancelled() }}
-              uses: actions/upload-artifact@v4
-              with:
-                  name: playwright-report
-                  path: playwright-report/
-                  retention-days: 30
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [22.x]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v5
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm ci
+      - name: Start dependencies
+        run: ./scripts/run_dependencies.sh
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+      - name: Run Playwright tests
+        run: npm run test:e2e
+      - name: Stop dependencies
+        if: ${{ always() }}
+        run: ./scripts/stop_dependencies.sh
+      - name: Upload Playwright Report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
