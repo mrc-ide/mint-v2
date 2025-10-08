@@ -81,16 +81,16 @@ These components will be added to `src/lib/components/ui/` and automatically reg
 
 #### Using Docker Compose
 
-A `docker-compose.yml` file is provided to run the application along with its dependencies (Redis and Mintr API).
+A `compose.yml` file is provided to run the application along with its dependencies (Redis and Mintr API).
 
 1. **Start services**:
 
    ```sh
-   docker-compose up -d
+   docker-compose up 
    ```
 
 2. **Access the application**:
-   Open your browser and navigate to `http://127.0.0.1:3000`.
+   Wait for mint-frontend to be ready. Open your browser and navigate to `http://127.0.0.1:3000`.
 3. **Stop services**:
 
    ```sh
