@@ -4,7 +4,7 @@ services:
     ports:
       - 6379:6379
     volumes:
-      - redis-data:/data
+      - mint-data:/data
     container_name: mint-redis
   mint-frontend:
     build: .
@@ -15,12 +15,22 @@ services:
       - PUBLIC_MINTR_URL=http://mintr:8888
       - ORIGIN=http://127.0.0.1:3000
     depends_on:
-      - mint-redis
-    container_name: mint-frontend
+      mint-redis:
+        condition: service_started
+      mintr:
+        condition: service_healthy
+        restart: true
   mintr:
-    image: ghcr.io/mrc-ide/mintr:main
+    image: ghcr.io/mrc-ide/mintr:${API_REF:-main}
     container_name: mintr
+    healthcheck:
+      test: curl -f http://localhost:8888/ || exit 1
+      start_period: 1m
+      start_interval: 10s
+      interval: 1m
+      timeout: 30s
+      retries: 5
     ports:
       - 8888:8888
 volumes:
-  redis-data:
+  mint-data:
