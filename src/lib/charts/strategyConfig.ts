@@ -21,7 +21,7 @@ const addBudgetPlotLine = (chart: Highcharts.Chart, budget: number) => {
 };
 
 const findClosestStrategiseResult = (strategiseResults: StrategiseResults[], xValue: number) =>
-	strategiseResults.find((result) => result.costThreshold >= xValue) ?? strategiseResults[strategiseResults.length - 1];
+	strategiseResults.findLast((result) => result.costThreshold <= xValue) ?? strategiseResults[0];
 
 export const getStrategiseSeries = (data: StrategiseResults[]): Highcharts.SeriesAreaOptions[] => {
 	const seriesMap = new Map<string, Highcharts.SeriesAreaOptions>();
@@ -110,8 +110,15 @@ export const getStrategyConfig = (
 		useHTML: true,
 		headerFormat:
 			'<div class="font-bold  pb-1 border-b">Cost: ${point.key:,.0f} | Cases Averted: {point.stackTotal:,.1f}</div>',
-		pointFormat:
-			'<div class="flex items-center"><span style="color:{point.color}" class="mr-1">●</span><span class="font-medium">{series.name}:</span> <span class="ml-0.5">{point.y:,.1f} cases <span class="text-muted-foreground">{point.custom.intervention}</span></span></div>'
+		pointFormat: `<div class="flex items-center">
+			    <span style="color:{point.color}" class="mr-1">●</span>
+			    <span class="font-medium">{series.name}:</span>
+			    <span class="ml-0.5">{point.y:,.1f} cases 
+			        <span class="text-muted-foreground">
+			            {point.custom.intervention}
+			        </span>
+			    </span>
+			</div>`
 	},
 	plotOptions: {
 		area: {

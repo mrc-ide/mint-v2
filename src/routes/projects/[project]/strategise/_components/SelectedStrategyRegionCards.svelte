@@ -12,20 +12,19 @@
 
 	let regionalMetrics = $derived(
 		Object.fromEntries(
-			selectedStrategy.interventions.map((intervention) => [
-				intervention.region,
-				{
-					intervention: intervention.intervention,
-					casesAverted: intervention.casesAverted,
-					cost: intervention.cost,
-					population: populations[intervention.region],
-					costPerPerson:
-						populations[intervention.region] > 0 ? intervention.cost / populations[intervention.region] : 0,
-					costPerCaseAverted: intervention.casesAverted > 0 ? intervention.cost / intervention.casesAverted : 0,
-					casesAvertedPerPerson:
-						populations[intervention.region] > 0 ? intervention.casesAverted / populations[intervention.region] : 0
-				}
-			])
+			selectedStrategy.interventions.map((intervention) => {
+				const population = populations[intervention.region];
+				return [
+					intervention.region,
+					{
+						...intervention,
+						population,
+						costPerPerson: population > 0 ? intervention.cost / population : 0,
+						costPerCaseAverted: intervention.casesAverted > 0 ? intervention.cost / intervention.casesAverted : 0,
+						casesAvertedPerPerson: population > 0 ? intervention.casesAverted / population : 0
+					}
+				];
+			})
 		)
 	);
 </script>
