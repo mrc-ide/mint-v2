@@ -2,21 +2,6 @@ import type { FormValue } from '$lib/components/dynamic-region-form/types';
 import { POST_INTERVENTION_YEARS, type Scenario } from '$lib/types/userState';
 import type { CasesAverted } from './processCases';
 
-/** Fallback values for cost calculations, taken from mintr default */
-export const DEFAULT_POPULATION = 20000;
-export const DEFAULT_PEOPLE_PER_HOUSEHOLD = 4;
-export const DEFAULT_IRS_COST_PER_HOUSEHOLD = 20;
-export const DEFAULT_LSM_COST_PER_PERSON = 5;
-export const DEFAULT_ITN_COSTS = {
-	pyOnly: 1.85,
-	pyPbo: 2.14,
-	pyPyrrole: 2.56,
-	pyPpf: 2.86
-} as const;
-export const DEFAULT_MASS_DISTRIBUTION_COST_PER_PERSON = 2.75;
-export const DEFAULT_CONTINUOUS_DISTRIBUTION_COST_PER_PERSON = 2.75;
-export const DEFAULT_PEOPLE_PER_NET = 1.8;
-
 /** Cost options for the various interventions */
 export interface CostOptions {
 	irsAnnualCostPerHousehold: number;
@@ -37,22 +22,20 @@ export interface CostOptions {
 }
 
 export const getFormCostOptions = (form: Record<string, FormValue>): CostOptions => ({
-	irsAnnualCostPerHousehold: Number(form['irs_household_annual_cost'] ?? DEFAULT_IRS_COST_PER_HOUSEHOLD),
-	peoplePerHousehold: Number(form['people_per_household'] ?? DEFAULT_PEOPLE_PER_HOUSEHOLD),
-	population: Number(form['population'] ?? DEFAULT_POPULATION),
-	lsmCostPerPerson: Number(form['lsm_cost'] ?? DEFAULT_LSM_COST_PER_PERSON),
+	irsAnnualCostPerHousehold: Number(form['irs_household_annual_cost']),
+	peoplePerHousehold: Number(form['people_per_household']),
+	population: Number(form['population']),
+	lsmCostPerPerson: Number(form['lsm_cost']),
 	itnCosts: {
-		pyOnly: Number(form['py_only_cost'] ?? DEFAULT_ITN_COSTS.pyOnly),
-		pyPbo: Number(form['py_pbo_cost'] ?? DEFAULT_ITN_COSTS.pyPbo),
-		pyPyrrole: Number(form['py_pyrrole_cost'] ?? DEFAULT_ITN_COSTS.pyPyrrole),
-		pyPpf: Number(form['py_ppf_cost'] ?? DEFAULT_ITN_COSTS.pyPpf)
+		pyOnly: Number(form['py_only_cost']),
+		pyPbo: Number(form['py_pbo_cost']),
+		pyPyrrole: Number(form['py_pyrrole_cost']),
+		pyPpf: Number(form['py_ppf_cost'])
 	},
-	massDistributionCostPerPerson: Number(form['mass_distribution_cost'] ?? DEFAULT_MASS_DISTRIBUTION_COST_PER_PERSON),
-	continuousDistributionCostPerPerson: Number(
-		form['continuous_itn_distribution_cost'] ?? DEFAULT_CONTINUOUS_DISTRIBUTION_COST_PER_PERSON
-	),
-	procurementBuffer: 1 + Number(form['procurement_buffer'] ?? 0) / 100, // convert percentage to multiplier
-	peoplePerNet: Number(form['people_per_bednet'] ?? DEFAULT_PEOPLE_PER_NET),
+	massDistributionCostPerPerson: Number(form['mass_distribution_cost']),
+	continuousDistributionCostPerPerson: Number(form['continuous_itn_distribution_cost']),
+	procurementBuffer: 1 + Number(form['procurement_buffer']) / 100, // convert percentage to multiplier
+	peoplePerNet: Number(form['people_per_bednet']),
 	isRoutine: Boolean(form['routine_coverage'])
 });
 

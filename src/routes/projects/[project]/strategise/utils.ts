@@ -1,5 +1,5 @@
 import type { FormValue } from '$lib/components/dynamic-region-form/types';
-import { combineCostsAndCasesAverted, DEFAULT_POPULATION, getTotalCostsPerScenario } from '$lib/process-results/costs';
+import { combineCostsAndCasesAverted, getTotalCostsPerScenario } from '$lib/process-results/costs';
 import {
 	collectPostInterventionCases,
 	convertPer1000ToTotal,
@@ -101,9 +101,6 @@ const buildInterventions = (
 	return Object.entries(costsAndCasesAverted).map(([scenario, { casesAverted, totalCost }]) => ({
 		intervention: scenario,
 		cost: totalCost,
-		casesAverted: convertPer1000ToTotal(
-			casesAverted.totalAvertedCasesPer1000,
-			Number(regionForm.population) || DEFAULT_POPULATION
-		)
+		casesAverted: convertPer1000ToTotal(casesAverted.totalAvertedCasesPer1000, Number(regionForm['population']))
 	}));
 };
