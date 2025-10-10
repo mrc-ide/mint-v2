@@ -16,6 +16,7 @@
 		"format": "prettier --write .",
 		"lint": "prettier --check . && eslint .",
 		"test:unit": "vitest",
+		"test:unit:coverage": "vitest run --coverage",
 		"test": "npm run test:unit -- --run && npm run test:e2e",
 		"test:e2e": "playwright test"
 	},
@@ -26,6 +27,7 @@
 		"@lucide/svelte": "^0.515.0",
 		"@playwright/test": "^1.49.1",
 		"@sveltejs/adapter-auto": "^6.0.0",
+		"@sveltejs/adapter-node": "^5.3.3",
 		"@sveltejs/kit": "^2.22.0",
 		"@sveltejs/vite-plugin-svelte": "^6.0.0",
 		"@tailwindcss/forms": "^0.5.9",
@@ -34,6 +36,7 @@
 		"@tanstack/table-core": "^8.21.3",
 		"@types/node": "^24.1.0",
 		"@vitest/browser": "^3.2.3",
+		"@vitest/coverage-v8": "^3.2.4",
 		"bits-ui": "^2.9.1",
 		"clsx": "^2.1.1",
 		"eslint": "^9.18.0",
