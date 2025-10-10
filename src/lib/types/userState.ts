@@ -59,4 +59,5 @@ export interface UserState {
 	userId: string;
 	createdAt: string;
 	projects: Project[];
+	country?: string;
 }
