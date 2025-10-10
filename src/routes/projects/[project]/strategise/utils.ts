@@ -1,5 +1,5 @@
 import type { FormValue } from '$lib/components/dynamic-region-form/types';
-import { combineCostsAndCasesAverted, DEFAULT_POPULATION, getTotalCostsPerScenario } from '$lib/process-results/costs';
+import { combineCostsAndCasesAverted, getTotalCostsPerScenario } from '$lib/process-results/costs';
 import {
 	collectPostInterventionCases,
 	convertPer1000ToTotal,
@@ -8,6 +8,33 @@ import {
 } from '$lib/process-results/processCases';
 import type { Region, Scenario } from '$lib/types/userState';
 import type { StrategiseRegions } from './schema';
+
+/**
+ * Calculates the minimum cost across all interventions in all regions for strategy optimization.
+ * Used to determine the lower bound for cost-effectiveness analysis.
+ *
+ * @param strategiseRegions - Array of regions with their intervention data
+ * @returns The lowest intervention cost found across all regions
+ */
+export const getMinimumCostForStrategise = (strategiseRegions: StrategiseRegions): number => {
+	const costs = strategiseRegions.flatMap((region) => region.interventions.map((intervention) => intervention.cost));
+	return Math.round(Math.min(...costs));
+};
+
+/**
+ * Calculates the maximum total cost by selecting the most expensive intervention from each region.
+ * Used to determine the upper bound for budget allocation scenarios where the highest-cost
+ * intervention is chosen per region.
+ *
+ * @param strategiseRegions - Array of regions with their intervention data
+ * @returns The sum of the highest intervention costs from each region
+ */
+export const getMaximumCostForStrategise = (strategiseRegions: StrategiseRegions): number => {
+	const maxCostsPerRegion = strategiseRegions.map((region) =>
+		Math.max(...region.interventions.map((intervention) => intervention.cost))
+	);
+	return Math.round(maxCostsPerRegion.reduce((sum, cost) => sum + cost, 0));
+};
 
 /**
  * Processes a collection of regions to extract cases averted and cost data for strategy analysis.
@@ -74,9 +101,6 @@ const buildInterventions = (
 	return Object.entries(costsAndCasesAverted).map(([scenario, { casesAverted, totalCost }]) => ({
 		intervention: scenario,
 		cost: totalCost,
-		casesAverted: convertPer1000ToTotal(
-			casesAverted.totalAvertedCasesPer1000,
-			Number(regionForm.population) || DEFAULT_POPULATION
-		)
+		casesAverted: convertPer1000ToTotal(casesAverted.totalAvertedCasesPer1000, Number(regionForm['population']))
 	}));
 };

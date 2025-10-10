@@ -3,11 +3,7 @@
 	import { getCostConfigs } from '$lib/charts/costsConfig';
 	import DataTable from '$lib/components/data-table/DataTable.svelte';
 	import type { FormValue } from '$lib/components/dynamic-region-form/types';
-	import {
-		DEFAULT_POPULATION,
-		combineCostsAndCasesAverted,
-		getTotalCostsPerScenario
-	} from '$lib/process-results/costs';
+	import { combineCostsAndCasesAverted, getTotalCostsPerScenario } from '$lib/process-results/costs';
 	import type { CasesAverted } from '$lib/process-results/processCases';
 	import { buildCostTableData, costTableColumns } from '$lib/tables/costTable';
 	import type { Scenario } from '$lib/types/userState';
@@ -24,9 +20,9 @@
 	);
 
 	let { costPer1000Config, costPerCaseConfig } = $derived(
-		getCostConfigs(costsAndCasesAverted, Number(form.population) || DEFAULT_POPULATION)
+		getCostConfigs(costsAndCasesAverted, Number(form['population']))
 	);
-	let tableData = $derived(buildCostTableData(costsAndCasesAverted, Number(form.population) || DEFAULT_POPULATION));
+	let tableData = $derived(buildCostTableData(costsAndCasesAverted, Number(form['population'])));
 </script>
 
 <div class="flex flex-col gap-6">

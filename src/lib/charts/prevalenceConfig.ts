@@ -23,7 +23,7 @@ const createPrevalenceSeries = (data: PrevalenceData[]): Highcharts.SeriesSpline
 export const getPrevalenceConfig = (prevalence: PrevalenceData[]): Highcharts.Options => ({
 	chart: {
 		type: 'spline',
-		height: 500
+		height: 450
 	},
 	title: {
 		text: 'Projected prevalence in under 5 year olds'

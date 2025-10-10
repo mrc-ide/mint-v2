@@ -1,5 +1,5 @@
 import { ApiError, apiFetch } from '$lib/fetch';
-import { saveRegionFormState, saveRegionRun } from '$lib/server/region';
+import { invalidateStrategyForProject, saveRegionFormState, saveRegionRun } from '$lib/server/region';
 import type { EmulatorResults } from '$lib/types/userState';
 import { runEmulatorUrl } from '$lib/url';
 import { error, json } from '@sveltejs/kit';
@@ -22,6 +22,7 @@ export const POST: RequestHandler = async ({ request, locals, params, fetch }) =
 			fetcher: fetch
 		});
 
+		invalidateStrategyForProject(locals.userState, project);
 		await saveRegionRun(locals.userState, project, region, formValues, res.data.cases);
 		return json(res);
 	} catch (e) {
@@ -34,6 +35,7 @@ export const PATCH: RequestHandler = async ({ request, locals, params }) => {
 	const { formValues } = await request.json();
 	const { project, region } = params;
 
+	invalidateStrategyForProject(locals.userState, project);
 	await saveRegionFormState(locals.userState, project, region, formValues);
 	return new Response(null, { status: 204 });
 };

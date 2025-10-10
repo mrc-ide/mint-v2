@@ -69,7 +69,7 @@
 		submitText="Run baseline"
 	>
 		{#await runPromise}
-			<Loader />
+			<Loader text="Running..." />
 		{:then emulatorResults}
 			{#if emulatorResults}
 				<Results {emulatorResults} {form} bind:activeTab />

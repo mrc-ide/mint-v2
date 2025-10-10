@@ -1,15 +1,15 @@
 <script lang="ts">
 	import Loader from '$lib/components/Loader.svelte';
 	import * as Alert from '$lib/components/ui/alert/index';
-	import * as Form from '$lib/components/ui/form';
-	import { Input } from '$lib/components/ui/input';
+	import { mapRegionsToPopulation } from '$lib/project';
 	import CircleAlert from '@lucide/svelte/icons/circle-alert';
 	import { toast } from 'svelte-sonner';
 	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import type { PageProps } from './$types';
+	import BudgetInput from './_components/BudgetInput.svelte';
+	import StrategiseResults from './_components/StrategiseResults.svelte';
 	import { strategiseSchema } from './schema';
-	import StrategiseResults from './StrategiseResults.svelte';
 	let { data }: PageProps = $props();
 
 	const form = superForm(data.form, {
@@ -23,52 +23,33 @@
 		}
 	});
 	const { form: formData, enhance, delayed } = form;
+	let populationsOfRegion = $derived(mapRegionsToPopulation(data.project.regions));
 </script>
 
-<div class="mx-auto max-w-7xl px-4 py-8">
+<div class="mx-auto px-15 py-8">
 	<div class="mb-6">
-		<h1 class="text-2xl font-bold">Strategise across regions for {data.project.name}</h1>
-		<p class="mb-1 leading-relaxed text-muted-foreground">
-			This tool can investigate how different interventions could be distributed across all project regions given a
-			total budget, to minimise the overall number of malaria cases whilst achieving local goals.
+		<h1 class="text-2xl font-bold">Strategise across regions for optimal budget allocation</h1>
+		<p class="mb-1 text-muted-foreground">
+			This tool explores how interventions can be distributed across regions at every budget level from minimum to
+			maximum. The chart shows the full range from the lowest possible budget up to your specified maximum budget,
+			helping you understand trade-offs and optimal allocation strategies at each funding level.
 		</p>
-		<p class="mb-1 leading-relaxed text-muted-foreground">
+		<p class="mb-1 text-muted-foreground">
 			The regions must have run with interventions to be included in the strategise tool.
 		</p>
 	</div>
 	{#if $formData.regionalStrategies.length > 1}
-		<form method="POST" use:enhance novalidate>
-			<div class="flex space-x-3">
-				<Form.Field {form} name="budget">
-					<Form.Control>
-						{#snippet children({ props })}
-							<div class="flex space-x-2">
-								<Form.Label class="whitespace-nowrap" for="budget">Total available budget</Form.Label>
-								<Input
-									type="number"
-									min={0}
-									step={100}
-									{...props}
-									placeholder="Enter budget"
-									bind:value={$formData.budget}
-								/>
-							</div>
-						{/snippet}
-					</Form.Control>
-					<Form.Description
-						>The total budget available to distribute across all regions over the 3-year period.</Form.Description
-					>
-					<Form.FieldErrors />
-				</Form.Field>
-				<Form.Button>Strategise</Form.Button>
-			</div>
-		</form>
+		<BudgetInput
+			{form}
+			bind:budget={$formData.budget}
+			{enhance}
+			maxCost={$formData.maxCost}
+			minCost={$formData.minCost}
+		/>
 		{#if $delayed}
 			<Loader />
-		{/if}
-
-		{#if data.project.strategy.results}
-			<StrategiseResults strategiseResults={data.project.strategy.results} />
+		{:else if data.project.strategy?.results}
+			<StrategiseResults strategiseResults={data.project.strategy.results} populations={populationsOfRegion} />
 		{/if}
 	{:else}
 		<Alert.Root variant="warning">

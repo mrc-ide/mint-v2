@@ -35,10 +35,7 @@ export const actions: Actions = {
 				formValues: {},
 				hasRunBaseline: false,
 				cases: []
-			})),
-			strategy: {
-				budget: 200000
-			}
+			}))
 		});
 
 		return { form };
