@@ -128,7 +128,7 @@
 			originally collected/processed, or if there are no overriding legitimate grounds for the processing. This is
 			sometimes known as 'the right to be forgotten'. To find out more, please see -
 			<a
-				href="https://www.imperial.ac.uk/admin-services/secretariat/information-governance/data-protection/internal-guidance/guide-10/"
+				href="https://www.imperial.ac.uk/admin-services/governance/policies-and-guidance/guidance/guide-10/"
 				target="_blank"
 				class="text-blue-600 underline transition-colors hover:text-blue-800"
 				>Guide 12 - Individual Rights | Administration and support services | Imperial College London</a
