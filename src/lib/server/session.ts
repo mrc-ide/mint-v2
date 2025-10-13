@@ -1,4 +1,3 @@
-import type { LayoutParams, RouteId } from '$app/types';
 import { env } from '$env/dynamic/private';
 import type { Cookies, RequestEvent } from '@sveltejs/kit';
 
@@ -16,9 +15,7 @@ export const setNewUserIdCookie = (cookies: Cookies) => {
 	return userId;
 };
 
-export const fetchCountry = async (
-	event: RequestEvent<LayoutParams<'/'>, RouteId | null>
-): Promise<string | undefined> => {
+export const fetchCountry = async (event: RequestEvent): Promise<string | undefined> => {
 	try {
 		const ip = event.getClientAddress();
 		const res = await fetch(`https://api.ipinfo.io/lite/${ip}?token=${env.IPINFO_TOKEN}`);

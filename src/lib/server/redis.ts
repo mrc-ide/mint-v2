@@ -1,9 +1,8 @@
 import { env } from '$env/dynamic/private';
 import type { UserState } from '$lib/types/userState';
+import type { Cookies, RequestEvent } from '@sveltejs/kit';
 import Redis from 'ioredis';
 import { fetchCountry, setNewUserIdCookie } from './session';
-import type { Cookies, RequestEvent } from '@sveltejs/kit';
-import type { LayoutParams, RouteId } from '$app/types';
 
 const redis = new Redis(env.REDIS_URL || 'redis://localhost:6379', { lazyConnect: true });
 redis.on('error', (err: Error) => {
@@ -17,10 +16,7 @@ redis.on('reconnecting', () => {
 });
 export default redis;
 
-export const loadOrSetupUserState = async (
-	cookies: Cookies,
-	event: RequestEvent<LayoutParams<'/'>, RouteId | null>
-): Promise<UserState> => {
+export const loadOrSetupUserState = async (cookies: Cookies, event: RequestEvent): Promise<UserState> => {
 	const userId = cookies.get('userId') || '';
 	const cachedUserState = await redis.get(userId);
 	if (cachedUserState) {
@@ -37,20 +33,17 @@ export const loadOrSetupUserState = async (
 	return createAndPersistNewUserState(cookies, event);
 };
 
-const createAndPersistNewUserState = async (
-	cookies: Cookies,
-	event: RequestEvent<LayoutParams<'/'>, RouteId | null>
-): Promise<UserState> => {
+const createAndPersistNewUserState = async (cookies: Cookies, event: RequestEvent): Promise<UserState> => {
 	const newUserId = setNewUserIdCookie(cookies);
-	const newUserState: UserState = await setupNewUserState(newUserId, event);
+	const newUserState: UserState = { userId: newUserId, createdAt: new Date().toISOString(), projects: [] };
 	await redis.set(newUserId, JSON.stringify(newUserState));
+	await registerLocation(event);
 	return newUserState;
 };
 
-export const setupNewUserState = async (userId: string, event: RequestEvent<LayoutParams<'/'>, RouteId | null>) => {
+export const registerLocation = async (event: RequestEvent) => {
 	const country = await fetchCountry(event);
 	await incrementCountryCount(country);
-	return { userId, createdAt: new Date().toISOString(), projects: [], country };
 };
 
 const COUNTRY_COUNT_KEY = 'countryCounts';
