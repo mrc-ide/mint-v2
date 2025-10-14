@@ -3,7 +3,6 @@
 	import * as Alert from '$lib/components/ui/alert/index';
 	import { mapRegionsToPopulation } from '$lib/project';
 	import CircleAlert from '@lucide/svelte/icons/circle-alert';
-	import { toast } from 'svelte-sonner';
 	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import type { PageProps } from './$types';
@@ -15,12 +14,7 @@
 	const form = superForm(data.form, {
 		validators: zodClient(strategiseSchema),
 		resetForm: false,
-		dataType: 'json',
-		onUpdated({ form }) {
-			if (form.message && !form.valid) {
-				toast.error(form.message);
-			}
-		}
+		dataType: 'json'
 	});
 	const { form: formData, enhance, delayed } = form;
 	let populationsOfRegion = $derived(mapRegionsToPopulation(data.project.regions));

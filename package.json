@@ -67,6 +67,7 @@
 		"debounce": "^2.2.0",
 		"highcharts": "^12.3.0",
 		"ioredis": "^5.7.0",
-		"mode-watcher": "^1.1.0"
+		"mode-watcher": "^1.1.0",
+		"yalps": "^0.5.6"
 	}
 }
