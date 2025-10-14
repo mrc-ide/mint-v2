@@ -108,45 +108,13 @@ const buildInterventions = (
 };
 
 /**** Optimisation Helpers ****/
-
-type Variables = Record<string, { cost: number; casesAverted: number; [key: string]: number }>;
-
-/**
- * Optimizes intervention selection to maximize cases averted within a given cost constraint.
- * Uses linear programming to determine the best combination of interventions across regions.
- *
- * @param cost - The maximum allowable cost for the interventions
- * @param regionConstraints - Constraints ensuring only one intervention per region
- * @param variables - Variables representing each intervention's cost and cases averted
- * @returns Array of selected interventions that maximize cases averted within the cost limit
- */
-const optimiseByCasesAverted = (
-	cost: number,
-	regionConstraints: Record<string, Constraint>,
-	variables: Variables
-): StrategiseIntervention[] => {
-	const model: Model = {
-		direction: 'maximize',
-		objective: 'casesAverted',
-		constraints: { ...regionConstraints, cost: lessEq(cost + 1) },
-		variables,
-		binaries: true
-	};
-
-	const solution = solve(model);
-	if (solution.status !== 'optimal') {
-		console.warn(`No optimal solution found for cost: ${cost}`);
-		return [];
-	}
-
-	return solution.variables
-		.filter(([_, value]) => value === 1)
-		.map(([key]) => {
-			const [region, intervention] = key.split('--');
-			const { cost, casesAverted } = variables[key];
-			return { region, intervention: intervention as Scenario, cost, casesAverted };
-		});
+type OptimizationVariable = {
+	cost: number;
+	casesAverted: number;
+	[regionName: string]: number;
 };
+
+type OptimizationVariables = Record<string, OptimizationVariable>;
 
 /**
  * Performs strategise analysis over a range of costs to generate intervention strategies.
@@ -169,23 +137,82 @@ export const strategise = (
 		interventions: [...region.interventions, NO_INTERVENTION]
 	}));
 
-	const constraints: Record<string, Constraint> = {};
-	const variables: Variables = {};
+	const { constraints, variables } = setupOptimisationModel(strategiesIncludingNoIntervention);
 
-	for (const { region, interventions } of strategiesIncludingNoIntervention) {
-		constraints[region] = equalTo(1); // Ensure only one intervention per region
+	return costRange.map((costThreshold) => ({
+		costThreshold,
+		interventions: optimiseForMaxCasesAverted(costThreshold, constraints, variables)
+	}));
+};
+
+/**
+ * Sets up optimization constraints and variables for linear programming.
+ */
+const setupOptimisationModel = (regions: StrategiseRegions) => {
+	const constraints: Record<string, Constraint> = {};
+	const variables: OptimizationVariables = {};
+
+	for (const { region, interventions } of regions) {
+		// Ensure exactly one intervention per region
+		constraints[region] = equalTo(1);
+
 		for (const { intervention, cost, casesAverted } of interventions) {
-			const varName = `${region}--${intervention}`;
-			variables[varName] = {
+			const variableName = `${region}--${intervention}`;
+			variables[variableName] = {
 				cost,
 				casesAverted,
-				[region]: 1 // To ensure only one intervention per region
+				[region]: 1 // Links variable to its region constraint
 			};
 		}
 	}
 
-	return costRange.map((costThreshold) => ({
-		costThreshold,
-		interventions: optimiseByCasesAverted(costThreshold, constraints, variables)
-	}));
+	return { constraints, variables };
+};
+
+/**
+ * Optimizes intervention selection to maximize cases averted within a given cost constraint.
+ * Uses linear programming to determine the best combination of interventions across regions.
+ *
+ * @param cost - The maximum allowable cost for the interventions
+ * @param regionConstraints - Constraints ensuring only one intervention per region
+ * @param variables - Variables representing each intervention's cost and cases averted
+ * @returns Array of selected interventions that maximize cases averted within the cost limit
+ */
+const optimiseForMaxCasesAverted = (
+	cost: number,
+	regionConstraints: Record<string, Constraint>,
+	variables: OptimizationVariables
+): StrategiseIntervention[] => {
+	const model: Model = {
+		direction: 'maximize',
+		objective: 'casesAverted',
+		constraints: { ...regionConstraints, cost: lessEq(cost + 1) },
+		variables,
+		binaries: true
+	};
+
+	const solution = solve(model);
+	if (solution.status !== 'optimal') {
+		console.warn(`No optimal solution found for cost: ${cost}`);
+		return [];
+	}
+
+	return solution.variables
+		.filter(([_, isSelected]) => isSelected === 1)
+		.map(([variableName]) => parseOptimisationResult(variableName, variables));
+};
+
+/**
+ * Parses optimization result variable name back to intervention data.
+ */
+const parseOptimisationResult = (variableName: string, variables: OptimizationVariables): StrategiseIntervention => {
+	const [region, intervention] = variableName.split('--');
+	const { cost, casesAverted } = variables[variableName];
+
+	return {
+		region,
+		intervention: intervention as Scenario,
+		cost,
+		casesAverted
+	};
 };

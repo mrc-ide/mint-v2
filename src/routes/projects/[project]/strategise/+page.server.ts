@@ -42,7 +42,7 @@ export const actions: Actions = {
 
 		projectData.strategy = {
 			budget: form.data.budget,
-			results: strategise(form.data.minCost, form.data.maxCost, form.data.regionalStrategies)
+			results: strategise(form.data.minCost, form.data.budget, form.data.regionalStrategies)
 		};
 
 		return { form };
