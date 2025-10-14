@@ -21,7 +21,6 @@
 	const { region, project }: Props = $props();
 	const form = superForm(page.data.addRegionForm ?? { name: '' }, {
 		validators: zodClient(addRegionSchema),
-		resetForm: true,
 		onResult({ result }) {
 			if (result.type === 'redirect') {
 				isOpen = false;
