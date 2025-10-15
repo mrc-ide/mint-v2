@@ -101,7 +101,7 @@ const buildInterventions = (
 	);
 
 	return Object.entries(costsAndCasesAverted).map(([scenario, { casesAverted, totalCost }]) => ({
-		intervention: scenario,
+		intervention: scenario as Scenario,
 		cost: totalCost,
 		casesAverted: convertPer1000ToTotal(casesAverted.totalAvertedCasesPer1000, Number(regionForm['population']))
 	}));
@@ -117,6 +117,22 @@ type OptimizationVariable = {
 type OptimizationVariables = Record<string, OptimizationVariable>;
 
 /**
+ * Performed asynchronous strategise analysis to avoid blocking the main thread.
+ * Wraps the synchronous strategise function in a Promise with a timeout.
+ */
+export const strategiseAsync = (
+	minCost: number,
+	maxCost: number,
+	regionalStrategies: StrategiseRegions
+): Promise<StrategiseResults> => {
+	return new Promise((resolve) => {
+		setTimeout(() => {
+			resolve(strategise(minCost, maxCost, regionalStrategies));
+		}, 0);
+	});
+};
+
+/**
  * Performs strategise analysis over a range of costs to generate intervention strategies.
  * For each cost threshold, it optimizes intervention selection to maximize cases averted.
  *
@@ -129,7 +145,7 @@ export const strategise = (
 	minCost: number,
 	maxCost: number,
 	regionalStrategies: StrategiseRegions
-): StrategiseResults[] => {
+): StrategiseResults => {
 	const costRange = createLinearSpace(minCost, maxCost).map(Math.round);
 	const NO_INTERVENTION = { intervention: 'no_intervention', casesAverted: 0, cost: 0 } as const;
 	const strategiesIncludingNoIntervention: StrategiseRegions = regionalStrategies.map((region) => ({

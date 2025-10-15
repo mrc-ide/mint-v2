@@ -20,10 +20,10 @@ const addBudgetPlotLine = (chart: Highcharts.Chart, budget: number) => {
 	chart.xAxis[0].addPlotLine(getBudgetPlotLine(budget));
 };
 
-const findClosestStrategiseResult = (strategiseResults: StrategiseResults[], xValue: number) =>
+const findClosestStrategiseResult = (strategiseResults: StrategiseResults, xValue: number) =>
 	strategiseResults.findLast((result) => result.costThreshold <= xValue) ?? strategiseResults[0];
 
-export const getStrategiseSeries = (data: StrategiseResults[]): Highcharts.SeriesAreaOptions[] => {
+export const getStrategiseSeries = (data: StrategiseResults): Highcharts.SeriesAreaOptions[] => {
 	const seriesMap = new Map<string, Highcharts.SeriesAreaOptions>();
 
 	data.forEach(({ costThreshold, interventions }) => {
@@ -48,8 +48,8 @@ export const getStrategiseSeries = (data: StrategiseResults[]): Highcharts.Serie
 };
 
 export const getStrategyConfig = (
-	strategiseResults: StrategiseResults[],
-	setStrategy: (strategy: StrategiseResults) => void
+	strategiseResults: StrategiseResults,
+	setStrategy: (strategy: StrategiseResults[number]) => void
 ): Highcharts.Options => ({
 	chart: {
 		type: 'area',

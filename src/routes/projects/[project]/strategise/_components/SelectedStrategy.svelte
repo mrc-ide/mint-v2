@@ -4,7 +4,7 @@
 	import SelectedStrategyRegionCards from './SelectedStrategyRegionCards.svelte';
 
 	interface Props {
-		selectedStrategy: StrategiseResults;
+		selectedStrategy: StrategiseResults[number];
 		populations: Record<string, number>;
 	}
 	let { selectedStrategy, populations }: Props = $props();

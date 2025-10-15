@@ -9,14 +9,29 @@
 	import BudgetInput from './_components/BudgetInput.svelte';
 	import StrategiseResults from './_components/StrategiseResults.svelte';
 	import { strategiseSchema } from './schema';
+	import { strategiseAsync } from './utils';
+
 	let { data }: PageProps = $props();
+	let loading = $state(false);
 
 	const form = superForm(data.form, {
 		validators: zodClient(strategiseSchema),
 		resetForm: false,
-		dataType: 'json'
+		dataType: 'json',
+		async onSubmit({ cancel }) {
+			if ($allErrors.length > 0) {
+				cancel();
+				return;
+			}
+			loading = true;
+
+			$formData.strategiseResults = await strategiseAsync($formData.minCost, $formData.budget, data.regionalStrategies);
+		},
+		onUpdated() {
+			loading = false;
+		}
 	});
-	const { form: formData, enhance, delayed } = form;
+	const { form: formData, enhance, allErrors } = form;
 	let populationsOfRegion = $derived(mapRegionsToPopulation(data.project.regions));
 </script>
 
@@ -32,7 +47,7 @@
 			The regions must have run with interventions to be included in the strategise tool.
 		</p>
 	</div>
-	{#if $formData.regionalStrategies.length > 1}
+	{#if data.regionalStrategies.length > 1}
 		<BudgetInput
 			{form}
 			bind:budget={$formData.budget}
@@ -40,9 +55,9 @@
 			maxCost={$formData.maxCost}
 			minCost={$formData.minCost}
 		/>
-		{#if $delayed}
+		{#if loading}
 			<Loader />
-		{:else if data.project.strategy?.results}
+		{:else if data.project.strategy?.results?.length}
 			<StrategiseResults strategiseResults={data.project.strategy.results} populations={populationsOfRegion} />
 		{/if}
 	{:else}

@@ -1,20 +1,21 @@
+import type { Scenario } from '$lib/types/userState';
 import { z } from 'zod';
 export const strategiseSchema = z
 	.object({
 		minCost: z.number().min(1, 'Minimum cost must be greater than 0'),
 		maxCost: z.number().min(1, 'Maximum cost must be greater than 0'),
 		budget: z.number().min(1, 'Budget must be greater than 0'),
-		regionalStrategies: z
+		strategiseResults: z
 			.object({
-				region: z.string(),
+				costThreshold: z.number().min(0, 'Cost threshold must be 0 or greater'),
 				interventions: z
 					.object({
-						intervention: z.string(),
+						intervention: z.custom<Scenario>(),
 						cost: z.number().min(0, 'Cost must be 0 or greater'),
-						casesAverted: z.number()
+						casesAverted: z.number(),
+						region: z.string()
 					})
 					.array()
-					.min(1, 'Select at least one intervention')
 			})
 			.array()
 	})
@@ -24,4 +25,13 @@ export const strategiseSchema = z
 	});
 
 export type StrategiseForm = z.infer<typeof strategiseSchema>;
-export type StrategiseRegions = z.infer<typeof strategiseSchema>['regionalStrategies'];
+
+interface StrategiseRegion {
+	region: string;
+	interventions: {
+		intervention: Scenario;
+		cost: number;
+		casesAverted: number;
+	}[];
+}
+export type StrategiseRegions = StrategiseRegion[];

@@ -6,12 +6,12 @@
 	import SelectedStrategy from './SelectedStrategy.svelte';
 
 	interface Props {
-		strategiseResults: StrategiseResults[];
+		strategiseResults: StrategiseResults;
 		populations: Record<string, number>;
 	}
 	let { strategiseResults, populations }: Props = $props();
 	let isChartLoading = $state(true);
-	let selectedStrategy = $state<StrategiseResults>(strategiseResults[strategiseResults.length - 1]);
+	let selectedStrategy = $state<StrategiseResults[number]>(strategiseResults[strategiseResults.length - 1]);
 	let config = $derived(getStrategyConfig(strategiseResults, (strategy) => (selectedStrategy = strategy)));
 </script>
 

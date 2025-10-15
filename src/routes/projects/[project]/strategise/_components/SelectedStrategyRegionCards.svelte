@@ -5,7 +5,7 @@
 	import { Badge } from '$lib/components/ui/badge/index';
 
 	interface Props {
-		selectedStrategy: StrategiseResults;
+		selectedStrategy: StrategiseResults[number];
 		populations: Record<string, number>;
 	}
 	let { selectedStrategy, populations }: Props = $props();
