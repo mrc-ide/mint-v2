@@ -56,10 +56,15 @@ const incrementCountryCount = async (country: string | undefined) => {
 	}
 };
 
-export const getCountryCounts = async (): Promise<Record<string, string>> => {
+export const getCountryCounts = async (): Promise<Record<string, number>> => {
 	try {
 		const counts = await redis.hgetall(COUNTRY_COUNT_KEY);
-		return counts;
+		const numericCounts = Object.entries(counts).reduce(
+			(acc, [key, value]) => ({ ...acc, [key]: Number(value) }),
+			{} as Record<string, number>
+		);
+
+		return numericCounts;
 	} catch (error) {
 		console.error('Error fetching country counts from Redis:', error);
 		return {};
