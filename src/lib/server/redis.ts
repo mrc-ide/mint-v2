@@ -1,8 +1,8 @@
 import { env } from '$env/dynamic/private';
 import type { UserState } from '$lib/types/userState';
+import type { Cookies, RequestEvent } from '@sveltejs/kit';
 import Redis from 'ioredis';
-import { setNewUserIdCookie } from './session';
-import type { Cookies } from '@sveltejs/kit';
+import { fetchCountry, setNewUserIdCookie } from './session';
 
 const redis = new Redis(env.REDIS_URL || 'redis://localhost:6379', { lazyConnect: true });
 redis.on('error', (err: Error) => {
@@ -16,7 +16,7 @@ redis.on('reconnecting', () => {
 });
 export default redis;
 
-export const loadOrSetupUserState = async (cookies: Cookies): Promise<UserState> => {
+export const loadOrSetupUserState = async (cookies: Cookies, event: RequestEvent): Promise<UserState> => {
 	const userId = cookies.get('userId') || '';
 	const cachedUserState = await redis.get(userId);
 	if (cachedUserState) {
@@ -30,14 +30,45 @@ export const loadOrSetupUserState = async (cookies: Cookies): Promise<UserState>
 	}
 
 	// If no cached user state exists or error occurs, create a new one
-	return createAndPersistNewUserState(cookies);
+	return createAndPersistNewUserState(cookies, event);
 };
 
-const createAndPersistNewUserState = async (cookies: Cookies): Promise<UserState> => {
+const createAndPersistNewUserState = async (cookies: Cookies, event: RequestEvent): Promise<UserState> => {
 	const newUserId = setNewUserIdCookie(cookies);
 	const newUserState: UserState = { userId: newUserId, createdAt: new Date().toISOString(), projects: [] };
 	await redis.set(newUserId, JSON.stringify(newUserState));
+	await registerLocation(event);
 	return newUserState;
+};
+
+export const registerLocation = async (event: RequestEvent) => {
+	const country = await fetchCountry(event);
+	await incrementCountryCount(country);
+};
+
+const COUNTRY_COUNT_KEY = 'countryCounts';
+const incrementCountryCount = async (country: string | undefined) => {
+	if (!country) return;
+	try {
+		await redis.hincrby(COUNTRY_COUNT_KEY, country, 1);
+	} catch (error) {
+		console.error('Error incrementing country count in Redis:', error);
+	}
+};
+
+export const getCountryCounts = async (): Promise<Record<string, number>> => {
+	try {
+		const counts = await redis.hgetall(COUNTRY_COUNT_KEY);
+		const numericCounts = Object.entries(counts).reduce(
+			(acc, [key, value]) => ({ ...acc, [key]: Number(value) }),
+			{} as Record<string, number>
+		);
+
+		return numericCounts;
+	} catch (error) {
+		console.error('Error fetching country counts from Redis:', error);
+		return {};
+	}
 };
 
 export const saveUserState = async (user: UserState): Promise<void> => {

@@ -25,18 +25,61 @@
 	<p class="mb-4 leading-relaxed text-muted-foreground">If you use this application we will record:</p>
 	<ul class="mb-6 ml-6 list-disc space-y-2 text-muted-foreground">
 		<li>Your IP address</li>
+		<li>Country-level location information derived from your IP address</li>
 		<li>Browser version details</li>
 		<li>Which areas of the website you visit</li>
 	</ul>
 	<p class="mb-8 leading-relaxed text-muted-foreground">No other personal data is kept on our servers.</p>
 
 	<h2 class="mt-8 mb-4 text-2xl font-semibold">How we use your personal data</h2>
+	<p class="mb-4 leading-relaxed text-muted-foreground">
+		We record this data to generate analytics reports on the usage of the site in order to improve it. Specifically:
+	</p>
+	<ul class="mb-6 ml-6 list-disc space-y-2 text-muted-foreground">
+		<li>IP addresses and browser details are used to analyse website traffic and identify technical issues</li>
+		<li>
+			Country-level location data is used to understand the approximate global distribution of our users and ensure our
+			services and content are appropriate and relevant for our international audience
+		</li>
+	</ul>
 	<p class="mb-8 leading-relaxed text-muted-foreground">
-		We record this data to generate analytics reports on the usage of the site in order to improve it.
+		We do not collect precise location data such as your city, postcode, or exact coordinates.
+	</p>
+
+	<h2 class="mt-8 mb-4 text-2xl font-semibold">How we collect location information</h2>
+	<p class="mb-8 leading-relaxed text-muted-foreground">
+		We use a third-party service, ipinfo.com, to convert your IP address into country-level location information. When
+		you visit our website, your IP address is shared with ipinfo.com for this purpose only. You can review ipinfo.com's
+		privacy practices at
+		<a
+			href="https://ipinfo.io/privacy-policy"
+			target="_blank"
+			rel="noopener noreferrer"
+			class="text-blue-600 underline transition-colors hover:text-blue-800">https://ipinfo.io/privacy-policy</a
+		>.
+	</p>
+
+	<h2 class="mt-8 mb-4 text-2xl font-semibold">Legal basis for processing</h2>
+	<p class="mb-4 leading-relaxed text-muted-foreground">
+		We process your IP address and location data based on our legitimate interests in:
+	</p>
+	<ul class="mb-6 ml-6 list-disc space-y-2 text-muted-foreground">
+		<li>Understanding our global user base</li>
+		<li>Improving our services and ensuring they are appropriate for users across different countries</li>
+		<li>Maintaining website security and preventing misuse</li>
+	</ul>
+	<p class="mb-8 leading-relaxed text-muted-foreground">
+		We have assessed that these interests are not overridden by your privacy rights, as we only collect country-level
+		data rather than precise location information.
 	</p>
 
 	<h2 class="mt-8 mb-4 text-2xl font-semibold">Where we store your data</h2>
-	<p class="mb-8 leading-relaxed text-muted-foreground">We store your data on our own servers based in London, UK</p>
+	<p class="mb-4 leading-relaxed text-muted-foreground">We store your data on our own servers based in London, UK.</p>
+	<p class="mb-8 leading-relaxed text-muted-foreground">
+		Please note that your IP address may be temporarily processed by ipinfo.com, which may store data outside the United
+		Kingdom. Appropriate safeguards are in place for any international transfers in accordance with UK GDPR
+		requirements.
+	</p>
 
 	<h2 class="mt-8 mb-4 text-2xl font-semibold">How we keep your data secure</h2>
 	<p class="mb-8 leading-relaxed text-muted-foreground">
@@ -58,6 +101,10 @@
 	<h2 class="mt-8 mb-4 text-2xl font-semibold">Disclosing your information</h2>
 	<ul class="mb-8 ml-6 list-disc space-y-2 text-muted-foreground">
 		<li>
+			We share your IP address with ipinfo.com solely for the purpose of determining your country location, as described
+			above.
+		</li>
+		<li>
 			We may pass on your personal information if we have a legal obligation to do so, or if we have to enforce or apply
 			our terms of use and other agreements.
 		</li>
@@ -75,16 +122,21 @@
 				>reside@imperial.ac.uk</a
 			> and ask us not to use the information we collect.
 		</li>
+		<li>You have the right to object to our processing of your IP address and location data.</li>
 		<li>
 			You also have the right to have data erased if it is no longer necessary for the purpose for which it was
 			originally collected/processed, or if there are no overriding legitimate grounds for the processing. This is
 			sometimes known as 'the right to be forgotten'. To find out more, please see -
 			<a
-				href="https://www.imperial.ac.uk/admin-services/secretariat/information-governance/data-protection/internal-guidance/guide-10/"
+				href="https://www.imperial.ac.uk/admin-services/governance/policies-and-guidance/guidance/guide-10/"
 				target="_blank"
 				class="text-blue-600 underline transition-colors hover:text-blue-800"
 				>Guide 12 - Individual Rights | Administration and support services | Imperial College London</a
 			>
+		</li>
+		<li>
+			If you object to location data collection, please note that this may affect our ability to optimise our services
+			for your region, but will not prevent you from using our website.
 		</li>
 	</ul>
 

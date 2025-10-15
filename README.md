@@ -103,3 +103,4 @@ Environment variables can be set in a `.env` file in the root directory or added
 
 - `FRONTEND_REF`: Git reference for the frontend image (default: `main`)
 - `API_REF`: Git reference for the Mintr API image (default: `main`)
+- `IPINFO_TOKEN`: Token for IP info service (retrieve with: `vault read -field=token secret/reside/ipinfo`)

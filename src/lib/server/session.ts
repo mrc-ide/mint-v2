@@ -1,4 +1,5 @@
-import type { Cookies } from '@sveltejs/kit';
+import { env } from '$env/dynamic/private';
+import type { Cookies, RequestEvent } from '@sveltejs/kit';
 
 export const setNewUserIdCookie = (cookies: Cookies) => {
 	const userId = crypto.randomUUID();
@@ -12,4 +13,16 @@ export const setNewUserIdCookie = (cookies: Cookies) => {
 	});
 
 	return userId;
+};
+
+export const fetchCountry = async (event: RequestEvent): Promise<string | undefined> => {
+	try {
+		const ip = event.getClientAddress();
+		const res = await fetch(`https://api.ipinfo.io/lite/${ip}?token=${env.IPINFO_TOKEN}`);
+		const data = await res.json();
+		return data.country;
+	} catch (error) {
+		console.error('Error fetching country from IP info:', error);
+		return undefined;
+	}
 };
