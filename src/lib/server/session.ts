@@ -18,8 +18,10 @@ export const setNewUserIdCookie = (cookies: Cookies) => {
 export const fetchCountry = async (event: RequestEvent): Promise<string | undefined> => {
 	try {
 		const ip = event.getClientAddress();
+		console.log('Client IP address:', ip);
 		const res = await fetch(`https://api.ipinfo.io/lite/${ip}?token=${env.IPINFO_TOKEN}`);
 		const data = await res.json();
+		console.log('IP info response:', data);
 		return data.country;
 	} catch (error) {
 		console.error('Error fetching country from IP info:', error);
