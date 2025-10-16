@@ -8,13 +8,14 @@ import {
 	getMaximumCostForStrategise,
 	getMinimumCostForStrategise
 } from './utils';
+import { ROUNDING_METHODS } from '$lib/number';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const { project } = params;
 
 	const projectData = getProjectFromUserState(locals.userState, project);
 	const regionalStrategies = getCasesAvertedAndCostsForStrategise(projectData.regions);
-	const maximumCost = getMaximumCostForStrategise(regionalStrategies);
+	const maximumCost = ROUNDING_METHODS['ceil'](getMaximumCostForStrategise(regionalStrategies));
 
 	return {
 		project: projectData,
