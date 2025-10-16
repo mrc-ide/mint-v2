@@ -37,6 +37,7 @@ const createAndPersistNewUserState = async (cookies: Cookies, event: RequestEven
 	const newUserId = setNewUserIdCookie(cookies);
 	const newUserState: UserState = { userId: newUserId, createdAt: new Date().toISOString(), projects: [] };
 	await redis.set(newUserId, JSON.stringify(newUserState));
+	console.log(`Created new user state for userId: ${newUserId}`);
 	await registerLocation(event);
 	return newUserState;
 };
