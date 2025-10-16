@@ -1,4 +1,20 @@
-export const convertToLocaleString = (number: number) => number.toLocaleString('en-US', { maximumFractionDigits: 2 });
+type RoundMode = 'ceil' | 'floor' | 'round';
+
+export const ROUNDING_METHODS = {
+	ceil: Math.ceil,
+	floor: Math.floor,
+	round: Math.round
+} as const;
+
+export const convertToLocaleString = (number: number, fractionalDigits = 2, roundMode: RoundMode = 'round') => {
+	const multiplier = Math.pow(10, fractionalDigits);
+	const rounded = ROUNDING_METHODS[roundMode](number * multiplier) / multiplier;
+
+	return rounded.toLocaleString('en-US', {
+		minimumFractionDigits: fractionalDigits,
+		maximumFractionDigits: fractionalDigits
+	});
+};
 
 /**
  * Creates an array of linearly spaced values between a minimum and maximum value.

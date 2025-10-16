@@ -3,6 +3,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import type { SuperForm } from 'sveltekit-superforms';
 	import type { StrategiseForm } from '../schema';
+	import { convertToLocaleString } from '$lib/number';
 	interface Props {
 		form: SuperForm<StrategiseForm>;
 		budget: number;
@@ -33,8 +34,11 @@
 				{/snippet}
 			</Form.Control>
 			<Form.Description class="text-xs"
-				>Enter your maximum possible budget between <span class="font-semibold">${minCost.toLocaleString()}</span> and
-				<span class="font-semibold">${maxCost.toLocaleString()}</span>.
+				>Enter your maximum possible budget between <span class="font-semibold"
+					>${convertToLocaleString(minCost, 0, 'ceil')}</span
+				>
+				and
+				<span class="font-semibold">${convertToLocaleString(maxCost, 0, 'ceil')}</span>.
 				<br /><span class="font-semibold">Tip:</span> Set this to the highest budget you could potentially secure to see
 				all possible strategies.</Form.Description
 			>

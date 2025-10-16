@@ -19,7 +19,7 @@ export const strategiseSchema = z
 			})
 			.array()
 	})
-	.refine((data) => data.budget >= data.minCost && data.budget <= data.maxCost, {
+	.refine((data) => data.budget > data.minCost && data.budget <= data.maxCost, {
 		message: 'Budget must be between minimum and maximum cost',
 		path: ['budget']
 	});

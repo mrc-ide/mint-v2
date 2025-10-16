@@ -20,7 +20,7 @@ import { createLinearSpace } from '$lib/number';
  */
 export const getMinimumCostForStrategise = (strategiseRegions: StrategiseRegions): number => {
 	const costs = strategiseRegions.flatMap((region) => region.interventions.map((intervention) => intervention.cost));
-	return Math.round(Math.min(...costs));
+	return Math.min(...costs);
 };
 
 /**
@@ -35,7 +35,7 @@ export const getMaximumCostForStrategise = (strategiseRegions: StrategiseRegions
 	const maxCostsPerRegion = strategiseRegions.map((region) =>
 		Math.max(...region.interventions.map((intervention) => intervention.cost))
 	);
-	return Math.round(maxCostsPerRegion.reduce((sum, cost) => sum + cost, 0));
+	return maxCostsPerRegion.reduce((sum, cost) => sum + cost, 0);
 };
 
 /**
@@ -146,7 +146,7 @@ export const strategise = (
 	maxCost: number,
 	regionalStrategies: StrategiseRegions
 ): StrategiseResults => {
-	const costRange = createLinearSpace(minCost, maxCost).map(Math.round);
+	const costRange = createLinearSpace(minCost, maxCost);
 	const NO_INTERVENTION = { intervention: 'no_intervention', casesAverted: 0, cost: 0 } as const;
 	const strategiesIncludingNoIntervention: StrategiseRegions = regionalStrategies.map((region) => ({
 		...region,
@@ -202,7 +202,7 @@ const optimiseForMaxCasesAverted = (
 	const model: Model = {
 		direction: 'maximize',
 		objective: 'casesAverted',
-		constraints: { ...regionConstraints, cost: lessEq(cost + 1) },
+		constraints: { ...regionConstraints, cost: lessEq(cost) },
 		variables,
 		binaries: true
 	};
