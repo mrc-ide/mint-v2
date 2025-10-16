@@ -18,18 +18,23 @@ export default redis;
 
 export const loadOrSetupUserState = async (cookies: Cookies, event: RequestEvent): Promise<UserState> => {
 	const userId = cookies.get('userId') || '';
+	const userAgent = event.request.headers.get('user-agent');
+	const path = event.url.pathname;
+	const ip = event.request.headers.get('x-forwarded-for') || event.request.headers.get('x-real-ip');
+
+	console.log(
+		`[USER STATE CHECK] Path: ${path}, IP: ${ip}, UA: ${userAgent?.substring(0, 50)}, Cookie: ${userId ? 'EXISTS' : 'MISSING'}`
+	);
+
 	const cachedUserState = await redis.get(userId);
 	if (cachedUserState) {
 		try {
 			return JSON.parse(cachedUserState);
 		} catch (error) {
 			console.error('Error parsing user state from Redis:', error);
-			// If parsing fails, reset the user state with new User ID
-			console.warn('Resetting user state due to parsing error');
 		}
 	}
 
-	// If no cached user state exists or error occurs, create a new one
 	return createAndPersistNewUserState(cookies, event);
 };
 
