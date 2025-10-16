@@ -1,4 +1,4 @@
-import type { StrategiseResults } from '$lib/types/userState';
+import type { StrategiseResult, StrategiseResults } from '$lib/types/userState';
 import { ScenarioToLabel } from './baseChart';
 
 const BUDGET_PLOTLINE_ID = 'explored-budget';
@@ -49,7 +49,7 @@ export const getStrategiseSeries = (data: StrategiseResults): Highcharts.SeriesA
 
 export const getStrategyConfig = (
 	strategiseResults: StrategiseResults,
-	setStrategy: (strategy: StrategiseResults[number]) => void
+	setStrategy: (strategy: StrategiseResult) => void
 ): Highcharts.Options => ({
 	chart: {
 		type: 'area',

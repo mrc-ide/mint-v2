@@ -44,6 +44,7 @@ export interface StrategiseIntervention {
 }
 
 export type StrategiseResults = z.infer<typeof strategiseSchema>['strategiseResults'];
+export type StrategiseResult = StrategiseResults[number];
 
 export interface Strategy {
 	budget: number;

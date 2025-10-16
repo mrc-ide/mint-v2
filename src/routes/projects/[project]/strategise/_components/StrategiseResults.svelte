@@ -2,7 +2,7 @@
 	import { createHighchart, getChartTheme } from '$lib/charts/baseChart';
 	import { getStrategyConfig } from '$lib/charts/strategyConfig';
 	import Loader from '$lib/components/Loader.svelte';
-	import type { StrategiseResults } from '$lib/types/userState';
+	import type { StrategiseResult, StrategiseResults } from '$lib/types/userState';
 	import SelectedStrategy from './SelectedStrategy.svelte';
 
 	interface Props {
@@ -11,7 +11,7 @@
 	}
 	let { strategiseResults, populations }: Props = $props();
 	let isChartLoading = $state(true);
-	let selectedStrategy = $state<StrategiseResults[number]>(strategiseResults[strategiseResults.length - 1]);
+	let selectedStrategy = $state<StrategiseResult>(strategiseResults[strategiseResults.length - 1]);
 	let config = $derived(getStrategyConfig(strategiseResults, (strategy) => (selectedStrategy = strategy)));
 </script>
 
