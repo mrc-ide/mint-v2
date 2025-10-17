@@ -19,13 +19,7 @@ export default redis;
 export const loadOrSetupUserState = async (cookies: Cookies, event: RequestEvent): Promise<UserState> => {
 	const userId = cookies.get('userId') || '';
 	const cachedUserState = await redis.get(userId);
-	const userAgent = event.request.headers.get('user-agent');
-	const path = event.url.pathname;
-	const ip = event.request.headers.get('x-forwarded-for') || event.request.headers.get('x-real-ip');
 
-	console.log(
-		`[USER STATE CHECK] Path: ${path}, IP: ${ip}, UA: ${userAgent?.substring(0, 50)}, Cookie: ${userId ? 'EXISTS' : 'MISSING'}`
-	);
 	if (cachedUserState) {
 		try {
 			return JSON.parse(cachedUserState);
