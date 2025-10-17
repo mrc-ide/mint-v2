@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { convertToLocaleString } from '$lib/number';
-	import type { StrategiseResults } from '$lib/types/userState';
+	import type { StrategiseResult } from '$lib/types/userState';
 	import SelectedStrategyRegionCards from './SelectedStrategyRegionCards.svelte';
 
 	interface Props {
-		selectedStrategy: StrategiseResults;
+		selectedStrategy: StrategiseResult;
 		populations: Record<string, number>;
 	}
 	let { selectedStrategy, populations }: Props = $props();

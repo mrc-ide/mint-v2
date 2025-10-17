@@ -1,5 +1,6 @@
 import type { FormValue } from '$lib/components/dynamic-region-form/types';
-
+import type { strategiseSchema } from '$routes/projects/[project]/strategise/schema';
+import { z } from 'zod';
 export type Scenario =
 	| 'no_intervention'
 	| 'irs_only'
@@ -41,13 +42,13 @@ export interface StrategiseIntervention {
 	cost: number;
 	casesAverted: number;
 }
-export interface StrategiseResults {
-	costThreshold: number;
-	interventions: StrategiseIntervention[];
-}
+
+export type StrategiseResults = z.infer<typeof strategiseSchema>['strategiseResults'];
+export type StrategiseResult = StrategiseResults[number];
+
 export interface Strategy {
 	budget: number;
-	results: StrategiseResults[];
+	results: StrategiseResults;
 }
 export interface Project {
 	name: string;

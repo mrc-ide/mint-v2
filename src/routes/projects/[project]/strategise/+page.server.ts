@@ -1,8 +1,5 @@
-import { ApiError, apiFetch } from '$lib/fetch';
 import { getProjectFromUserState } from '$lib/server/region';
-import type { StrategiseResults } from '$lib/types/userState';
-import { strategiseUrl } from '$lib/url';
-import { message, superValidate, type ErrorStatus } from 'sveltekit-superforms';
+import { fail, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import type { Actions, PageServerLoad } from './$types';
 import { strategiseSchema } from './schema';
@@ -11,22 +8,23 @@ import {
 	getMaximumCostForStrategise,
 	getMinimumCostForStrategise
 } from './utils';
+import { ROUNDING_METHODS } from '$lib/number';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const { project } = params;
 
 	const projectData = getProjectFromUserState(locals.userState, project);
 	const regionalStrategies = getCasesAvertedAndCostsForStrategise(projectData.regions);
-	const maximumCost = getMaximumCostForStrategise(regionalStrategies);
+	const maximumCost = ROUNDING_METHODS['ceil'](getMaximumCostForStrategise(regionalStrategies));
 
 	return {
 		project: projectData,
+		regionalStrategies,
 		form: await superValidate(
 			{
 				minCost: getMinimumCostForStrategise(regionalStrategies),
 				maxCost: maximumCost,
-				budget: projectData.strategy?.budget || maximumCost,
-				regionalStrategies: regionalStrategies
+				budget: projectData.strategy?.budget || maximumCost
 			},
 			zod(strategiseSchema)
 		)
@@ -34,34 +32,18 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 };
 
 export const actions: Actions = {
-	default: async ({ request, locals, fetch, params }) => {
+	default: async ({ request, locals, params }) => {
 		const { project } = params;
 		const projectData = getProjectFromUserState(locals.userState, project);
 		const form = await superValidate(request, zod(strategiseSchema));
 		if (!form.valid) {
-			return { form };
+			return fail(400, { form });
 		}
 
-		try {
-			const res = await apiFetch<StrategiseResults[]>({
-				fetcher: fetch,
-				url: strategiseUrl(),
-				method: 'POST',
-				body: {
-					minCost: form.data.minCost,
-					maxCost: form.data.budget,
-					regions: form.data.regionalStrategies
-				}
-			});
-
-			projectData.strategy = {
-				budget: form.data.budget,
-				results: res.data
-			};
-		} catch (e) {
-			const status = (e instanceof ApiError ? e.status : 500) as ErrorStatus;
-			return message(form, 'Failed to run strategise', { status });
-		}
+		projectData.strategy = {
+			budget: form.data.budget,
+			results: form.data.strategiseResults
+		};
 
 		return { form };
 	}

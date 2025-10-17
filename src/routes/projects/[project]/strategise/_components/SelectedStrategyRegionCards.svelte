@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { ScenarioToColor, ScenarioToLabel } from '$lib/charts/baseChart';
-	import { convertToLocaleString } from '$lib/number';
-	import type { StrategiseResults } from '$lib/types/userState';
 	import { Badge } from '$lib/components/ui/badge/index';
+	import { convertToLocaleString } from '$lib/number';
+	import type { StrategiseResult } from '$lib/types/userState';
 
 	interface Props {
-		selectedStrategy: StrategiseResults;
+		selectedStrategy: StrategiseResult;
 		populations: Record<string, number>;
 	}
 	let { selectedStrategy, populations }: Props = $props();

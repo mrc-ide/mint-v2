@@ -6,8 +6,10 @@ import {
 	getAvertedCasesData,
 	type CasesAverted
 } from '$lib/process-results/processCases';
-import type { Region, Scenario } from '$lib/types/userState';
+import type { Region, Scenario, StrategiseIntervention, StrategiseResults } from '$lib/types/userState';
+import { equalTo, lessEq, solve, type Constraint, type Model } from 'yalps';
 import type { StrategiseRegions } from './schema';
+import { createLinearSpace } from '$lib/number';
 
 /**
  * Calculates the minimum cost across all interventions in all regions for strategy optimization.
@@ -18,7 +20,7 @@ import type { StrategiseRegions } from './schema';
  */
 export const getMinimumCostForStrategise = (strategiseRegions: StrategiseRegions): number => {
 	const costs = strategiseRegions.flatMap((region) => region.interventions.map((intervention) => intervention.cost));
-	return Math.round(Math.min(...costs));
+	return Math.min(...costs);
 };
 
 /**
@@ -33,7 +35,7 @@ export const getMaximumCostForStrategise = (strategiseRegions: StrategiseRegions
 	const maxCostsPerRegion = strategiseRegions.map((region) =>
 		Math.max(...region.interventions.map((intervention) => intervention.cost))
 	);
-	return Math.round(maxCostsPerRegion.reduce((sum, cost) => sum + cost, 0));
+	return maxCostsPerRegion.reduce((sum, cost) => sum + cost, 0);
 };
 
 /**
@@ -99,8 +101,134 @@ const buildInterventions = (
 	);
 
 	return Object.entries(costsAndCasesAverted).map(([scenario, { casesAverted, totalCost }]) => ({
-		intervention: scenario,
+		intervention: scenario as Scenario,
 		cost: totalCost,
 		casesAverted: convertPer1000ToTotal(casesAverted.totalAvertedCasesPer1000, Number(regionForm['population']))
 	}));
+};
+
+/**** Optimisation Helpers ****/
+type OptimizationVariable = {
+	cost: number;
+	casesAverted: number;
+	[regionName: string]: number;
+};
+
+type OptimizationVariables = Record<string, OptimizationVariable>;
+
+/**
+ * Performed asynchronous strategise analysis to avoid blocking the main thread.
+ * Wraps the synchronous strategise function in a Promise with a timeout.
+ */
+export const strategiseAsync = (
+	minCost: number,
+	maxCost: number,
+	regionalStrategies: StrategiseRegions
+): Promise<StrategiseResults> => {
+	return new Promise((resolve) => {
+		setTimeout(() => {
+			resolve(strategise(minCost, maxCost, regionalStrategies));
+		}, 0);
+	});
+};
+
+/**
+ * Performs strategise analysis over a range of costs to generate intervention strategies.
+ * For each cost threshold, it optimizes intervention selection to maximize cases averted.
+ *
+ * @param minCost - The minimum cost threshold for the analysis
+ * @param maxCost - The maximum cost threshold for the analysis
+ * @param regionalStrategies - Array of regions with their intervention data
+ * @returns Array of strategise results, each containing a cost threshold and selected interventions
+ */
+export const strategise = (
+	minCost: number,
+	maxCost: number,
+	regionalStrategies: StrategiseRegions
+): StrategiseResults => {
+	const costRange = createLinearSpace(minCost, maxCost);
+	const NO_INTERVENTION = { intervention: 'no_intervention', casesAverted: 0, cost: 0 } as const;
+	const strategiesIncludingNoIntervention: StrategiseRegions = regionalStrategies.map((region) => ({
+		...region,
+		interventions: [...region.interventions, NO_INTERVENTION]
+	}));
+
+	const { constraints, variables } = setupOptimisationModel(strategiesIncludingNoIntervention);
+
+	return costRange.map((costThreshold) => ({
+		costThreshold,
+		interventions: optimiseForMaxCasesAverted(costThreshold, constraints, variables)
+	}));
+};
+
+/**
+ * Sets up optimization constraints and variables for linear programming.
+ */
+const setupOptimisationModel = (regions: StrategiseRegions) => {
+	const constraints: Record<string, Constraint> = {};
+	const variables: OptimizationVariables = {};
+
+	for (const { region, interventions } of regions) {
+		// Ensure exactly one intervention per region
+		constraints[region] = equalTo(1);
+
+		for (const { intervention, cost, casesAverted } of interventions) {
+			const variableName = `${region}--${intervention}`;
+			variables[variableName] = {
+				cost,
+				casesAverted,
+				[region]: 1 // Links variable to its region constraint
+			};
+		}
+	}
+
+	return { constraints, variables };
+};
+
+/**
+ * Optimizes intervention selection to maximize cases averted within a given cost constraint.
+ * Uses linear programming to determine the best combination of interventions across regions.
+ *
+ * @param cost - The maximum allowable cost for the interventions
+ * @param regionConstraints - Constraints ensuring only one intervention per region
+ * @param variables - Variables representing each intervention's cost and cases averted
+ * @returns Array of selected interventions that maximize cases averted within the cost limit
+ */
+const optimiseForMaxCasesAverted = (
+	cost: number,
+	regionConstraints: Record<string, Constraint>,
+	variables: OptimizationVariables
+): StrategiseIntervention[] => {
+	const model: Model = {
+		direction: 'maximize',
+		objective: 'casesAverted',
+		constraints: { ...regionConstraints, cost: lessEq(cost) },
+		variables,
+		binaries: true
+	};
+
+	const solution = solve(model);
+	if (solution.status !== 'optimal') {
+		console.warn(`No optimal solution found for cost: ${cost}`);
+		return [];
+	}
+
+	return solution.variables
+		.filter(([_, isSelected]) => isSelected === 1)
+		.map(([variableName]) => parseOptimisationResult(variableName, variables));
+};
+
+/**
+ * Parses optimization result variable name back to intervention data.
+ */
+const parseOptimisationResult = (variableName: string, variables: OptimizationVariables): StrategiseIntervention => {
+	const [region, intervention] = variableName.split('--');
+	const { cost, casesAverted } = variables[variableName];
+
+	return {
+		region,
+		intervention: intervention as Scenario,
+		cost,
+		casesAverted
+	};
 };
