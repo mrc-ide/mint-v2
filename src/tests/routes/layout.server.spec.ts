@@ -1,4 +1,3 @@
-import { describe, it, expect } from 'vitest';
 import { load } from '$routes/+layout.server';
 
 describe('root +layout.server.ts', () => {

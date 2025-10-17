@@ -1,5 +1,4 @@
 import { GET } from '$routes/healthz/+server';
-import { describe, it, expect } from 'vitest';
 
 describe('/healthz/+server.ts', () => {
 	it('should return status ok', async () => {

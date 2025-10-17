@@ -1,4 +1,3 @@
-import { describe, it, expect, vi } from 'vitest';
 import { GET } from '$routes/country-stats/+server';
 
 import * as redis from '$lib/server/redis';
