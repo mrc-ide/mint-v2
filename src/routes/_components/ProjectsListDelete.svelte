@@ -13,7 +13,10 @@
 </script>
 
 <AlertDialog.Root bind:open={isOpen}>
-	<AlertDialog.Trigger class={buttonVariants({ variant: 'destructive', size: 'icon' })}><Trash2 /></AlertDialog.Trigger>
+	<AlertDialog.Trigger
+		aria-label="delete-{projectName}"
+		class={buttonVariants({ variant: 'destructive', size: 'icon' })}><Trash2 /></AlertDialog.Trigger
+	>
 	<AlertDialog.Content>
 		<AlertDialog.Header>
 			<AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>

@@ -1,11 +1,9 @@
-import { testWithWorker } from '$root/test-extend';
+import { createProjectSchema } from '$routes/schema';
+import { userEvent } from '@vitest/browser/context';
+import { superValidate } from 'sveltekit-superforms';
+import { zod } from 'sveltekit-superforms/adapters';
 import { render } from 'vitest-browser-svelte';
 import Page from '../../routes/+page.svelte';
-import { userEvent } from '@vitest/browser/context';
-import { http, HttpResponse } from 'msw';
-import { superValidate } from 'sveltekit-superforms';
-import { createProjectSchema } from '$routes/schema';
-import { zod } from 'sveltekit-superforms/adapters';
 
 describe('/+page.svelte', () => {
 	it('should render base page with project info', async () => {
@@ -44,9 +42,9 @@ describe('/+page.svelte', () => {
 			}
 		} as any);
 
-		await screen.getByRole('button').last().click(); // click delete button
+		await screen.getByRole('button', { name: 'delete-Asia' }).click();
 
-		const deleteButton = screen.getByRole('button', { name: /delete/i });
+		const deleteButton = screen.getByRole('button', { name: 'Delete', exact: true });
 		await expect.element(deleteButton).toBeVisible();
 		await expect.element(screen.getByRole('button', { name: /cancel/i })).toBeVisible();
 	});
