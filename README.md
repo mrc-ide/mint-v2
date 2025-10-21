@@ -65,6 +65,11 @@ npm run test:e2e     # End-to-end tests with Playwright
 
 - Files: `**/*.{test,spec}.{js,ts}` (excluding `.svelte` tests)
 
+**Mock Service Worker**: Network request mocking in browser tests using MSW
+
+- Handlers, server, and worker configuration located in `src/tests/mocks/`
+- For component testing with network mocks, use `testWithWorker` from `test-extend.ts`
+
 **E2E Tests**: Full application testing with Playwright
 
 ## Component Management
