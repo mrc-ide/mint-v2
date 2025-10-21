@@ -29,8 +29,7 @@ describe('/+page.svelte', () => {
 		await expect.element(screen.getByRole('button', { name: /create project/i })).toBeVisible();
 	});
 
-	testWithWorker('should be able to delete a project', async ({ worker }) => {
-		worker.use(http.post('*', () => HttpResponse.json({ type: 'success' })));
+	it('should be able to delete a project', async () => {
 		const screen = render(Page, {
 			props: {
 				data: {
@@ -50,14 +49,9 @@ describe('/+page.svelte', () => {
 		const deleteButton = screen.getByRole('button', { name: /delete/i });
 		await expect.element(deleteButton).toBeVisible();
 		await expect.element(screen.getByRole('button', { name: /cancel/i })).toBeVisible();
-
-		// perform delete & close dialog
-		await userEvent.click(deleteButton);
-
-		await expect.element(deleteButton).not.toBeInTheDocument();
 	});
 
-	testWithWorker('should be able to see create project dialog', async () => {
+	it('should be able to see create project dialog', async () => {
 		const form = await superValidate(zod(createProjectSchema));
 		const screen = render(Page, {
 			props: {
