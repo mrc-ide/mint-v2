@@ -8,8 +8,7 @@ export default defineConfig({
 	test: {
 		expect: { requireAssertions: true },
 		coverage: {
-			exclude: ['src/tests/**'],
-			include: ['src/lib/**', 'src/routes/**']
+			exclude: ['src/tests/**']
 		},
 		projects: [
 			{
