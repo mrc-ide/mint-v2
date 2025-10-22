@@ -241,12 +241,8 @@ export const parseOptimisationResult = (
 	};
 };
 
-/** Constructs detailed regional metrics for a given strategy.
- * Calculates cost per person, cost per case averted, and cases averted per person for each region.
- *
- * @param strategy - The strategise result containing selected interventions
- * @param populations - Mapping of region names to their populations
- * @returns Record mapping region names to their detailed metrics
+/**
+ * Constructs detailed regional metrics used for display for a given strategy.
  */
 export const constructRegionalMetrics = (strategy: StrategiseResult, populations: Record<string, number>) =>
 	Object.fromEntries(
