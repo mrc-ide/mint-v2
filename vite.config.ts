@@ -7,6 +7,9 @@ export default defineConfig({
 	plugins: [tailwindcss(), sveltekit(), devtoolsJson()],
 	test: {
 		expect: { requireAssertions: true },
+		coverage: {
+			exclude: ['src/tests/**']
+		},
 		projects: [
 			{
 				extends: './vite.config.ts',
