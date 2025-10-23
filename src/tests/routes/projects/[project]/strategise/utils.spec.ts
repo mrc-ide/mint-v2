@@ -272,8 +272,9 @@ describe('strategiseAsync', () => {
 		expect(result[0].costThreshold).toBe(100);
 	});
 
-	it('should not block main thread', async () => {
+	it('should call setTimeout with correct arguments', async () => {
 		vi.spyOn(numberModule, 'createLinearSpace').mockReturnValue([100]);
+		vi.spyOn(global, 'setTimeout');
 
 		const regions: StrategiseRegions = [
 			{
@@ -282,9 +283,9 @@ describe('strategiseAsync', () => {
 			}
 		];
 
-		const promise = strategiseAsync(100, 100, regions);
-		expect(promise).toBeInstanceOf(Promise);
-		await promise;
+		await strategiseAsync(100, 100, regions);
+
+		expect(setTimeout).toHaveBeenCalledWith(expect.any(Function), 0);
 	});
 });
 
