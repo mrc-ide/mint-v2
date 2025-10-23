@@ -105,6 +105,7 @@ export const buildInterventions = (
 		getTotalCostsPerScenario(scenarios, regionForm),
 		casesAvertedData
 	);
+	
 	return Object.entries(costsAndCasesAverted).map(([scenario, { casesAverted, totalCost }]) => ({
 		intervention: scenario as Scenario,
 		cost: totalCost,

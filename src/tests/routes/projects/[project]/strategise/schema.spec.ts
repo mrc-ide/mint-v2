@@ -26,7 +26,7 @@ describe('strategise schema', () => {
 		expect(result.success).toBe(true);
 	});
 
-	it('should reject when minCost is 0 or negative', () => {
+	it('should reject when minCost is less than 1', () => {
 		const invalidData = {
 			minCost: 0,
 			maxCost: 1000,
@@ -41,7 +41,7 @@ describe('strategise schema', () => {
 		}
 	});
 
-	it('should reject when maxCost is 0 or negative', () => {
+	it('should reject when maxCost is less than 1', () => {
 		const invalidData = {
 			minCost: 100,
 			maxCost: 0,
