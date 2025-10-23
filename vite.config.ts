@@ -13,6 +13,7 @@ export default defineConfig({
 				test: {
 					name: 'client',
 					environment: 'browser',
+					globals: true,
 					browser: {
 						enabled: true,
 						provider: 'playwright',
@@ -28,8 +29,10 @@ export default defineConfig({
 				test: {
 					name: 'server',
 					environment: 'node',
+					globals: true,
 					include: ['src/**/*.{test,spec}.{js,ts}'],
-					exclude: ['src/**/*.svelte.{test,spec}.{js,ts}']
+					exclude: ['src/**/*.svelte.{test,spec}.{js,ts}'],
+					setupFiles: ['./vitest.setup-server.ts']
 				}
 			}
 		]

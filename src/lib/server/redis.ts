@@ -19,6 +19,7 @@ export default redis;
 export const loadOrSetupUserState = async (cookies: Cookies, event: RequestEvent): Promise<UserState> => {
 	const userId = cookies.get('userId') || '';
 	const cachedUserState = await redis.get(userId);
+
 	if (cachedUserState) {
 		try {
 			return JSON.parse(cachedUserState);
