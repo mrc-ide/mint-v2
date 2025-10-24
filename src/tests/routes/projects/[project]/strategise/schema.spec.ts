@@ -1,4 +1,4 @@
-import type { Scenario } from '$root/src/lib/types/userState';
+import type { Scenario } from '$lib/types/userState';
 import { strategiseSchema } from '$routes/projects/[project]/strategise/schema';
 
 describe('strategise schema', () => {
