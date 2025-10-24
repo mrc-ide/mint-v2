@@ -62,7 +62,7 @@ describe('DynamicForm component', () => {
 		} as any);
 
 		forEachField(MOCK_FORM_SCHEMA.groups as any, async (field) => {
-			const input = screen.getByLabelText(field.label);
+			const input = screen.getByLabelText(field.label, { exact: true });
 			await expect.element(input).toBeDisabled();
 		});
 	});
@@ -107,8 +107,8 @@ describe('DynamicForm component', () => {
 			}
 		} as any);
 
-		await screen.getByRole('button', { name: 'Baseline Options' }).click();
-		await screen.getByLabelText('Size of population').fill('5000');
+		await screen.getByRole('button', { name: 'Baseline Options', exact: true }).click();
+		await screen.getByLabelText('Size of population', { exact: true }).fill('5000');
 
 		vi.runAllTimers();
 
@@ -132,8 +132,8 @@ describe('DynamicForm component', () => {
 			}
 		} as any);
 
-		await screen.getByRole('button', { name: 'Baseline Options' }).click();
-		await screen.getByLabelText('Size of population').fill('5000');
+		await screen.getByRole('button', { name: 'Baseline Options', exact: true }).click();
+		await screen.getByLabelText('Size of population', { exact: true }).fill('5000');
 
 		expect(run).not.toHaveBeenCalled();
 	});
@@ -155,7 +155,7 @@ describe('DynamicForm component', () => {
 			}
 		} as any);
 
-		await screen.getByLabelText('Number of People per bed net').fill('5');
+		await screen.getByLabelText('Number of People per bed net', { exact: true }).fill('5');
 
 		vi.runAllTimers();
 
@@ -201,7 +201,7 @@ describe('DynamicForm component', () => {
 			}
 		} as any);
 
-		await screen.getByRole('button', { name: 'Baseline Options' }).click();
+		await screen.getByRole('button', { name: 'Baseline Options', exact: true }).click();
 		await screen.getByLabelText('Size of population').fill('-5000');
 
 		expect(run).not.toHaveBeenCalled();
@@ -226,9 +226,9 @@ describe('DynamicForm component', () => {
 
 		forEachSubGroup(MOCK_FORM_SCHEMA.groups as any, async (group, subGroup) => {
 			if (subGroup.collapsible) {
-				const field = screen.getByLabelText(subGroup.fields[0].label);
+				const field = screen.getByLabelText(subGroup.fields[0].label, { exact: true });
 				await expect.element(field).toBeVisible();
-				await screen.getByRole('button', { name: subGroup.title }).click();
+				await screen.getByRole('button', { name: subGroup.title, exact: true }).click();
 				await expect.element(field).not.toBeVisible();
 			}
 		});
@@ -237,7 +237,7 @@ describe('DynamicForm component', () => {
 			if (group.collapsible) {
 				const sg = screen.getByRole('button', { name: group.subGroups[0].title, exact: true });
 				await expect.element(sg).toBeVisible();
-				await screen.getByRole('button', { name: group.title }).click();
+				await screen.getByRole('button', { name: group.title, exact: true }).click();
 				await expect.element(sg).not.toBeVisible();
 			}
 		});
