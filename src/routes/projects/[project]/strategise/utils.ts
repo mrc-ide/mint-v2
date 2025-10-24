@@ -6,7 +6,13 @@ import {
 	getAvertedCasesData,
 	type CasesAverted
 } from '$lib/process-results/processCases';
-import type { Region, Scenario, StrategiseIntervention, StrategiseResults } from '$lib/types/userState';
+import type {
+	Region,
+	Scenario,
+	StrategiseIntervention,
+	StrategiseResult,
+	StrategiseResults
+} from '$lib/types/userState';
 import { equalTo, lessEq, solve, type Constraint, type Model } from 'yalps';
 import type { StrategiseRegions } from './schema';
 import { createLinearSpace } from '$lib/number';
@@ -56,7 +62,7 @@ export const getCasesAvertedAndCostsForStrategise = (regions: Region[]): Strateg
  * @param region - Individual region containing cases data and form values
  * @returns Structured region data with interventions analysis, or null if no valid cases averted data exists
  */
-const processRegionData = (region: Region) => {
+export const processRegionData = (region: Region) => {
 	const casesAverted = extractCasesAvertedData(region);
 	if (!casesAverted || Object.keys(casesAverted).length === 0) {
 		return null;
@@ -77,7 +83,7 @@ const processRegionData = (region: Region) => {
  * @param region - Region containing raw cases data
  * @returns Partial record mapping scenarios to their respective cases averted data
  */
-const extractCasesAvertedData = (region: Region) => {
+export const extractCasesAvertedData = (region: Region) => {
 	const postInterventionCases = collectPostInterventionCases(region.cases);
 	return getAvertedCasesData(postInterventionCases);
 };
@@ -90,7 +96,7 @@ const extractCasesAvertedData = (region: Region) => {
  * @param regionForm - Form values containing cost parameters and population data
  * @returns Array of intervention objects with scenario name, total cost, and total cases averted
  */
-const buildInterventions = (
+export const buildInterventions = (
 	casesAvertedData: Partial<Record<Scenario, CasesAverted>>,
 	regionForm: Record<string, FormValue>
 ): StrategiseRegions[number]['interventions'] => {
@@ -194,7 +200,7 @@ const setupOptimisationModel = (regions: StrategiseRegions) => {
  * @param variables - Variables representing each intervention's cost and cases averted
  * @returns Array of selected interventions that maximize cases averted within the cost limit
  */
-const optimiseForMaxCasesAverted = (
+export const optimiseForMaxCasesAverted = (
 	cost: number,
 	regionConstraints: Record<string, Constraint>,
 	variables: OptimizationVariables
@@ -221,7 +227,10 @@ const optimiseForMaxCasesAverted = (
 /**
  * Parses optimization result variable name back to intervention data.
  */
-const parseOptimisationResult = (variableName: string, variables: OptimizationVariables): StrategiseIntervention => {
+export const parseOptimisationResult = (
+	variableName: string,
+	variables: OptimizationVariables
+): StrategiseIntervention => {
 	const [region, intervention] = variableName.split('--');
 	const { cost, casesAverted } = variables[variableName];
 
@@ -232,3 +241,27 @@ const parseOptimisationResult = (variableName: string, variables: OptimizationVa
 		casesAverted
 	};
 };
+
+/** Constructs detailed regional metrics for a given strategy.
+ * Calculates cost per person, cost per case averted, and cases averted per person for each region.
+ *
+ * @param strategy - The strategise result containing selected interventions
+ * @param populations - Mapping of region names to their populations
+ * @returns Record mapping region names to their detailed metrics
+ */
+export const constructRegionalMetrics = (strategy: StrategiseResult, populations: Record<string, number>) =>
+	Object.fromEntries(
+		strategy.interventions.map((intervention) => {
+			const population = populations[intervention.region];
+			return [
+				intervention.region,
+				{
+					...intervention,
+					population,
+					costPerPerson: population > 0 ? intervention.cost / population : 0,
+					costPerCaseAverted: intervention.casesAverted > 0 ? intervention.cost / intervention.casesAverted : 0,
+					casesAvertedPerPerson: population > 0 ? intervention.casesAverted / population : 0
+				}
+			];
+		})
+	);

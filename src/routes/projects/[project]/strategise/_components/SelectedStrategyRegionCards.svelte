@@ -3,6 +3,7 @@
 	import { Badge } from '$lib/components/ui/badge/index';
 	import { convertToLocaleString } from '$lib/number';
 	import type { StrategiseResult } from '$lib/types/userState';
+	import { constructRegionalMetrics } from '../utils';
 
 	interface Props {
 		selectedStrategy: StrategiseResult;
@@ -10,23 +11,7 @@
 	}
 	let { selectedStrategy, populations }: Props = $props();
 
-	let regionalMetrics = $derived(
-		Object.fromEntries(
-			selectedStrategy.interventions.map((intervention) => {
-				const population = populations[intervention.region];
-				return [
-					intervention.region,
-					{
-						...intervention,
-						population,
-						costPerPerson: population > 0 ? intervention.cost / population : 0,
-						costPerCaseAverted: intervention.casesAverted > 0 ? intervention.cost / intervention.casesAverted : 0,
-						casesAvertedPerPerson: population > 0 ? intervention.casesAverted / population : 0
-					}
-				];
-			})
-		)
-	);
+	let regionalMetrics = $derived(constructRegionalMetrics(selectedStrategy, populations));
 </script>
 
 {#snippet regionMetrics(label: string, value: string)}
