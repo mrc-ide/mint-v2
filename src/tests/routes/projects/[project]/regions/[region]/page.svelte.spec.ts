@@ -139,7 +139,6 @@ describe('page.svelte', () => {
 		worker.use(
 			http.patch(mockUrl, async ({ request }) => {
 				const body = await request.clone().json();
-				console.log(body);
 				expect(body).toMatchObject({ formValues: { people_per_bednet: 3 } });
 
 				return HttpResponse.json({
