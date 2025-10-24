@@ -79,7 +79,7 @@ export const getProjectFromUserState = (userState: UserState, projectName?: stri
 	return projectData;
 };
 
-export const invalidateStrategyForProject = async (userState: UserState, projectName: string) => {
+export const invalidateStrategyForProject = (userState: UserState, projectName: string) => {
 	const projectData = getProjectFromUserState(userState, projectName);
 	projectData.strategy = undefined;
 };
