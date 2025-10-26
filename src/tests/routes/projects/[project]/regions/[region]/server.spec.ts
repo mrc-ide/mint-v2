@@ -5,6 +5,10 @@ import { MOCK_FORM_VALUES } from '$mocks/mocks';
 import * as regionModule from '$lib/server/region';
 import { isHttpError, type HttpError } from '@sveltejs/kit';
 
+beforeEach(() => {
+	vi.resetAllMocks();
+});
+
 describe('POST', () => {
 	it('should run emulator and save region run', async () => {
 		vi.spyOn(regionModule, 'invalidateStrategyForProject').mockImplementation(() => {});
