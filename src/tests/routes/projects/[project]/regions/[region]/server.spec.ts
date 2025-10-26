@@ -4,15 +4,18 @@ import { PATCH, POST } from '$routes/projects/[project]/regions/[region]/+server
 import { MOCK_FORM_VALUES } from '$mocks/mocks';
 import * as regionModule from '$lib/server/region';
 import { isHttpError, type HttpError } from '@sveltejs/kit';
+import * as urlModule from '$lib/url';
 
 beforeEach(() => {
 	vi.resetAllMocks();
 });
 
 describe('POST', () => {
-	it('should run emulator and save region run', async () => {
+	it.only('should run emulator and save region run', async () => {
 		vi.spyOn(regionModule, 'invalidateStrategyForProject').mockImplementation(() => {});
 		vi.spyOn(regionModule, 'saveRegionRun').mockImplementation(() => Promise.resolve());
+		vi.spyOn(urlModule, 'runEmulatorUrl').mockReturnValue('http://localhost:8080/emulator/run');
+
 		const expectedResponse = {
 			status: 'success',
 			errors: null,
@@ -50,6 +53,7 @@ describe('POST', () => {
 	});
 
 	it('should throw error on network request', async () => {
+		vi.spyOn(urlModule, 'runEmulatorUrl').mockReturnValue('http://localhost:8080/emulator/run');
 		server.use(
 			http.post('*/emulator/run', () => {
 				return HttpResponse.error();
@@ -77,6 +81,7 @@ describe('PATCH', () => {
 	it('should save region form state and invalidate strategy', async () => {
 		vi.spyOn(regionModule, 'invalidateStrategyForProject').mockImplementation(() => {});
 		vi.spyOn(regionModule, 'saveRegionFormState').mockImplementation(() => Promise.resolve());
+
 		const request = new Request(new URL('http://localhost:3000'), {
 			method: 'PATCH',
 			body: JSON.stringify({ formValues: MOCK_FORM_VALUES })
