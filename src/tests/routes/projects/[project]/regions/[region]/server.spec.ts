@@ -11,7 +11,7 @@ beforeEach(() => {
 });
 
 describe('POST', () => {
-	it.only('should run emulator and save region run', async () => {
+	it('should run emulator and save region run', async () => {
 		vi.spyOn(regionModule, 'invalidateStrategyForProject').mockImplementation(() => {});
 		vi.spyOn(regionModule, 'saveRegionRun').mockImplementation(() => Promise.resolve());
 		vi.spyOn(urlModule, 'runEmulatorUrl').mockReturnValue('http://localhost:8080/emulator/run');
