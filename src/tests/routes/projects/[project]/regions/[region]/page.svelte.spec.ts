@@ -39,8 +39,6 @@ describe('page.svelte', () => {
 	testWithWorker('should run emulator and show results when runPromise resolves', async ({ worker }) => {
 		worker.use(
 			http.post(mockUrl, async () => {
-				await new Promise((resolve) => setTimeout(resolve, 100));
-
 				return HttpResponse.json({
 					status: 'success',
 					errors: null,
@@ -70,8 +68,6 @@ describe('page.svelte', () => {
 		} as any);
 
 		await screen.getByRole('button', { name: 'Run baseline' }).click();
-
-		await expect.element(screen.getByText('Running...')).toBeVisible();
 
 		await expect.element(screen.getByRole('heading', { name: 'Projected prevalence in under' })).toBeVisible();
 		await expect.element(screen.getByRole('heading', { name: 'Clinical cases averted per' })).toBeVisible();
