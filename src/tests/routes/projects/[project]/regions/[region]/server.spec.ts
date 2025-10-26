@@ -11,10 +11,12 @@ beforeEach(() => {
 });
 
 describe('POST', () => {
+	const mockUrl = 'http://localhost:8080/emulator/run';
+
 	it('should run emulator and save region run', async () => {
 		vi.spyOn(regionModule, 'invalidateStrategyForProject').mockImplementation(() => {});
 		vi.spyOn(regionModule, 'saveRegionRun').mockImplementation(() => Promise.resolve());
-		vi.spyOn(urlModule, 'runEmulatorUrl').mockReturnValue('http://localhost:8080/emulator/run');
+		vi.spyOn(urlModule, 'runEmulatorUrl').mockReturnValue(mockUrl);
 
 		const expectedResponse = {
 			status: 'success',
@@ -25,14 +27,14 @@ describe('POST', () => {
 			}
 		};
 		server.use(
-			http.post('*/emulator/run', async ({ request }) => {
+			http.post(mockUrl, async ({ request }) => {
 				const body = await request.clone().json();
 				expect(body).toEqual(MOCK_FORM_VALUES);
 
 				return HttpResponse.json(expectedResponse);
 			})
 		);
-		const request = new Request(new URL('http://localhost:3000'), {
+		const request = new Request(new URL(mockUrl), {
 			method: 'POST',
 			body: JSON.stringify({ formValues: MOCK_FORM_VALUES })
 		});
@@ -53,14 +55,14 @@ describe('POST', () => {
 	});
 
 	it('should throw error on network request', async () => {
-		vi.spyOn(urlModule, 'runEmulatorUrl').mockReturnValue('http://localhost:8080/emulator/run');
+		vi.spyOn(urlModule, 'runEmulatorUrl').mockReturnValue(mockUrl);
 		server.use(
-			http.post('*/emulator/run', () => {
+			http.post(mockUrl, () => {
 				return HttpResponse.error();
 			})
 		);
 
-		const request = new Request(new URL('http://localhost:3000'), {
+		const request = new Request(new URL(mockUrl), {
 			method: 'POST',
 			body: JSON.stringify({ formValues: MOCK_FORM_VALUES })
 		});
