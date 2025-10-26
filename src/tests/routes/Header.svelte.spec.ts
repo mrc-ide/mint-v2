@@ -1,11 +1,10 @@
 import Header from '$routes/_components/Header.svelte';
 import { render } from 'vitest-browser-svelte';
 
-vi.mock('$app/state', () => ({
-	page: { params: { project: 'Test Project', region: 'Region 1' }, data: {} }
-}));
-
 describe('Header component', () => {
+	vi.mock('$app/state', () => ({
+		page: { params: { project: 'Test Project', region: 'Region 1' }, data: {} }
+	}));
 	it('should render header with correct links', async () => {
 		const screen = render(Header, {
 			props: {
