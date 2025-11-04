@@ -30,7 +30,7 @@ export const getPrevalenceConfig = (prevalence: PrevalenceData[]): Highcharts.Op
 	},
 	xAxis: {
 		title: {
-			text: 'Years since intervention'
+			text: 'Years since new interventions'
 		},
 		tickPositions: [0, 1, 2, 3],
 		plotBands: [
@@ -39,7 +39,7 @@ export const getPrevalenceConfig = (prevalence: PrevalenceData[]): Highcharts.Op
 				from: -1,
 				to: 0,
 				label: {
-					text: 'Pre-Intervention',
+					text: 'Previous interventions',
 					style: {
 						color: 'var(--muted-foreground)'
 					},
@@ -53,7 +53,7 @@ export const getPrevalenceConfig = (prevalence: PrevalenceData[]): Highcharts.Op
 				dashStyle: 'Dash',
 				value: 0,
 				label: {
-					text: 'Post-Intervention',
+					text: 'New interventions',
 					y: 15,
 					rotation: 0,
 					style: {
