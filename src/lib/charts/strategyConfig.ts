@@ -66,18 +66,18 @@ export const getStrategyConfig = (
 		}
 	},
 	title: {
-		text: 'Total Cases Averted vs Total Cost'
+		text: 'Total Cases Averted vs Total Budget'
 	},
 	subtitle: {
 		text:
-			'<b>Click anywhere on the chart to explore the optimal intervention strategy at that specific budget level.</b><br>' +
-			' The chart displays strategies from minimum cost to your maximum budget',
+			'<b>Click anywhere on the chart to explore the optimal intervention strategy at the selected budget level.</b><br>' +
+			'The chart displays strategies from the minimum cost option to the defined maximum available budget.',
 		verticalAlign: 'bottom',
 		align: 'left'
 	},
 	xAxis: {
 		title: {
-			text: 'Total Cost (USD)'
+			text: 'Total budget ($USD)'
 		},
 
 		labels: {
@@ -86,10 +86,10 @@ export const getStrategyConfig = (
 		plotLines: [
 			{
 				value: strategiseResults[0]?.costThreshold ?? 0,
-
 				dashStyle: 'Dash',
+				zIndex: 5,
 				label: {
-					text: 'Minimum cost-effective budget',
+					text: 'Minimum budget',
 					style: { color: 'var(--muted-foreground)' }
 				}
 			},
@@ -98,7 +98,7 @@ export const getStrategyConfig = (
 	},
 	yAxis: {
 		title: {
-			text: 'Total Cases Averted'
+			text: 'Total cases averted'
 		},
 		labels: {
 			format: '{value:,.1f}'
@@ -109,7 +109,7 @@ export const getStrategyConfig = (
 		shadow: true,
 		useHTML: true,
 		headerFormat:
-			'<div class="font-bold  pb-1 border-b">Cost: ${point.key:,.0f} | Cases Averted: {point.stackTotal:,.1f}</div>',
+			'<div class="font-bold  pb-1 border-b">Budget: ${point.key:,.0f} | Cases Averted: {point.stackTotal:,.1f}</div>',
 		pointFormat: `<div class="flex items-center">
 			    <span style="color:{point.color}" class="mr-1">●</span>
 			    <span class="font-medium">{series.name}:</span>
@@ -133,6 +133,9 @@ export const getStrategyConfig = (
 				}
 			}
 		}
+	},
+	legend: {
+		enabled: true
 	},
 	series: getStrategiseSeries(strategiseResults)
 });

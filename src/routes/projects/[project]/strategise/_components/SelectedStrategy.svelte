@@ -29,11 +29,11 @@
 	</div>
 {/snippet}
 <div>
-	<h2 class="border-b py-1 text-xl font-bold">Optimal Strategy for explored budget</h2>
+	<h2 class="border-b py-1 text-xl font-bold">Optimal strategy for selected budget</h2>
 	<div class="mt-2 grid grid-cols-3 gap-4">
-		{@render metricCard('Total Cost', `$${convertToLocaleString(cost)}`)}
-		{@render metricCard('Cases Averted', convertToLocaleString(casesAverted))}
-		{@render metricCard('Cost per Case Averted', `$${convertToLocaleString(costPerCasesAverted)}`)}
+		{@render metricCard('Total cost of interventions', `$${convertToLocaleString(cost)}`)}
+		{@render metricCard('Total cases averted', convertToLocaleString(casesAverted))}
+		{@render metricCard('Cost per case averted', `$${convertToLocaleString(costPerCasesAverted)}`)}
 	</div>
 	<SelectedStrategyRegionCards {selectedStrategy} {populations} />
 </div>

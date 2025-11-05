@@ -26,13 +26,29 @@ export const buildCostTableData = (
 		};
 	});
 
-const CostTableInfo: Record<keyof CostTableMetrics, { label: string; formatStyle: 'string' | 'decimal' | 'currency' }> =
-	{
-		intervention: { label: 'Interventions', formatStyle: 'string' },
-		casesAvertedTotal: { label: 'Total cases averted', formatStyle: 'decimal' },
-		totalCost: { label: 'Total costs (USD)', formatStyle: 'currency' },
-		costPerCaseAverted: { label: 'Cost per case averted across 3 years (USD)', formatStyle: 'currency' }
-	};
+const CostTableInfo: Record<
+	keyof CostTableMetrics,
+	{ label: string; helpText?: string; formatStyle: 'string' | 'decimal' | 'currency' }
+> = {
+	intervention: { label: 'Interventions', formatStyle: 'string' },
+	casesAvertedTotal: {
+		label: 'Total cases averted',
+		helpText:
+			'Total number of clinical cases averted across the three years after new interventions are implemented, relative to the no intervention scenario.',
+		formatStyle: 'decimal'
+	},
+	totalCost: {
+		label: 'Total costs ($USD)',
+		helpText:
+			'The estimated total cost in $USD for the product procurement and implementation for the intervention package to cover a three-year period of protection.',
+		formatStyle: 'currency'
+	},
+	costPerCaseAverted: {
+		label: 'Cost per case averted across 3 years ($USD)',
+		helpText: 'The cost in $USD per case averted over the three-year period, relative to the no intervention scenario.',
+		formatStyle: 'currency'
+	}
+};
 export const costTableColumns: ColumnDef<CostTableMetrics>[] = Object.entries(CostTableInfo).map(
 	([key, headerInfo]) => ({
 		accessorKey: key,
@@ -52,6 +68,7 @@ export const costTableColumns: ColumnDef<CostTableMetrics>[] = Object.entries(Co
 		header: ({ column }) => {
 			return renderComponent(DataTableSortHeader, {
 				onclick: column.getToggleSortingHandler(),
+				helpText: headerInfo.helpText,
 				label: headerInfo.label
 			});
 		}

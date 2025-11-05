@@ -54,43 +54,55 @@ export const buildImpactTableData = (
 
 	return tableMetrics;
 };
+
 const ImpactTableInfo: Record<
 	keyof ImpactTableMetrics,
-	{ label: string; formatStyle: 'string' | 'percent' | 'decimal'; fractionalDigits?: number }
+	{ label: string; formatStyle: 'string' | 'percent' | 'decimal'; helpText?: string; fractionalDigits?: number }
 > = {
 	intervention: { label: 'Interventions', formatStyle: 'string' },
 	casesAvertedMeanPer1000: {
-		label: 'Mean cases averted per 1,000 people annually across 3 years since intervention',
+		label: 'Mean cases averted per 1,000 people: Years 1-3',
+		helpText:
+			'The average number of cases averted each year across the three years after new interventions are implemented, relative to the no intervention scenario.',
 		formatStyle: 'decimal',
 		fractionalDigits: 1
 	},
 	casesAvertedYear1Per1000: {
-		label: 'Cases averted per 1,000 people: Year 1 post intervention',
+		label: 'Cases averted per 1,000 people: Year 1',
+		helpText: 'The number of cases averted in the first year after new interventions are implemented.',
 		formatStyle: 'decimal',
 		fractionalDigits: 1
 	},
 	casesAvertedYear2Per1000: {
-		label: 'Cases averted per 1,000 people: Year 2 post intervention',
+		label: 'Cases averted per 1,000 people: Year 2',
+		helpText: 'The number of cases averted in the second year after new interventions are implemented.',
 		formatStyle: 'decimal',
 		fractionalDigits: 1
 	},
 	casesAvertedYear3Per1000: {
-		label: 'Cases averted per 1,000 people: Year 3 post intervention',
+		label: 'Cases averted per 1,000 people: Year 3',
+		helpText: 'The number of cases averted in the third year after new interventions are implemented.',
 		formatStyle: 'decimal',
 		fractionalDigits: 1
 	},
 	relativeReductionInCases: {
-		label: 'Relative reduction in clinical cases across 3 years since intervention',
+		label: 'Relative reduction in clinical cases(%): Years 1-3',
+		helpText:
+			'The percentage reduction in clinical cases across the three years after new interventions are implemented, relative to the no intervention scenario.',
 		formatStyle: 'percent',
 		fractionalDigits: 1
 	},
 	meanCasesPerYearPerPerson: {
-		label: 'Mean cases per person per year averaged across 3 years',
+		label: 'Mean cases per person per year: Years 1-3',
+		helpText:
+			'The predicted number of clinical cases per person, averaged across the three years after new interventions are implemented.',
 		formatStyle: 'decimal',
 		fractionalDigits: 2
 	},
 	relativeReductionInPrevalence: {
-		label: 'Relative reduction in prevalence across 36 months post intervention',
+		label: 'Relative reduction in prevalence(%): Years 1-3',
+		helpText:
+			'The percentage reduction in prevalence in under 5 year olds across the three years after new interventions are implemented, relative to the no intervention scenario.',
 		formatStyle: 'percent',
 		fractionalDigits: 1
 	}
@@ -116,7 +128,8 @@ export const impactTableColumns: ColumnDef<ImpactTableMetrics>[] = Object.entrie
 		header: ({ column }) => {
 			return renderComponent(DataTableSortHeader, {
 				onclick: column.getToggleSortingHandler(),
-				label: headerInfo.label
+				label: headerInfo.label,
+				helpText: headerInfo.helpText
 			});
 		}
 	})

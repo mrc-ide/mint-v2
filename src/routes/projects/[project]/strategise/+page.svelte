@@ -40,11 +40,16 @@
 		<h1 class="text-2xl font-bold">Strategise across regions for optimal budget allocation</h1>
 		<p class="mb-1 text-muted-foreground">
 			This tool explores how interventions can be distributed across regions at every budget level from minimum to
-			maximum. The chart shows the full range from the lowest possible budget up to your specified maximum budget,
-			helping you understand trade-offs and optimal allocation strategies at each funding level.
+			maximum. The chart shows the full range from the lowest possible budget (implementing the cheapest intervention in
+			a region) up to your specified maximum budget, helping you understand trade-offs and optimal allocation strategies
+			at each funding level.
 		</p>
 		<p class="mb-1 text-muted-foreground">
-			The regions must have run with interventions to be included in the strategise tool.
+			The highest budget value permitted by the tool corresponds to implementation of the set of interventions that
+			leads to the maximum cost across all regions.
+		</p>
+		<p class="mb-1 text-muted-foreground">
+			Note that the regions must have run with interventions to be included in the strategise tool.
 		</p>
 	</div>
 	{#if data.regionalStrategies.length > 1}

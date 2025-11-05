@@ -12,7 +12,7 @@ const POST_INTERVENTION_YEARS = [2, 3, 4] as const;
 export const getMeanCasesPostIntervention = (postInterventionCases: CasesData[]) =>
 	postInterventionCases.reduce((sum, c) => sum + c.casesPer1000, 0) / postInterventionCases.length;
 
-// Group cases by scenario, filtering out year 1 (pre-intervention year)
+// Group cases by scenario (ensuring order), filtering out year 1 (pre-intervention year)
 export const collectPostInterventionCases = (cases: CasesData[]): Record<Scenario, CasesData[]> => {
 	const postInterventionCases = cases.filter((c) => c.year > PRE_INTERVENTION_YEAR);
 

@@ -44,10 +44,10 @@
 					</div>
 					<div class="space-y-1.5 border-t border-border/30 pt-2">
 						{@render regionMetrics('Cost', `$${convertToLocaleString(cost)}`)}
-						{@render regionMetrics('Cases Averted', convertToLocaleString(casesAverted))}
-						{@render regionMetrics('Cost per Case Averted', `$${convertToLocaleString(costPerCaseAverted)}`)}
-						{@render regionMetrics('Cost per Person', `$${convertToLocaleString(costPerPerson)}`)}
-						{@render regionMetrics('Cases Averted per Person', convertToLocaleString(casesAvertedPerPerson))}
+						{@render regionMetrics('Cases averted', convertToLocaleString(casesAverted))}
+						{@render regionMetrics('Cost per case averted', `$${convertToLocaleString(costPerCaseAverted)}`)}
+						{@render regionMetrics('Cost per person', `$${convertToLocaleString(costPerPerson)}`)}
+						{@render regionMetrics('Cases averted per person', convertToLocaleString(casesAvertedPerPerson))}
 					</div>
 				</div>
 			</div>
