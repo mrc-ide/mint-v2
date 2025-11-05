@@ -135,7 +135,10 @@ export const getStrategyConfig = (
 		}
 	},
 	legend: {
-		enabled: true
+		enabled: true,
+		events: {
+			itemClick: () => false
+		}
 	},
 	series: getStrategiseSeries(strategiseResults)
 });

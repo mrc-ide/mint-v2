@@ -71,6 +71,7 @@ export const getPrevalenceConfig = (prevalence: PrevalenceData[]): Highcharts.Op
 		}
 	},
 	yAxis: {
+		min: 0,
 		title: {
 			text: 'Prevalence (%)'
 		},

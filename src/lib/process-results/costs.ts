@@ -47,12 +47,38 @@ export const getLsmTotalCost = ({ lsmCostPerPerson, population }: CostOptions): 
 const calculateItnDistributionCosts = (
 	distributionCostPerPerson: number,
 	population: number,
-	bedNetCost: number,
+	itnCost: number,
+	peoplePerNet: number,
 	procurementBuffer: number
-): number => (distributionCostPerPerson * population + bedNetCost) * procurementBuffer;
+): number => (((distributionCostPerPerson + itnCost) * population) / peoplePerNet) * procurementBuffer;
 
-export const calculateBedNetCost = (itnCost: number, population: number, peoplePerNet: number): number =>
-	(itnCost * population) / peoplePerNet;
+export const calculateContinuousCosts = (
+	continuousDistributionCostPerPerson: number,
+	population: number,
+	peoplePerNet: number,
+	procurementBuffer: number,
+	itnCost: number
+) => {
+	const meanDurationOfITNUse = 2.1 * 365; // 2.1 years in days
+	const defaultRoutineUsage = 0.15; // 15% of population receives ITNs through routine channels annually
+	const routineTopUpsPerYear = 26; // bi-weekly top-ups
+
+	const incrementalLossOfNets =
+		defaultRoutineUsage * (1 - Math.exp(-365 / routineTopUpsPerYear / meanDurationOfITNUse));
+	const incrementalContinuousTopUp = incrementalLossOfNets / (1 - defaultRoutineUsage - incrementalLossOfNets);
+	const topUpsOver3Years = incrementalContinuousTopUp * routineTopUpsPerYear * POST_INTERVENTION_YEARS.length;
+
+	return (
+		topUpsOver3Years *
+		calculateItnDistributionCosts(
+			continuousDistributionCostPerPerson,
+			population,
+			itnCost,
+			peoplePerNet,
+			procurementBuffer
+		)
+	);
+};
 
 export const getItnTotalCost = (
 	{
@@ -66,17 +92,21 @@ export const getItnTotalCost = (
 	}: CostOptions,
 	itnType: keyof CostOptions['itnCosts']
 ): number => {
-	const bedNetCost = calculateBedNetCost(itnCosts[itnType], population, peoplePerNet);
-
 	const massCosts = calculateItnDistributionCosts(
 		massDistributionCostPerPerson,
 		population,
-		bedNetCost,
+		itnCosts[itnType],
+		peoplePerNet,
 		procurementBuffer
 	);
 	const continuousCosts = isRoutine
-		? 0.15 *
-			calculateItnDistributionCosts(continuousDistributionCostPerPerson, population, bedNetCost, procurementBuffer)
+		? calculateContinuousCosts(
+				continuousDistributionCostPerPerson,
+				population,
+				peoplePerNet,
+				procurementBuffer,
+				itnCosts[itnType]
+			)
 		: 0;
 
 	return massCosts + continuousCosts;
