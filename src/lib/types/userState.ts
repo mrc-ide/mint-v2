@@ -32,6 +32,7 @@ export interface CasesData {
 export interface EmulatorResults {
 	prevalence: PrevalenceData[];
 	cases: CasesData[];
+	eirValid: boolean;
 }
 
 export interface Region {
