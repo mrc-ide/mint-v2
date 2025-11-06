@@ -20,6 +20,11 @@
 
 	const postInterventionCasesMap = $derived(collectPostInterventionCases(emulatorResults.cases));
 	const casesAverted = $derived(getAvertedCasesData(postInterventionCasesMap));
+	const isModelResultsInvalid = $derived.by(() => {
+		if (!emulatorResults.eirValid) return true;
+
+		return false;
+	});
 </script>
 
 <Tabs.Root bind:value={activeTab} aria-label="Results tabs" class="w-full">
