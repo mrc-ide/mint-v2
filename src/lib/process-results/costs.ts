@@ -52,7 +52,7 @@ const calculateItnDistributionCosts = (
 	procurementBuffer: number
 ): number => (((distributionCostPerPerson + itnCost) * population) / peoplePerNet) * procurementBuffer;
 
-export const calculateContinuousCosts = (
+export const calculateContinuousItnCosts = (
 	continuousDistributionCostPerPerson: number,
 	population: number,
 	peoplePerNet: number,
@@ -100,7 +100,7 @@ export const getItnTotalCost = (
 		procurementBuffer
 	);
 	const continuousCosts = isRoutine
-		? calculateContinuousCosts(
+		? calculateContinuousItnCosts(
 				continuousDistributionCostPerPerson,
 				population,
 				peoplePerNet,
