@@ -15,7 +15,7 @@ const config = {
 		alias: {
 			'$routes/*': 'src/routes/*',
 			'$mocks/*': 'src/tests/mocks/*',
-			'$root/*': './*'
+			'$lib/*': 'src/lib/*'
 		}
 	}
 };
