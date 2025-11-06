@@ -33,11 +33,11 @@ describe('SelectedStrategy component', () => {
 		} as any);
 
 		// totals
-		await expect.element(screen.getByRole('heading', { name: 'Total Cost', exact: true })).toBeVisible();
+		await expect.element(screen.getByRole('heading', { name: /total cost of interventions/i })).toBeVisible();
 		await expect.element(screen.getByText('$700.00')).toBeVisible();
-		await expect.element(screen.getByRole('heading', { name: 'Cases Averted', exact: true })).toBeVisible();
+		await expect.element(screen.getByRole('heading', { name: /total cases averted/i })).toBeVisible();
 		await expect.element(screen.getByText('130')).toBeVisible();
-		await expect.element(screen.getByRole('heading', { name: 'Cost per Case Averted' })).toBeVisible();
+		await expect.element(screen.getByRole('heading', { name: /cost per case averted/i })).toBeVisible();
 		await expect.element(screen.getByText('$5.38')).toBeVisible();
 		// individual regions
 		await expect.element(screen.getByRole('heading', { name: 'Region A' })).toBeVisible();

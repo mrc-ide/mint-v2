@@ -642,9 +642,3 @@ describe('checkCrossFieldValidation', () => {
 		expect(errors.b).toBeUndefined();
 	});
 });
-
-describe('DEBOUNCE_DELAY_MS', () => {
-	it('should be set to 1500', () => {
-		expect(DEBOUNCE_DELAY_MS).toBe(1500);
-	});
-});

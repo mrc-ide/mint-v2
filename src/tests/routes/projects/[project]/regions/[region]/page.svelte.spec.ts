@@ -192,7 +192,7 @@ describe('page.svelte', () => {
 
 		await screen.getByRole('tab', { name: 'Cost' }).click();
 
-		await expect.element(screen.getByRole('heading', { name: 'Strategy cost over 3 years vs' })).toBeVisible();
+		await expect.element(screen.getByRole('heading', { name: 'Strategy costs over 3 years vs' })).toBeVisible();
 		await expect.element(screen.getByRole('heading', { name: 'Strategy costs per case' })).toBeVisible();
 	});
 });
