@@ -14,8 +14,8 @@ export interface CostOptions {
 		pyPyrrole: number;
 		pyPpf: number;
 	};
-	massDistributionCostPerPerson: number;
-	continuousDistributionCostPerPerson: number;
+	massDistributionCostPerITN: number;
+	continuousDistributionCostPerITN: number;
 	procurementBuffer: number;
 	peoplePerNet: number;
 	isRoutine: boolean;
@@ -32,8 +32,8 @@ export const getFormCostOptions = (form: Record<string, FormValue>): CostOptions
 		pyPyrrole: Number(form['py_pyrrole_cost']),
 		pyPpf: Number(form['py_ppf_cost'])
 	},
-	massDistributionCostPerPerson: Number(form['mass_distribution_cost']),
-	continuousDistributionCostPerPerson: Number(form['continuous_itn_distribution_cost']),
+	massDistributionCostPerITN: Number(form['mass_distribution_cost']),
+	continuousDistributionCostPerITN: Number(form['continuous_itn_distribution_cost']),
 	procurementBuffer: 1 + Number(form['procurement_buffer']) / 100, // convert percentage to multiplier
 	peoplePerNet: Number(form['people_per_bednet']),
 	isRoutine: Boolean(form['routine_coverage'])
@@ -45,15 +45,15 @@ export const getIrsTotalCost = ({ irsAnnualCostPerHousehold, population, peopleP
 export const getLsmTotalCost = ({ lsmCostPerPerson, population }: CostOptions): number => lsmCostPerPerson * population;
 
 const calculateItnDistributionCosts = (
-	distributionCostPerPerson: number,
+	distributionCostPerITN: number,
 	population: number,
 	itnCost: number,
 	peoplePerNet: number,
 	procurementBuffer: number
-): number => (((distributionCostPerPerson + itnCost) * population) / peoplePerNet) * procurementBuffer;
+): number => (((distributionCostPerITN + itnCost) * population) / peoplePerNet) * procurementBuffer;
 
 export const calculateContinuousItnCosts = (
-	continuousDistributionCostPerPerson: number,
+	continuousDistributionCostPerITN: number,
 	population: number,
 	peoplePerNet: number,
 	procurementBuffer: number,
@@ -71,7 +71,7 @@ export const calculateContinuousItnCosts = (
 	return (
 		topUpsOver3Years *
 		calculateItnDistributionCosts(
-			continuousDistributionCostPerPerson,
+			continuousDistributionCostPerITN,
 			population,
 			itnCost,
 			peoplePerNet,
@@ -87,13 +87,13 @@ export const getItnTotalCost = (
 		peoplePerNet,
 		isRoutine,
 		procurementBuffer,
-		massDistributionCostPerPerson,
-		continuousDistributionCostPerPerson
+		massDistributionCostPerITN,
+		continuousDistributionCostPerITN
 	}: CostOptions,
 	itnType: keyof CostOptions['itnCosts']
 ): number => {
 	const massCosts = calculateItnDistributionCosts(
-		massDistributionCostPerPerson,
+		massDistributionCostPerITN,
 		population,
 		itnCosts[itnType],
 		peoplePerNet,
@@ -101,7 +101,7 @@ export const getItnTotalCost = (
 	);
 	const continuousCosts = isRoutine
 		? calculateContinuousItnCosts(
-				continuousDistributionCostPerPerson,
+				continuousDistributionCostPerITN,
 				population,
 				peoplePerNet,
 				procurementBuffer,
