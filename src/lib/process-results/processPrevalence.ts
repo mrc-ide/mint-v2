@@ -12,7 +12,9 @@ export const getMeanPrevalencePostIntervention = (prevalenceData: PrevalenceData
 };
 
 export const validateBaselinePrevalence = (prevalenceData: PrevalenceData[], currentMalariaPrevalence: number) => {
-	const preInterventionPrevalence = prevalenceData.filter((p) => p.scenario === 'no_intervention' && p.days / 365 < 1);
+	const preInterventionPrevalence = prevalenceData.filter((p) => p.scenario === 'no_intervention' && p.days / 365 <= 1);
+	if (preInterventionPrevalence.length === 0) return false;
+
 	const meanYear1Prevalence =
 		preInterventionPrevalence.reduce((sum, p) => sum + p.prevalence, 0) / preInterventionPrevalence.length;
 
