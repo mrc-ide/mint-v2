@@ -27,5 +27,8 @@ export const convertToLocaleString = (number: number, fractionalDigits = 2, roun
 export const createLinearSpace = (min: number, max: number, count = 200): number[] => {
 	if (count <= 1) return [min];
 	const step = (max - min) / (count - 1);
-	return Array.from({ length: count }, (_, i) => min + i * step);
+	return Array.from({ length: count }, (_, i) => {
+		if (i === count - 1) return max; // ensure last value is exactly max
+		return min + i * step;
+	});
 };
