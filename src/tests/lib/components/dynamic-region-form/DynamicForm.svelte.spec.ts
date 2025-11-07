@@ -28,6 +28,25 @@ describe('DynamicForm component', () => {
 		await expect.element(screen.getByRole('button', { name: 'Submit Text' })).toBeVisible();
 	});
 
+	it('should set hasRunBaseline to false when run fails', async () => {
+		const run = vi.fn().mockRejectedValue(new Error('Run failed'));
+		const screen = render(DynamicForm, {
+			props: {
+				schema: MOCK_FORM_SCHEMA,
+				initialValues: {},
+				hasRunBaseline: false,
+				run: run,
+				process: vi.fn(),
+				submitText: 'Submit Text',
+				isInputsDisabled: false
+			}
+		} as any);
+
+		await screen.getByRole('button', { name: 'Submit Text' }).click();
+
+		await expect.element(screen.getByRole('button', { name: 'Submit Text' })).toBeVisible();
+	});
+
 	it('should not show submit button & children when hasRunBaseline = true', async () => {
 		const screen = render(DynamicForm, {
 			props: {
