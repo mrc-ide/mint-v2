@@ -144,6 +144,41 @@ describe('getStrategyConfig', () => {
 		// Verify setStrategy was called with closest result (1000 threshold)
 		expect(mockSetStrategy).toHaveBeenCalledWith(mockData[0]);
 	});
+
+	it('should call functions when plotOptions click event is triggered', () => {
+		const mockData: StrategiseResults = [
+			{
+				costThreshold: 1000,
+				interventions: [{ region: 'Region A', intervention: 'irs_only', casesAverted: 100, cost: 1000 }]
+			}
+		];
+		const mockSetStrategy = vi.fn();
+		const mockSeries = {
+			chart: {
+				xAxis: [
+					{
+						removePlotLine: vi.fn(),
+						addPlotLine: vi.fn()
+					}
+				]
+			}
+		} as unknown as Highcharts.Series;
+		const mockEvent = {
+			point: { x: 1200 }
+		} as Highcharts.PointClickEventObject;
+
+		const config = getStrategyConfig(mockData, mockSetStrategy);
+
+		// Call the click handler with proper context
+		config.plotOptions!.area!.events!.click!.call(mockSeries, mockEvent);
+
+		// Verify addBudgetPlotLine was called
+		expect(mockSeries.chart.xAxis[0].removePlotLine).toHaveBeenCalledWith(BUDGET_PLOTLINE_ID);
+		expect(mockSeries.chart.xAxis[0].addPlotLine).toHaveBeenCalled();
+
+		// Verify setStrategy was called with closest result (1000 threshold)
+		expect(mockSetStrategy).toHaveBeenCalledWith(mockData[0]);
+	});
 });
 
 describe('findClosestStrategiseResult', () => {

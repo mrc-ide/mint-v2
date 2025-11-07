@@ -21,6 +21,30 @@ vi.mock(import('$lib/server/session'), () => ({
 	fetchCountry: vi.fn()
 }));
 
+describe('redis on events', () => {
+	afterEach(() => {
+		vi.resetAllMocks();
+	});
+
+	it('should log connection events', () => {
+		const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+		const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+		// Simulate events
+		vi.mocked(redis.on).mock.calls.forEach(([event, handler]) => {
+			if (event === 'connect' || event === 'reconnecting') {
+				handler();
+			} else if (event === 'error') {
+				handler(new Error('Test error'));
+			}
+		});
+
+		expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Connected to Redis server'));
+		expect(consoleLogSpy).toHaveBeenCalledWith('Reconnecting to Redis...');
+		expect(consoleErrorSpy).toHaveBeenCalledWith('Redis connection error:', expect.any(Error));
+	});
+});
+
 describe('loadOrSetupUserState', () => {
 	let mockCookies: Cookies;
 	let mockEvent: RequestEvent;
