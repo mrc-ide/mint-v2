@@ -95,7 +95,7 @@ describe('Results.svelte', () => {
 	});
 
 	it('should render warning alert when baseline prevalence is invalid', async () => {
-		vi.mocked(validateBaselinePrevalence, { partial: true }).mockReturnValueOnce(false);
+		vi.mocked(validateBaselinePrevalence).mockReturnValueOnce(false);
 
 		const screen = render(Results, {
 			props: {
