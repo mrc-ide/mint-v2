@@ -1,11 +1,4 @@
-import {
-	configureHighcharts,
-	createHighchart,
-	getChartTheme,
-	getColumnFill,
-	ScenarioToColor,
-	ScenarioToLabel
-} from '$lib/charts/baseChart';
+import { configureHighcharts, createHighchart, getChartTheme, getColumnFill } from '$lib/charts/baseChart';
 import type { Scenario } from '$lib/types/userState';
 import Highcharts from 'highcharts/esm/highcharts.js';
 
@@ -40,55 +33,6 @@ describe('getChartTheme', () => {
 	it('should return dark theme for dark mode', () => {
 		(mode as any).current = 'dark';
 		expect(getChartTheme()).toBe('highcharts-dark');
-	});
-});
-
-describe('ScenarioToLabel', () => {
-	it('should contain labels for all scenarios', () => {
-		expect(ScenarioToLabel.no_intervention).toBe('No Intervention');
-		expect(ScenarioToLabel.irs_only).toBe('IRS Only');
-		expect(ScenarioToLabel.lsm_only).toBe('LSM Only');
-	});
-
-	it('should have labels for pyrethroid ITN scenarios', () => {
-		expect(ScenarioToLabel.py_only_only).toBe('Pyrethroid ITN (Only)');
-		expect(ScenarioToLabel.py_only_with_lsm).toBe('Pyrethroid ITN (with LSM)');
-	});
-
-	it('should have labels for pyrethroid-PBO scenarios', () => {
-		expect(ScenarioToLabel.py_pbo_only).toBe('Pyrethroid-PBO (Only)');
-		expect(ScenarioToLabel.py_pbo_with_lsm).toBe('Pyrethroid-PBO (with LSM)');
-	});
-
-	it('should have labels for pyrethroid-pyrrole scenarios', () => {
-		expect(ScenarioToLabel.py_pyrrole_only).toBe('Pyrethroid-Pyrrole (Only)');
-		expect(ScenarioToLabel.py_pyrrole_with_lsm).toBe('Pyrethroid-Pyrrole (with LSM)');
-	});
-
-	it('should have labels for pyrethroid-PPF scenarios', () => {
-		expect(ScenarioToLabel.py_ppf_only).toBe('Pyrethroid-PPF (Only)');
-		expect(ScenarioToLabel.py_ppf_with_lsm).toBe('Pyrethroid-PPF (with LSM)');
-	});
-});
-
-describe('ScenarioToColor', () => {
-	it('should contain colors for all scenarios', () => {
-		expect(ScenarioToColor.no_intervention).toBe('var(--muted-foreground)');
-		expect(ScenarioToColor.irs_only).toBe('var(--chart-1)');
-		expect(ScenarioToColor.lsm_only).toBe('var(--chart-2)');
-	});
-
-	it('should use same color for scenarios with and without LSM', () => {
-		expect(ScenarioToColor.py_only_only).toBe(ScenarioToColor.py_only_with_lsm);
-		expect(ScenarioToColor.py_pbo_only).toBe(ScenarioToColor.py_pbo_with_lsm);
-		expect(ScenarioToColor.py_pyrrole_only).toBe(ScenarioToColor.py_pyrrole_with_lsm);
-		expect(ScenarioToColor.py_ppf_only).toBe(ScenarioToColor.py_ppf_with_lsm);
-	});
-
-	it('should use CSS variable format for colors', () => {
-		Object.values(ScenarioToColor).forEach((color) => {
-			expect(color).toMatch(/^var\(--[\w-]+\)$/);
-		});
 	});
 });
 
