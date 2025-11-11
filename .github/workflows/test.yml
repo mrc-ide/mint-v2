@@ -40,6 +40,10 @@ jobs:
     strategy:
       matrix:
         node-version: [22.x]
+    env:
+      REDIS_URL: redis://localhost:6379
+      PUBLIC_MINTR_URL: http://localhost:8888
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
