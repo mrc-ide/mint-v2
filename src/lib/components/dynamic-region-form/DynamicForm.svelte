@@ -125,7 +125,7 @@
 
 	{#if hasRunBaseline}
 		<div class="col-span-3 col-start-2 row-span-2 row-start-2">
-			{@render children()}
+			{@render children?.()}
 		</div>
 	{/if}
 	<div class="col-span-4 flex justify-center">

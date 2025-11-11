@@ -1,8 +1,8 @@
 import type { StrategiseResult, StrategiseResults } from '$lib/types/userState';
 import { ScenarioToLabel } from './baseChart';
 
-const BUDGET_PLOTLINE_ID = 'explored-budget';
-const getBudgetPlotLine = (budget: number): Highcharts.AxisPlotLinesOptions => ({
+export const BUDGET_PLOTLINE_ID = 'explored-budget';
+export const getBudgetPlotLine = (budget: number): Highcharts.AxisPlotLinesOptions => ({
 	id: BUDGET_PLOTLINE_ID,
 	value: budget,
 	color: 'var(--foreground)',
@@ -15,12 +15,12 @@ const getBudgetPlotLine = (budget: number): Highcharts.AxisPlotLinesOptions => (
 	}
 });
 
-const addBudgetPlotLine = (chart: Highcharts.Chart, budget: number) => {
+export const addBudgetPlotLine = (chart: Highcharts.Chart, budget: number) => {
 	chart.xAxis[0].removePlotLine(BUDGET_PLOTLINE_ID);
 	chart.xAxis[0].addPlotLine(getBudgetPlotLine(budget));
 };
 
-const findClosestStrategiseResult = (strategiseResults: StrategiseResults, xValue: number) =>
+export const findClosestStrategiseResult = (strategiseResults: StrategiseResults, xValue: number) =>
 	strategiseResults.findLast((result) => result.costThreshold <= xValue) ?? strategiseResults[0];
 
 export const getStrategiseSeries = (data: StrategiseResults): Highcharts.SeriesAreaOptions[] => {
