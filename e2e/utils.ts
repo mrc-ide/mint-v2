@@ -1,4 +1,4 @@
-import { expect, Page } from 'playwright/test';
+import { expect, Page } from '@playwright/test';
 
 /**
  * Navigates to the given path and waits for the svelte app to fully hydrate page.

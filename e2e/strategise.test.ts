@@ -1,4 +1,4 @@
-import test, { expect, Page } from 'playwright/test';
+import test, { expect, Page } from '@playwright/test';
 import { changeSlider, createProject, goto, randomProjectName } from './utils';
 
 const runRegionWithLSM = async (page: Page) => {
@@ -65,7 +65,7 @@ test.describe('Strategise page', () => {
 			page.getByLabel('Interactive chart', { exact: true }).getByText('Total Cases Averted vs Total')
 		).toBeVisible();
 
-		// Re-run interventions for nz region
+		// Re-run interventions for uk region
 		await goto(page, `/projects/${projectName}/regions/uk`);
 		await runRegionWithLSM(page);
 

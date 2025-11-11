@@ -1,4 +1,4 @@
-import test, { expect } from 'playwright/test';
+import test, { expect } from '@playwright/test';
 import { changeSlider, createProject, goto, randomProjectName } from './utils';
 
 test.describe('Region page', () => {
@@ -12,7 +12,7 @@ test.describe('Region page', () => {
 	test('runs baseline form for region shows prevalence graph only', async ({ page }) => {
 		await page.getByRole('spinbutton', { name: 'Size of population at risk' }).fill('50000');
 		await page.getByRole('switch', { name: 'Is transmission seasonal?' }).click();
-		await changeSlider(page, 'current_malaria_prevalence', 0.8); // Set ITN coverage to 80%
+		await changeSlider(page, 'current_malaria_prevalence', 0.8);
 
 		await page.getByRole('button', { name: 'Run baseline' }).click();
 
