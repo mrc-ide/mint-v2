@@ -5,8 +5,15 @@
 	import '../app.css';
 	import Header from './_components/Header.svelte';
 	import { configureHighcharts } from '$lib/charts/baseChart';
+	import { onMount } from 'svelte';
 
 	let { children, data } = $props();
+
+	// Add 'started' class to body when app is mounted to indicate hydration is complete
+	onMount(() => {
+		document.body.classList.add('started');
+	});
+
 	configureHighcharts();
 </script>
 

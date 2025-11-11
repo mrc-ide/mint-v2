@@ -64,7 +64,7 @@
 						</Form.Control>
 						<Form.FieldErrors />
 					</Form.Field>
-					<Form.Button variant="outline" size="icon"><Plus /></Form.Button>
+					<Form.Button variant="outline" size="icon" aria-label="Add Region"><Plus /></Form.Button>
 				</div>
 			</form>
 		</DropdownMenu.Sub>
