@@ -3,10 +3,10 @@ on:
   push:
     branches:
       - main
-      - 'releases/*'
+      - "releases/*"
   pull_request:
     branches:
-      - '*'
+      - "*"
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -17,7 +17,7 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: 22.x
-          cache: 'npm'
+          cache: "npm"
           cache-dependency-path: package-lock.json
       - name: Install dependencies
         run: npm ci
@@ -40,6 +40,10 @@ jobs:
     strategy:
       matrix:
         node-version: [22.x]
+    env:
+      REDIS_URL: redis://localhost:6379
+      PUBLIC_MINTR_URL: http://localhost:5173
+      
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -47,7 +51,7 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
+          cache: "npm"
       - name: Install dependencies
         run: npm ci
       - name: Start dependencies

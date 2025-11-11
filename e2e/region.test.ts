@@ -29,7 +29,7 @@ test.describe('Region page', () => {
 	}) => {
 		await page.getByRole('button', { name: 'Run baseline' }).click();
 		await expect(page.getByRole('region', { name: 'Impact prevalence graph' })).toBeVisible();
-		await page.locator('#lsm').scrollIntoViewIfNeeded();
+		await page.waitForTimeout(500); // wait for chart to fully render
 
 		// itn options
 		await changeSlider(page, 'itn_future', 0.8);
@@ -40,6 +40,7 @@ test.describe('Region page', () => {
 		await page.getByRole('switch', { name: 'Continuous distribution of' }).click();
 		// irs & lsm options
 		await changeSlider(page, 'irs_future', 0.6);
+		await page.locator('#lsm').scrollIntoViewIfNeeded();
 		await changeSlider(page, 'lsm', 0.4);
 
 		// Verify that intervention chart toggle buttons are visible

@@ -4,6 +4,7 @@ import { changeSlider, createProject, goto, randomProjectName } from './utils';
 const runRegionWithLSM = async (page: Page) => {
 	await page.getByRole('button', { name: 'Run baseline' }).click();
 	await expect(page.getByRole('region', { name: 'Impact prevalence graph' })).toBeVisible();
+	await page.waitForTimeout(500);
 	await page.locator('#lsm').scrollIntoViewIfNeeded();
 	await changeSlider(page, 'lsm', 0.8);
 	await expect(page.getByRole('button', { name: 'Show LSM Only' })).toBeVisible();
@@ -40,13 +41,13 @@ test.describe('Strategise page', () => {
 		await page.getByRole('button', { name: 'Explore defined budget range' }).click();
 
 		// chart visibility
-		expect(
+		await expect(
 			page.getByLabel('Interactive chart', { exact: true }).getByText('Total Cases Averted vs Total')
 		).toBeVisible();
 
 		// individual region cards
-		expect(page.getByText('Pop: 20,000 nz LSM Only Cost')).toBeVisible();
-		expect(page.getByText('Pop: 20,000 australia LSM Only Cost')).toBeVisible();
+		await expect(page.getByText('Pop: 20,000 nz LSM Only Cost')).toBeVisible();
+		await expect(page.getByText('Pop: 20,000 australia LSM Only Cost')).toBeVisible();
 	});
 
 	test("should wipe strategise data when a region's interventions are re-run", async ({ page }) => {
