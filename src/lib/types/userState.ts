@@ -1,18 +1,22 @@
 import type { FormValue } from '$lib/components/dynamic-region-form/types';
 import type { strategiseSchema } from '$routes/projects/[project]/strategise/schema';
 import { z } from 'zod';
-export type Scenario =
-	| 'no_intervention'
-	| 'irs_only'
-	| 'lsm_only'
-	| 'py_only_only'
-	| 'py_only_with_lsm'
-	| 'py_pbo_only'
-	| 'py_pbo_with_lsm'
-	| 'py_pyrrole_only'
-	| 'py_pyrrole_with_lsm'
-	| 'py_ppf_only'
-	| 'py_ppf_with_lsm';
+
+export const SCENARIOS = [
+	'no_intervention',
+	'py_only_only',
+	'py_pbo_only',
+	'py_pyrrole_only',
+	'py_ppf_only',
+	'irs_only',
+	'lsm_only',
+	'py_only_with_lsm',
+	'py_pbo_with_lsm',
+	'py_pyrrole_with_lsm',
+	'py_ppf_with_lsm'
+] as const;
+export type Scenario = (typeof SCENARIOS)[number];
+
 export interface PrevalenceData {
 	scenario: Scenario;
 	days: number;

@@ -8,7 +8,6 @@ import type {
 import {
 	checkCrossFieldValidation,
 	coerceDefaults,
-	DEBOUNCE_DELAY_MS,
 	evaluateValueExpression,
 	forEachField,
 	forEachGroup,
@@ -640,11 +639,5 @@ describe('checkCrossFieldValidation', () => {
 		checkCrossFieldValidation({ a: 60, b: 50 }, rule, errors);
 		expect(errors.a).toBeUndefined();
 		expect(errors.b).toBeUndefined();
-	});
-});
-
-describe('DEBOUNCE_DELAY_MS', () => {
-	it('should be set to 1500', () => {
-		expect(DEBOUNCE_DELAY_MS).toBe(1500);
 	});
 });

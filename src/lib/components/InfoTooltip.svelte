@@ -12,7 +12,7 @@
 	<Tooltip.Root>
 		<Tooltip.Trigger><Info class="h-4 w-4 text-muted-foreground" /></Tooltip.Trigger>
 		<Tooltip.Content>
-			<p>{text}</p>
+			<div class="max-w-64">{text}</div>
 		</Tooltip.Content>
 	</Tooltip.Root>
 </Tooltip.Provider>

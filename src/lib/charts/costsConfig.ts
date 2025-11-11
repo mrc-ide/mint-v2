@@ -30,23 +30,23 @@ const getCostPer1000Config = (
 		type: 'scatter'
 	},
 	title: {
-		text: 'Strategy cost over 3 years vs cases averted'
+		text: 'Strategy costs over 3 years vs Cases averted'
 	},
 	xAxis: {
 		title: {
 			text: 'Cases averted per 1,000 people over 3 years'
 		},
 		labels: {
-			format: '{value:.2f}'
+			format: '{value:.1f}'
 		}
 	},
 	yAxis: {
 		title: {
-			text: 'Costs per 1,000 people over 3 years (USD)'
+			text: 'Costs per 1,000 people over 3 years ($USD)'
 		}
 	},
 	tooltip: {
-		pointFormat: 'Cases averted: <b>{point.x:.2f}</b><br/>Cost: <b>${point.y:,.2f}</b>'
+		pointFormat: 'Cases averted: <b>{point.x:.1f}</b><br/>Cost: <b>${point.y:,.1f}</b>'
 	},
 	series: createCostsPer1000Series(costsAndCasesAverted, population)
 });
@@ -64,7 +64,7 @@ const getCostPerCaseSeries = (
 			color: getColumnFill(scenario as Scenario),
 			dataLabels: {
 				enabled: true,
-				format: '${point.y:.2f}'
+				format: '${point.y:,.2f}'
 			}
 		}))
 	}
@@ -94,7 +94,7 @@ const getCostPerCaseConfig = (
 		},
 		yAxis: {
 			title: {
-				text: 'Cost per case averted (USD)'
+				text: 'Cost per case averted ($USD)'
 			}
 		},
 		series: getCostPerCaseSeries(costsAndCasesAverted, population),

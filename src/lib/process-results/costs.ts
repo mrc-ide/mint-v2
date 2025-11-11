@@ -14,8 +14,8 @@ export interface CostOptions {
 		pyPyrrole: number;
 		pyPpf: number;
 	};
-	massDistributionCostPerPerson: number;
-	continuousDistributionCostPerPerson: number;
+	massDistributionCostPerITN: number;
+	continuousDistributionCostPerITN: number;
 	procurementBuffer: number;
 	peoplePerNet: number;
 	isRoutine: boolean;
@@ -32,8 +32,8 @@ export const getFormCostOptions = (form: Record<string, FormValue>): CostOptions
 		pyPyrrole: Number(form['py_pyrrole_cost']),
 		pyPpf: Number(form['py_ppf_cost'])
 	},
-	massDistributionCostPerPerson: Number(form['mass_distribution_cost']),
-	continuousDistributionCostPerPerson: Number(form['continuous_itn_distribution_cost']),
+	massDistributionCostPerITN: Number(form['mass_distribution_cost']),
+	continuousDistributionCostPerITN: Number(form['continuous_itn_distribution_cost']),
 	procurementBuffer: 1 + Number(form['procurement_buffer']) / 100, // convert percentage to multiplier
 	peoplePerNet: Number(form['people_per_bednet']),
 	isRoutine: Boolean(form['routine_coverage'])
@@ -45,14 +45,40 @@ export const getIrsTotalCost = ({ irsAnnualCostPerHousehold, population, peopleP
 export const getLsmTotalCost = ({ lsmCostPerPerson, population }: CostOptions): number => lsmCostPerPerson * population;
 
 const calculateItnDistributionCosts = (
-	distributionCostPerPerson: number,
+	distributionCostPerITN: number,
 	population: number,
-	bedNetCost: number,
+	itnCost: number,
+	peoplePerNet: number,
 	procurementBuffer: number
-): number => (distributionCostPerPerson * population + bedNetCost) * procurementBuffer;
+): number => (((distributionCostPerITN + itnCost) * population) / peoplePerNet) * procurementBuffer;
 
-export const calculateBedNetCost = (itnCost: number, population: number, peoplePerNet: number): number =>
-	(itnCost * population) / peoplePerNet;
+export const calculateContinuousItnCosts = (
+	continuousDistributionCostPerITN: number,
+	population: number,
+	peoplePerNet: number,
+	procurementBuffer: number,
+	itnCost: number
+) => {
+	const meanDurationOfITNUse = 2.1 * 365; // 2.1 years in days
+	const defaultRoutineUsage = 0.15; // 15% of population receives ITNs through routine channels annually
+	const routineTopUpsPerYear = 26; // bi-weekly top-ups
+
+	const incrementalLossOfNets =
+		defaultRoutineUsage * (1 - Math.exp(-365 / routineTopUpsPerYear / meanDurationOfITNUse));
+	const incrementalContinuousTopUp = incrementalLossOfNets / (1 - defaultRoutineUsage - incrementalLossOfNets);
+	const topUpsOver3Years = incrementalContinuousTopUp * routineTopUpsPerYear * POST_INTERVENTION_YEARS.length;
+
+	return (
+		topUpsOver3Years *
+		calculateItnDistributionCosts(
+			continuousDistributionCostPerITN,
+			population,
+			itnCost,
+			peoplePerNet,
+			procurementBuffer
+		)
+	);
+};
 
 export const getItnTotalCost = (
 	{
@@ -61,22 +87,26 @@ export const getItnTotalCost = (
 		peoplePerNet,
 		isRoutine,
 		procurementBuffer,
-		massDistributionCostPerPerson,
-		continuousDistributionCostPerPerson
+		massDistributionCostPerITN,
+		continuousDistributionCostPerITN
 	}: CostOptions,
 	itnType: keyof CostOptions['itnCosts']
 ): number => {
-	const bedNetCost = calculateBedNetCost(itnCosts[itnType], population, peoplePerNet);
-
 	const massCosts = calculateItnDistributionCosts(
-		massDistributionCostPerPerson,
+		massDistributionCostPerITN,
 		population,
-		bedNetCost,
+		itnCosts[itnType],
+		peoplePerNet,
 		procurementBuffer
 	);
 	const continuousCosts = isRoutine
-		? 0.15 *
-			calculateItnDistributionCosts(continuousDistributionCostPerPerson, population, bedNetCost, procurementBuffer)
+		? calculateContinuousItnCosts(
+				continuousDistributionCostPerITN,
+				population,
+				peoplePerNet,
+				procurementBuffer,
+				itnCosts[itnType]
+			)
 		: 0;
 
 	return massCosts + continuousCosts;

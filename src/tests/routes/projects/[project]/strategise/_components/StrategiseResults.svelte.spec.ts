@@ -55,6 +55,6 @@ describe('StrategiseResults', () => {
 		await expect.element(screen.getByRole('heading', { name: 'Total Cases Averted vs Total' })).toBeVisible();
 		await expect.element(screen.getByRole('button', { name: 'Show Region A' })).toBeVisible();
 		await expect.element(screen.getByRole('button', { name: 'Show Region B' })).toBeVisible();
-		await expect.element(screen.getByRole('heading', { name: 'Optimal Strategy for explored' })).toBeVisible();
+		await expect.element(screen.getByRole('heading', { name: 'Optimal Strategy for selected' })).toBeVisible();
 	});
 });

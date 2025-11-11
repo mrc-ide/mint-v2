@@ -1,4 +1,4 @@
-import { PRE_INTERVENTION_YEAR, type CasesData, type Scenario } from '$lib/types/userState';
+import { PRE_INTERVENTION_YEAR, SCENARIOS, type CasesData, type Scenario } from '$lib/types/userState';
 
 export interface CasesAverted {
 	casesAvertedYear1Per1000: number;
@@ -12,14 +12,13 @@ const POST_INTERVENTION_YEARS = [2, 3, 4] as const;
 export const getMeanCasesPostIntervention = (postInterventionCases: CasesData[]) =>
 	postInterventionCases.reduce((sum, c) => sum + c.casesPer1000, 0) / postInterventionCases.length;
 
-// Group cases by scenario, filtering out year 1 (pre-intervention year)
+// Group cases by scenario (ensuring order), filtering out year 1 (pre-intervention year)
 export const collectPostInterventionCases = (cases: CasesData[]): Record<Scenario, CasesData[]> => {
-	return cases.reduce(
-		(acc, c) => {
-			if (c.year > PRE_INTERVENTION_YEAR) {
-				acc[c.scenario] = acc[c.scenario] || [];
-				acc[c.scenario].push(c);
-			}
+	const postInterventionCases = cases.filter((c) => c.year > PRE_INTERVENTION_YEAR);
+
+	return SCENARIOS.reduce(
+		(acc, scenario) => {
+			acc[scenario] = postInterventionCases.filter((c) => c.scenario === scenario);
 			return acc;
 		},
 		{} as Record<Scenario, CasesData[]>
@@ -49,11 +48,13 @@ export const getAvertedCasesData = (
 			(year) => (noInterventionByYear.get(year) ?? 0) - (casesByYear.get(year) ?? 0)
 		);
 
+		const casesAvertedMeanPer1000 = meanNoInterventionCases - meanCasesForScenario;
+
 		casesAverted[scenario as Scenario] = {
 			casesAvertedYear1Per1000,
 			casesAvertedYear2Per1000,
 			casesAvertedYear3Per1000,
-			casesAvertedMeanPer1000: meanNoInterventionCases - meanCasesForScenario,
+			casesAvertedMeanPer1000: casesAvertedMeanPer1000 < 0 ? 0 : casesAvertedMeanPer1000, // negative mean cases averted is due to model error rather than accurate prediction
 			totalAvertedCasesPer1000: casesAvertedYear1Per1000 + casesAvertedYear2Per1000 + casesAvertedYear3Per1000
 		};
 	}

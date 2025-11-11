@@ -3,7 +3,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import type { SuperForm } from 'sveltekit-superforms';
 	import type { StrategiseForm } from '../schema';
-	import { convertToLocaleString } from '$lib/number';
+	import { convertToLocaleString, ROUNDING_METHODS } from '$lib/number';
 	interface Props {
 		form: SuperForm<StrategiseForm>;
 		budget: number;
@@ -20,10 +20,10 @@
 			<Form.Control>
 				{#snippet children({ props })}
 					<div class="flex space-x-2">
-						<Form.Label class="whitespace-nowrap" for="budget">Maximum available budget (USD)</Form.Label>
+						<Form.Label class="whitespace-nowrap" for="budget">Maximum available budget ($USD)</Form.Label>
 						<Input
 							type="number"
-							min={minCost}
+							min={ROUNDING_METHODS['ceil'](minCost)}
 							max={maxCost}
 							step={100}
 							{...props}
@@ -34,16 +34,16 @@
 				{/snippet}
 			</Form.Control>
 			<Form.Description class="text-xs"
-				>Enter your maximum possible budget between <span class="font-semibold"
+				>Enter your maximum budget available to you in the range <span class="font-semibold"
 					>${convertToLocaleString(minCost, 0, 'ceil')}</span
 				>
-				and
+				to
 				<span class="font-semibold">${convertToLocaleString(maxCost, 0, 'ceil')}</span>.
 				<br /><span class="font-semibold">Tip:</span> Set this to the highest budget you could potentially secure to see
 				all possible strategies.</Form.Description
 			>
 			<Form.FieldErrors />
 		</Form.Field>
-		<Form.Button>Show Full Budget Range</Form.Button>
+		<Form.Button>Explore defined budget range</Form.Button>
 	</div>
 </form>

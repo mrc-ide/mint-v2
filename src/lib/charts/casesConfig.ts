@@ -46,7 +46,7 @@ export const getCasesConfig = (casesAverted: Partial<Record<Scenario, CasesAvert
 			height: 450
 		},
 		title: {
-			text: 'Clinical cases averted per 1000 people per year'
+			text: 'Clinical cases averted per 1,000 people per year'
 		},
 		xAxis: {
 			type: 'category',
@@ -60,7 +60,7 @@ export const getCasesConfig = (casesAverted: Partial<Record<Scenario, CasesAvert
 		},
 		yAxis: {
 			title: {
-				text: ''
+				text: 'Cases averted'
 			}
 		},
 		series: getCasesSeriesData(casesAverted),
