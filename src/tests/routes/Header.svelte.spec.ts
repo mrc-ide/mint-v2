@@ -36,7 +36,7 @@ describe('Header component', () => {
 			}
 		} as any);
 
-		await screen.getByRole('button', { name: 'Test Project - Region 1' }).click();
+		await screen.getByRole('button', { name: /region 1/i }).click();
 
 		await expect.element(screen.getByRole('menuitem', { name: 'Region 1' })).toBeVisible();
 		await expect.element(screen.getByRole('menuitem', { name: 'Region 2' })).toBeVisible();
