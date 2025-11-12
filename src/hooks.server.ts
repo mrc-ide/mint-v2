@@ -30,7 +30,6 @@ export const handleError: HandleServerError = async ({ error, event, status, mes
 	});
 
 	if (status === 500) {
-		// For internal server errors, return a generic message with the error ID
 		return {
 			message: `An internal server error occurred. Please contact support with Error ID: ${errorId}`
 		};
