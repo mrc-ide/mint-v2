@@ -101,4 +101,14 @@ test.describe('Region page', () => {
 
 		await page.getByRole('button', { name: `${projectName} - ${newRegionName}` }).click();
 	});
+
+	test('shows error page when navigating to non-existent region', async ({ page }) => {
+		await goto(page, `/projects/${projectName}/regions/non-existent-region`);
+
+		await expect(page.getByText('404')).toBeVisible();
+		await expect(page.getByText('Resource Not Found')).toBeVisible();
+		await expect(
+			page.getByText('Region "non-existent-region" not found in project "' + projectName + '"')
+		).toBeVisible();
+	});
 });
