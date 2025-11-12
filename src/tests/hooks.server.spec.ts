@@ -123,7 +123,7 @@ describe('handleError', () => {
 
 		expect(consoleErrorSpy).toHaveBeenCalledWith(
 			expect.objectContaining({
-				userId: 'unknown '
+				userId: 'unknown'
 			})
 		);
 	});

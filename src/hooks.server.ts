@@ -25,7 +25,7 @@ export const handleError: HandleServerError = async ({ error, event, status, mes
 		message,
 		method: event.request.method,
 		path: event.url.pathname,
-		userId: event.cookies.get('userId') ?? 'unknown ',
+		userId: event.cookies.get('userId') ?? 'unknown',
 		stack: error
 	});
 
