@@ -1,18 +1,14 @@
 import Error from '$routes/+error.svelte';
 import { render } from 'vitest-browser-svelte';
 
-vi.mock(import('$app/state'), () => ({
-	page: {
-		status: 404,
-		error: { message: 'Test error message' }
-	} as any
-}));
-
-beforeEach(() => {
-	vi.resetAllMocks();
-});
-
 describe('base error page', () => {
+	vi.mock(import('$app/state'), () => ({
+		page: {
+			status: 404,
+			error: { message: 'Test error message' }
+		} as any
+	}));
+
 	it('should display the correct status code, messages, and buttons', async () => {
 		const screen = render(Error);
 
