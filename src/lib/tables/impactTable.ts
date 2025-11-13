@@ -100,7 +100,7 @@ const ImpactTableInfo: Record<
 		fractionalDigits: 3
 	},
 	relativeReductionInPrevalence: {
-		label: 'Relative reduction in prevalence 5(%): Years 1-3',
+		label: 'Relative reduction in prevalence (%): Years 1-3',
 		helpText:
 			'The percentage reduction in prevalence in under 5 year olds across the three years after new interventions are implemented, relative to the no intervention scenario.',
 		formatStyle: 'percent',
