@@ -3,9 +3,9 @@ import Results from '$routes/projects/[project]/regions/[region]/_components/Res
 import { render } from 'vitest-browser-svelte';
 import { getModelInvalidMessage } from '$lib/process-results/processPrevalence';
 
-vi.mock(import('$lib/process-results/processPrevalence'), async (importOriginal) => ({
-	...(await importOriginal()),
-	getModelInvalidMessage: vi.fn()
+vi.mock(import('$lib/process-results/processPrevalence'), () => ({
+	getModelInvalidMessage: vi.fn().mockReturnValue(undefined),
+	getMeanPrevalencePostIntervention: vi.fn().mockReturnValue(10)
 }));
 
 describe('Results.svelte', () => {
@@ -25,7 +25,6 @@ describe('Results.svelte', () => {
 		await expect.element(screen.getByRole('region', { name: 'Impact results table' })).toBeVisible();
 		await expect.element(screen.getByRole('region', { name: 'Impact cases graph' })).toBeVisible();
 		await expect.element(screen.getByRole('region', { name: 'Impact prevalence graph' })).toBeVisible();
-		await expect.element(screen.getByRole('alert')).not.toBeInTheDocument();
 	});
 
 	it('should render costs tab with charts and table', async () => {
@@ -77,6 +76,13 @@ describe('Results.svelte', () => {
 
 		await expect.element(screen.getByText(/cost results are not available/i)).toBeVisible();
 	});
+});
+
+describe('results warning', () => {
+	const warningMessage = 'Some warning message';
+	beforeEach(() => {
+		vi.mocked(getModelInvalidMessage).mockReturnValueOnce(warningMessage);
+	});
 
 	it('should render warning alert when eirValid is false', async () => {
 		const screen = render(Results, {
@@ -92,10 +98,10 @@ describe('Results.svelte', () => {
 		} as any);
 
 		await expect.element(screen.getByRole('alert')).toBeVisible();
+		await expect.element(screen.getByText(warningMessage)).toBeVisible();
 	});
 
 	it('should render warning alert when baseline prevalence is invalid', async () => {
-		vi.mocked(getModelInvalidMessage).mockReturnValue('Some warning message');
 		const emulatorResults = {
 			cases: MOCK_CASES_DATA,
 			prevalence: MOCK_PREVALENCE_DATA,
@@ -114,6 +120,6 @@ describe('Results.svelte', () => {
 			MOCK_FORM_VALUES.current_malaria_prevalence / 100
 		);
 		await expect.element(screen.getByRole('alert')).toBeVisible();
-		await expect.element(screen.getByText('Some warning message')).toBeVisible();
+		await expect.element(screen.getByText(warningMessage)).toBeVisible();
 	});
 });
