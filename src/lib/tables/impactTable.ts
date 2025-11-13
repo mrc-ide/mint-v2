@@ -97,7 +97,7 @@ const ImpactTableInfo: Record<
 		helpText:
 			'The predicted number of clinical cases per person, averaged across the three years after new interventions are implemented.',
 		formatStyle: 'decimal',
-		fractionalDigits: 2
+		fractionalDigits: 3
 	},
 	relativeReductionInPrevalence: {
 		label: 'Relative reduction in prevalence 5(%): Years 1-3',

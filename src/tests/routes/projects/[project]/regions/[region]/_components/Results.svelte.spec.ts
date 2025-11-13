@@ -1,11 +1,11 @@
 import { MOCK_CASES_DATA, MOCK_FORM_VALUES, MOCK_PREVALENCE_DATA } from '$mocks/mocks';
 import Results from '$routes/projects/[project]/regions/[region]/_components/Results.svelte';
 import { render } from 'vitest-browser-svelte';
-import { validateBaselinePrevalence } from '$lib/process-results/processPrevalence';
+import { getModelInvalidMessage } from '$lib/process-results/processPrevalence';
 
 vi.mock(import('$lib/process-results/processPrevalence'), async (importOriginal) => ({
 	...(await importOriginal()),
-	validateBaselinePrevalence: vi.fn().mockReturnValue(true)
+	getModelInvalidMessage: vi.fn()
 }));
 
 describe('Results.svelte', () => {
@@ -95,20 +95,25 @@ describe('Results.svelte', () => {
 	});
 
 	it('should render warning alert when baseline prevalence is invalid', async () => {
-		vi.mocked(validateBaselinePrevalence).mockReturnValueOnce(false);
-
+		vi.mocked(getModelInvalidMessage).mockReturnValue('Some warning message');
+		const emulatorResults = {
+			cases: MOCK_CASES_DATA,
+			prevalence: MOCK_PREVALENCE_DATA,
+			eirValid: true
+		};
 		const screen = render(Results, {
 			props: {
-				emulatorResults: {
-					cases: MOCK_CASES_DATA,
-					prevalence: MOCK_PREVALENCE_DATA,
-					eirValid: true
-				},
+				emulatorResults,
 				form: MOCK_FORM_VALUES,
 				activeTab: 'cost'
 			}
 		} as any);
 
+		expect(getModelInvalidMessage).toHaveBeenCalledWith(
+			emulatorResults,
+			MOCK_FORM_VALUES.current_malaria_prevalence / 100
+		);
 		await expect.element(screen.getByRole('alert')).toBeVisible();
+		await expect.element(screen.getByText('Some warning message')).toBeVisible();
 	});
 });
