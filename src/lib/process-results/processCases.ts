@@ -1,3 +1,4 @@
+import { roundNumber } from '$lib/number';
 import { PRE_INTERVENTION_YEAR, SCENARIOS, type CasesData, type Scenario } from '$lib/types/userState';
 
 export interface CasesAverted {
@@ -47,16 +48,26 @@ export const getAvertedCasesData = (
 		const [casesAvertedYear1Per1000, casesAvertedYear2Per1000, casesAvertedYear3Per1000] = POST_INTERVENTION_YEARS.map(
 			(year) => (noInterventionByYear.get(year) ?? 0) - (casesByYear.get(year) ?? 0)
 		);
-
 		const casesAvertedMeanPer1000 = meanNoInterventionCases - meanCasesForScenario;
 
-		casesAverted[scenario as Scenario] = {
-			casesAvertedYear1Per1000,
-			casesAvertedYear2Per1000,
-			casesAvertedYear3Per1000,
-			casesAvertedMeanPer1000: casesAvertedMeanPer1000 < 0 ? 0 : casesAvertedMeanPer1000, // negative mean cases averted is due to model error rather than accurate prediction
-			totalAvertedCasesPer1000: casesAvertedYear1Per1000 + casesAvertedYear2Per1000 + casesAvertedYear3Per1000
-		};
+		if (roundNumber(casesAvertedMeanPer1000, 1) > 0) {
+			casesAverted[scenario as Scenario] = {
+				casesAvertedYear1Per1000,
+				casesAvertedYear2Per1000,
+				casesAvertedYear3Per1000,
+				casesAvertedMeanPer1000,
+				totalAvertedCasesPer1000: casesAvertedYear1Per1000 + casesAvertedYear2Per1000 + casesAvertedYear3Per1000
+			};
+		} else {
+			// Skip scenarios where mean cases averted rounds to 0 or less at 1 decimal place (likely model error)
+			casesAverted[scenario as Scenario] = {
+				casesAvertedYear1Per1000: 0,
+				casesAvertedYear2Per1000: 0,
+				casesAvertedYear3Per1000: 0,
+				casesAvertedMeanPer1000: 0,
+				totalAvertedCasesPer1000: 0
+			};
+		}
 	}
 
 	return casesAverted;

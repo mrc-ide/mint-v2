@@ -79,7 +79,7 @@ describe('getFormCostOptions', () => {
 describe('getIrsTotalCost', () => {
 	it('should calculate IRS total cost correctly', () => {
 		const costOptions: CostOptions = {
-			irsAnnualCostPerHousehold: 100,
+			irsAnnualCostPerHouseholdProduct: 100,
 			peoplePerHousehold: 5,
 			population: 50000,
 			lsmCostPerPerson: 0,
@@ -102,7 +102,7 @@ describe('getIrsTotalCost', () => {
 describe('getLsmTotalCost', () => {
 	it('should calculate LSM total cost correctly', () => {
 		const costOptions: CostOptions = {
-			irsAnnualCostPerHousehold: 0,
+			irsAnnualCostPerHouseholdProduct: 0,
 			peoplePerHousehold: 1,
 			population: 50000,
 			lsmCostPerPerson: 2.5,
@@ -122,7 +122,7 @@ describe('getLsmTotalCost', () => {
 
 describe('getItnTotalCost', () => {
 	const baseCostOptions: CostOptions = {
-		irsAnnualCostPerHousehold: 0,
+		irsAnnualCostPerHouseholdProduct: 0,
 		peoplePerHousehold: 1,
 		population: 10000,
 		lsmCostPerPerson: 0,
@@ -156,7 +156,7 @@ describe('getItnTotalCost', () => {
 
 describe('getScenarioCostCalculators', () => {
 	const costOptions: CostOptions = {
-		irsAnnualCostPerHousehold: 100,
+		irsAnnualCostPerHouseholdProduct: 100,
 		peoplePerHousehold: 5,
 		population: 10000,
 		lsmCostPerPerson: 2,

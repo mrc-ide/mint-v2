@@ -86,7 +86,7 @@ const ImpactTableInfo: Record<
 		fractionalDigits: 1
 	},
 	relativeReductionInCases: {
-		label: 'Relative reduction in clinical cases(%): Years 1-3',
+		label: 'Relative reduction in clinical cases (%): Years 1-3',
 		helpText:
 			'The percentage reduction in clinical cases across the three years after new interventions are implemented, relative to the no intervention scenario.',
 		formatStyle: 'percent',
@@ -100,7 +100,7 @@ const ImpactTableInfo: Record<
 		fractionalDigits: 2
 	},
 	relativeReductionInPrevalence: {
-		label: 'Relative reduction in prevalence(%): Years 1-3',
+		label: 'Relative reduction in prevalence 5(%): Years 1-3',
 		helpText:
 			'The percentage reduction in prevalence in under 5 year olds across the three years after new interventions are implemented, relative to the no intervention scenario.',
 		formatStyle: 'percent',

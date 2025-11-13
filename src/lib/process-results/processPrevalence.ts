@@ -1,4 +1,4 @@
-import type { PrevalenceData, Scenario } from '$lib/types/userState';
+import type { EmulatorResults, PrevalenceData, Scenario } from '$lib/types/userState';
 
 export const getPostInterventionPrevalence = (prevalenceData: PrevalenceData[], scenario: Scenario) => {
 	return prevalenceData.filter((p) => p.scenario === scenario && p.days > 365);
@@ -19,4 +19,23 @@ export const validateBaselinePrevalence = (prevalenceData: PrevalenceData[], cur
 		preInterventionPrevalence.reduce((sum, p) => sum + p.prevalence, 0) / preInterventionPrevalence.length;
 
 	return Math.abs(meanYear1Prevalence - currentMalariaPrevalence) < 0.05;
+};
+
+export const MODEL_INTERPRETATION_WARNINGS = {
+	EIR_HIGH:
+		'The combination of previous interventions estimates an entomological inoculation rate (EIR) > 350 infectious bites/year prior to control interventions. This is extremely high — exercise caution when interpreting these findings.',
+	BASELINE_MISMATCH:
+		'Model starting prevalence differs from the input prevalence by > 5%. Exercise caution when interpreting these findings.'
+} as const;
+
+export const getModelInvalidMessage = (
+	emulatorResults: EmulatorResults,
+	currentMalariaPrevalence: number
+): string | undefined => {
+	if (!emulatorResults.eirValid) return MODEL_INTERPRETATION_WARNINGS.EIR_HIGH;
+	if (!validateBaselinePrevalence(emulatorResults.prevalence, currentMalariaPrevalence)) {
+		return MODEL_INTERPRETATION_WARNINGS.BASELINE_MISMATCH;
+	}
+
+	return undefined;
 };
