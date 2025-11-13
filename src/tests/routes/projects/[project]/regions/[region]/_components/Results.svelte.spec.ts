@@ -8,7 +8,7 @@ vi.mock(import('$lib/process-results/processPrevalence'), () => ({
 	getMeanPrevalencePostIntervention: vi.fn().mockReturnValue(10)
 }));
 
-describe('Results.svelte', () => {
+describe('Results.svelte happy path', () => {
 	it('should render impact tab with charts and table', async () => {
 		const screen = render(Results, {
 			props: {
@@ -78,7 +78,7 @@ describe('Results.svelte', () => {
 	});
 });
 
-describe('results warning', () => {
+describe('Results.svelte - warning message', () => {
 	const warningMessage = 'Some warning message';
 	beforeEach(() => {
 		vi.mocked(getModelInvalidMessage).mockReturnValueOnce(warningMessage);
