@@ -125,12 +125,12 @@ export const ScenarioToLabel: Record<Scenario, string> = {
 	lsm_only: 'LSM Only',
 	py_only_only: 'Pyrethroid ITN (Only)',
 	py_only_with_lsm: 'Pyrethroid ITN (with LSM)',
-	py_pbo_only: 'Pyrethroid-PBO (Only)',
-	py_pbo_with_lsm: 'Pyrethroid-PBO (with LSM)',
-	py_pyrrole_only: 'Pyrethroid-Pyrrole (Only)',
-	py_pyrrole_with_lsm: 'Pyrethroid-Pyrrole (with LSM)',
-	py_ppf_only: 'Pyrethroid-PPF (Only)',
-	py_ppf_with_lsm: 'Pyrethroid-PPF (with LSM)'
+	py_pbo_only: 'Pyrethroid-PBO ITN (Only)',
+	py_pbo_with_lsm: 'Pyrethroid-PBO ITN (with LSM)',
+	py_pyrrole_only: 'Pyrethroid-Pyrrole ITN (Only)',
+	py_pyrrole_with_lsm: 'Pyrethroid-Pyrrole ITN (with LSM)',
+	py_ppf_only: 'Pyrethroid-PPF ITN (Only)',
+	py_ppf_with_lsm: 'Pyrethroid-PPF ITN (with LSM)'
 };
 export const ScenarioToColor: Record<Scenario, string> = {
 	no_intervention: 'var(--muted-foreground)',

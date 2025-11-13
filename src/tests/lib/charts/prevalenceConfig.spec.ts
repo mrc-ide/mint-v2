@@ -1,8 +1,9 @@
+import { ScenarioToLabel } from '$lib/charts/baseChart';
 import { getPrevalenceConfig } from '$lib/charts/prevalenceConfig';
-import type { PrevalenceData } from '$lib/types/userState';
+import { SCENARIOS, type PrevalenceData } from '$lib/types/userState';
 
 describe('createPrevalenceSeries', () => {
-	it('should create series for each unique scenario', () => {
+	it('should create series for each unique scenario in correct order', () => {
 		const mockData: PrevalenceData[] = [
 			{ scenario: 'irs_only', days: 365, prevalence: 0.15 },
 			{ scenario: 'irs_only', days: 730, prevalence: 0.12 },
@@ -13,9 +14,10 @@ describe('createPrevalenceSeries', () => {
 		const config = getPrevalenceConfig(mockData);
 		const series = config.series as Highcharts.SeriesSplineOptions[];
 
+		SCENARIOS.filter((scenario) => ['irs_only', 'py_only_only'].includes(scenario)).forEach((scenario, index) => {
+			expect(series[index].name).toBe(ScenarioToLabel[scenario]);
+		});
 		expect(series).toHaveLength(2);
-		expect(series[0].name).toBe('IRS Only');
-		expect(series[1].name).toBe('Pyrethroid ITN (Only)');
 	});
 
 	it('should convert days to years since intervention (days/365 - 1)', () => {

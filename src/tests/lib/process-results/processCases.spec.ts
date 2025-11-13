@@ -148,7 +148,7 @@ describe('getAvertedCasesData', () => {
 		expect(result).not.toHaveProperty('lsm_only');
 	});
 
-	it('should handle negative mean cases averted by capping at zero', () => {
+	it('should handle rounded negative mean cases averted by capping at zero', () => {
 		const postInterventionCasesMap: Record<Scenario, CasesData[]> = {
 			no_intervention: [
 				{ year: 2, scenario: 'no_intervention', casesPer1000: 50 },
@@ -156,9 +156,9 @@ describe('getAvertedCasesData', () => {
 				{ year: 4, scenario: 'no_intervention', casesPer1000: 50 }
 			],
 			irs_only: [
-				{ year: 2, scenario: 'irs_only', casesPer1000: 80 },
-				{ year: 3, scenario: 'irs_only', casesPer1000: 80 },
-				{ year: 4, scenario: 'irs_only', casesPer1000: 80 }
+				{ year: 2, scenario: 'irs_only', casesPer1000: 50.01 },
+				{ year: 3, scenario: 'irs_only', casesPer1000: 50.01 },
+				{ year: 4, scenario: 'irs_only', casesPer1000: 50.01 }
 			],
 			lsm_only: [],
 			py_only_only: [],
@@ -174,6 +174,10 @@ describe('getAvertedCasesData', () => {
 		const result = getAvertedCasesData(postInterventionCasesMap);
 
 		expect(result.irs_only?.casesAvertedMeanPer1000).toBe(0);
+		expect(result.irs_only?.casesAvertedYear1Per1000).toBe(0);
+		expect(result.irs_only?.casesAvertedYear2Per1000).toBe(0);
+		expect(result.irs_only?.casesAvertedYear3Per1000).toBe(0);
+		expect(result.irs_only?.totalAvertedCasesPer1000).toBe(0);
 	});
 
 	it('should calculate total averted cases as sum of yearly averted', () => {

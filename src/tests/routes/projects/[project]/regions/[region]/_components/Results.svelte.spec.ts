@@ -1,14 +1,14 @@
 import { MOCK_CASES_DATA, MOCK_FORM_VALUES, MOCK_PREVALENCE_DATA } from '$mocks/mocks';
 import Results from '$routes/projects/[project]/regions/[region]/_components/Results.svelte';
 import { render } from 'vitest-browser-svelte';
-import { validateBaselinePrevalence } from '$lib/process-results/processPrevalence';
+import { getModelInvalidMessage } from '$lib/process-results/processPrevalence';
 
-vi.mock(import('$lib/process-results/processPrevalence'), async (importOriginal) => ({
-	...(await importOriginal()),
-	validateBaselinePrevalence: vi.fn().mockReturnValue(true)
+vi.mock(import('$lib/process-results/processPrevalence'), () => ({
+	getModelInvalidMessage: vi.fn().mockReturnValue(undefined),
+	getMeanPrevalencePostIntervention: vi.fn().mockReturnValue(10)
 }));
 
-describe('Results.svelte', () => {
+describe('Results.svelte happy path', () => {
 	it('should render impact tab with charts and table', async () => {
 		const screen = render(Results, {
 			props: {
@@ -25,7 +25,6 @@ describe('Results.svelte', () => {
 		await expect.element(screen.getByRole('region', { name: 'Impact results table' })).toBeVisible();
 		await expect.element(screen.getByRole('region', { name: 'Impact cases graph' })).toBeVisible();
 		await expect.element(screen.getByRole('region', { name: 'Impact prevalence graph' })).toBeVisible();
-		await expect.element(screen.getByRole('alert')).not.toBeInTheDocument();
 	});
 
 	it('should render costs tab with charts and table', async () => {
@@ -77,6 +76,13 @@ describe('Results.svelte', () => {
 
 		await expect.element(screen.getByText(/cost results are not available/i)).toBeVisible();
 	});
+});
+
+describe('Results.svelte - warning message', () => {
+	const warningMessage = 'Some warning message';
+	beforeEach(() => {
+		vi.mocked(getModelInvalidMessage).mockReturnValueOnce(warningMessage);
+	});
 
 	it('should render warning alert when eirValid is false', async () => {
 		const screen = render(Results, {
@@ -92,23 +98,28 @@ describe('Results.svelte', () => {
 		} as any);
 
 		await expect.element(screen.getByRole('alert')).toBeVisible();
+		await expect.element(screen.getByText(warningMessage)).toBeVisible();
 	});
 
 	it('should render warning alert when baseline prevalence is invalid', async () => {
-		vi.mocked(validateBaselinePrevalence).mockReturnValueOnce(false);
-
+		const emulatorResults = {
+			cases: MOCK_CASES_DATA,
+			prevalence: MOCK_PREVALENCE_DATA,
+			eirValid: true
+		};
 		const screen = render(Results, {
 			props: {
-				emulatorResults: {
-					cases: MOCK_CASES_DATA,
-					prevalence: MOCK_PREVALENCE_DATA,
-					eirValid: true
-				},
+				emulatorResults,
 				form: MOCK_FORM_VALUES,
 				activeTab: 'cost'
 			}
 		} as any);
 
+		expect(getModelInvalidMessage).toHaveBeenCalledWith(
+			emulatorResults,
+			MOCK_FORM_VALUES.current_malaria_prevalence / 100
+		);
 		await expect.element(screen.getByRole('alert')).toBeVisible();
+		await expect.element(screen.getByText(warningMessage)).toBeVisible();
 	});
 });

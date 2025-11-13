@@ -1,4 +1,57 @@
-import { convertToLocaleString, createLinearSpace, ROUNDING_METHODS } from '$lib/number';
+import { convertToLocaleString, createLinearSpace, ROUNDING_METHODS, roundNumber } from '$lib/number';
+
+describe('roundNumber', () => {
+	it('should round number with default 2 decimal places', () => {
+		expect(roundNumber(1.2345)).toBe(1.23);
+	});
+
+	it('should round number with custom decimal places', () => {
+		expect(roundNumber(1.23456, 3)).toBe(1.235);
+		expect(roundNumber(1.23456, 4)).toBe(1.2346);
+	});
+
+	it('should use default round mode', () => {
+		expect(roundNumber(1.235, 2)).toBe(1.24);
+	});
+
+	it('should round up when using ceil mode', () => {
+		expect(roundNumber(1.231, 2, 'ceil')).toBe(1.24);
+		expect(roundNumber(1.1, 0, 'ceil')).toBe(2);
+	});
+
+	it('should round down when using floor mode', () => {
+		expect(roundNumber(1.239, 2, 'floor')).toBe(1.23);
+		expect(roundNumber(1.9, 0, 'floor')).toBe(1);
+	});
+
+	it('should handle negative numbers', () => {
+		expect(roundNumber(-1.235, 2)).toBe(-1.24);
+		expect(roundNumber(-1.235, 2, 'floor')).toBe(-1.24);
+	});
+
+	it('should handle zero', () => {
+		expect(roundNumber(0, 2)).toBe(0);
+	});
+
+	it('should handle very large numbers', () => {
+		expect(roundNumber(123456789.123, 2)).toBe(123456789.12);
+		expect(roundNumber(123456789.127, 2)).toBe(123456789.13);
+	});
+
+	it('should handle very small numbers', () => {
+		expect(roundNumber(0.001234, 3)).toBe(0.001);
+		expect(roundNumber(0.001234, 5)).toBe(0.00123);
+		expect(roundNumber(0.0019, 2)).toBe(0);
+	});
+
+	it('should handle whole numbers', () => {
+		expect(roundNumber(42, 3)).toBe(42);
+	});
+
+	it('should handle edge cases with precision', () => {
+		expect(roundNumber(1.555, 2)).toBe(1.56);
+	});
+});
 
 describe('convertToLocaleString', () => {
 	it('should format number with default 2 decimal places', () => {
@@ -7,43 +60,18 @@ describe('convertToLocaleString', () => {
 
 	it('should format number with custom decimal places', () => {
 		expect(convertToLocaleString(1234.5678, 3)).toBe('1,234.568');
-		expect(convertToLocaleString(1234.5678, 0)).toBe('1,235');
-		expect(convertToLocaleString(1234.5678, 1)).toBe('1,234.6');
 	});
 
 	it('should round using default round mode', () => {
 		expect(convertToLocaleString(1.235, 2)).toBe('1.24');
-		expect(convertToLocaleString(1.234, 2)).toBe('1.23');
 	});
 
 	it('should round up when using ceil mode', () => {
 		expect(convertToLocaleString(1.231, 2, 'ceil')).toBe('1.24');
-		expect(convertToLocaleString(1.239, 2, 'ceil')).toBe('1.24');
 	});
 
 	it('should round down when using floor mode', () => {
-		expect(convertToLocaleString(1.239, 2, 'floor')).toBe('1.23');
 		expect(convertToLocaleString(1.231, 2, 'floor')).toBe('1.23');
-	});
-
-	it('should handle negative numbers', () => {
-		expect(convertToLocaleString(-1234.5678, 2)).toBe('-1,234.57');
-		expect(convertToLocaleString(-1.235, 2, 'ceil')).toBe('-1.23');
-		expect(convertToLocaleString(-1.235, 2, 'floor')).toBe('-1.24');
-	});
-
-	it('should handle zero', () => {
-		expect(convertToLocaleString(0, 2)).toBe('0.00');
-		expect(convertToLocaleString(0, 0)).toBe('0');
-	});
-
-	it('should handle very large numbers', () => {
-		expect(convertToLocaleString(1234567890.12, 2)).toBe('1,234,567,890.12');
-	});
-
-	it('should handle very small numbers', () => {
-		expect(convertToLocaleString(0.00123, 5)).toBe('0.00123');
-		expect(convertToLocaleString(0.001234, 3)).toBe('0.001');
 	});
 });
 

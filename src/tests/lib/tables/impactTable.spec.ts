@@ -117,7 +117,7 @@ describe('impactTableColumns', () => {
 
 			const result = cellRenderer({ getValue: mockGetValue });
 
-			expect(result).toBe('0.13');
+			expect(result).toBe('0.126');
 		});
 
 		it('should format percent values correctly for relativeReductionInPrevalence', () => {

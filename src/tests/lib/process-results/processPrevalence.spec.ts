@@ -1,9 +1,11 @@
 import {
 	getPostInterventionPrevalence,
 	getMeanPrevalencePostIntervention,
-	validateBaselinePrevalence
+	validateBaselinePrevalence,
+	getModelInvalidMessage,
+	MODEL_INTERPRETATION_WARNINGS
 } from '$lib/process-results/processPrevalence';
-import type { PrevalenceData, Scenario } from '$lib/types/userState';
+import type { EmulatorResults, PrevalenceData, Scenario } from '$lib/types/userState';
 
 describe('getPostInterventionPrevalence', () => {
 	it('should filter prevalence data for specific scenario after day 365', () => {
@@ -194,5 +196,63 @@ describe('validateBaselinePrevalence', () => {
 		const result = validateBaselinePrevalence(prevalenceData, 0.15);
 
 		expect(result).toBe(true);
+	});
+});
+
+describe('getModelInvalidMessage', () => {
+	it('should return EIR_HIGH warning when eirValid is false', () => {
+		const emulatorResults: EmulatorResults = {
+			eirValid: false,
+			prevalence: [
+				{ scenario: 'no_intervention', days: 100, prevalence: 0.15 },
+				{ scenario: 'no_intervention', days: 365, prevalence: 0.15 }
+			]
+		} as EmulatorResults;
+
+		const result = getModelInvalidMessage(emulatorResults, 0.15);
+
+		expect(result).toBe(MODEL_INTERPRETATION_WARNINGS.EIR_HIGH);
+	});
+
+	it('should return BASELINE_MISMATCH warning when baseline prevalence is invalid', () => {
+		const emulatorResults: EmulatorResults = {
+			eirValid: true,
+			prevalence: [
+				{ scenario: 'no_intervention', days: 100, prevalence: 0.1 },
+				{ scenario: 'no_intervention', days: 365, prevalence: 0.1 }
+			]
+		} as EmulatorResults;
+
+		const result = getModelInvalidMessage(emulatorResults, 0.2);
+
+		expect(result).toBe(MODEL_INTERPRETATION_WARNINGS.BASELINE_MISMATCH);
+	});
+
+	it('should return undefined when both validations pass', () => {
+		const emulatorResults: EmulatorResults = {
+			eirValid: true,
+			prevalence: [
+				{ scenario: 'no_intervention', days: 100, prevalence: 0.15 },
+				{ scenario: 'no_intervention', days: 365, prevalence: 0.15 }
+			]
+		} as EmulatorResults;
+
+		const result = getModelInvalidMessage(emulatorResults, 0.15);
+
+		expect(result).toBeUndefined();
+	});
+
+	it('should prioritize EIR_HIGH warning over BASELINE_MISMATCH', () => {
+		const emulatorResults: EmulatorResults = {
+			eirValid: false,
+			prevalence: [
+				{ scenario: 'no_intervention', days: 100, prevalence: 0.1 },
+				{ scenario: 'no_intervention', days: 365, prevalence: 0.1 }
+			]
+		} as EmulatorResults;
+
+		const result = getModelInvalidMessage(emulatorResults, 0.2);
+
+		expect(result).toBe(MODEL_INTERPRETATION_WARNINGS.EIR_HIGH);
 	});
 });
