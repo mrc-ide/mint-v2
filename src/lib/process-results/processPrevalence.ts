@@ -23,7 +23,7 @@ export const validateBaselinePrevalence = (prevalenceData: PrevalenceData[], cur
 
 export const MODEL_INTERPRETATION_WARNINGS = {
 	EIR_HIGH:
-		'The combination of previous interventions estimates an entomological inoculation rate (EIR) > 350 infectious bites/year prior to control interventions. This is extremely high — exercise caution when interpreting these findings.',
+		'The combination of previous interventions means estimates of the entomological inoculation rate (EIR) are > 350 infectious bites/year prior to control interventions. This is extremely high — exercise caution when interpreting these findings.',
 	BASELINE_MISMATCH:
 		'Model starting prevalence differs from the input prevalence by > 5%. Exercise caution when interpreting these findings.'
 } as const;
