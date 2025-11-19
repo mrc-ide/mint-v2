@@ -44,7 +44,7 @@ export const getIrsTotalCost = ({ irsAnnualCostPerHousehold, population, peopleP
 
 export const getLsmTotalCost = ({ lsmCostPerPerson, population }: CostOptions): number => lsmCostPerPerson * population;
 
-const calculateItnDistributionCosts = (
+export const calculateItnDistributionCosts = (
 	distributionCostPerITN: number,
 	population: number,
 	itnCost: number,
