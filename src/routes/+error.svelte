@@ -2,18 +2,23 @@
 	import { page } from '$app/state';
 	import { Button } from '$lib/components/ui/button';
 
-	const statusMessages: Record<number, string> = {
-		404: 'Resource Not Found',
-		500: 'Internal Server Error',
-		403: 'Forbidden',
-		401: 'Unauthorized'
-	};
-
-	const statusDescriptions: Record<number, string> = {
-		404: "The page you're looking for doesn't exist or has been moved.",
-		500: "Something went wrong on our end. We're working to fix it.",
-		403: "You don't have permission to access this resource.",
-		401: 'You need to be authenticated to access this page.'
+	const errorDetails: Record<number, { title: string; description: string }> = {
+		404: {
+			title: 'Resource Not Found',
+			description: "The page you're looking for doesn't exist or has been moved."
+		},
+		500: {
+			title: 'Internal Server Error',
+			description: "Something went wrong on our end. We're working to fix it."
+		},
+		403: {
+			title: 'Forbidden',
+			description: "You don't have permission to access this resource."
+		},
+		401: {
+			title: 'Unauthorized',
+			description: 'You need to be authenticated to access this page.'
+		}
 	};
 </script>
 
@@ -28,12 +33,12 @@
 
 		<!-- Error Title -->
 		<h2 class="mb-2 text-2xl font-semibold text-destructive">
-			{statusMessages[page.status] || 'An Error Occurred'}
+			{errorDetails[page.status].title || 'An Error Occurred'}
 		</h2>
 
 		<!-- Error Message -->
 		<p class="mb-6 text-destructive">
-			{page.error?.message || statusDescriptions[page.status] || 'An unexpected error occurred.'}
+			{page.error?.message || errorDetails[page.status].description || 'An unexpected error occurred.'}
 		</p>
 
 		<!-- Actions -->
