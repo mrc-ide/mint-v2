@@ -1,4 +1,4 @@
-import type { PrevalenceData, Scenario } from '$lib/types/userState';
+import { SCENARIOS, type PrevalenceData, type Scenario } from '$lib/types/userState';
 import { ScenarioToColor, ScenarioToLabel } from './baseChart';
 
 const createPrevalenceSeries = (data: PrevalenceData[]): Highcharts.SeriesSplineOptions[] => {
@@ -17,7 +17,8 @@ const createPrevalenceSeries = (data: PrevalenceData[]): Highcharts.SeriesSpline
 		seriesMap.get(scenario)!.data!.push([days / 365 - 1, prevalence * 100]);
 	});
 
-	return Array.from(seriesMap.values());
+	// Ensure series are returned in the order of SCENARIOS constant
+	return SCENARIOS.filter((scenario) => seriesMap.has(scenario)).map((scenario) => seriesMap.get(scenario)!);
 };
 
 export const getPrevalenceConfig = (prevalence: PrevalenceData[]): Highcharts.Options => ({

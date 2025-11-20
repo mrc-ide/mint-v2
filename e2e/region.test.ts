@@ -45,16 +45,16 @@ test.describe('Region page', () => {
 
 		// Verify that intervention chart toggle buttons are visible
 		await expect(page.getByRole('button', { name: 'Show Pyrethroid ITN (Only)' })).toBeVisible();
-		await expect(page.getByRole('button', { name: 'Show Pyrethroid-PPF (Only)' })).toBeVisible();
-		await expect(page.getByRole('button', { name: 'Show Pyrethroid-PBO (Only)' })).toBeVisible();
-		await expect(page.getByRole('button', { name: 'Show Pyrethroid-Pyrrole (Only)' })).toBeVisible();
+		await expect(page.getByRole('button', { name: 'Show Pyrethroid-PPF ITN (Only)' })).toBeVisible();
+		await expect(page.getByRole('button', { name: 'Show Pyrethroid-PBO ITN (Only)' })).toBeVisible();
+		await expect(page.getByRole('button', { name: 'Show Pyrethroid-Pyrrole ITN (Only)' })).toBeVisible();
 
 		// irs & lsm toggle buttons
 		await expect(page.getByRole('button', { name: 'Show IRS Only' })).toBeVisible();
 		await expect(page.getByRole('button', { name: 'Show LSM Only' })).toBeVisible();
-		await expect(page.getByRole('button', { name: 'Show Pyrethroid-PBO (with LSM)' })).toBeVisible();
-		await expect(page.getByRole('button', { name: 'Show Pyrethroid-PPF (with LSM)' })).toBeVisible();
-		await expect(page.getByRole('button', { name: 'Show Pyrethroid-Pyrrole (with' })).toBeVisible();
+		await expect(page.getByRole('button', { name: 'Show Pyrethroid-PBO ITN (with LSM)' })).toBeVisible();
+		await expect(page.getByRole('button', { name: 'Show Pyrethroid-PPF ITN (with LSM)' })).toBeVisible();
+		await expect(page.getByRole('button', { name: 'Show Pyrethroid-Pyrrole ITN (with LSM)' })).toBeVisible();
 	});
 
 	test('should show impact table + cost options after running baseline and intervention scenarios', async ({
@@ -84,8 +84,8 @@ test.describe('Region page', () => {
 
 		await page.getByRole('tab', { name: 'Cost' }).click();
 
-		// check total cost in table, default value is 5
-		await expect(page.getByRole('cell', { name: '$100,000' })).toBeVisible();
+		// check total cost in table, default value is 10
+		await expect(page.getByRole('cell', { name: '$200,000' })).toBeVisible();
 
 		// change lsm cost
 		await page.getByRole('spinbutton', { name: 'Estimated cost of LSM' }).fill('100');
@@ -100,5 +100,15 @@ test.describe('Region page', () => {
 		await page.getByRole('button', { name: 'Add Region' }).click();
 
 		await page.getByRole('button', { name: `${projectName} - ${newRegionName}` }).click();
+	});
+
+	test('shows error page when navigating to non-existent region', async ({ page }) => {
+		await goto(page, `/projects/${projectName}/regions/non-existent-region`);
+
+		await expect(page.getByText('404')).toBeVisible();
+		await expect(page.getByText('Resource Not Found')).toBeVisible();
+		await expect(
+			page.getByText('Region "non-existent-region" not found in project "' + projectName + '"')
+		).toBeVisible();
 	});
 });

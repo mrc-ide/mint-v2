@@ -39,7 +39,8 @@ describe('calculateContinuousItnCosts', () => {
 describe('getFormCostOptions', () => {
 	it('should convert form values to CostOptions', () => {
 		const form: Record<string, FormValue> = {
-			irs_household_annual_cost: '100',
+			irs_household_annual_cost_product: '100',
+			irs_household_annual_cost_deployment: '100',
 			people_per_household: '5',
 			population: '50000',
 			lsm_cost: '2',
@@ -57,7 +58,8 @@ describe('getFormCostOptions', () => {
 		const result = getFormCostOptions(form);
 
 		expect(result).toEqual({
-			irsAnnualCostPerHousehold: 100,
+			irsAnnualCostPerHouseholdProduct: 100,
+			irsAnnualCostPerHouseholdDeployment: 100,
 			peoplePerHousehold: 5,
 			population: 50000,
 			lsmCostPerPerson: 2,
@@ -79,7 +81,8 @@ describe('getFormCostOptions', () => {
 describe('getIrsTotalCost', () => {
 	it('should calculate IRS total cost correctly', () => {
 		const costOptions: CostOptions = {
-			irsAnnualCostPerHousehold: 100,
+			irsAnnualCostPerHouseholdProduct: 100,
+			irsAnnualCostPerHouseholdDeployment: 100,
 			peoplePerHousehold: 5,
 			population: 50000,
 			lsmCostPerPerson: 0,
@@ -93,7 +96,7 @@ describe('getIrsTotalCost', () => {
 
 		const result = getIrsTotalCost(costOptions);
 		const expectedHouseholds = 50000 / 5;
-		const expected = POST_INTERVENTION_YEARS.length * 100 * expectedHouseholds;
+		const expected = POST_INTERVENTION_YEARS.length * (100 + 100) * expectedHouseholds;
 
 		expect(result).toBe(expected);
 	});
@@ -102,7 +105,8 @@ describe('getIrsTotalCost', () => {
 describe('getLsmTotalCost', () => {
 	it('should calculate LSM total cost correctly', () => {
 		const costOptions: CostOptions = {
-			irsAnnualCostPerHousehold: 0,
+			irsAnnualCostPerHouseholdProduct: 0,
+			irsAnnualCostPerHouseholdDeployment: 0,
 			peoplePerHousehold: 1,
 			population: 50000,
 			lsmCostPerPerson: 2.5,
@@ -122,7 +126,8 @@ describe('getLsmTotalCost', () => {
 
 describe('getItnTotalCost', () => {
 	const baseCostOptions: CostOptions = {
-		irsAnnualCostPerHousehold: 0,
+		irsAnnualCostPerHouseholdProduct: 0,
+		irsAnnualCostPerHouseholdDeployment: 0,
 		peoplePerHousehold: 1,
 		population: 10000,
 		lsmCostPerPerson: 0,
@@ -156,7 +161,8 @@ describe('getItnTotalCost', () => {
 
 describe('getScenarioCostCalculators', () => {
 	const costOptions: CostOptions = {
-		irsAnnualCostPerHousehold: 100,
+		irsAnnualCostPerHouseholdProduct: 100,
+		irsAnnualCostPerHouseholdDeployment: 100,
 		peoplePerHousehold: 5,
 		population: 10000,
 		lsmCostPerPerson: 2,
