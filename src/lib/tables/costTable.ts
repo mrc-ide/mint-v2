@@ -54,8 +54,8 @@ export const costTableColumns: ColumnDef<CostTableMetrics>[] = Object.entries(Co
 		accessorKey: key,
 		cell: ({ getValue }) => {
 			const value = getValue() as string | number;
-
 			if (headerInfo.formatStyle === 'string') return value;
+			if (value === Infinity) return '-';
 
 			const formatter = new Intl.NumberFormat('en-US', {
 				style: headerInfo.formatStyle,

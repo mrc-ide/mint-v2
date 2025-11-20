@@ -6,9 +6,13 @@ export const ROUNDING_METHODS = {
 	round: Math.round
 } as const;
 
-export const convertToLocaleString = (number: number, fractionalDigits = 2, roundMode: RoundMode = 'round') => {
+export const roundNumber = (number: number, fractionalDigits = 2, roundMode: RoundMode = 'round'): number => {
 	const multiplier = Math.pow(10, fractionalDigits);
-	const rounded = ROUNDING_METHODS[roundMode](number * multiplier) / multiplier;
+	return ROUNDING_METHODS[roundMode](number * multiplier) / multiplier;
+};
+
+export const convertToLocaleString = (number: number, fractionalDigits = 2, roundMode: RoundMode = 'round') => {
+	const rounded = roundNumber(number, fractionalDigits, roundMode);
 
 	return rounded.toLocaleString('en-US', {
 		minimumFractionDigits: fractionalDigits,

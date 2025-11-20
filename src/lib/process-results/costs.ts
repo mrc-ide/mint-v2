@@ -4,7 +4,8 @@ import type { CasesAverted } from './processCases';
 
 /** Cost options for the various interventions */
 export interface CostOptions {
-	irsAnnualCostPerHousehold: number;
+	irsAnnualCostPerHouseholdProduct: number;
+	irsAnnualCostPerHouseholdDeployment: number;
 	peoplePerHousehold: number;
 	population: number;
 	lsmCostPerPerson: number;
@@ -22,7 +23,8 @@ export interface CostOptions {
 }
 
 export const getFormCostOptions = (form: Record<string, FormValue>): CostOptions => ({
-	irsAnnualCostPerHousehold: Number(form['irs_household_annual_cost']),
+	irsAnnualCostPerHouseholdProduct: Number(form['irs_household_annual_cost_product']),
+	irsAnnualCostPerHouseholdDeployment: Number(form['irs_household_annual_cost_deployment']),
 	peoplePerHousehold: Number(form['people_per_household']),
 	population: Number(form['population']),
 	lsmCostPerPerson: Number(form['lsm_cost']),
@@ -39,8 +41,15 @@ export const getFormCostOptions = (form: Record<string, FormValue>): CostOptions
 	isRoutine: Boolean(form['routine_coverage'])
 });
 
-export const getIrsTotalCost = ({ irsAnnualCostPerHousehold, population, peoplePerHousehold }: CostOptions): number =>
-	POST_INTERVENTION_YEARS.length * irsAnnualCostPerHousehold * (population / peoplePerHousehold);
+export const getIrsTotalCost = ({
+	irsAnnualCostPerHouseholdProduct,
+	irsAnnualCostPerHouseholdDeployment,
+	population,
+	peoplePerHousehold
+}: CostOptions): number =>
+	POST_INTERVENTION_YEARS.length *
+	(irsAnnualCostPerHouseholdProduct + irsAnnualCostPerHouseholdDeployment) *
+	(population / peoplePerHousehold);
 
 export const getLsmTotalCost = ({ lsmCostPerPerson, population }: CostOptions): number => lsmCostPerPerson * population;
 
