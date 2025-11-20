@@ -33,12 +33,12 @@
 
 		<!-- Error Title -->
 		<h2 class="mb-2 text-2xl font-semibold text-destructive">
-			{errorDetails[page.status].title || 'An Error Occurred'}
+			{errorDetails[page.status]?.title || 'An Error Occurred'}
 		</h2>
 
 		<!-- Error Message -->
 		<p class="mb-6 text-destructive">
-			{page.error?.message || errorDetails[page.status].description || 'An unexpected error occurred.'}
+			{page.error?.message || errorDetails[page.status]?.description || 'An unexpected error occurred.'}
 		</p>
 
 		<!-- Actions -->
