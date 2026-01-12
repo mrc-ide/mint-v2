@@ -18,9 +18,6 @@ env:
 jobs:
   build-push:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: client
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -38,7 +35,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
-          context: .
+          context: client
           file: client/Dockerfile
           push: true
           tags: |
