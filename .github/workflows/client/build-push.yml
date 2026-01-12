@@ -3,16 +3,22 @@ on:
   push:
     branches:
       - main
-      - 'releases/*'
+      - "releases/*"
+    paths:
+      - "client/**"
   pull_request:
     branches:
-      - '*'
+      - "*"
+    paths:
+      - "client/**"
 env:
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
   IMAGE_NAME: ghcr.io/mrc-ide/mint-frontend
 
 jobs:
   build-push:
+    defaults:
+      working-directory: client
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository

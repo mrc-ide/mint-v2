@@ -3,13 +3,19 @@ on:
   push:
     branches:
       - main
-      - 'releases/*'
+      - "releases/*"
+    paths:
+      - "client/**"
   pull_request:
     branches:
-      - '*'
+      - "*"
+    paths:
+      - "client/**"
 jobs:
   test:
     runs-on: ubuntu-latest
+    defaults:
+      working-directory: client
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -17,7 +23,7 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: 22.x
-          cache: 'npm'
+          cache: "npm"
           cache-dependency-path: package-lock.json
       - name: Install dependencies
         run: npm ci
@@ -37,6 +43,8 @@ jobs:
           fail_ci_if_error: true
   e2e-tests:
     runs-on: ubuntu-latest
+    defaults:
+      working-directory: client
     strategy:
       matrix:
         node-version: [22.x]
@@ -51,7 +59,7 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
+          cache: "npm"
       - name: Install dependencies
         run: npm ci
       - name: Start dependencies
