@@ -4,14 +4,19 @@ on:
     branches:
       - main
       - "releases/*"
-
+    paths:
+      - "client/**"
   pull_request:
     branches:
       - "*"
-
+    paths:
+      - "client/**"
 jobs:
   test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: client
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -20,7 +25,7 @@ jobs:
         with:
           node-version: 22.x
           cache: "npm"
-          cache-dependency-path: package-lock.json
+          cache-dependency-path: client/package-lock.json
       - name: Install dependencies
         run: npm ci
       - name: Run format + lint checks
@@ -40,7 +45,8 @@ jobs:
   e2e-tests:
     runs-on: ubuntu-latest
     defaults:
-      working-directory: client
+      run:
+        working-directory: client
     strategy:
       matrix:
         node-version: [22.x]
@@ -56,14 +62,15 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
+          cache-dependency-path: client/package-lock.json
       - name: Install dependencies
         run: npm ci
       - name: Start dependencies
-        run: ./scripts/run_dependencies.sh
+        run: client/scripts/run_dependencies.sh
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
       - name: Run Playwright tests
         run: npm run test:e2e
       - name: Stop dependencies
         if: ${{ always() }}
-        run: ./scripts/stop_dependencies.sh
+        run: client/scripts/stop_dependencies.sh
