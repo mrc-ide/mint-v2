@@ -66,11 +66,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Start dependencies
-        run: client/scripts/run_dependencies.sh
+        run: ./scripts/run_dependencies.sh
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
       - name: Run Playwright tests
         run: npm run test:e2e
       - name: Stop dependencies
         if: ${{ always() }}
-        run: client/scripts/stop_dependencies.sh
+        run: ./scripts/stop_dependencies.sh
