@@ -37,7 +37,7 @@ A modern SvelteKit application built with Svelte 5, TypeScript, TailwindCSS 4, a
 
 4. **Start development server**:
 
-   ```sh
+   ```bash
    npm run dev
    ```
 
