@@ -15,7 +15,8 @@ jobs:
   test:
     runs-on: ubuntu-latest
     defaults:
-      working-directory: client
+      run:
+        working-directory: client
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
