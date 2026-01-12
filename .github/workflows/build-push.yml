@@ -17,9 +17,6 @@ env:
 
 jobs:
   build-push:
-    defaults:
-      run:
-        working-directory: client
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -39,6 +36,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
+          file: client/Dockerfile
           push: true
           tags: |
             ${{ env.IMAGE_NAME }}:${{ env.BRANCH_NAME }}
