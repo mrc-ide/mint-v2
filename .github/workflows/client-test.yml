@@ -4,13 +4,11 @@ on:
     branches:
       - main
       - "releases/*"
-    paths:
-      - "client/**"
+
   pull_request:
     branches:
       - "*"
-    paths:
-      - "client/**"
+
 jobs:
   test:
     runs-on: ubuntu-latest
