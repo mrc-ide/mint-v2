@@ -55,12 +55,12 @@ jobs:
       PUBLIC_MINTR_URL: http://localhost:8888
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
       - name: Free Disk Space (Ubuntu)
         uses: jlumbroso/free-disk-space@main
         with:
           tool-cache: false
+      - name: Checkout repository
+        uses: actions/checkout@v5
       - name: Set up Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v5
         with:
