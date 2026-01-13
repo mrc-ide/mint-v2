@@ -10,4 +10,4 @@ def test_get_version():
     response = client.get("/version")
 
     assert response.status_code == status.HTTP_200_OK
-    assert response.json() == {"version": "1.0.0"}
+    assert response.json() == {"serverVersion": "1.0.0", "minteVersion": "0.1.0"}
