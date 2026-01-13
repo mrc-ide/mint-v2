@@ -29,7 +29,3 @@ coverage
 test-results
 **/__screenshots__
 
-# Python Server
-__pycache__/
-.ruff_cache/
-.venv
