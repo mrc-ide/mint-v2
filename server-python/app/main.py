@@ -20,7 +20,7 @@ async def health_check():
     return {"status": "ok"}
 
 
-@app.get("/dynamic-form-options")
+@app.get("/options")
 async def dynamic_form_options():
     return get_dynamic_form_options()
 

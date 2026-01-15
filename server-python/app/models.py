@@ -1,7 +1,6 @@
 from enum import Enum
 
-from pydantic import BaseModel, Field, field_validator
-from typing import Annotated
+from pydantic import BaseModel, Field, TypeAdapter, field_validator
 
 
 class VersionResponse(BaseModel):
@@ -83,13 +82,19 @@ class Prevalence(BaseModel):
     prevalence: float
 
 
+prevalence_adapter = TypeAdapter(list[Prevalence])
+
+
 class Cases(BaseModel):
     scenario: str
     year: int
     casesPer1000: float
 
 
+cases_adapter = TypeAdapter(list[Cases])
+
+
 class EmulatorResponse(BaseModel):
-    prevalence: Annotated[list[dict], list[Prevalence]]
-    cases: Annotated[list[dict], list[Cases]]
+    prevalence: list[Prevalence]
+    cases: list[Cases]
     eirValid: bool

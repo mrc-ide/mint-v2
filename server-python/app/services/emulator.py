@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import HTTPException
 from minte import MintwebResults, run_mintweb_controller
 
-from app.models import EmulatorRequest, EmulatorResponse, EmulatorScenario
+from app.models import EmulatorRequest, EmulatorResponse, EmulatorScenario, cases_adapter, prevalence_adapter
 
 
 def run_emulator_model(emulator_request: EmulatorRequest):
@@ -79,7 +79,7 @@ def post_process_results(results: MintwebResults) -> EmulatorResponse:
     cases_df["year"] = cases_df.groupby("scenario").cumcount() + 1
 
     return EmulatorResponse(
-        prevalence=prevalence_df.to_dict(orient="records"),
-        cases=cases_df.to_dict(orient="records"),
+        prevalence=prevalence_adapter.validate_python(prevalence_df.to_dict(orient="records")),
+        cases=cases_adapter.validate_python(cases_df.to_dict(orient="records")),
         eirValid=results.eir_valid,
     )
