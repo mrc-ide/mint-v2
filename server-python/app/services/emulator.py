@@ -1,6 +1,5 @@
 from typing import Annotated
 
-import pandas as pd
 from fastapi import HTTPException
 from minte import MintwebResults, run_mintweb_controller
 
