@@ -24,5 +24,8 @@ COPY . /app
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked
 
+# Expose port 80
+EXPOSE 80
+
 # Start the application.
 CMD ["uv", "run", "fastapi", "run", "--port", "80", "--host", "0.0.0.0"]
