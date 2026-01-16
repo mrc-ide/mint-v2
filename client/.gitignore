@@ -1,13 +1,14 @@
 test-results
 node_modules
+test-env
 
 # Output
 .output
 .vercel
 .netlify
 .wrangler
-/.svelte-kit
-/build
+.svelte-kit
+build
 test-results
 
 # OS
@@ -20,9 +21,11 @@ Thumbs.db
 !.env.example
 !.env.test
 
+
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 coverage
 test-results
 **/__screenshots__
+

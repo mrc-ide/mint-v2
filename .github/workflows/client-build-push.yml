@@ -1,12 +1,16 @@
-name: build and push docker image
+name: client build and push docker image
 on:
   push:
     branches:
       - main
-      - 'releases/*'
+      - "releases/*"
+    paths:
+      - "client/**"
   pull_request:
     branches:
-      - '*'
+      - "*"
+    paths:
+      - "client/**"
 env:
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
   IMAGE_NAME: ghcr.io/mrc-ide/mint-frontend
@@ -31,7 +35,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
-          context: .
+          context: client
+          file: client/Dockerfile
           push: true
           tags: |
             ${{ env.IMAGE_NAME }}:${{ env.BRANCH_NAME }}

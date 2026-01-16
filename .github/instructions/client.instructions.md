@@ -1,4 +1,9 @@
-# Copilot Instructions for Mint v2
+---
+description: 'Svelte 5 and SvelteKit development standards and best practices for component-based user interfaces and full-stack applications'
+applyTo: '**/*.svelte, **/*.ts, **/*.js, **/*.css, **/*.scss, **/*.json'
+---
+
+# Copilot Instructions for Mint v2 Client
 
 ## Project Overview
 

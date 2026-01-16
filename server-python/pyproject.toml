@@ -1,0 +1,72 @@
+[project]
+name = "server-python"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi[standard]>=0.128.0",
+    "minte>=1.0.3",
+]
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "pytest>=9.0.2",
+    "ruff>=0.14.11",
+]
+
+[tool.coverage.report]
+fail_under = 90
+omit = [
+    "shibokensupport/*",
+    "signature_bootstrap.py",
+]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.ruff.lint]
+select = [
+    "A",
+    "ARG",
+    "B",
+    "C",
+    "DTZ",
+    "E",
+    "F",
+    "I",
+    "ICN",
+    "ISC",
+    "PLC",
+    "PLE",
+    "PLR",
+    "PLW",
+    "Q",
+    "RUF",
+    "T",
+    "UP",
+    "W",
+    "YTT",
+]
+ignore = [
+    # Allow non-abstract empty methods in abstract base classes
+    "B027",
+    # Allow boolean positional values in function calls, like `dict.get(... True)`
+    "FBT003",
+    # Ignore complexity
+    "C901", "PLR0911", "PLR0912", "PLR0913", "PLR0915",
+    # Ignore print statements
+    "T201",
+    # Unnecessary call to `encode` as UTF-8
+    "UP012",
+    # Unnecessary mode argument in `open` calls
+    "UP015",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests can use magic values, assertions, and relative imports
+"tests/**/*" = ["PLR2004", "EM101","B017"]
