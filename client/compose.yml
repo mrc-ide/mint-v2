@@ -13,25 +13,25 @@ services:
       - 127.0.0.1:3000:3000
     environment:
       - REDIS_URL=redis://mint-redis:6379
-      - PUBLIC_MINTR_URL=http://mintr:8888
+      - PUBLIC_API_URL=http://mint-api:8000
       - ORIGIN=http://127.0.0.1:3000
     depends_on:
       mint-redis:
         condition: service_started
-      mintr:
+      mint-api:
         condition: service_healthy
         restart: true
-  mintr:
-    image: ghcr.io/mrc-ide/mintr:${API_REF:-main}
-    container_name: mintr
+  mint-api:
+    image: ghcr.io/mrc-ide/mint-api:${API_REF:-main}
+    container_name: mint-api
     healthcheck:
-      test: curl -f http://localhost:8888/ || exit 1
+      test: curl -f http://localhost:8000/healthz || exit 1
       start_period: 1m
       start_interval: 10s
       interval: 1m
       timeout: 30s
       retries: 5
     ports:
-      - 8888:8888
+      - 8000:80
 volumes:
   mint-data:

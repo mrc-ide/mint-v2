@@ -6,11 +6,10 @@ from minte import MintwebResults, run_mintweb_controller
 from app.models import EmulatorRequest, EmulatorResponse, EmulatorScenario, cases_adapter, prevalence_adapter
 
 
-def run_emulator_model(emulator_request: EmulatorRequest):
+def run_emulator_model(emulator_request: EmulatorRequest) -> EmulatorResponse:
     """Run the emulator model based on the request and return the response."""
     scenarios = build_scenarios(emulator_request)
     results = run_mintweb_controller(**scenarios)
-
     return post_process_results(results)
 
 
