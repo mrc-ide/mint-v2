@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { apiFetch, ApiError } from '$lib/fetch';
-import type { ResponseBodySuccess, ResponseBodyFailure } from '$lib/types/api';
+import type { ResponseBodySuccess } from '$lib/types/api';
 
 beforeEach(() => {
 	vi.resetAllMocks();
