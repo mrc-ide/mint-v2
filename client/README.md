@@ -91,7 +91,7 @@ A `compose.yml` file is provided to run the application along with its dependenc
 1. **Start services**:
 
    ```sh
-   docker-compose up
+   docker compose up -d
    ```
 
 2. **Access the application**:
@@ -99,7 +99,7 @@ A `compose.yml` file is provided to run the application along with its dependenc
 3. **Stop services**:
 
    ```sh
-   docker-compose down
+   docker compose down
    ```
 
 ## Environment Variables

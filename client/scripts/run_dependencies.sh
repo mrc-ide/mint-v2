@@ -14,4 +14,4 @@ docker run --rm -d \
   --pull always \
   --network=$NETWORK \
   --name=$NAME_API \
-  -p 8000:80 $MINT_API_IMAGE
+  -p 8000:8000 $MINT_API_IMAGE
