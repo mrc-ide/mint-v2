@@ -66,6 +66,8 @@ ignore = [
     "UP012",
     # Unnecessary mode argument in `open` calls
     "UP015",
+    # Pydantic allow Generic[T] models
+    "UP046",
 ]
 
 [tool.ruff.lint.per-file-ignores]

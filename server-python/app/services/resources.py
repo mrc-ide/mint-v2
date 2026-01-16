@@ -10,7 +10,7 @@ def validate_json(instance, schema_name: str):
     jsonschema.validate(instance=instance, schema=schema)
 
 
-def get_dynamic_form_options():
+def get_dynamic_form_options() -> dict:
     options_path = Path("app", "resources", "dynamicFormOptions.json")
     options = json.loads(options_path.read_text())
 

@@ -1,9 +1,16 @@
 from enum import Enum
+from typing import Generic, TypeVar
 
 from pydantic import BaseModel, Field, TypeAdapter, field_validator
 
+T = TypeVar("T")
 
-class VersionResponse(BaseModel):
+
+class Response(BaseModel, Generic[T]):
+    data: T
+
+
+class Version(BaseModel):
     server: str
     minte: str
 

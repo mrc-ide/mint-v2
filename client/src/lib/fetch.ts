@@ -39,12 +39,7 @@ export const apiFetch = async <T>({ url, method = 'GET', body, fetcher = fetch }
 		throw new ApiError(`Request failed with status ${res.status}`, res.status);
 	}
 
-	if ('message' in data) {
-		throw new ApiError(data.message, res.status);
-	}
-
 	console.error(data);
-	const errors = (data as ResponseBodyFailure).errors;
-	const errorMessage = errors[0]?.detail || errors[0]?.error || 'Unknown error';
+	const errorMessage = (data as ResponseBodyFailure).detail || 'Unknown error';
 	throw new ApiError(errorMessage, res.status);
 };
