@@ -55,7 +55,7 @@ class EmulatorRequest(BaseModel):
         mode="after",
     )
     @classmethod
-    def convert_to_fraction(cls, value: int) -> float:
+    def percentage_to_fraction(cls, value: int) -> float:
         return value / 100.0
 
     @field_validator("season", "routine", mode="after")
