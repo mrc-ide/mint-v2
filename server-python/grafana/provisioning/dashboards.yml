@@ -1,0 +1,9 @@
+apiVersion: 1
+
+providers:
+  - name: "FastApi"
+    orgId: 1
+    folder: "FastApi"
+    type: file
+    options:
+      path: /var/lib/grafana/dashboards
