@@ -1,3 +1,4 @@
+import logging
 import time
 
 from fastapi import FastAPI, Request
@@ -37,16 +38,26 @@ async def metrics_middleware(request: Request, call_next):
     return response
 
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+logger = logging.getLogger(__name__)
+
+
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(_req, exc: RequestValidationError):
-    message = "Validation errors: "
-    for error in exc.errors():
-        message += f"{error['loc']}: {error['msg']}; "
+    logger.error(f"Validation error: {exc} ")
+    errors = [f"{error['loc']}: {error['msg']}" for error in exc.errors()]
+    message = "Validation errors: " + "; ".join(errors)
+
     return JSONResponse(status_code=400, content={"detail": message.rstrip("; ")})
 
 
 @app.exception_handler(500)
-async def internal_server_error_handler(_req, _exc):
+async def internal_server_error_handler(_req, exc):
+    logger.error(f"Internal server error occurred.. {exc} ")
     return JSONResponse(status_code=500, content={"detail": "Internal server error"})
 
 

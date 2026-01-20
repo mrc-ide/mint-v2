@@ -20,20 +20,39 @@ def build_scenarios(
     base_scenario = build_base_scenario(emulator_request)
     scenarios = [base_scenario]
 
-    # irs only
-    if emulator_request.irs_future > 0:
-        irs_scenario = base_scenario.model_copy(
-            update={"scenario_tag": "irs_only", "irs_future": emulator_request.irs_future}
-        )
-        scenarios.append(irs_scenario)
-    # lsm only
-    if emulator_request.lsm > 0:
-        lsm_scenario = base_scenario.model_copy(update={"scenario_tag": "lsm_only", "lsm": emulator_request.lsm})
-        scenarios.append(lsm_scenario)
+    scenarios.extend(build_intervention_scenarios(emulator_request, base_scenario))
 
-    # net types (with/without lsm)
+    return scenarios_to_dict(scenarios)
+
+
+def build_intervention_scenarios(
+    emulator_request: EmulatorRequest, base_scenario: EmulatorScenario
+) -> list[EmulatorScenario]:
+    """Build all intervention scenarios (IRS, LSM, and net types)."""
+    scenarios = []
+
+    # IRS only scenario
+    if emulator_request.irs_future > 0:
+        scenarios.append(
+            base_scenario.model_copy(update={"scenario_tag": "irs_only", "irs_future": emulator_request.irs_future})
+        )
+
+    # LSM only scenario
+    if emulator_request.lsm > 0:
+        scenarios.append(base_scenario.model_copy(update={"scenario_tag": "lsm_only", "lsm": emulator_request.lsm}))
+
+    # Net type scenarios (with optional LSM)
+    scenarios.extend(build_net_scenarios(emulator_request, base_scenario))
+
+    return scenarios
+
+
+def build_net_scenarios(emulator_request: EmulatorRequest, base_scenario: EmulatorScenario) -> list[EmulatorScenario]:
+    """Build scenarios for each net type, with and without LSM."""
+    scenarios = []
     for net_type in emulator_request.net_type_future:
-        net_only_scenario = base_scenario.model_copy(
+        # Net only scenario
+        net_scenario = base_scenario.model_copy(
             update={
                 "scenario_tag": f"{net_type.value}_only",
                 "net_type_future": net_type.value,
@@ -41,18 +60,28 @@ def build_scenarios(
                 "routine": emulator_request.routine,
             }
         )
-        scenarios.append(net_only_scenario)
+        scenarios.append(net_scenario)
 
+        # Net with LSM scenario
         if emulator_request.lsm > 0:
-            net_lsm_scenario = net_only_scenario.model_copy(
-                update={
-                    "scenario_tag": f"{net_type.value}_with_lsm",
-                    "lsm": emulator_request.lsm,
-                }
+            scenarios.append(
+                net_scenario.model_copy(
+                    update={
+                        "scenario_tag": f"{net_type.value}_with_lsm",
+                        "lsm": emulator_request.lsm,
+                    }
+                )
             )
-            scenarios.append(net_lsm_scenario)
 
-    return {key: [scenario.model_dump()[key] for scenario in scenarios] for key in base_scenario.model_dump().keys()}
+    return scenarios
+
+
+def scenarios_to_dict(scenarios: list[EmulatorScenario]) -> dict:
+    """Convert list of scenarios to columnar dictionary format."""
+    if not scenarios:
+        return {}
+
+    return {key: [scenario.model_dump()[key] for scenario in scenarios] for key in scenarios[0].model_dump().keys()}
 
 
 def build_base_scenario(emulator_request: EmulatorRequest) -> EmulatorScenario:
