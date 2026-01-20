@@ -20,7 +20,7 @@ app.mount("/metrics", metrics_app)
 
 REQUEST_COUNT = Counter("http_requests_total", "Total HTTP requests", ["method", "endpoint", "status"])
 
-REQUEST_LATENCY = Histogram("http_request_duration_seconds", "Request latency", ["method", "endpoint"])
+REQUEST_LATENCY = Histogram("http_requests_duration_seconds", "Request latency", ["method", "endpoint"])
 
 ACTIVE_REQUESTS = Gauge("http_requests_in_flight", "In-flight requests", ["method", "endpoint"])
 
