@@ -113,7 +113,7 @@ describe('apiFetch', () => {
 		);
 	});
 
-	it('should throw ApiError with "Unknown error" if no detail exists', async () => {
+	it('should throw ApiError with "Unknown error occurred" if no detail exists', async () => {
 		const errorResponse = {};
 		const mockFetch = vi.fn().mockResolvedValue({
 			ok: false,
@@ -123,7 +123,21 @@ describe('apiFetch', () => {
 		});
 
 		await expect(apiFetch({ url: '/api/test', fetcher: mockFetch })).rejects.toThrow(
-			new ApiError('Unknown error', 500)
+			new ApiError('Unknown error occurred', 500)
+		);
+	});
+
+	it("should throw ApiError with App.Error's message if present", async () => {
+		const errorResponse = { message: 'App level error occurred' };
+		const mockFetch = vi.fn().mockResolvedValue({
+			ok: false,
+			status: 500,
+			headers: new Headers({ 'content-type': 'application/json' }),
+			json: async () => errorResponse
+		});
+
+		await expect(apiFetch({ url: '/api/test', fetcher: mockFetch })).rejects.toThrow(
+			new ApiError('App level error occurred', 500)
 		);
 	});
 
