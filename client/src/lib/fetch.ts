@@ -39,7 +39,16 @@ export const apiFetch = async <T>({ url, method = 'GET', body, fetcher = fetch }
 		throw new ApiError(`Request failed with status ${res.status}`, res.status);
 	}
 
-	console.error(data);
-	const errorMessage = (data as ResponseBodyFailure).detail || 'Unknown error';
+	console.error('API Fetch Error:', data);
+	let errorMessage = 'Unknown error occurred';
+	// App.Error type from sveltekit
+	if ('message' in data) {
+		errorMessage = data.message;
+	}
+	// ResponseBodyFailure type
+	if ('detail' in data) {
+		errorMessage = data.detail;
+	}
+
 	throw new ApiError(errorMessage, res.status);
 };
