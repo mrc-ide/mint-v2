@@ -1,4 +1,4 @@
-import type { ResponseBody, ResponseBodyFailure, ResponseBodySuccess } from './types/api';
+import type { ResponseBody, ResponseBodySuccess } from './types/api';
 
 export class ApiError extends Error {
 	status: number;
