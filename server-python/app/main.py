@@ -27,15 +27,19 @@ ACTIVE_REQUESTS = Gauge("http_requests_in_flight", "In-flight requests", ["metho
 
 @app.middleware("http")
 async def metrics_middleware(request: Request, call_next):
-    ACTIVE_REQUESTS.labels(method=request.method, endpoint=request.url.path).inc()
+    metric_labels = {"method": request.method, "endpoint": request.url.path}
+    ACTIVE_REQUESTS.labels(**metric_labels).inc()
     start_time = time.time()
 
-    response = await call_next(request)
-
-    REQUEST_LATENCY.labels(endpoint=request.url.path, method=request.method).observe(time.time() - start_time)
-    REQUEST_COUNT.labels(endpoint=request.url.path, method=request.method, status=response.status_code).inc()
-    ACTIVE_REQUESTS.labels(method=request.method, endpoint=request.url.path).dec()
-    return response
+    status_code = 500  # Default to 500 in case of unhandled exceptions
+    try:
+        response = await call_next(request)
+        status_code = response.status_code
+        return response
+    finally:
+        REQUEST_LATENCY.labels(**metric_labels).observe(time.time() - start_time)
+        REQUEST_COUNT.labels(**metric_labels, status=status_code).inc()
+        ACTIVE_REQUESTS.labels(**metric_labels).dec()
 
 
 logging.basicConfig(
