@@ -1,6 +1,6 @@
 <script lang="ts">
-	import userGuideEN from '$lib/assets/User-Guide-en.pdf';
-	import userGuideFR from '$lib/assets/User-Guide-fr.pdf';
+	// import userGuideEN from '$lib/assets/User-Guide-en.pdf';
+	// import userGuideFR from '$lib/assets/User-Guide-fr.pdf';
 	import type { PageProps } from './$types';
 	import CreateProject from './_components/CreateProject.svelte';
 	import ProjectsList from './_components/ProjectsList.svelte';
@@ -24,14 +24,14 @@
 		regions for this assessment and adjust population size accordingly.
 	</p>
 	<!-- TODO: need to update user guides. (do we need french still?) -->
-	<p class="mb-4 leading-relaxed">
+	<!-- <p class="mb-4 leading-relaxed">
 		<span class="font-semibold">For further guidance please see the </span>
 		{#if data.userGuideLanguage === 'fr'}
 			<a href={userGuideFR} class="text-blue-500 hover:underline">User Guide (FR)</a>
 		{:else}
 			<a href={userGuideEN} class="text-blue-500 hover:underline">User Guide (EN)</a>
 		{/if}
-	</p>
+	</p> -->
 	<p class="mb-2 text-xl font-semibold">You have {data.userData.projects.length} projects</p>
 
 	<CreateProject pageForm={data.form} />
