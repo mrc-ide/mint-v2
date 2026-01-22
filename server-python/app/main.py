@@ -13,10 +13,6 @@ from .models import EmulatorRequest, EmulatorResponse, Response, Version
 from .services.emulator import run_emulator_model
 from .services.resources import get_dynamic_form_options
 
-app = FastAPI(title="MINT API", version=__version__)
-metrics_app = make_asgi_app()
-app.mount("/metrics", metrics_app)
-
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -24,11 +20,12 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+app = FastAPI(title="MINT API", version=__version__)
 
+metrics_app = make_asgi_app()
+app.mount("/metrics", metrics_app)
 REQUEST_COUNT = Counter("http_requests_total", "Total HTTP requests", ["method", "endpoint", "status"])
-
 REQUEST_LATENCY = Histogram("http_requests_duration_seconds", "Request latency", ["method", "endpoint"])
-
 ACTIVE_REQUESTS = Gauge("http_requests_in_flight", "In-flight requests", ["method", "endpoint"])
 
 
