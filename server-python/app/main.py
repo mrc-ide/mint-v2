@@ -14,7 +14,7 @@ from .services.emulator import run_emulator_model
 from .services.resources import get_dynamic_form_options
 
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.WARNING,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
 )
