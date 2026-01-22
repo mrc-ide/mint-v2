@@ -87,8 +87,7 @@ describe('runEmulatorOnLoad', () => {
 			name: 'Region 1',
 			hasRunBaseline: false,
 			formValues: {},
-			cases: [],
-			prevalence: []
+			cases: []
 		};
 
 		const result = await runEmulatorOnLoad(regionData, mockFetch);
@@ -108,8 +107,7 @@ describe('runEmulatorOnLoad', () => {
 			name: 'Region 1',
 			hasRunBaseline: true,
 			formValues: { population: '10000' },
-			cases: [],
-			prevalence: []
+			cases: []
 		};
 
 		(apiFetch as Mock).mockResolvedValue({ data: mockResults });
@@ -131,8 +129,7 @@ describe('runEmulatorOnLoad', () => {
 			name: 'Region 1',
 			hasRunBaseline: true,
 			formValues: { population: '10000' },
-			cases: [],
-			prevalence: []
+			cases: []
 		};
 
 		(apiFetch as Mock).mockRejectedValue(new Error('API Error'));
@@ -155,8 +152,7 @@ describe('runEmulatorOnLoad', () => {
 			name: 'Region 1',
 			hasRunBaseline: true,
 			formValues,
-			cases: [],
-			prevalence: []
+			cases: []
 		};
 
 		(apiFetch as Mock).mockResolvedValue({ data: { cases: [], prevalence: [] } });
@@ -189,8 +185,7 @@ describe('saveRegionRun', () => {
 							name: 'Region 1',
 							hasRunBaseline: false,
 							formValues: {},
-							cases: [],
-							prevalence: []
+							cases: []
 						}
 					]
 				}
@@ -251,8 +246,7 @@ describe('saveRegionRun', () => {
 							name: 'Region 1',
 							hasRunBaseline: true,
 							formValues: oldFormValues,
-							cases: oldCases,
-							prevalence: []
+							cases: oldCases
 						}
 					]
 				}
@@ -289,8 +283,7 @@ describe('saveRegionFormState', () => {
 							name: 'Region 1',
 							hasRunBaseline: false,
 							formValues: {},
-							cases: [],
-							prevalence: []
+							cases: []
 						}
 					]
 				}
@@ -320,8 +313,7 @@ describe('saveRegionFormState', () => {
 							name: 'Region 1',
 							hasRunBaseline: true,
 							formValues: {},
-							cases: [{ year: 1, scenario: 'no_intervention', casesPer1000: 100 }],
-							prevalence: []
+							cases: [{ year: 1, scenario: 'no_intervention', casesPer1000: 100 }]
 						}
 					]
 				}
@@ -378,8 +370,7 @@ describe('getRegionFromUserState', () => {
 							name: 'Region 1',
 							hasRunBaseline: false,
 							formValues: {},
-							cases: [],
-							prevalence: []
+							cases: []
 						}
 					]
 				}

@@ -23,7 +23,7 @@ export const POST: RequestHandler = async ({ request, locals, params, fetch }) =
 		});
 
 		invalidateStrategyForProject(locals.userState, project);
-		await saveRegionRun(locals.userState, project, region, formValues, res.data);
+		await saveRegionRun(locals.userState, project, region, formValues, res.data.cases);
 		return json(res);
 	} catch (e) {
 		const status = e instanceof ApiError ? e.status : 500;

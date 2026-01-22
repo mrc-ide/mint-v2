@@ -39,7 +39,7 @@ export interface Region {
 	name: string;
 	hasRunBaseline: boolean;
 	formValues: Record<string, FormValue>;
-	results?: EmulatorResults;
+	cases: CasesData[];
 }
 export interface StrategiseIntervention {
 	region: string;

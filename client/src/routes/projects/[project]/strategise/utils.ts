@@ -7,7 +7,6 @@ import {
 	type CasesAverted
 } from '$lib/process-results/processCases';
 import type {
-	CasesData,
 	Region,
 	Scenario,
 	StrategiseIntervention,
@@ -64,7 +63,7 @@ export const getCasesAvertedAndCostsForStrategise = (regions: Region[]): Strateg
  * @returns Structured region data with interventions analysis, or null if no valid cases averted data exists
  */
 export const processRegionData = (region: Region) => {
-	const casesAverted = extractCasesAvertedData(region.results?.cases);
+	const casesAverted = extractCasesAvertedData(region);
 	if (!casesAverted || Object.keys(casesAverted).length === 0) {
 		return null;
 	}
@@ -81,11 +80,11 @@ export const processRegionData = (region: Region) => {
  * Extracts cases averted data from a region's  cases.
  * Processes post-intervention cases to calculate how many cases were prevented by interventions.
  *
- * @param cases - Array of cases data
+ * @param region - Region containing raw cases data
  * @returns Partial record mapping scenarios to their respective cases averted data
  */
-export const extractCasesAvertedData = (cases: CasesData[] = []) => {
-	const postInterventionCases = collectPostInterventionCases(cases);
+export const extractCasesAvertedData = (region: Region) => {
+	const postInterventionCases = collectPostInterventionCases(region.cases);
 	return getAvertedCasesData(postInterventionCases);
 };
 
