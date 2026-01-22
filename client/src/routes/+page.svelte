@@ -1,6 +1,6 @@
 <script lang="ts">
-	import userGuideEN from '$lib/assets/User-Guide-en.pdf';
-	import userGuideFR from '$lib/assets/User-Guide-fr.pdf';
+	// import userGuideEN from '$lib/assets/User-Guide-en.pdf';
+	// import userGuideFR from '$lib/assets/User-Guide-fr.pdf';
 	import type { PageProps } from './$types';
 	import CreateProject from './_components/CreateProject.svelte';
 	import ProjectsList from './_components/ProjectsList.svelte';
