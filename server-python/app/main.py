@@ -17,6 +17,13 @@ app = FastAPI(title="MINT API", version=__version__)
 metrics_app = make_asgi_app()
 app.mount("/metrics", metrics_app)
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+logger = logging.getLogger(__name__)
+
 
 REQUEST_COUNT = Counter("http_requests_total", "Total HTTP requests", ["method", "endpoint", "status"])
 
@@ -40,14 +47,6 @@ async def metrics_middleware(request: Request, call_next):
         REQUEST_LATENCY.labels(**metric_labels).observe(time.time() - start_time)
         REQUEST_COUNT.labels(**metric_labels, status=status_code).inc()
         ACTIVE_REQUESTS.labels(**metric_labels).dec()
-
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-)
-logger = logging.getLogger(__name__)
 
 
 @app.exception_handler(RequestValidationError)
