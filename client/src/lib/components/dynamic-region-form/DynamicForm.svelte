@@ -13,14 +13,13 @@
 		forEachSubGroup,
 		getFieldErrorMessage
 	} from './utils';
-	import type { EmulatorResults } from '$lib/types/userState';
 
 	interface Props {
 		schema: DynamicFormSchema;
 		initialValues: Record<string, FormValue>;
 		hasRunBaseline: boolean;
 		children: Snippet;
-		run: (formValues: Record<string, FormValue>) => Promise<EmulatorResults | null>;
+		run: (formValues: Record<string, FormValue>) => Promise<void>;
 		process: (formValues: Record<string, FormValue>) => void;
 		submitText: string;
 		isInputsDisabled: boolean;

@@ -4,6 +4,8 @@
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import MoonIcon from '@lucide/svelte/icons/moon';
 	import SunIcon from '@lucide/svelte/icons/sun';
+	import ChartIcon from '@lucide/svelte/icons/chart-spline';
+	import CalenderClockIcon from '@lucide/svelte/icons/calendar-clock';
 	import { toggleMode } from 'mode-watcher';
 	import HeaderRegionsDropdown from './HeaderRegionsDropdown.svelte';
 	import type { UserState } from '$lib/types/userState';
@@ -29,8 +31,21 @@
 			<HeaderRegionsDropdown {project} {region} />
 		{/if}
 		{#if project}
-			<a class={buttonVariants({ variant: 'link', class: 'p-1' })} href={`/projects/${project.name}/strategise`}>
+			<a
+				class={buttonVariants({ variant: 'link', class: 'p-1', size: 'sm' })}
+				href={`/projects/${project.name}/strategise`}
+			>
+				<ChartIcon class="size-3.5" />
 				Strategise across regions
+			</a>
+		{/if}
+		{#if project && region && region.hasRunBaseline}
+			<a
+				class={buttonVariants({ variant: 'link', class: 'p-1', size: 'sm' })}
+				href={`/projects/${project.name}/regions/${region.name}/compare`}
+			>
+				<CalenderClockIcon class="size-3.5" />
+				Long term comparison
 			</a>
 		{/if}
 		<div class="ml-auto flex items-center gap-3 px-4">

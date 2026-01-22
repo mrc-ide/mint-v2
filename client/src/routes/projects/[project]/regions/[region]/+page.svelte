@@ -9,15 +9,17 @@
 	import type { PageProps } from './$types';
 	import Results from './_components/Results.svelte';
 	import Loader from '$lib/components/Loader.svelte';
+	import { onMount } from 'svelte';
 	let { data, params }: PageProps = $props();
 
-	let isRunning = $state(false);
+	let isRunning = $state(true);
+	let runError = $state<Error>();
 	let hasRunBaseline = $derived(data.region.hasRunBaseline);
-	let runPromise = $derived(data.runPromise);
+	let emulatorResults = $derived(data.region.results);
 	let form = $derived(data.region.formValues);
 	let activeTab: 'impact' | 'cost' = $state('impact');
 
-	const runEmulator = async (formValues: Record<string, FormValue>): Promise<EmulatorResults> => {
+	const runEmulator = async (formValues: Record<string, FormValue>): Promise<void> => {
 		isRunning = true;
 		try {
 			const res = await apiFetch<EmulatorResults>({
@@ -28,10 +30,11 @@
 
 			isRunning = false;
 			form = formValues;
-			return res.data;
+			emulatorResults = res.data;
 		} catch (e) {
 			toast.error(`Failed to run emulator for region "${params.region}" in project "${params.project}"`);
 			isRunning = false;
+			runError = e as Error;
 			throw e;
 		}
 	};
@@ -47,6 +50,11 @@
 			toast.error('Failed to save form state');
 		}
 	};
+
+	// hydration complete can render the results
+	onMount(() => {
+		isRunning = false;
+	});
 </script>
 
 {#snippet failedLoad(err?: Error)}
@@ -63,21 +71,17 @@
 		schema={data.formSchema}
 		initialValues={data.region.formValues}
 		bind:hasRunBaseline
-		run={(formValues) => (runPromise = runEmulator(formValues))}
+		run={(formValues) => runEmulator(formValues)}
 		process={processCosts}
 		isInputsDisabled={isRunning}
 		submitText="Run baseline"
 	>
-		{#await runPromise}
+		{#if isRunning}
 			<Loader text="Running..." />
-		{:then emulatorResults}
-			{#if emulatorResults}
-				<Results {emulatorResults} {form} bind:activeTab />
-			{:else}
-				{@render failedLoad()}
-			{/if}
-		{:catch _err}
-			{@render failedLoad(_err)}
-		{/await}
+		{:else if emulatorResults && !runError}
+			<Results {emulatorResults} {form} bind:activeTab />
+		{:else}
+			{@render failedLoad(runError)}
+		{/if}
 	</DynamicForm>
 {/key}

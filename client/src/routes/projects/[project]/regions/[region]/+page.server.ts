@@ -1,4 +1,4 @@
-import { getRegionFormSchema, getRegionFromUserState, runEmulatorOnLoad } from '$lib/server/region';
+import { getRegionFormSchema, getRegionFromUserState } from '$lib/server/region';
 import { addRegionSchema } from '$routes/projects/[project]/regions/[region]/schema';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
@@ -14,7 +14,6 @@ export const load: PageServerLoad = async ({ params, locals, fetch }) => {
 	return {
 		formSchema: await getRegionFormSchema(project, region, fetch),
 		region: regionData,
-		addRegionForm,
-		runPromise: runEmulatorOnLoad(regionData, fetch) // stream as it resolves
+		addRegionForm
 	};
 };
