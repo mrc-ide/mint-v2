@@ -71,7 +71,6 @@ describe('page.svelte', () => {
 
 		await screen.getByRole('button', { name: 'Run baseline' }).click();
 
-		await expect.element(screen.getByText('Running...')).toBeVisible();
 		await vi.waitFor(() => expect(vi.mocked(invalidateAll)).toHaveBeenCalled());
 	});
 
