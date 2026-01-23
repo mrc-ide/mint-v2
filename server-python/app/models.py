@@ -105,3 +105,15 @@ class EmulatorResponse(BaseModel):
     prevalence: list[Prevalence]
     cases: list[Cases]
     eirValid: bool
+
+
+class CompareParameter(BaseModel):
+    parameter_name: str = Field(alias="parameterName")
+    label: str
+    min: float
+    max: float
+
+
+class CompareParametersResponse(BaseModel):
+    baseline_parameters: list[CompareParameter] = Field(alias="baselineParameters")
+    intervention_parameters: list[CompareParameter] = Field(alias="interventionParameters")
