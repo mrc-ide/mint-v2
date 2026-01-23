@@ -29,7 +29,7 @@ def get_compare_parameters() -> CompareParametersResponse:
         ("current_malaria_prevalence", "Prevalence"),
         ("preference_for_biting_in_bed", "Preference for Biting in Bed"),
     ]
-    intervention_param_names = [("irs_future", "IRS coverage"), ("itn_future", "ITN usage"), ("lsm", "LSM")]
+    intervention_param_names = [("irs_future", "IRS coverage"), ("itn_future", "ITN usage"), ("lsm", "LSM coverage")]
 
     baseline_parameters = [create_compare_parameter(param_name, form_options) for param_name in baseline_param_names]
     intervention_parameters = [
