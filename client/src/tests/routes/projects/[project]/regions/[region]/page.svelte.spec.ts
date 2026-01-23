@@ -4,10 +4,14 @@ import { MOCK_CASES_DATA, MOCK_FORM_SCHEMA, MOCK_FORM_VALUES, MOCK_PREVALENCE_DA
 import Page from '$routes/projects/[project]/regions/[region]/+page.svelte';
 import { render } from 'vitest-browser-svelte';
 import { HttpResponse, http } from 'msw';
+import { invalidateAll } from '$app/navigation';
 
 const mockUrl = vi.hoisted(() => '/mocked/region/url');
 vi.mock('$lib/url', () => ({
 	regionUrl: vi.fn().mockReturnValue(mockUrl)
+}));
+vi.mock('$app/navigation', () => ({
+	invalidateAll: vi.fn()
 }));
 
 describe('page.svelte', () => {
@@ -35,7 +39,7 @@ describe('page.svelte', () => {
 		});
 	});
 
-	testWithWorker('should run emulator and show results', async ({ worker }) => {
+	testWithWorker('should run emulator and call invalidateAll', async ({ worker }) => {
 		worker.use(
 			http.post(mockUrl, async () => {
 				return HttpResponse.json({
@@ -67,8 +71,8 @@ describe('page.svelte', () => {
 
 		await screen.getByRole('button', { name: 'Run baseline' }).click();
 
-		await expect.element(screen.getByRole('heading', { name: 'Projected prevalence in under' })).toBeVisible();
-		await expect.element(screen.getByRole('heading', { name: 'Clinical cases averted per' })).toBeVisible();
+		await expect.element(screen.getByText('Running...')).toBeVisible();
+		await vi.waitFor(() => expect(vi.mocked(invalidateAll)).toHaveBeenCalled());
 	});
 
 	it('should display results on load if available', async () => {
