@@ -1,7 +1,7 @@
 export interface CompareParameter {
 	parameterName: string;
 	label: string;
-	min: 0;
+	min: number;
 	max: number;
 }
 export interface CompareParameters {

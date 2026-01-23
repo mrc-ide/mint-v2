@@ -6,6 +6,7 @@
 	import SunIcon from '@lucide/svelte/icons/sun';
 	import ChartIcon from '@lucide/svelte/icons/chart-spline';
 	import CalenderClockIcon from '@lucide/svelte/icons/calendar-clock';
+	import BackIcon from '@lucide/svelte/icons/arrow-left';
 	import { toggleMode } from 'mode-watcher';
 	import HeaderRegionsDropdown from './HeaderRegionsDropdown.svelte';
 	import type { UserState } from '$lib/types/userState';
@@ -29,8 +30,6 @@
 		>
 		{#if project}
 			<HeaderRegionsDropdown {project} {region} />
-		{/if}
-		{#if project}
 			<a
 				class={buttonVariants({ variant: 'link', class: 'p-1', size: 'sm' })}
 				href={`/projects/${project.name}/strategise`}
@@ -38,15 +37,26 @@
 				<ChartIcon class="size-3.5" />
 				Strategise across regions
 			</a>
-		{/if}
-		{#if project && region && region.hasRunBaseline}
-			<a
-				class={buttonVariants({ variant: 'link', class: 'p-1', size: 'sm' })}
-				href={`/projects/${project.name}/regions/${region.name}/compare`}
-			>
-				<CalenderClockIcon class="size-3.5" />
-				Long term comparison
-			</a>
+			{#if region}
+				{@const isComparePage = page.url.pathname.endsWith('/compare')}
+				{#if isComparePage}
+					<a
+						class={buttonVariants({ variant: 'link', class: 'p-1', size: 'sm' })}
+						href={`/projects/${project.name}/regions/${region.name}`}
+					>
+						<BackIcon class="size-3.5" />
+						Back to region
+					</a>
+				{:else if region.hasRunBaseline}
+					<a
+						class={buttonVariants({ variant: 'link', class: 'p-1', size: 'sm' })}
+						href={`/projects/${project.name}/regions/${region.name}/compare`}
+					>
+						<CalenderClockIcon class="size-3.5" />
+						Long term comparison
+					</a>
+				{/if}
+			{/if}
 		{/if}
 		<div class="ml-auto flex items-center gap-3 px-4">
 			<a href="/privacy" class="text-muted-foreground hover:underline">Privacy</a>

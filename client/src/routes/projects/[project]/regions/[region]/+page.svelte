@@ -10,6 +10,7 @@
 	import Results from './_components/Results.svelte';
 	import Loader from '$lib/components/Loader.svelte';
 	import { onMount } from 'svelte';
+	import { invalidateAll } from '$app/navigation';
 	let { data, params }: PageProps = $props();
 
 	let isRunning = $state(true);
@@ -29,8 +30,7 @@
 			});
 
 			isRunning = false;
-			form = formValues;
-			emulatorResults = res.data;
+			invalidateAll(); // rerun load to get updated results
 		} catch (e) {
 			toast.error(`Failed to run emulator for region "${params.region}" in project "${params.project}"`);
 			isRunning = false;
@@ -78,10 +78,10 @@
 	>
 		{#if isRunning}
 			<Loader text="Running..." />
-		{:else if emulatorResults && !runError}
-			<Results {emulatorResults} {form} bind:activeTab />
-		{:else}
+		{:else if runError && !emulatorResults}
 			{@render failedLoad(runError)}
+		{:else if emulatorResults}
+			<Results {emulatorResults} {form} bind:activeTab />
 		{/if}
 	</DynamicForm>
 {/key}

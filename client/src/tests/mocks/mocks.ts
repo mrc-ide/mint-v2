@@ -1,3 +1,5 @@
+import type { CompareParameters } from '$lib/types/compare';
+
 export const MOCK_FORM_VALUES = Object.freeze({
 	population: 20000,
 	is_seasonal: true,
@@ -553,4 +555,41 @@ export const MOCK_FORM_SCHEMA = Object.freeze({
 			message: 'Total ITN population usage must be less than or equal to 100%.'
 		}
 	}
+});
+
+export const MOCK_COMPARE_PARAMETERS: Readonly<CompareParameters> = Object.freeze({
+	baselineParameters: [
+		{
+			parameterName: 'current_malaria_prevalence',
+			label: 'Prevalence',
+			min: 2,
+			max: 70
+		},
+		{
+			parameterName: 'preference_for_biting_in_bed',
+			label: 'Preference for Biting in Bed',
+			min: 40,
+			max: 90
+		}
+	],
+	interventionParameters: [
+		{
+			parameterName: 'irs_future',
+			label: 'IRS coverage',
+			min: 0,
+			max: 100
+		},
+		{
+			parameterName: 'itn_future',
+			label: 'ITN usage',
+			min: 0,
+			max: 100
+		},
+		{
+			parameterName: 'lsm',
+			label: 'LSM coverage',
+			min: 0,
+			max: 90
+		}
+	]
 });
