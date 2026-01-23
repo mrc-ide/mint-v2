@@ -7,11 +7,11 @@ import pytest
 
 from app.models import CompareParameter, CompareParametersResponse
 from app.services.resources import (
-    get_dynamic_form_options,
-    validate_json,
-    get_compare_parameters,
-    get_form_field,
     create_compare_parameter,
+    get_compare_parameters,
+    get_dynamic_form_options,
+    get_form_field,
+    validate_json,
 )
 
 

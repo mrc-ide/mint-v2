@@ -23,7 +23,7 @@
 	const runEmulator = async (formValues: Record<string, FormValue>): Promise<void> => {
 		isRunning = true;
 		try {
-			const res = await apiFetch<EmulatorResults>({
+			await apiFetch<EmulatorResults>({
 				url: regionUrl(params.project, params.region),
 				method: 'POST',
 				body: { formValues }
