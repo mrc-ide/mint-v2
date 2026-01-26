@@ -1,9 +1,11 @@
 import logging
+import time
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from minte import __version__ as minte_version
+from prometheus_client import Counter, Gauge, Histogram, make_asgi_app
 
 from app import __version__
 
@@ -11,14 +13,37 @@ from .models import EmulatorRequest, EmulatorResponse, Response, Version
 from .services.emulator import run_emulator_model
 from .services.resources import get_dynamic_form_options
 
-app = FastAPI(title="MINT API", version=__version__)
-
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.WARNING,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 logger = logging.getLogger(__name__)
+
+app = FastAPI(title="MINT API", version=__version__)
+
+metrics_app = make_asgi_app()
+app.mount("/metrics", metrics_app)
+REQUEST_COUNT = Counter("http_requests_total", "Total HTTP requests", ["method", "endpoint", "status"])
+REQUEST_LATENCY = Histogram("http_requests_duration_seconds", "Request latency", ["method", "endpoint"])
+ACTIVE_REQUESTS = Gauge("http_requests_in_flight", "In-flight requests", ["method", "endpoint"])
+
+
+@app.middleware("http")
+async def metrics_middleware(request: Request, call_next):
+    metric_labels = {"method": request.method, "endpoint": request.url.path}
+    ACTIVE_REQUESTS.labels(**metric_labels).inc()
+    start_time = time.time()
+
+    status_code = 500  # Default to 500 in case of unhandled exceptions
+    try:
+        response = await call_next(request)
+        status_code = response.status_code
+        return response
+    finally:
+        REQUEST_LATENCY.labels(**metric_labels).observe(time.time() - start_time)
+        REQUEST_COUNT.labels(**metric_labels, status=status_code).inc()
+        ACTIVE_REQUESTS.labels(**metric_labels).dec()
 
 
 @app.exception_handler(RequestValidationError)
