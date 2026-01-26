@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { apiFetch, ApiError } from '$lib/fetch';
-import type { ResponseBodySuccess, ResponseBodyFailure } from '$lib/types/api';
+import type { ResponseBodySuccess } from '$lib/types/api';
 
 beforeEach(() => {
 	vi.resetAllMocks();
@@ -100,12 +100,12 @@ describe('apiFetch', () => {
 		);
 	});
 
-	it('should throw ApiError with message from response data', async () => {
+	it('should throw ApiError with detail field from response data', async () => {
 		const mockFetch = vi.fn().mockResolvedValue({
 			ok: false,
 			status: 400,
 			headers: new Headers({ 'content-type': 'application/json' }),
-			json: async () => ({ message: 'Bad request error' })
+			json: async () => ({ detail: 'Bad request error' })
 		});
 
 		await expect(apiFetch({ url: '/api/test', fetcher: mockFetch })).rejects.toThrow(
@@ -113,28 +113,8 @@ describe('apiFetch', () => {
 		);
 	});
 
-	it('should throw ApiError with detail from errors array', async () => {
-		const errorResponse = {
-			errors: [{ detail: 'Validation failed' }]
-		} as ResponseBodyFailure;
-		const mockFetch = vi.fn().mockResolvedValue({
-			ok: false,
-			status: 422,
-			headers: new Headers({ 'content-type': 'application/json' }),
-			json: async () => errorResponse
-		});
-
-		await expect(apiFetch({ url: '/api/test', fetcher: mockFetch })).rejects.toThrow(
-			new ApiError('Validation failed', 422)
-		);
-	});
-
-	it('should throw ApiError with error from errors array if no detail', async () => {
-		const errorResponse: ResponseBodyFailure = {
-			status: 'failure',
-			data: null,
-			errors: [{ error: 'Something went wrong', detail: null }]
-		};
+	it('should throw ApiError with "Unknown error occurred" if no detail exists', async () => {
+		const errorResponse = {};
 		const mockFetch = vi.fn().mockResolvedValue({
 			ok: false,
 			status: 500,
@@ -143,14 +123,12 @@ describe('apiFetch', () => {
 		});
 
 		await expect(apiFetch({ url: '/api/test', fetcher: mockFetch })).rejects.toThrow(
-			new ApiError('Something went wrong', 500)
+			new ApiError('Unknown error occurred', 500)
 		);
 	});
 
-	it('should throw ApiError with "Unknown error" if no detail or error in errors array', async () => {
-		const errorResponse = {
-			errors: [{}]
-		} as ResponseBodyFailure;
+	it("should throw ApiError with App.Error's message if present", async () => {
+		const errorResponse = { message: 'App level error occurred' };
 		const mockFetch = vi.fn().mockResolvedValue({
 			ok: false,
 			status: 500,
@@ -159,7 +137,7 @@ describe('apiFetch', () => {
 		});
 
 		await expect(apiFetch({ url: '/api/test', fetcher: mockFetch })).rejects.toThrow(
-			new ApiError('Unknown error', 500)
+			new ApiError('App level error occurred', 500)
 		);
 	});
 
@@ -180,8 +158,6 @@ describe('apiFetch', () => {
 			name: string;
 		}
 		const mockData: ResponseBodySuccess<TestData> = {
-			status: 'success',
-			errors: null,
 			data: { id: 1, name: 'test' }
 		};
 		const mockFetch = vi.fn().mockResolvedValue({

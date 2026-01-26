@@ -1,9 +1,9 @@
 import { regionFormUrl, regionUrl, runEmulatorUrl } from '$lib/url';
 
-const mockUrl = vi.hoisted(() => 'http://mock-mintr-url.com');
+const mockUrl = vi.hoisted(() => 'http://mock-api-url.com');
 vi.mock('$env/dynamic/public', () => ({
 	env: {
-		PUBLIC_MINTR_URL: mockUrl
+		PUBLIC_API_URL: mockUrl
 	}
 }));
 

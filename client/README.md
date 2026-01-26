@@ -84,14 +84,14 @@ These components will be added to `src/lib/components/ui/` and automatically reg
 
 ## Docker
 
-#### Using Docker Compose
+### Using Docker Compose
 
-A `compose.yml` file is provided to run the application along with its dependencies (Redis and Mintr API).
+A `compose.yml` file is provided to run the application along with its dependencies (Redis and Mint API).
 
 1. **Start services**:
 
    ```sh
-   docker-compose up
+   docker compose up -d
    ```
 
 2. **Access the application**:
@@ -99,7 +99,7 @@ A `compose.yml` file is provided to run the application along with its dependenc
 3. **Stop services**:
 
    ```sh
-   docker-compose down
+   docker compose down
    ```
 
 ## Environment Variables
@@ -107,5 +107,6 @@ A `compose.yml` file is provided to run the application along with its dependenc
 Environment variables can be set in a `.env` file in the root directory or added to the environment. Example variables include:
 
 - `FRONTEND_REF`: Git reference for the frontend image (default: `main`)
-- `API_REF`: Git reference for the Mintr API image (default: `main`)
+- `API_REF`: Git reference for the Mint API image (default: `main`)
 - `IPINFO_TOKEN`: Token for IP info service (retrieve with: `vault read -field=token secret/reside/ipinfo`)
+- `REDIS_URL`: URL for the Redis server (default: `redis://localhost:6379`)
