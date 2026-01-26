@@ -5,7 +5,7 @@
 	import MoonIcon from '@lucide/svelte/icons/moon';
 	import SunIcon from '@lucide/svelte/icons/sun';
 	import ChartIcon from '@lucide/svelte/icons/chart-spline';
-	import CalenderClockIcon from '@lucide/svelte/icons/calendar-clock';
+	import CalendarClockIcon from '@lucide/svelte/icons/calendar-clock';
 	import BackIcon from '@lucide/svelte/icons/arrow-left';
 	import { toggleMode } from 'mode-watcher';
 	import HeaderRegionsDropdown from './HeaderRegionsDropdown.svelte';
@@ -52,7 +52,7 @@
 						class={buttonVariants({ variant: 'link', class: 'p-1', size: 'sm' })}
 						href={`/projects/${project.name}/regions/${region.name}/compare`}
 					>
-						<CalenderClockIcon class="size-3.5" />
+						<CalendarClockIcon class="size-3.5" />
 						Long term comparison
 					</a>
 				{/if}

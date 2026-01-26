@@ -21,7 +21,7 @@
 				<div class="flex flex-col gap-3 pl-2">parameters selection</div>
 
 				<div class="flex gap-3">
-					<div class="flex-1/2">prevalaence graph</div>
+					<div class="flex-1/2">prevalence graph</div>
 					<div class="flex-1/2">cases graph</div>
 				</div>
 			</div>
