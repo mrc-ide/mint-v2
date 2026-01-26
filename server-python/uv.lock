@@ -200,7 +200,7 @@ wheels = [
 
 [[package]]
 name = "estimint"
-version = "1.0.0"
+version = "1.2.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "duckdb" },
@@ -210,9 +210,9 @@ dependencies = [
     { name = "scikit-learn" },
     { name = "xgboost" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/b2/de/5ed87c31bb61aa5e1551c078874879a86101a336feef51c757da632a038e/estimint-1.0.0.tar.gz", hash = "sha256:437bdd3337a93f78c8e0e766e0ce13726b7c8c04c109d8eadc20853b23587023", size = 4631596, upload-time = "2025-12-04T17:00:10.113Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/d5/0b/aef3f425f58f848beb155748abd159b7d4d7daca959fd85b03153c47a11f/estimint-1.2.0.tar.gz", hash = "sha256:d55886456d65b9c82d5bb28b1fa40b934ffcea40cd1a50dfb84c25d0ebe47e4d", size = 6805516, upload-time = "2026-01-26T00:02:55.407Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c3/83/f0522dfe0414e3ae01f5ae45b6836219c6a87412d3edbdb727dc9eb4f82c/estimint-1.0.0-py3-none-any.whl", hash = "sha256:1df3bf63bbf4d4631f2b3b09c0284b71484ed9028fba01d65c3399e173a62ab1", size = 4741426, upload-time = "2025-12-04T17:00:06.496Z" },
+    { url = "https://files.pythonhosted.org/packages/9e/1b/ed8cc62bc0572aadc02ea968a41f81f72e71cc7c940b641c271aebf316be/estimint-1.2.0-py3-none-any.whl", hash = "sha256:645d39eb82990b5c87cb633dfd31cf0903e1d07b912930d68d9b160626f86d36", size = 6937118, upload-time = "2026-01-26T00:02:50.498Z" },
 ]
 
 [[package]]
@@ -752,7 +752,7 @@ wheels = [
 
 [[package]]
 name = "minte"
-version = "1.0.3"
+version = "1.3.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "estimint" },
@@ -764,9 +764,9 @@ dependencies = [
     { name = "scipy" },
     { name = "torch" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/fa/56/89dcf51da6a2c94e12ef8eca07fcf99d5abf3a7c95848401efc2ae05fbd1/minte-1.0.3.tar.gz", hash = "sha256:7ed163cf89789fe06321cbcca2832b509541a15bb8473f2bdc17cf7ef4ddd5e8", size = 45447504, upload-time = "2025-12-04T21:24:13.448Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/7d/38/6fdfeb170ae2b0023950104939973cff7258fd681fd349a9eb7c1428d5d1/minte-1.3.1.tar.gz", hash = "sha256:9e1805956669a54601ff31d381f0773738d8872f4882157e4b7db79f481c4861", size = 47370348, upload-time = "2026-01-26T13:10:19.489Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/71/9d/092c5c8e818e6822d431a8b7bbc1f1034e361590971147352d7e46dd26e3/minte-1.0.3-py3-none-any.whl", hash = "sha256:661dd551c179f098896ea737066db4e2d3092f4f0f4093ea58103372e69af4d4", size = 45450804, upload-time = "2025-12-04T21:23:59.168Z" },
+    { url = "https://files.pythonhosted.org/packages/98/ba/ec102cf1aacfe3c7f0fb61d35f293a1399f935e2ef5bfcc2a327306bde92/minte-1.3.1-py3-none-any.whl", hash = "sha256:2d5d3410d5afbb06f52a5053467a5c997a9db8b6a9e024b01606aad33f69f174", size = 47234045, upload-time = "2026-01-26T13:09:53.177Z" },
 ]
 
 [[package]]
@@ -1693,7 +1693,7 @@ dev = [
 requires-dist = [
     { name = "fastapi", extras = ["standard"], specifier = ">=0.128.0" },
     { name = "jsonschema", specifier = ">=4.26.0" },
-    { name = "minte", specifier = ">=1.0.3" },
+    { name = "minte", specifier = ">=1.3.1" },
 ]
 
 [package.metadata.requires-dev]
