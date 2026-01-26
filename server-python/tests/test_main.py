@@ -14,7 +14,7 @@ def test_get_version():
     response = client.get("/version")
 
     assert response.status_code == status.HTTP_200_OK
-    assert response.json() == {"data": {"server": "1.0.0", "minte": "0.1.0"}}
+    assert response.json() == {"data": {"server": "1.0.0", "minte": "1.3.1"}}
 
 
 def test_health_check():
