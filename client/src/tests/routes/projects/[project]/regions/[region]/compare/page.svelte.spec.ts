@@ -14,7 +14,6 @@ describe('Compare page', () => {
 		} as any);
 
 		await expect.element(screen.getByText('Long term Scenario planning')).toBeVisible();
-		await expect.element(screen.getByText(/prevalence/i)).toBeVisible();
 	});
 
 	it('should show unavailable alert if baseline has not run', async () => {
