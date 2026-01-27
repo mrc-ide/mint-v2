@@ -1,6 +1,6 @@
 import * as ApiFetch from '$lib/fetch';
 import * as Urls from '$lib/url';
-import { getCompareParameters } from '$lib/server/compare';
+import { fetchCompareParameters } from '$lib/server/compare';
 import { MOCK_COMPARE_PARAMETERS } from '$mocks/mocks';
 
 describe('getCompareParameters', () => {
@@ -10,7 +10,7 @@ describe('getCompareParameters', () => {
 		vi.spyOn(ApiFetch, 'apiFetch').mockResolvedValue({ data: MOCK_COMPARE_PARAMETERS } as any);
 		const mockFetch = vi.fn();
 
-		const result = await getCompareParameters(mockFetch);
+		const result = await fetchCompareParameters(mockFetch);
 
 		expect(result).toEqual(MOCK_COMPARE_PARAMETERS);
 		expect(ApiFetch.apiFetch).toHaveBeenCalledWith({ fetcher: mockFetch, url: '/compare-parameters' });
@@ -21,7 +21,7 @@ describe('getCompareParameters', () => {
 		vi.spyOn(ApiFetch, 'apiFetch').mockRejectedValue(apiError);
 		const mockFetch = vi.fn();
 
-		await expect(getCompareParameters(mockFetch)).rejects.toMatchObject({
+		await expect(fetchCompareParameters(mockFetch)).rejects.toMatchObject({
 			status: 503,
 			body: {
 				message: 'Failed to fetch compare parameters'
@@ -33,7 +33,7 @@ describe('getCompareParameters', () => {
 		vi.spyOn(ApiFetch, 'apiFetch').mockRejectedValue(new Error('Some generic error'));
 		const mockFetch = vi.fn();
 
-		await expect(getCompareParameters(mockFetch)).rejects.toMatchObject({
+		await expect(fetchCompareParameters(mockFetch)).rejects.toMatchObject({
 			status: 500,
 			body: {
 				message: 'Failed to fetch compare parameters'

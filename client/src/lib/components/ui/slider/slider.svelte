@@ -27,7 +27,7 @@ get along, so we shut typescript up by casting `value` to `never`.
 	)}
 	{...restProps}
 >
-	{#snippet children({ thumbs })}
+	{#snippet children({ thumbItems })}
 		<span
 			data-orientation={orientation}
 			data-slot="slider-track"
@@ -37,15 +37,15 @@ get along, so we shut typescript up by casting `value` to `never`.
 		>
 			<SliderPrimitive.Range
 				data-slot="slider-range"
-				class={cn('absolute bg-primary data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full')}
+				class={cn('absolute z-1 bg-primary data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full')}
 			/>
 		</span>
-		{#each thumbs as thumb (thumb)}
+		{#each thumbItems as { index } (index)}
 			<SliderPrimitive.Thumb
 				data-slot="slider-thumb"
-				index={thumb}
+				{index}
 				class={cn(
-					'block size-4 shrink-0 rounded-full border border-primary bg-background shadow-sm ring-ring/50 transition-[color,box-shadow] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50',
+					'z-2 block size-4 shrink-0 rounded-full border border-primary bg-background shadow-sm ring-ring/50 transition-[color,box-shadow] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50',
 					thumbClass
 				)}
 			/>
