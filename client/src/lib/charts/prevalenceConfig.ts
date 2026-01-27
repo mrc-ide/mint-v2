@@ -90,3 +90,52 @@ export const getPrevalenceConfig = (prevalence: PrevalenceData[]): Highcharts.Op
 	},
 	series: createPrevalenceSeries(prevalence)
 });
+
+export const getPrevalenceConfigCompare = (
+	currentPrevalence: PrevalenceData[],
+	newPrevalence: PrevalenceData[]
+): Highcharts.Options => {
+	const currentSeries: Highcharts.SeriesSplineOptions[] = createPrevalenceSeries(currentPrevalence).map((series) => ({
+		...series,
+		name: `${series.name} (Present)`,
+		opacity: 0.4
+	}));
+	const newSeries: Highcharts.SeriesSplineOptions[] = createPrevalenceSeries(newPrevalence).map((series) => ({
+		...series,
+		name: `${series.name} (Long term)`
+	}));
+
+	return {
+		chart: {
+			type: 'spline',
+			height: 500
+		},
+		title: {
+			text: 'Prevalence - Present vs Long term'
+		},
+		xAxis: {
+			title: {
+				text: 'Years since new interventions'
+			},
+			tickPositions: [0, 1, 2, 3]
+		},
+		yAxis: {
+			min: 0,
+			title: {
+				text: 'Prevalence (%)'
+			},
+			labels: {
+				format: '{value}%'
+			}
+		},
+		tooltip: {
+			headerFormat: '{point.x:.2f} years <br/>',
+			valueSuffix: '%',
+			valueDecimals: 1
+		},
+		legend: {
+			symbolWidth: 22
+		},
+		series: [...currentSeries, ...newSeries]
+	};
+};
