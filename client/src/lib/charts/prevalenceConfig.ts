@@ -97,12 +97,12 @@ export const getPrevalenceConfigCompare = (
 ): Highcharts.Options => {
 	const currentSeries: Highcharts.SeriesSplineOptions[] = createPrevalenceSeries(currentPrevalence).map((series) => ({
 		...series,
-		name: `${series.name} (Present)`,
+		name: `${series.name} <em>Present</em>`,
 		opacity: 0.4
 	}));
 	const newSeries: Highcharts.SeriesSplineOptions[] = createPrevalenceSeries(newPrevalence).map((series) => ({
 		...series,
-		name: `${series.name} (Long term)`
+		name: `${series.name} <em>Long term</em>`
 	}));
 
 	return {
