@@ -91,15 +91,17 @@ export const getPrevalenceConfig = (prevalence: PrevalenceData[]): Highcharts.Op
 	series: createPrevalenceSeries(prevalence)
 });
 
-export const getPrevalenceConfigCompare = (
-	currentPrevalence: PrevalenceData[],
-	newPrevalence: PrevalenceData[]
-): Highcharts.Options => {
-	const currentSeries: Highcharts.SeriesSplineOptions[] = createPrevalenceSeries(currentPrevalence).map((series) => ({
+export const createPresentPrevalenceSeries = (prevalence: PrevalenceData[]): Highcharts.SeriesSplineOptions[] =>
+	createPrevalenceSeries(prevalence).map((series) => ({
 		...series,
 		name: `${series.name} <em>Present</em>`,
 		opacity: 0.4
 	}));
+
+export const getPrevalenceConfigCompare = (
+	currentPrevalenceSeries: Highcharts.SeriesSplineOptions[],
+	newPrevalence: PrevalenceData[]
+): Highcharts.Options => {
 	const newSeries: Highcharts.SeriesSplineOptions[] = createPrevalenceSeries(newPrevalence).map((series) => ({
 		...series,
 		name: `${series.name} <em>Long term</em>`
@@ -111,7 +113,7 @@ export const getPrevalenceConfigCompare = (
 			height: 500
 		},
 		title: {
-			text: 'Prevalence - Present vs Long term'
+			text: '<span style="opacity: 0.4;">Present</span> vs Long term - Prevalence in under 5 year olds'
 		},
 		xAxis: {
 			title: {
@@ -136,6 +138,6 @@ export const getPrevalenceConfigCompare = (
 		legend: {
 			symbolWidth: 22
 		},
-		series: [...currentSeries, ...newSeries]
+		series: [...currentPrevalenceSeries, ...newSeries]
 	};
 };
