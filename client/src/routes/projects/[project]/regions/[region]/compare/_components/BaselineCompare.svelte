@@ -43,7 +43,7 @@
 			});
 			isLoading = false;
 			longTermResults = res.data;
-		} catch (err) {
+		} catch (_err) {
 			toast.error('Failed to run long term scenario planning emulator');
 			isLoading = false;
 		}
@@ -59,7 +59,7 @@
 		<Field.Field>
 			<Field.Label for="parameter-select">What do you want to adjust?</Field.Label>
 			<RadioGroup.Root value={selectedParameter.parameterName} onValueChange={updateBaselineParam} disabled={isLoading}>
-				{#each compareBaselineParameters as param}
+				{#each compareBaselineParameters as param (param.parameterName)}
 					<Field.Field orientation="horizontal">
 						<RadioGroup.Item value={param.parameterName} id={param.parameterName} />
 						<Field.Label for={param.parameterName}>{param.label}</Field.Label>
@@ -68,16 +68,17 @@
 			</RadioGroup.Root>
 		</Field.Field>
 		<Field.Field>
-			<Field.Label for="parameter-slider">Change from baseline (%)</Field.Label>
+			<Field.Label for="baseline-parameter-slider">Change from baseline (%)</Field.Label>
 			<div class="flex flex-row items-center gap-3">
 				<SliderWithMarker
+					id="baseline-parameter-slider"
 					type="single"
 					bind:value={sliderValue}
 					onValueCommit={runEmulator}
 					max={selectedParameter.max}
 					min={selectedParameter.min}
 					disabled={isLoading}
-					aria-label="varying parameter slide"
+					aria-label="Adjust baseline parameter slider"
 					markerValue={selectedParameter.value}
 					unit="%"
 					class="h-full"
