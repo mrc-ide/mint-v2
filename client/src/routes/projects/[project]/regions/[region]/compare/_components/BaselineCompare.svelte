@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { createHighchart } from '$lib/charts/baseChart';
-	import { createPresentPrevalenceSeries, getPrevalenceConfigCompare } from '$lib/charts/prevalenceConfig';
 	import type { FormValue } from '$lib/components/dynamic-region-form/types';
 	import { DEBOUNCE_DELAY_MS } from '$lib/components/dynamic-region-form/utils';
 	import Loader from '$lib/components/Loader.svelte';
@@ -14,6 +12,7 @@
 	import debounce from 'debounce';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
+	import BaselinePlots from './BaselinePlots.svelte';
 
 	interface Props {
 		presentResults: EmulatorResults;
@@ -25,13 +24,12 @@
 	let { presentResults, compareBaselineParameters, formValues, chartTheme }: Props = $props();
 	let selectedParameter = $state(compareBaselineParameters[0]);
 	let sliderValue = $derived(selectedParameter.value);
-	let currentPrevalenceSeries = $derived(createPresentPrevalenceSeries(presentResults.prevalence));
-	let prevalenceConfig = $derived(getPrevalenceConfigCompare(currentPrevalenceSeries, []));
+	let longTermResults = $state<EmulatorResults>();
 	let isLoading = $state(true);
 
 	const updateBaselineParam = (paramName: string) => {
 		selectedParameter = compareBaselineParameters.find((param) => param.parameterName === paramName)!;
-		prevalenceConfig = getPrevalenceConfigCompare(currentPrevalenceSeries, []);
+		longTermResults = undefined;
 	};
 
 	const runEmulator = async () => {
@@ -46,7 +44,7 @@
 				}
 			});
 			isLoading = false;
-			prevalenceConfig = getPrevalenceConfigCompare(currentPrevalenceSeries, res.data.prevalence);
+			longTermResults = res.data;
 		} catch (err) {
 			toast.error('Failed to run long term scenario planning emulator');
 			isLoading = false;
@@ -103,11 +101,6 @@
 	{#if isLoading}
 		<Loader text="Loading..." />
 	{:else}
-		<div class="flex gap-2">
-			<section aria-label="Impact prevalence graph" class="flex-1/2 rounded-lg border">
-				<div {@attach createHighchart(prevalenceConfig)} class={chartTheme}></div>
-			</section>
-			<div class="flex-1/2">cases graph</div>
-		</div>
+		<BaselinePlots {chartTheme} {presentResults} {longTermResults} />
 	{/if}
 </div>
