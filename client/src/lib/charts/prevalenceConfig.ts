@@ -21,6 +21,28 @@ const createPrevalenceSeries = (data: PrevalenceData[]): Highcharts.SeriesSpline
 	return SCENARIOS.filter((scenario) => seriesMap.has(scenario)).map((scenario) => seriesMap.get(scenario)!);
 };
 
+const BASE_OPTIONS: Partial<Highcharts.Options> = {
+	yAxis: {
+		min: 0,
+		title: {
+			text: 'Prevalence (%)'
+		},
+		labels: {
+			format: '{value}%'
+		}
+	},
+	tooltip: {
+		headerFormat: '{point.x:.2f} years <br/>',
+		valueSuffix: '%',
+		valueDecimals: 1
+	},
+	legend: {
+		symbolWidth: 22,
+		itemStyle: {
+			fontSize: '.75em'
+		}
+	}
+};
 export const getPrevalenceConfig = (prevalence: PrevalenceData[]): Highcharts.Options => ({
 	chart: {
 		type: 'spline',
@@ -71,31 +93,15 @@ export const getPrevalenceConfig = (prevalence: PrevalenceData[]): Highcharts.Op
 			}
 		}
 	},
-	yAxis: {
-		min: 0,
-		title: {
-			text: 'Prevalence (%)'
-		},
-		labels: {
-			format: '{value}%'
-		}
-	},
-	tooltip: {
-		headerFormat: '{point.x:.2f} years <br/>',
-		valueSuffix: '%',
-		valueDecimals: 1
-	},
-	legend: {
-		symbolWidth: 22
-	},
+	...BASE_OPTIONS,
 	series: createPrevalenceSeries(prevalence)
 });
 
 export const createPresentPrevalenceSeries = (prevalence: PrevalenceData[]): Highcharts.SeriesSplineOptions[] =>
 	createPrevalenceSeries(prevalence).map((series) => ({
 		...series,
-		name: `${series.name} <em>Present</em>`,
-		opacity: 0.4
+		name: `<span style="opacity: 0.4;">${series.name} <em>Present</em></span> `,
+		color: `color-mix(in oklab, ${series.color}, transparent 40%)`
 	}));
 
 export const getPrevalenceConfigCompare = (
@@ -121,23 +127,7 @@ export const getPrevalenceConfigCompare = (
 			},
 			tickPositions: [0, 1, 2, 3]
 		},
-		yAxis: {
-			min: 0,
-			title: {
-				text: 'Prevalence (%)'
-			},
-			labels: {
-				format: '{value}%'
-			}
-		},
-		tooltip: {
-			headerFormat: '{point.x:.2f} years <br/>',
-			valueSuffix: '%',
-			valueDecimals: 1
-		},
-		legend: {
-			symbolWidth: 22
-		},
+		...BASE_OPTIONS,
 		series: [...currentPrevalenceSeries, ...newSeries]
 	};
 };

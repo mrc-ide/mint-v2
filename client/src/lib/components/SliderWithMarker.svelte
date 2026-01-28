@@ -5,7 +5,7 @@
 	import { Slider as SliderPrimitive } from 'bits-ui';
 	let {
 		class: className,
-		value,
+		value = $bindable(),
 		containerClass,
 		markerValue,
 		min,
@@ -24,7 +24,7 @@
 </script>
 
 <div class={cn('relative h-7 w-64', containerClass)}>
-	<Slider value={value as never} class={className} {min} {max} {...restProps} />
+	<Slider bind:value={value as never} class={className} {min} {max} {...restProps} />
 	<div class="pointer-events-none absolute top-0 h-full" style="left: {markerPos}%;">
 		<div class="z-1.5 h-full w-0.5 bg-foreground/80"></div>
 		<div class="-translate-x-1/4 text-xs text-muted-foreground">
