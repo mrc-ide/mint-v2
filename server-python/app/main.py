@@ -32,7 +32,7 @@ ACTIVE_REQUESTS = Gauge("http_requests_in_flight", "In-flight requests", ["metho
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Adjust this to your needs
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
