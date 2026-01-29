@@ -178,6 +178,7 @@ export const getCasesConfigCompare = (
 			labels: {
 				format: '${value:,.0f}'
 			},
+			min: 0,
 			tickPixelInterval: 10,
 			breaks: [
 				{
