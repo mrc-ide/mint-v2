@@ -10,8 +10,10 @@ export interface CasesAverted {
 }
 const POST_INTERVENTION_YEARS = [2, 3, 4] as const;
 
-export const getMeanCasesPostIntervention = (postInterventionCases: CasesData[]) =>
-	postInterventionCases.reduce((sum, c) => sum + c.casesPer1000, 0) / postInterventionCases.length;
+export const getTotalCasesPer1000 = (cases: CasesData[]) => cases.reduce((sum, c) => sum + c.casesPer1000, 0);
+
+export const getMeanCasesPer1000 = (cases: CasesData[]) =>
+	cases.reduce((sum, c) => sum + c.casesPer1000, 0) / cases.length;
 
 // Group cases by scenario (ensuring order), filtering out year 1 (pre-intervention year)
 export const collectPostInterventionCases = (cases: CasesData[]): Record<Scenario, CasesData[]> => {
@@ -34,7 +36,7 @@ export const getAvertedCasesData = (
 
 	// Pre-calculate no intervention data
 	const noInterventionByYear = new Map(noInterventionCases.map((c) => [c.year, c.casesPer1000]));
-	const meanNoInterventionCases = getMeanCasesPostIntervention(noInterventionCases);
+	const meanNoInterventionCases = getMeanCasesPer1000(noInterventionCases);
 
 	// Calculate cases averted for each intervention scenario
 	const casesAverted: Partial<Record<Scenario, CasesAverted>> = {};
@@ -43,7 +45,7 @@ export const getAvertedCasesData = (
 		if (scenario === 'no_intervention' || !scenarioCases.length) continue;
 
 		const casesByYear = new Map(scenarioCases.map((c) => [c.year, c.casesPer1000]));
-		const meanCasesForScenario = getMeanCasesPostIntervention(scenarioCases);
+		const meanCasesForScenario = getMeanCasesPer1000(scenarioCases);
 
 		const [casesAvertedYear1Per1000, casesAvertedYear2Per1000, casesAvertedYear3Per1000] = POST_INTERVENTION_YEARS.map(
 			(year) => (noInterventionByYear.get(year) ?? 0) - (casesByYear.get(year) ?? 0)

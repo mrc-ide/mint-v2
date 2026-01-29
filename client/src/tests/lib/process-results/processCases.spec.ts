@@ -3,7 +3,7 @@ import {
 	convertPer1000ToTotal,
 	convertTotalToPer1000,
 	getAvertedCasesData,
-	getMeanCasesPostIntervention
+	getMeanCasesPer1000
 } from '$lib/process-results/processCases';
 import { PRE_INTERVENTION_YEAR, SCENARIOS, type CasesData, type Scenario } from '$lib/types/userState';
 
@@ -15,7 +15,7 @@ describe('getMeanCasesPostIntervention', () => {
 			{ year: 4, scenario: 'irs_only', casesPer1000: 300 }
 		];
 
-		const result = getMeanCasesPostIntervention(cases);
+		const result = getMeanCasesPer1000(cases);
 
 		expect(result).toBe(200);
 	});
@@ -26,7 +26,7 @@ describe('getMeanCasesPostIntervention', () => {
 			{ year: 3, scenario: 'irs_only', casesPer1000: 200.5 }
 		];
 
-		const result = getMeanCasesPostIntervention(cases);
+		const result = getMeanCasesPer1000(cases);
 
 		expect(result).toBe(150.5);
 	});

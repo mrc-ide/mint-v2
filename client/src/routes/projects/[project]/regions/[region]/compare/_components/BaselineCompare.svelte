@@ -94,6 +94,6 @@
 	{#if isLoading}
 		<Loader text="Loading..." />
 	{:else}
-		<BaselinePlots {chartTheme} {presentResults} {longTermResults} />
+		<BaselinePlots {chartTheme} {presentResults} {longTermResults} {formValues} />
 	{/if}
 </div>
