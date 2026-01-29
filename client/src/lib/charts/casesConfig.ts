@@ -154,18 +154,6 @@ export const getCasesConfigCompare = (
 			height: 500,
 			zooming: {
 				type: 'x'
-			},
-			events: {
-				click(event) {
-					const clickedX = (event as Highcharts.ChartClickEventObject).xAxis[0].value;
-					console.log(clickedX);
-					// const xAxisValues = this.xAxis[0].categories ||
-					// 	(this.series[0]?.data.map((point: any) => point.x) || []);
-					// const closestX = xAxisValues.reduce((prev: number, curr: number) =>
-					// 	Math.abs(curr - clickedX) < Math.abs(prev - clickedX) ? curr : prev
-					// );
-					// addBudgetPlotLine(this, closestX);
-				}
 			}
 		},
 		title: {
