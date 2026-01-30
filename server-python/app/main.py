@@ -3,7 +3,6 @@ import time
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from minte import __version__ as minte_version
 from prometheus_client import Counter, Gauge, Histogram, make_asgi_app
@@ -28,6 +27,7 @@ app.mount("/metrics", metrics_app)
 REQUEST_COUNT = Counter("http_requests_total", "Total HTTP requests", ["method", "endpoint", "status"])
 REQUEST_LATENCY = Histogram("http_requests_duration_seconds", "Request latency", ["method", "endpoint"])
 ACTIVE_REQUESTS = Gauge("http_requests_in_flight", "In-flight requests", ["method", "endpoint"])
+
 
 @app.middleware("http")
 async def metrics_middleware(request: Request, call_next):
