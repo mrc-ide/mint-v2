@@ -29,16 +29,6 @@ REQUEST_COUNT = Counter("http_requests_total", "Total HTTP requests", ["method",
 REQUEST_LATENCY = Histogram("http_requests_duration_seconds", "Request latency", ["method", "endpoint"])
 ACTIVE_REQUESTS = Gauge("http_requests_in_flight", "In-flight requests", ["method", "endpoint"])
 
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-
 @app.middleware("http")
 async def metrics_middleware(request: Request, call_next):
     metric_labels = {"method": request.method, "endpoint": request.url.path}
