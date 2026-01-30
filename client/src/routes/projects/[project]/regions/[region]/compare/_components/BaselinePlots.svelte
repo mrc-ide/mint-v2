@@ -8,15 +8,17 @@
 	interface Props {
 		chartTheme: string;
 		presentResults: EmulatorResults;
-		formValues: Record<string, FormValue>;
+		regionFormValues: Record<string, FormValue>;
 		longTermResults?: EmulatorResults;
 	}
-	let { chartTheme, presentResults, longTermResults, formValues }: Props = $props();
+	let { chartTheme, presentResults, longTermResults, regionFormValues }: Props = $props();
 	let presentPrevalenceSeries = $derived(createPresentPrevalenceSeries(presentResults.prevalence));
 	let prevalenceConfig = $derived(
 		getPrevalenceConfigCompare(presentPrevalenceSeries, longTermResults?.prevalence ?? [])
 	);
-	let casesConfig = $derived(getCasesConfigCompare(presentResults.cases, longTermResults?.cases ?? [], formValues));
+	let casesConfig = $derived(
+		getCasesConfigCompare(presentResults.cases, longTermResults?.cases ?? [], regionFormValues)
+	);
 </script>
 
 <div class="flex gap-2">
