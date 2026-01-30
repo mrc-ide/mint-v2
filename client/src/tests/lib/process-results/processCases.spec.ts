@@ -3,7 +3,8 @@ import {
 	convertPer1000ToTotal,
 	convertTotalToPer1000,
 	getAvertedCasesData,
-	getMeanCasesPer1000
+	getMeanCasesPer1000,
+	getTotalCasesPer1000
 } from '$lib/process-results/processCases';
 import { PRE_INTERVENTION_YEAR, SCENARIOS, type CasesData, type Scenario } from '$lib/types/userState';
 
@@ -256,5 +257,19 @@ describe('convertTotalToPer1000', () => {
 		const backToPer1000 = convertTotalToPer1000(total, population);
 
 		expect(backToPer1000).toBeCloseTo(per1000, 10);
+	});
+});
+
+describe('getTotalCasesPer1000', () => {
+	it('should calculate total cases per 1000 correctly', () => {
+		const casesData: CasesData[] = [
+			{ year: 2, scenario: 'irs_only', casesPer1000: 10 },
+			{ year: 3, scenario: 'irs_only', casesPer1000: 15 },
+			{ year: 4, scenario: 'irs_only', casesPer1000: 20 }
+		];
+
+		const totalCases = getTotalCasesPer1000(casesData);
+
+		expect(totalCases).toBe(45);
 	});
 });

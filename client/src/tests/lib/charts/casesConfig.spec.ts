@@ -1,10 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { getCasesConfig } from '$lib/charts/casesConfig';
-import type { CasesAverted } from '$lib/process-results/processCases';
-import type { Scenario } from '$lib/types/userState';
-
+import { createCasesCompareDataPoints, getCasesConfig } from '$lib/charts/casesConfig';
+import * as processCases from '$lib/process-results/processCases';
+import type { CasesData, Scenario } from '$lib/types/userState';
+import type { FormValue } from '$lib/components/dynamic-region-form/types';
+import * as costs from '$lib/process-results/costs';
 describe('getCasesConfig', () => {
-	const mockCasesAverted: Partial<Record<Scenario, CasesAverted>> = {
+	const mockCasesAverted: Partial<Record<Scenario, processCases.CasesAverted>> = {
 		irs_only: {
 			casesAvertedMeanPer1000: 10.5,
 			casesAvertedYear1Per1000: 8.2,
@@ -145,7 +146,7 @@ describe('getCasesConfig', () => {
 	});
 
 	it('should handle single scenario', () => {
-		const singleScenario: Partial<Record<Scenario, CasesAverted>> = {
+		const singleScenario: Partial<Record<Scenario, processCases.CasesAverted>> = {
 			irs_only: {
 				casesAvertedMeanPer1000: 15.2,
 				casesAvertedYear1Per1000: 14.0,
@@ -181,5 +182,67 @@ describe('getCasesConfig', () => {
 		expect(firstLineSeries.data[0].y).toBe(8.2);
 		expect(firstLineSeries.data[1].y).toBe(11.3);
 		expect(firstLineSeries.data[2].y).toBe(12.0);
+	});
+});
+
+describe('createCasesCompareDataPoints', () => {
+	const mockCases: CasesData[] = [
+		{ scenario: 'irs_only', casesPer1000: 10, year: 2 },
+		{ scenario: 'irs_only', casesPer1000: 10, year: 3 },
+		{ scenario: 'py_only_only', casesPer1000: 20, year: 2 },
+		{ scenario: 'py_only_only', casesPer1000: 20, year: 3 },
+		{ scenario: 'py_only_with_lsm', casesPer1000: 15, year: 2 },
+		{ scenario: 'py_only_with_lsm', casesPer1000: 15, year: 3 }
+	];
+
+	const mockFormValues: Record<string, FormValue> = {
+		population: 10000
+	};
+
+	beforeEach(() => {
+		vi.resetAllMocks();
+	});
+
+	it('should return sorted data points based on totalCost in ascending order', () => {
+		vi.spyOn(processCases, 'collectPostInterventionCases');
+		vi.spyOn(processCases, 'getTotalCasesPer1000').mockReturnValue(100);
+		vi.spyOn(processCases, 'convertPer1000ToTotal').mockReturnValue(1000);
+		vi.spyOn(costs, 'getTotalCostsPerScenario').mockReturnValue({
+			irs_only: 5000,
+			py_only_only: 2000,
+			py_only_with_lsm: 8000
+		});
+
+		const result = createCasesCompareDataPoints(mockCases, mockFormValues);
+
+		expect(result[0]).toEqual({
+			scenario: 'py_only_only',
+			totalCases: 1000,
+			totalCost: 2000
+		});
+		expect(result[1]).toEqual({
+			scenario: 'irs_only',
+			totalCases: 1000,
+			totalCost: 5000
+		});
+		expect(result[2]).toEqual({
+			scenario: 'py_only_with_lsm',
+			totalCases: 1000,
+			totalCost: 8000
+		});
+
+		expect(processCases.collectPostInterventionCases).toHaveBeenCalledWith(mockCases);
+		expect(costs.getTotalCostsPerScenario).toHaveBeenCalledWith(
+			['py_only_only', 'irs_only', 'py_only_with_lsm'],
+			mockFormValues
+		);
+		expect(processCases.getTotalCasesPer1000).toHaveBeenCalledTimes(3);
+		expect(processCases.convertPer1000ToTotal).toHaveBeenCalledTimes(3);
+		expect(processCases.convertPer1000ToTotal).toHaveBeenCalledWith(100, mockFormValues['population']);
+	});
+
+	it('should handle empty cases array', () => {
+		const result = createCasesCompareDataPoints([], mockFormValues);
+		expect(result).toEqual([]);
 	});
 });

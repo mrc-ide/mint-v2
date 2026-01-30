@@ -1,3 +1,5 @@
+import type { FormValue } from '$lib/components/dynamic-region-form/types';
+import { getTotalCostsPerScenario } from '$lib/process-results/costs';
 import {
 	collectPostInterventionCases,
 	convertPer1000ToTotal,
@@ -5,11 +7,8 @@ import {
 	type CasesAverted
 } from '$lib/process-results/processCases';
 import type { CasesData, Scenario } from '$lib/types/userState';
-import type { Options, SeriesColumnOptions, SeriesLineOptions, PointOptionsObject } from 'highcharts';
+import type { Options, PointOptionsObject, SeriesColumnOptions, SeriesLineOptions } from 'highcharts';
 import { getColumnFill, ScenarioToLabel } from './baseChart';
-import type { FormValue } from '$lib/components/dynamic-region-form/types';
-import { getTotalCostsPerScenario } from '$lib/process-results/costs';
-import { addBudgetPlotLine } from './strategyConfig';
 
 const getCasesSeriesData = (
 	casesAverted: Partial<Record<Scenario, CasesAverted>>
@@ -97,7 +96,7 @@ interface CasesCompareDataPoint {
 	totalCases: number;
 	totalCost: number;
 }
-export const createCasesCompareData = (
+export const createCasesCompareDataPoints = (
 	cases: CasesData[],
 	formValues: Record<string, FormValue>
 ): CasesCompareDataPoint[] => {
@@ -109,9 +108,7 @@ export const createCasesCompareData = (
 
 	return scenarios
 		.map((scenario) => {
-			const scenarioCases = postInterventionCases[scenario];
-
-			const totalCasesPer1000 = getTotalCasesPer1000(scenarioCases);
+			const totalCasesPer1000 = getTotalCasesPer1000(postInterventionCases[scenario]);
 			return {
 				scenario,
 				totalCases: convertPer1000ToTotal(totalCasesPer1000, Number(formValues['population'])),
@@ -128,7 +125,7 @@ export const createCasesCompareSeries = (
 ): SeriesLineOptions => ({
 	name,
 	type: 'line',
-	data: createCasesCompareData(cases, formValues).map(({ totalCases, totalCost, scenario }) => ({
+	data: createCasesCompareDataPoints(cases, formValues).map(({ totalCases, totalCost, scenario }) => ({
 		x: totalCost,
 		y: totalCases,
 		custom: {
@@ -138,6 +135,20 @@ export const createCasesCompareSeries = (
 	step: 'left'
 });
 
+export const createBreakToMinimizeEmptySpace = (
+	data1: PointOptionsObject[],
+	data2: PointOptionsObject[]
+): Highcharts.XAxisBreaksOptions[] | undefined => {
+	const getSecondPoint = (data: PointOptionsObject[]): number => (data.length > 1 ? (data[1].x as number) : Infinity);
+
+	const data1Breakpoint = getSecondPoint(data1);
+	const data2Breakpoint = getSecondPoint(data2);
+
+	const breakPoint = Math.min(data1Breakpoint, data2Breakpoint);
+
+	return breakPoint !== Infinity ? [{ from: 0, to: breakPoint * 0.9 }] : undefined;
+};
+
 export const getCasesConfigCompare = (
 	currentCases: CasesData[],
 	newCases: CasesData[],
@@ -145,9 +156,6 @@ export const getCasesConfigCompare = (
 ): Options => {
 	const presentSeries = createCasesCompareSeries(currentCases, formValues, 'Present');
 	const futureSeries = createCasesCompareSeries(newCases, formValues, 'Long term');
-
-	const breakPoint = ((presentSeries.data!.at(1) as PointOptionsObject)?.x as number) ?? 0;
-	const xAxisBreaks = breakPoint > 0 ? [{ from: 0, to: breakPoint * 0.9 }] : undefined;
 
 	return {
 		chart: {
@@ -163,7 +171,10 @@ export const getCasesConfigCompare = (
 			labels: { format: '${value:,.0f}' },
 			min: 0,
 			tickPixelInterval: 10,
-			breaks: xAxisBreaks
+			breaks: createBreakToMinimizeEmptySpace(
+				presentSeries.data as PointOptionsObject[],
+				futureSeries.data as PointOptionsObject[]
+			)
 		},
 		yAxis: {
 			title: { text: 'Total Cases' },
