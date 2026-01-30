@@ -4,10 +4,14 @@ import { MOCK_CASES_DATA, MOCK_FORM_SCHEMA, MOCK_FORM_VALUES, MOCK_PREVALENCE_DA
 import Page from '$routes/projects/[project]/regions/[region]/+page.svelte';
 import { render } from 'vitest-browser-svelte';
 import { HttpResponse, http } from 'msw';
+import { invalidateAll } from '$app/navigation';
 
 const mockUrl = vi.hoisted(() => '/mocked/region/url');
 vi.mock('$lib/url', () => ({
 	regionUrl: vi.fn().mockReturnValue(mockUrl)
+}));
+vi.mock('$app/navigation', () => ({
+	invalidateAll: vi.fn()
 }));
 
 describe('page.svelte', () => {
@@ -15,7 +19,6 @@ describe('page.svelte', () => {
 		const screen = render(Page, {
 			props: {
 				data: {
-					runPromise: Promise.resolve(null),
 					region: {
 						formValues: {},
 						hasRunBaseline: false
@@ -36,7 +39,7 @@ describe('page.svelte', () => {
 		});
 	});
 
-	testWithWorker('should run emulator and show results when runPromise resolves', async ({ worker }) => {
+	testWithWorker('should run emulator and call invalidateAll', async ({ worker }) => {
 		worker.use(
 			http.post(mockUrl, async () => {
 				return HttpResponse.json({
@@ -53,7 +56,6 @@ describe('page.svelte', () => {
 		const screen = render(Page, {
 			props: {
 				data: {
-					runPromise: Promise.resolve(null),
 					region: {
 						formValues: MOCK_FORM_VALUES,
 						hasRunBaseline: false
@@ -69,54 +71,20 @@ describe('page.svelte', () => {
 
 		await screen.getByRole('button', { name: 'Run baseline' }).click();
 
-		await expect.element(screen.getByRole('heading', { name: 'Projected prevalence in under' })).toBeVisible();
-		await expect.element(screen.getByRole('heading', { name: 'Clinical cases averted per' })).toBeVisible();
+		await vi.waitFor(() => expect(vi.mocked(invalidateAll)).toHaveBeenCalled());
 	});
 
-	testWithWorker('should show error message when emulator falsy', async ({ worker }) => {
-		worker.use(
-			http.post(mockUrl, async () => {
-				return HttpResponse.json({
-					status: 'success',
-					errors: null,
-					data: null
-				});
-			})
-		);
-
+	it('should display results on load if available', async () => {
 		const screen = render(Page, {
 			props: {
 				data: {
-					runPromise: Promise.resolve(null),
 					region: {
 						formValues: MOCK_FORM_VALUES,
-						hasRunBaseline: false
-					},
-					formSchema: MOCK_FORM_SCHEMA
-				},
-				params: {
-					project: 'test-project',
-					region: 'test-region'
-				}
-			}
-		} as any);
-
-		await screen.getByRole('button', { name: 'Run baseline' }).click();
-
-		await expect.element(screen.getByText(/failed/i)).toBeVisible();
-	});
-
-	it('should display results on load if runPromise has results', async () => {
-		const screen = render(Page, {
-			props: {
-				data: {
-					runPromise: Promise.resolve({
-						cases: MOCK_CASES_DATA,
-						prevalence: MOCK_PREVALENCE_DATA
-					}),
-					region: {
-						formValues: MOCK_FORM_VALUES,
-						hasRunBaseline: true
+						hasRunBaseline: true,
+						results: {
+							cases: MOCK_CASES_DATA,
+							prevalence: MOCK_PREVALENCE_DATA
+						}
 					},
 					formSchema: MOCK_FORM_SCHEMA
 				},
@@ -147,13 +115,13 @@ describe('page.svelte', () => {
 		const screen = render(Page, {
 			props: {
 				data: {
-					runPromise: Promise.resolve({
-						cases: MOCK_CASES_DATA,
-						prevalence: MOCK_PREVALENCE_DATA
-					}),
 					region: {
 						formValues: MOCK_FORM_VALUES,
-						hasRunBaseline: true
+						hasRunBaseline: true,
+						results: {
+							cases: MOCK_CASES_DATA,
+							prevalence: MOCK_PREVALENCE_DATA
+						}
 					},
 					formSchema: MOCK_FORM_SCHEMA
 				},
@@ -173,13 +141,13 @@ describe('page.svelte', () => {
 		const screen = render(Page, {
 			props: {
 				data: {
-					runPromise: Promise.resolve({
-						cases: MOCK_CASES_DATA,
-						prevalence: MOCK_PREVALENCE_DATA
-					}),
 					region: {
 						formValues: MOCK_FORM_VALUES,
-						hasRunBaseline: true
+						hasRunBaseline: true,
+						results: {
+							cases: MOCK_CASES_DATA,
+							prevalence: MOCK_PREVALENCE_DATA
+						}
 					},
 					formSchema: MOCK_FORM_SCHEMA
 				},

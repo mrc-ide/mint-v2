@@ -25,8 +25,7 @@ export const actions: Actions = {
 		projectData.regions.push({
 			name: addRegionForm.data.name,
 			formValues: {},
-			hasRunBaseline: false,
-			cases: []
+			hasRunBaseline: false
 		});
 
 		return redirect(303, regionUrl(projectData.name, addRegionForm.data.name));

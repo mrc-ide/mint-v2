@@ -5,12 +5,10 @@ import {
 	getRegionFormSchema,
 	getRegionFromUserState,
 	invalidateStrategyForProject,
-	runEmulatorOnLoad,
 	saveRegionFormState,
 	saveRegionRun
 } from '$lib/server/region';
-import type { CasesData, EmulatorResults, Region, UserState } from '$lib/types/userState';
-import type { RequestEvent } from '@sveltejs/kit';
+import type { EmulatorResults, UserState } from '$lib/types/userState';
 import type { Mock } from 'vitest';
 
 // Mock dependencies
@@ -75,99 +73,6 @@ describe('getRegionFormSchema', () => {
 	});
 });
 
-describe('runEmulatorOnLoad', () => {
-	const mockFetch = vi.fn() as unknown as RequestEvent['fetch'];
-
-	beforeEach(() => {
-		vi.clearAllMocks();
-	});
-
-	it('should return null when hasRunBaseline is false', async () => {
-		const regionData: Region = {
-			name: 'Region 1',
-			hasRunBaseline: false,
-			formValues: {},
-			cases: []
-		};
-
-		const result = await runEmulatorOnLoad(regionData, mockFetch);
-
-		expect(result).toBeNull();
-		expect(apiFetch).not.toHaveBeenCalled();
-	});
-
-	it('should fetch and return emulator results when hasRunBaseline is true', async () => {
-		const mockResults: EmulatorResults = {
-			cases: [{ year: 1, scenario: 'no_intervention', casesPer1000: 100 }],
-			prevalence: [],
-			eirValid: true
-		};
-
-		const regionData: Region = {
-			name: 'Region 1',
-			hasRunBaseline: true,
-			formValues: { population: '10000' },
-			cases: []
-		};
-
-		(apiFetch as Mock).mockResolvedValue({ data: mockResults });
-
-		const result = await runEmulatorOnLoad(regionData, mockFetch);
-
-		expect(result).toEqual(mockResults);
-		expect(apiFetch).toHaveBeenCalledWith({
-			url: '/api/run-emulator',
-			method: 'POST',
-			body: regionData.formValues,
-			fetcher: mockFetch
-		});
-	});
-
-	it('should return null and log error when API call fails', async () => {
-		const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-		const regionData: Region = {
-			name: 'Region 1',
-			hasRunBaseline: true,
-			formValues: { population: '10000' },
-			cases: []
-		};
-
-		(apiFetch as Mock).mockRejectedValue(new Error('API Error'));
-
-		const result = await runEmulatorOnLoad(regionData, mockFetch);
-
-		expect(result).toBeNull();
-		expect(consoleErrorSpy).toHaveBeenCalledWith(expect.any(Error));
-
-		consoleErrorSpy.mockRestore();
-	});
-
-	it('should pass formValues as request body', async () => {
-		const formValues = {
-			population: '50000',
-			baseline_prevalence: '0.15'
-		};
-
-		const regionData: Region = {
-			name: 'Region 1',
-			hasRunBaseline: true,
-			formValues,
-			cases: []
-		};
-
-		(apiFetch as Mock).mockResolvedValue({ data: { cases: [], prevalence: [] } });
-
-		await runEmulatorOnLoad(regionData, mockFetch);
-
-		expect(apiFetch).toHaveBeenCalledWith({
-			url: '/api/run-emulator',
-			method: 'POST',
-			body: formValues,
-			fetcher: mockFetch
-		});
-	});
-});
-
 describe('saveRegionRun', () => {
 	beforeEach(() => {
 		vi.resetAllMocks();
@@ -184,8 +89,7 @@ describe('saveRegionRun', () => {
 						{
 							name: 'Region 1',
 							hasRunBaseline: false,
-							formValues: {},
-							cases: []
+							formValues: {}
 						}
 					]
 				}
@@ -193,15 +97,19 @@ describe('saveRegionRun', () => {
 		};
 
 		const formValues = { population: '10000' };
-		const cases: CasesData[] = [{ year: 1, scenario: 'no_intervention', casesPer1000: 100 }];
+		const emulatorResults: EmulatorResults = {
+			eirValid: true,
+			cases: [{ year: 1, scenario: 'no_intervention', casesPer1000: 150 }],
+			prevalence: [{ days: 14, scenario: 'no_intervention', prevalence: 0.24 }]
+		};
 
 		vi.mocked(saveUserState).mockResolvedValue(undefined);
 
-		await saveRegionRun(userState, 'Project A', 'Region 1', formValues, cases);
+		await saveRegionRun(userState, 'Project A', 'Region 1', formValues, emulatorResults);
 
 		const region = userState.projects[0].regions[0];
 		expect(region.formValues).toEqual(formValues);
-		expect(region.cases).toEqual(cases);
+		expect(region.results).toEqual(emulatorResults);
 		expect(region.hasRunBaseline).toBe(true);
 		expect(saveUserState).toHaveBeenCalledWith(userState);
 	});
@@ -213,7 +121,7 @@ describe('saveRegionRun', () => {
 			projects: []
 		};
 
-		await expect(saveRegionRun(userState, 'Nonexistent', 'Region 1', {}, [])).rejects.toThrow();
+		await expect(saveRegionRun(userState, 'Nonexistent', 'Region 1', {}, {} as EmulatorResults)).rejects.toThrow();
 	});
 
 	it('should throw 404 when region not found', async () => {
@@ -228,12 +136,16 @@ describe('saveRegionRun', () => {
 			]
 		};
 
-		await expect(saveRegionRun(userState, 'Project A', 'Nonexistent', {}, [])).rejects.toThrow();
+		await expect(saveRegionRun(userState, 'Project A', 'Nonexistent', {}, {} as EmulatorResults)).rejects.toThrow();
 	});
 
 	it('should update existing data when region already has baseline', async () => {
 		const oldFormValues = { population: '5000' };
-		const oldCases: CasesData[] = [{ year: 1, scenario: 'no_intervention', casesPer1000: 200 }];
+		const oldResults: EmulatorResults = {
+			eirValid: true,
+			cases: [{ year: 1, scenario: 'no_intervention', casesPer1000: 150 }],
+			prevalence: [{ days: 14, scenario: 'no_intervention', prevalence: 0.24 }]
+		};
 
 		const userState: UserState = {
 			userId: 'user-1',
@@ -246,7 +158,7 @@ describe('saveRegionRun', () => {
 							name: 'Region 1',
 							hasRunBaseline: true,
 							formValues: oldFormValues,
-							cases: oldCases
+							results: oldResults
 						}
 					]
 				}
@@ -254,15 +166,18 @@ describe('saveRegionRun', () => {
 		};
 
 		const newFormValues = { population: '10000' };
-		const newCases: CasesData[] = [{ year: 1, scenario: 'no_intervention', casesPer1000: 100 }];
+		const newResults: EmulatorResults = {
+			...oldResults,
+			eirValid: false
+		};
 
 		vi.mocked(saveUserState).mockResolvedValue(undefined);
 
-		await saveRegionRun(userState, 'Project A', 'Region 1', newFormValues, newCases);
+		await saveRegionRun(userState, 'Project A', 'Region 1', newFormValues, newResults);
 
 		const region = userState.projects[0].regions[0];
 		expect(region.formValues).toEqual(newFormValues);
-		expect(region.cases).toEqual(newCases);
+		expect(region.results).toEqual(newResults);
 	});
 });
 
@@ -282,8 +197,7 @@ describe('saveRegionFormState', () => {
 						{
 							name: 'Region 1',
 							hasRunBaseline: false,
-							formValues: {},
-							cases: []
+							formValues: {}
 						}
 					]
 				}
@@ -301,7 +215,7 @@ describe('saveRegionFormState', () => {
 		expect(saveUserState).toHaveBeenCalledWith(userState);
 	});
 
-	it('should not modify hasRunBaseline or cases', async () => {
+	it('should not modify hasRunBaseline or results', async () => {
 		const userState: UserState = {
 			userId: 'user-1',
 			createdAt: '2024-01-01T00:00:00.000Z',
@@ -312,8 +226,7 @@ describe('saveRegionFormState', () => {
 						{
 							name: 'Region 1',
 							hasRunBaseline: true,
-							formValues: {},
-							cases: [{ year: 1, scenario: 'no_intervention', casesPer1000: 100 }]
+							formValues: {}
 						}
 					]
 				}
@@ -328,7 +241,7 @@ describe('saveRegionFormState', () => {
 
 		const region = userState.projects[0].regions[0];
 		expect(region.hasRunBaseline).toBe(true);
-		expect(region.cases).toHaveLength(1);
+		expect(region.results).toBeUndefined();
 	});
 
 	it('should throw 404 when project not found', async () => {
@@ -369,8 +282,7 @@ describe('getRegionFromUserState', () => {
 						{
 							name: 'Region 1',
 							hasRunBaseline: false,
-							formValues: {},
-							cases: []
+							formValues: {}
 						}
 					]
 				}

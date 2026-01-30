@@ -121,3 +121,12 @@ def test_metrics_middleware_tracks_exceptions():
 
     final_active = ACTIVE_REQUESTS.labels(**labels)._value.get()
     assert final_active == initial_active
+
+
+def test_compare_parameters():
+    response = client.get("/compare-parameters")
+
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()["data"]
+    assert len(data["baselineParameters"]) == 2
+    assert len(data["interventionParameters"]) == 3

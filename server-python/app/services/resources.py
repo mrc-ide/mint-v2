@@ -3,6 +3,8 @@ from pathlib import Path
 
 import jsonschema
 
+from app.models import CompareParameter, CompareParametersResponse
+
 APP_DIR = Path(__file__).parent.parent
 
 
@@ -19,3 +21,43 @@ def get_dynamic_form_options() -> dict:
     validate_json(options, "DynamicFormOptions")
 
     return options
+
+
+def get_compare_parameters() -> CompareParametersResponse:
+    form_options = get_dynamic_form_options()
+    baseline_param_names = [
+        ("current_malaria_prevalence", "Prevalence"),
+        ("preference_for_biting_in_bed", "Preference for Biting in Bed"),
+    ]
+    intervention_param_names = [("irs_future", "IRS coverage"), ("itn_future", "ITN usage"), ("lsm", "LSM coverage")]
+
+    baseline_parameters = [create_compare_parameter(param_name, form_options) for param_name in baseline_param_names]
+    intervention_parameters = [
+        create_compare_parameter(param_name, form_options) for param_name in intervention_param_names
+    ]
+
+    return CompareParametersResponse(
+        baselineParameters=baseline_parameters,
+        interventionParameters=intervention_parameters,
+    )
+
+
+def create_compare_parameter(param: tuple[str, str], form_options: dict) -> CompareParameter:
+    """Create a CompareParameter from form field data."""
+    param_name, label = param
+    field = get_form_field(param_name, form_options)
+    return CompareParameter(
+        parameterName=param_name,
+        label=label,
+        min=field.get("min", 0.0),
+        max=field.get("max", 100.0),
+    )
+
+
+def get_form_field(parameter_name: str, form_options: dict) -> dict:
+    for group in form_options.get("groups", []):
+        for sub_group in group.get("subGroups", []):
+            for field in sub_group.get("fields", []):
+                if field.get("id") == parameter_name:
+                    return field
+    raise ValueError(f"Parameter '{parameter_name}' not found in form options.")

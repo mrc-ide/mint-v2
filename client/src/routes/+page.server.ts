@@ -33,8 +33,7 @@ export const actions: Actions = {
 			regions: form.data.regions.map((region) => ({
 				name: region,
 				formValues: {},
-				hasRunBaseline: false,
-				cases: []
+				hasRunBaseline: false
 			}))
 		});
 

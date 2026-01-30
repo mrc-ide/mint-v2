@@ -9,9 +9,9 @@ from prometheus_client import Counter, Gauge, Histogram, make_asgi_app
 
 from app import __version__
 
-from .models import EmulatorRequest, EmulatorResponse, Response, Version
+from .models import CompareParametersResponse, EmulatorRequest, EmulatorResponse, Response, Version
 from .services.emulator import run_emulator_model
-from .services.resources import get_dynamic_form_options
+from .services.resources import get_compare_parameters, get_dynamic_form_options
 
 logging.basicConfig(
     level=logging.WARNING,
@@ -79,3 +79,8 @@ async def dynamic_form_options() -> Response[dict]:
 @app.post("/emulator/run")
 async def run_emulator(emulator_request: EmulatorRequest) -> Response[EmulatorResponse]:
     return Response(data=run_emulator_model(emulator_request))
+
+
+@app.get("/compare-parameters")
+async def compare_parameters() -> Response[CompareParametersResponse]:
+    return Response(data=get_compare_parameters())

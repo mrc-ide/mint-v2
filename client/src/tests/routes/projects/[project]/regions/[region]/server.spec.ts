@@ -50,7 +50,7 @@ describe('POST', () => {
 			params.project,
 			params.region,
 			MOCK_FORM_VALUES,
-			expectedResponse.data.cases
+			expectedResponse.data
 		);
 	});
 

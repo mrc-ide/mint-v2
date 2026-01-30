@@ -3,6 +3,8 @@ from pydantic import ValidationError
 
 from app.models import (
     Cases,
+    CompareParameter,
+    CompareParametersResponse,
     EmulatorRequest,
     EmulatorResponse,
     EmulatorScenario,
@@ -229,3 +231,31 @@ class TestEmulatorResponse:
         assert response.prevalence == []
         assert response.cases == []
         assert response.eirValid is False
+
+
+class TestCompareParameter:
+    def test_compare_parameter_creation(self):
+        param = CompareParameter(parameterName="test_param", label="Test Parameter", min=0.0, max=100.0)
+        assert param.parameter_name == "test_param"
+        assert param.label == "Test Parameter"
+        assert param.min == 0.0
+        assert param.max == 100.0
+
+
+class TestCompareParametersResponse:
+    def test_compare_parameters_response_creation(self):
+        baseline_params = [
+            CompareParameter(parameterName="param1", label="Parameter 1", min=0.0, max=50.0),
+            CompareParameter(parameterName="param2", label="Parameter 2", min=10.0, max=60.0),
+        ]
+        intervention_params = [
+            CompareParameter(parameterName="param3", label="Parameter 3", min=20.0, max=70.0),
+        ]
+        response = CompareParametersResponse(
+            baselineParameters=baseline_params,
+            interventionParameters=intervention_params,
+        )
+        assert len(response.baseline_parameters) == 2
+        assert len(response.intervention_parameters) == 1
+        assert response.baseline_parameters[0].parameter_name == "param1"
+        assert response.intervention_parameters[0].label == "Parameter 3"

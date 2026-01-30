@@ -1,8 +1,8 @@
 import type { DynamicFormSchema, FormValue } from '$lib/components/dynamic-region-form/types';
 import { ApiError, apiFetch } from '$lib/fetch';
 import { saveUserState } from '$lib/server/redis';
-import type { CasesData, EmulatorResults, Region, UserState } from '$lib/types/userState';
-import { regionFormUrl, runEmulatorUrl } from '$lib/url';
+import type { EmulatorResults, Region, UserState } from '$lib/types/userState';
+import { regionFormUrl } from '$lib/url';
 import { error } from '@sveltejs/kit';
 import type { RequestEvent } from '../../routes/projects/[project]/regions/[region]/$types';
 
@@ -20,36 +20,16 @@ export const getRegionFormSchema = async (
 	}
 };
 
-export const runEmulatorOnLoad = async (
-	regionData: Region,
-	fetch: RequestEvent['fetch']
-): Promise<EmulatorResults | null> => {
-	if (!regionData.hasRunBaseline) return null;
-	try {
-		const res = await apiFetch<EmulatorResults>({
-			url: runEmulatorUrl(),
-			method: 'POST',
-			body: regionData.formValues,
-			fetcher: fetch
-		});
-		return res.data;
-	} catch (e) {
-		// This promise cannot throw as its during page load & will cause app to crash. Thus return null for data
-		console.error(e);
-	}
-	return null;
-};
-
 export const saveRegionRun = async (
 	userState: UserState,
 	project: string,
 	region: string,
 	formValues: Record<string, FormValue>,
-	cases: CasesData[]
+	results: EmulatorResults
 ) => {
 	const regionData = getRegionFromUserState(userState, project, region);
 	regionData.formValues = formValues;
-	regionData.cases = cases;
+	regionData.results = results;
 	regionData.hasRunBaseline = true;
 	await saveUserState(userState);
 };
