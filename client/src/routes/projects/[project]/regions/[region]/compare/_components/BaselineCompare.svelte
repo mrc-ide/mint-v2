@@ -15,12 +15,12 @@
 	interface Props {
 		presentResults: EmulatorResults;
 		compareBaselineParameters: CompareParameterWithValue[];
-		formValues: Record<string, FormValue>;
+		regionFormValues: Record<string, FormValue>;
 		chartTheme: string;
 		params: { project: string; region: string };
 	}
 
-	let { presentResults, compareBaselineParameters, formValues, chartTheme, params }: Props = $props();
+	let { presentResults, compareBaselineParameters, regionFormValues, chartTheme, params }: Props = $props();
 	let selectedParameter = $state(compareBaselineParameters[0]);
 	let sliderValue = $derived(selectedParameter.value);
 	let longTermResults = $state<EmulatorResults>();
@@ -39,7 +39,7 @@
 				method: 'POST',
 				body: {
 					formValues: {
-						...formValues,
+						...regionFormValues,
 						[selectedParameter.parameterName]: sliderValue
 					}
 				}

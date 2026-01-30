@@ -18,6 +18,6 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 		return json(res);
 	} catch (e) {
 		const status = e instanceof ApiError ? e.status : 500;
-		error(status, 'Failed to run eumulator for comparing region');
+		error(status, 'Failed to run emulator for comparing region');
 	}
 };

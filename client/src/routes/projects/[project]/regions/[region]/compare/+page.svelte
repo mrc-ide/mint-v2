@@ -22,7 +22,7 @@
 			<BaselineCompare
 				{params}
 				{chartTheme}
-				formValues={data.region.formValues}
+				regionFormValues={data.region.formValues}
 				compareBaselineParameters={data.compareParameters.baselineParameters}
 				presentResults={data.region.results}
 			/>
