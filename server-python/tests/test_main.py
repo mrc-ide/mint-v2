@@ -128,5 +128,5 @@ def test_compare_parameters():
 
     assert response.status_code == status.HTTP_200_OK
     data = response.json()["data"]
-    assert len(data["baselineParameters"]) == 2
+    assert len(data["baselineParameters"]) == 1
     assert len(data["interventionParameters"]) == 3

@@ -1,9 +1,10 @@
-import { getCompareParameters } from '$lib/server/compare';
+import { fetchCompareParameters, getCompareParametersWithValue } from '$lib/server/compare';
 import { getRegionFromUserState } from '$lib/server/region';
 import { load } from '$routes/projects/[project]/regions/[region]/compare/+page.server';
 
 vi.mock('$lib/server/compare', () => ({
-	getCompareParameters: vi.fn()
+	fetchCompareParameters: vi.fn(),
+	getCompareParametersWithValue: vi.fn()
 }));
 vi.mock('$lib/server/region', () => ({
 	getRegionFromUserState: vi.fn()
@@ -11,8 +12,10 @@ vi.mock('$lib/server/region', () => ({
 describe('+page.server load function', () => {
 	it('should load region data and compare parameters', async () => {
 		const fetchMock = vi.fn();
-		vi.mocked(getRegionFromUserState).mockReturnValue({ region: 'test-region' } as any);
-		vi.mocked(getCompareParameters).mockResolvedValue({ some: 'compare-params' } as any);
+		const mockRegion = { region: 'test-region', formValues: { prev: 1 } };
+		vi.mocked(getRegionFromUserState).mockReturnValue(mockRegion as any);
+		vi.mocked(fetchCompareParameters).mockResolvedValue({ some: 'compare-params' } as any);
+		vi.mocked(getCompareParametersWithValue).mockReturnValue({ some: 'compare-params-with-value' } as any);
 
 		const params = { project: 'test-project', region: 'test-region' };
 		const locals = { userState: { projects: [] } };
@@ -20,10 +23,11 @@ describe('+page.server load function', () => {
 		const result = await load({ params, locals, fetch: fetchMock } as any);
 
 		expect(getRegionFromUserState).toHaveBeenCalledWith(locals.userState, params.project, params.region);
-		expect(getCompareParameters).toHaveBeenCalledWith(fetchMock);
+		expect(fetchCompareParameters).toHaveBeenCalledWith(fetchMock);
 		expect(result).toEqual({
-			region: { region: 'test-region' },
-			compareParameters: { some: 'compare-params' }
+			region: mockRegion,
+			compareParameters: { some: 'compare-params-with-value' }
 		});
+		expect(getCompareParametersWithValue).toHaveBeenCalledWith({ some: 'compare-params' }, mockRegion.formValues);
 	});
 });

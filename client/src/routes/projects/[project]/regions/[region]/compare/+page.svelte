@@ -1,30 +1,31 @@
 <script lang="ts">
 	import * as Alert from '$lib/components/ui/alert/index';
 	import CircleAlert from '@lucide/svelte/icons/circle-alert';
+	import type { PageProps } from './$types';
+	import BaselineCompare from './_components/BaselineCompare.svelte';
+	import { getChartTheme } from '$lib/charts/baseChart';
 
-	import type { PageProps } from '../$types';
-
-	let { data }: PageProps = $props();
+	let { data, params }: PageProps = $props();
+	let chartTheme = $derived(getChartTheme());
 </script>
 
 <div class="mx-auto px-4 py-2">
 	<div class="mb-4">
 		<h1 class="text-xl font-bold">Long term Scenario planning</h1>
 		<p class="mb-1 text-muted-foreground">
-			Compare the impact of current interventions versus long-term scenarios. Adjust parameters and modify intervention
+			Compare the impact of present interventions versus long-term scenarios. Adjust parameters and modify intervention
 			coverage percentages to see how cases and prevalence change across different budget levels.
 		</p>
 	</div>
-	{#if data.region.hasRunBaseline}
+	{#if data.region.hasRunBaseline && data.region.results}
 		<div class="flex flex-col gap-6">
-			<div class="flex flex-col gap-3">
-				<div class="flex flex-col gap-3 pl-2">parameters selection</div>
-
-				<div class="flex gap-3">
-					<div class="flex-1/2">prevalence graph</div>
-					<div class="flex-1/2">cases graph</div>
-				</div>
-			</div>
+			<BaselineCompare
+				{params}
+				{chartTheme}
+				regionFormValues={data.region.formValues}
+				compareBaselineParameters={data.compareParameters.baselineParameters}
+				presentResults={data.region.results}
+			/>
 
 			<div class="flex gap-3">Varying interventions graphs</div>
 		</div>

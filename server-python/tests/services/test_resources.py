@@ -143,7 +143,6 @@ class TestGetCompareParameters:
     def test_get_compare_parameters(self, mock_compare: Mock, mock_options: Mock):
         options = {"field": "test"}
         baseline_parameters = [
-            CompareParameter(parameterName="current_malaria_prevalence", label="Prevalence", min=0, max=100),
             CompareParameter(
                 parameterName="preference_for_biting_in_bed", label="Preference for Biting in Bed", min=0, max=100
             ),
@@ -151,7 +150,7 @@ class TestGetCompareParameters:
         intervention_parameters = [
             CompareParameter(parameterName="irs_future", label="IRS coverage", min=0, max=100),
             CompareParameter(parameterName="itn_future", label="ITN usage", min=0, max=100),
-            CompareParameter(parameterName="lsm", label="LSM", min=0, max=100),
+            CompareParameter(parameterName="lsm", label="LSM coverage", min=0, max=100),
         ]
         mock_options.return_value = options
         mock_compare.side_effect = [*baseline_parameters, *intervention_parameters]
@@ -160,8 +159,7 @@ class TestGetCompareParameters:
 
         mock_options.assert_called_once()
         expected_compare_calls = [
-            (("current_malaria_prevalence", "Prevalence"), options),
-            (("preference_for_biting_in_bed", "Preference for Biting in Bed"), options),
+            (("current_malaria_prevalence", "Baseline prevalence"), options),
             (("irs_future", "IRS coverage"), options),
             (("itn_future", "ITN usage"), options),
             (("lsm", "LSM coverage"), options),
