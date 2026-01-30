@@ -135,7 +135,6 @@ export const createCasesCompareSeries = (
 			intervention: ScenarioToLabel[scenario as Scenario]
 		}
 	})),
-	color: name === 'Present' ? 'var(--chart-1)' : 'var(--chart-2)',
 	step: 'left'
 });
 
@@ -157,7 +156,7 @@ export const getCasesConfigCompare = (
 			}
 		},
 		title: {
-			text: '<span style="color:var(--chart-1);">Present</span> vs <span style="color:var(--chart-2);">Long term</span> - Cases vs Cost'
+			text: 'Present vs Long term - Total Cases vs Total Cost'
 		},
 		xAxis: {
 			title: {
