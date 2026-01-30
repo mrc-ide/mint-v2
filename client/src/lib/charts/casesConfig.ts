@@ -147,40 +147,27 @@ export const getCasesConfigCompare = (
 	const futureSeries = createCasesCompareSeries(newCases, formValues, 'Long term');
 
 	const breakPoint = ((presentSeries.data!.at(1) as PointOptionsObject)?.x as number) ?? 0;
+	const xAxisBreaks = breakPoint > 0 ? [{ from: 0, to: breakPoint * 0.9 }] : undefined;
+
 	return {
 		chart: {
 			type: 'line',
 			height: 500,
-			zooming: {
-				type: 'x'
-			}
+			zooming: { type: 'x' }
 		},
 		title: {
 			text: 'Present vs Long term - Total Cases vs Total Cost'
 		},
 		xAxis: {
-			title: {
-				text: 'Total Cost ($USD)'
-			},
-			labels: {
-				format: '${value:,.0f}'
-			},
+			title: { text: 'Total Cost ($USD)' },
+			labels: { format: '${value:,.0f}' },
 			min: 0,
 			tickPixelInterval: 10,
-			breaks: [
-				{
-					from: 0,
-					to: breakPoint * 0.9 // scale down the break size from the first data point,
-				}
-			]
+			breaks: xAxisBreaks
 		},
 		yAxis: {
-			title: {
-				text: 'Total Cases'
-			},
-			labels: {
-				format: '{value:,.0f}'
-			}
+			title: { text: 'Total Cases' },
+			labels: { format: '{value:,.0f}' }
 		},
 		tooltip: {
 			shared: true,
@@ -188,18 +175,14 @@ export const getCasesConfigCompare = (
 			useHTML: true,
 			headerFormat: 'Total Cost: <b/>${point.x:,.0f}</b>',
 			pointFormat: `<div class="flex items-center">
-			    <span style="color:{point.color}" class="mr-1">●</span>
-			    <span class="font-medium">{series.name}:</span>
-			    <span class="ml-0.5">{point.y:,.1f} cases
-			        <span class="text-muted-foreground">
-			            {point.custom.intervention}
-			        </span>
-			    </span>
+				<span style="color:{point.color}" class="mr-1">●</span>
+				<span class="font-medium">{series.name}:</span>
+				<span class="ml-0.5">{point.y:,.1f} cases
+					<span class="text-muted-foreground">{point.custom.intervention}</span>
+				</span>
 			</div>`
 		},
-		series: [presentSeries, futureSeries],
-		legend: {
-			enabled: true
-		}
+		series: futureSeries.data?.length ? [presentSeries, futureSeries] : [presentSeries],
+		legend: { enabled: true }
 	};
 };

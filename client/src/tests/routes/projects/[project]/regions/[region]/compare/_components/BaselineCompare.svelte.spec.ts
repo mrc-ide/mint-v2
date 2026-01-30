@@ -32,5 +32,6 @@ describe('BaselineCompare component', () => {
 		await expect.element(screen.getByRole('slider')).toBeInTheDocument();
 		await expect.element(screen.getByText('50%').first()).toBeVisible();
 		await expect.element(screen.getByRole('region', { name: 'prevalence compare graph' })).toBeVisible();
+		await expect.element(screen.getByRole('region', { name: 'cases compare graph' })).toBeVisible();
 	});
 });

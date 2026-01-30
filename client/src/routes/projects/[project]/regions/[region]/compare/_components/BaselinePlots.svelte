@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createHighchart } from '$lib/charts/baseChart';
-	import { createCasesCompareSeries, getCasesConfigCompare } from '$lib/charts/casesConfig';
+	import { getCasesConfigCompare } from '$lib/charts/casesConfig';
 	import { createPresentPrevalenceSeries, getPrevalenceConfigCompare } from '$lib/charts/prevalenceConfig';
 	import type { FormValue } from '$lib/components/dynamic-region-form/types';
 	import type { EmulatorResults } from '$lib/types/userState';
@@ -23,7 +23,7 @@
 	<section aria-label="prevalence compare graph" class="flex-1/2 rounded-lg border">
 		<div {@attach createHighchart(prevalenceConfig)} class={chartTheme}></div>
 	</section>
-	<section aria-label="prevalence compare graph" class="flex-1/2 rounded-lg border">
+	<section aria-label="cases compare graph" class="flex-1/2 rounded-lg border">
 		<div {@attach createHighchart(casesConfig)} class={chartTheme}></div>
 	</section>
 </div>

@@ -1,4 +1,4 @@
-import { MOCK_CASES_DATA, MOCK_PREVALENCE_DATA } from '$mocks/mocks';
+import { MOCK_CASES_DATA, MOCK_FORM_VALUES, MOCK_PREVALENCE_DATA } from '$mocks/mocks';
 import BaselinePlots from '$routes/projects/[project]/regions/[region]/compare/_components/BaselinePlots.svelte';
 import { render } from 'vitest-browser-svelte';
 
@@ -11,15 +11,20 @@ describe('BaselineCompare component', () => {
 					cases: MOCK_CASES_DATA,
 					prevalence: MOCK_PREVALENCE_DATA,
 					eirValid: true
-				}
+				},
+				formValues: MOCK_FORM_VALUES,
+				longTermResults: null
 			}
 		} as any);
-
 		await expect.element(screen.getByRole('region', { name: 'prevalence compare graph' })).toBeVisible();
-		await expect.element(screen.getByText(/no intervention present/i)).toBeVisible();
-		await expect.element(screen.getByText(/no intervention long term/i)).not.toBeInTheDocument();
+		await expect.element(screen.getByRole('button', { name: 'Show No Intervention Present' })).toBeVisible();
+		await expect
+			.element(screen.getByRole('button', { name: 'Show No Intervention Long Term' }))
+			.not.toBeInTheDocument();
 
-		await expect.element(screen.getByText('cases graph')).toBeVisible();
+		await expect.element(screen.getByRole('region', { name: 'cases compare graph' })).toBeVisible();
+		await expect.element(screen.getByRole('button', { name: 'Show Present' })).toBeVisible();
+		await expect.element(screen.getByRole('button', { name: 'Show Long Term' })).not.toBeInTheDocument();
 	});
 
 	it('should render graphs with long term results if available', async () => {
@@ -35,12 +40,17 @@ describe('BaselineCompare component', () => {
 					cases: MOCK_CASES_DATA,
 					prevalence: MOCK_PREVALENCE_DATA,
 					eirValid: true
-				}
+				},
+				formValues: MOCK_FORM_VALUES
 			}
 		} as any);
 
 		await expect.element(screen.getByRole('region', { name: 'prevalence compare graph' })).toBeVisible();
-		await expect.element(screen.getByText(/no intervention present/i)).toBeVisible();
-		await expect.element(screen.getByText(/no intervention long term/i)).toBeVisible();
+		await expect.element(screen.getByRole('button', { name: 'Show No Intervention Present' })).toBeVisible();
+		await expect.element(screen.getByRole('button', { name: 'Show No Intervention Long Term' })).toBeVisible();
+
+		await expect.element(screen.getByRole('region', { name: 'cases compare graph' })).toBeVisible();
+		await expect.element(screen.getByRole('button', { name: 'Show Present' })).toBeVisible();
+		await expect.element(screen.getByRole('button', { name: 'Show Long Term' })).toBeVisible();
 	});
 });
