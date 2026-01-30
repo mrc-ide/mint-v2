@@ -7,7 +7,7 @@
 	import { apiFetch } from '$lib/fetch';
 	import type { CompareParameterWithValue } from '$lib/types/compare';
 	import type { EmulatorResults } from '$lib/types/userState';
-	import { runEmulatorUrl } from '$lib/url';
+	import { regionCompareUrl } from '$lib/url';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import BaselinePlots from './BaselinePlots.svelte';
@@ -15,11 +15,12 @@
 	interface Props {
 		presentResults: EmulatorResults;
 		compareBaselineParameters: CompareParameterWithValue[];
-		formValues: Record<string, FormValue>;
+		regionFormValues: Record<string, FormValue>;
 		chartTheme: string;
+		params: { project: string; region: string };
 	}
 
-	let { presentResults, compareBaselineParameters, formValues, chartTheme }: Props = $props();
+	let { presentResults, compareBaselineParameters, regionFormValues, chartTheme, params }: Props = $props();
 	let selectedParameter = $state(compareBaselineParameters[0]);
 	let sliderValue = $derived(selectedParameter.value);
 	let longTermResults = $state<EmulatorResults>();
@@ -34,11 +35,13 @@
 		isLoading = true;
 		try {
 			const res = await apiFetch<EmulatorResults>({
-				url: runEmulatorUrl(),
+				url: regionCompareUrl(params.project, params.region),
 				method: 'POST',
 				body: {
-					...formValues,
-					[selectedParameter.parameterName]: sliderValue
+					formValues: {
+						...regionFormValues,
+						[selectedParameter.parameterName]: sliderValue
+					}
 				}
 			});
 			isLoading = false;

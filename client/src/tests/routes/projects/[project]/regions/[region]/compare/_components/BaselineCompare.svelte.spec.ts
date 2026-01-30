@@ -3,7 +3,7 @@ import BaselineCompare from '$routes/projects/[project]/regions/[region]/compare
 import { render } from 'vitest-browser-svelte';
 
 vi.mock('$lib/url', () => ({
-	runEmulatorUrl: vi.fn().mockReturnValue('http://test-emulator-url')
+	regionCompareUrl: vi.fn().mockReturnValue('http://test-emulator-url')
 }));
 describe('BaselineCompare component', () => {
 	it('should render fields + present day charts initially', async () => {

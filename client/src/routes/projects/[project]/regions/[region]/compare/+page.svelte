@@ -5,7 +5,7 @@
 	import BaselineCompare from './_components/BaselineCompare.svelte';
 	import { getChartTheme } from '$lib/charts/baseChart';
 
-	let { data }: PageProps = $props();
+	let { data, params }: PageProps = $props();
 	let chartTheme = $derived(getChartTheme());
 </script>
 
@@ -21,8 +21,9 @@
 		<h3 class="mb-1 font-semibold">Varying Baseline</h3>
 		<div class="flex flex-col gap-6">
 			<BaselineCompare
+				{params}
 				{chartTheme}
-				formValues={data.region.formValues}
+				regionFormValues={data.region.formValues}
 				compareBaselineParameters={data.compareParameters.baselineParameters}
 				presentResults={data.region.results}
 			/>
