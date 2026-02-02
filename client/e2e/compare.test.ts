@@ -31,7 +31,7 @@ test.describe('E2E Compare Page', () => {
 
 		changeSlider(page, 'baseline-parameter-slider', 0.7);
 
-		// prevlalence plot
+		// prevalence plot
 		await expect(page.getByRole('button', { name: 'Show No Intervention Long term' })).toBeVisible();
 		await expect(page.getByRole('button', { name: 'Show No Intervention Present' })).toBeVisible();
 		// cases plot
