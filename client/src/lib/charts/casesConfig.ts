@@ -135,6 +135,10 @@ export const createCasesCompareSeries = (
 	step: 'left'
 });
 
+/**
+ * The function creates an x-axis break to minimize the empty space between the first and second data points.
+ * This is because the first point is always at x=0 (no intervention), and the second point can be far away, leading to a large empty space on the chart.
+ */
 export const createBreakToMinimizeEmptySpace = (
 	data1: PointOptionsObject[],
 	data2: PointOptionsObject[]
