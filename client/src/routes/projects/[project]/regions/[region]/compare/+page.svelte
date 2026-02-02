@@ -18,20 +18,13 @@
 		</p>
 	</div>
 	{#if data.region.hasRunBaseline && data.region.results}
-		<h3 class="mb-1 font-semibold">Varying Baseline</h3>
-		<div class="flex flex-col gap-6">
-			<BaselineCompare
-				{params}
-				{chartTheme}
-				regionFormValues={data.region.formValues}
-				compareBaselineParameters={data.compareParameters.baselineParameters}
-				presentResults={data.region.results}
-			/>
-			<div>
-				<h3 class="mb-1 font-semibold">Varying Interventions</h3>
-				<div class="flex gap-3">Varying interventions graphs</div>
-			</div>
-		</div>
+		<BaselineCompare
+			{params}
+			{chartTheme}
+			regionFormValues={data.region.formValues}
+			compareBaselineParameters={data.compareParameters.baselineParameters}
+			presentResults={data.region.results}
+		/>
 	{:else}
 		<Alert.Root variant="warning">
 			<CircleAlert />

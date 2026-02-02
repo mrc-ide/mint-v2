@@ -11,6 +11,8 @@
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import BaselinePlots from './BaselinePlots.svelte';
+	import debounce from 'debounce';
+	import { DEBOUNCE_DELAY_MS } from '$lib/components/dynamic-region-form/utils';
 
 	interface Props {
 		presentResults: EmulatorResults;
@@ -51,51 +53,60 @@
 			isLoading = false;
 		}
 	};
+	const debounceRunEmulator = debounce(runEmulator, DEBOUNCE_DELAY_MS);
 
 	onMount(() => {
 		isLoading = false;
 	});
 </script>
 
-<div class="flex flex-col gap-6">
-	<Field.Group class="gap-4">
-		<Field.Field>
-			<Field.Label for="parameter-select">What do you want to adjust?</Field.Label>
-			<RadioGroup.Root value={selectedParameter.parameterName} onValueChange={updateBaselineParam} disabled={isLoading}>
-				{#each compareBaselineParameters as param (param.parameterName)}
-					<Field.Field orientation="horizontal">
-						<RadioGroup.Item value={param.parameterName} id={param.parameterName} />
-						<Field.Label for={param.parameterName}>{param.label}</Field.Label>
-					</Field.Field>
-				{/each}
-			</RadioGroup.Root>
-		</Field.Field>
-		<Field.Field>
-			<Field.Label for="baseline-parameter-slider">Change from baseline (%)</Field.Label>
-			<div class="flex flex-row items-center gap-3">
-				<SliderWithMarker
-					id="baseline-parameter-slider"
-					type="single"
-					bind:value={sliderValue}
-					onValueCommit={runEmulator}
-					max={selectedParameter.max}
-					min={selectedParameter.min}
+<div class="flex flex-row gap-4">
+	<div class="flex w-1/4 flex-col rounded-md border p-4">
+		<Field.Group class="gap-4">
+			<Field.Field>
+				<Field.Label for="parameter-select">What do you want to adjust?</Field.Label>
+				<RadioGroup.Root
+					value={selectedParameter.parameterName}
+					onValueChange={updateBaselineParam}
 					disabled={isLoading}
-					aria-label="Adjust baseline parameter slider"
-					markerValue={selectedParameter.value}
-					unit="%"
-					class="h-full"
-				/>
-				<span class="text-right text-sm font-medium tabular-nums">
-					{#if sliderValue - selectedParameter.value >= 0}+{:else}-{/if}
-					{Math.abs(sliderValue - selectedParameter.value)}%</span
 				>
-			</div>
-		</Field.Field>
-	</Field.Group>
+					{#each compareBaselineParameters as param (param.parameterName)}
+						<Field.Field orientation="horizontal">
+							<RadioGroup.Item value={param.parameterName} id={param.parameterName} />
+							<Field.Label for={param.parameterName}>{param.label}</Field.Label>
+						</Field.Field>
+					{/each}
+				</RadioGroup.Root>
+			</Field.Field>
+			<Field.Field>
+				<Field.Label for="baseline-parameter-slider">Change from baseline (%)</Field.Label>
+				<div class="flex flex-row items-center gap-2">
+					<SliderWithMarker
+						id="baseline-parameter-slider"
+						type="single"
+						bind:value={sliderValue}
+						onValueCommit={debounceRunEmulator}
+						max={selectedParameter.max}
+						min={selectedParameter.min}
+						disabled={isLoading}
+						aria-label="Adjust baseline parameter slider"
+						markerValue={selectedParameter.value}
+						unit="%"
+						class="h-full"
+					/>
+					<span class="text-right text-sm font-medium tabular-nums">
+						{#if sliderValue - selectedParameter.value >= 0}+{:else}-{/if}
+						{Math.abs(sliderValue - selectedParameter.value)}%</span
+					>
+				</div>
+			</Field.Field>
+		</Field.Group>
+	</div>
 
 	{#if isLoading}
-		<Loader text="Loading..." />
+		<div class="flex flex-3/4 items-center justify-center">
+			<Loader text="Loading..." />
+		</div>
 	{:else}
 		<BaselinePlots {chartTheme} {presentResults} {longTermResults} {regionFormValues} />
 	{/if}

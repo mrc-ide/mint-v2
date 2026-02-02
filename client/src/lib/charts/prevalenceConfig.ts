@@ -41,6 +41,13 @@ const BASE_OPTIONS: Partial<Highcharts.Options> = {
 		itemStyle: {
 			fontSize: '.75em'
 		}
+	},
+	plotOptions: {
+		series: {
+			marker: {
+				enabled: false
+			}
+		}
 	}
 };
 export const getPrevalenceConfig = (prevalence: PrevalenceData[]): Highcharts.Options => ({
@@ -86,13 +93,7 @@ export const getPrevalenceConfig = (prevalence: PrevalenceData[]): Highcharts.Op
 			}
 		]
 	},
-	plotOptions: {
-		series: {
-			marker: {
-				enabled: false
-			}
-		}
-	},
+
 	...BASE_OPTIONS,
 	series: createPrevalenceSeries(prevalence)
 });

@@ -21,11 +21,11 @@
 	);
 </script>
 
-<div class="flex gap-2">
-	<section aria-label="prevalence compare graph" class="flex-1/2 rounded-lg border">
-		<div {@attach createHighchart(prevalenceConfig)} class={chartTheme}></div>
-	</section>
+<div class="flex flex-3/4 flex-col gap-4">
 	<section aria-label="cases compare graph" class="flex-1/2 rounded-lg border">
 		<div {@attach createHighchart(casesConfig)} class={chartTheme}></div>
+	</section>
+	<section aria-label="prevalence compare graph" class="flex-1/2 rounded-lg border">
+		<div {@attach createHighchart(prevalenceConfig)} class={chartTheme}></div>
 	</section>
 </div>

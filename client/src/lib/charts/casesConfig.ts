@@ -160,17 +160,19 @@ export const getCasesConfigCompare = (
 	return {
 		chart: {
 			type: 'line',
-			height: 500,
-			zooming: { type: 'x' }
+			height: 450
 		},
 		title: {
 			text: 'Present vs Long term - Total Cases vs Total Cost'
+		},
+		subtitle: {
+			text: 'Step lines indicate changes in intervention strategy as budget increases.'
 		},
 		xAxis: {
 			title: { text: 'Total Cost ($USD)' },
 			labels: { format: '${value:,.0f}' },
 			min: 0,
-			tickPixelInterval: 10,
+			tickPixelInterval: 50,
 			breaks: createBreakToMinimizeEmptySpace(
 				presentSeries.data as PointOptionsObject[],
 				futureSeries.data as PointOptionsObject[]
@@ -184,7 +186,7 @@ export const getCasesConfigCompare = (
 			shared: true,
 			shadow: true,
 			useHTML: true,
-			headerFormat: 'Total Cost: <b/>${point.x:,.0f}</b>',
+			headerFormat: 'Total Cost: ${point.x:,.0f}',
 			pointFormat: `<div class="flex items-center">
 				<span style="color:{point.color}" class="mr-1">●</span>
 				<span class="font-medium">{series.name}:</span>
@@ -193,7 +195,7 @@ export const getCasesConfigCompare = (
 				</span>
 			</div>`
 		},
-		series: futureSeries.data?.length ? [presentSeries, futureSeries] : [presentSeries],
-		legend: { enabled: true }
+		legend: { enabled: true },
+		series: futureSeries.data?.length ? [presentSeries, futureSeries] : [presentSeries]
 	};
 };
