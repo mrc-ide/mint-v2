@@ -1,35 +1,35 @@
 <script lang="ts">
 	import type { FormValue } from '$lib/components/dynamic-region-form/types';
+	import { DEBOUNCE_DELAY_MS } from '$lib/components/dynamic-region-form/utils';
 	import Loader from '$lib/components/Loader.svelte';
 	import SliderWithMarker from '$lib/components/SliderWithMarker.svelte';
 	import * as Field from '$lib/components/ui/field';
 	import * as RadioGroup from '$lib/components/ui/radio-group';
 	import { apiFetch } from '$lib/fetch';
-	import type { CompareParameterWithValue } from '$lib/types/compare';
+	import type { CompareParametersWithValue } from '$lib/types/compare';
 	import type { EmulatorResults } from '$lib/types/userState';
 	import { regionCompareUrl } from '$lib/url';
+	import debounce from 'debounce';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
-	import BaselinePlots from './BaselinePlots.svelte';
-	import debounce from 'debounce';
-	import { DEBOUNCE_DELAY_MS } from '$lib/components/dynamic-region-form/utils';
+	import Plots from './Plots.svelte';
 
 	interface Props {
 		presentResults: EmulatorResults;
-		compareBaselineParameters: CompareParameterWithValue[];
+		compareParameters: CompareParametersWithValue;
 		regionFormValues: Record<string, FormValue>;
 		chartTheme: string;
 		params: { project: string; region: string };
 	}
 
-	let { presentResults, compareBaselineParameters, regionFormValues, chartTheme, params }: Props = $props();
-	let selectedParameter = $state(compareBaselineParameters[0]);
+	let { presentResults, compareParameters, regionFormValues, chartTheme, params }: Props = $props();
+	let selectedParameter = $state(compareParameters.baselineParameters[0]);
 	let sliderValue = $derived(selectedParameter.value);
 	let longTermResults = $state<EmulatorResults>();
 	let isLoading = $state(true);
 
 	const updateBaselineParam = (paramName: string) => {
-		selectedParameter = compareBaselineParameters.find((param) => param.parameterName === paramName)!;
+		selectedParameter = compareParameters.baselineParameters.find((param) => param.parameterName === paramName)!;
 		longTermResults = undefined;
 	};
 
@@ -70,7 +70,7 @@
 					onValueChange={updateBaselineParam}
 					disabled={isLoading}
 				>
-					{#each compareBaselineParameters as param (param.parameterName)}
+					{#each compareParameters.baselineParameters as param (param.parameterName)}
 						<Field.Field orientation="horizontal">
 							<RadioGroup.Item value={param.parameterName} id={param.parameterName} />
 							<Field.Label for={param.parameterName}>{param.label}</Field.Label>
@@ -104,10 +104,10 @@
 	</div>
 
 	{#if isLoading}
-		<div class="flex flex-3/4 items-center justify-center">
+		<div class="flex h-[500px] flex-3/4 items-center justify-center">
 			<Loader text="Loading..." />
 		</div>
 	{:else}
-		<BaselinePlots {chartTheme} {presentResults} {longTermResults} {regionFormValues} />
+		<Plots {chartTheme} {presentResults} {longTermResults} {regionFormValues} />
 	{/if}
 </div>

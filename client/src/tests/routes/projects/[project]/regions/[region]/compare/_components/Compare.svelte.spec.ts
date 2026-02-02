@@ -1,13 +1,13 @@
 import { MOCK_CASES_DATA, MOCK_COMPARE_PARAMETERS, MOCK_FORM_VALUES, MOCK_PREVALENCE_DATA } from '$mocks/mocks';
-import BaselineCompare from '$routes/projects/[project]/regions/[region]/compare/_components/BaselineCompare.svelte';
+import Compare from '$routes/projects/[project]/regions/[region]/compare/_components/Compare.svelte';
 import { render } from 'vitest-browser-svelte';
 
 vi.mock('$lib/url', () => ({
 	regionCompareUrl: vi.fn().mockReturnValue('http://test-emulator-url')
 }));
-describe('BaselineCompare component', () => {
+describe('Compare component', () => {
 	it('should render fields + present day charts initially', async () => {
-		const screen = render(BaselineCompare, {
+		const screen = render(Compare, {
 			props: {
 				presentResults: {
 					cases: MOCK_CASES_DATA,
@@ -19,7 +19,7 @@ describe('BaselineCompare component', () => {
 					value: 50
 				})),
 				chartTheme: 'highcharts-dark',
-				formValues: MOCK_FORM_VALUES
+				regionFormValues: MOCK_FORM_VALUES
 			}
 		} as any);
 
