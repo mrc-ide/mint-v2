@@ -34,8 +34,12 @@
 </main>
 <footer class="py-3">
 	<div class="text-center text-sm text-muted-foreground">
-		Powered by <a href="https://github.com/mrc-ide/MINTe-python" class="hover:underline"
-			>minte v{data.versionInfo.minte}</a
+		Powered by <a
+			target="_blank"
+			href="https://github.com/mrc-ide/MINTe-python"
+			class="hover:underline"
+			rel="noopener noreferrer"
+			aria-label={`Open MINTe Python on GitHub (version ${data.versionInfo.minte})`}>MINTe v{data.versionInfo.minte}</a
 		>
 	</div>
 </footer>
