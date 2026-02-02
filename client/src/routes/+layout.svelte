@@ -39,7 +39,8 @@
 			href="https://github.com/mrc-ide/MINTe-python"
 			class="hover:underline"
 			rel="noopener noreferrer"
-			aria-label={`Open MINTe Python on GitHub (version ${data.versionInfo.minte})`}>MINTe v{data.versionInfo.minte}</a
 		>
+			MINTe v{data.versionInfo.minte}
+		</a>
 	</div>
 </footer>

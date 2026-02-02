@@ -3,7 +3,7 @@ import { load } from '$routes/+layout.server';
 import { isHttpError, type HttpError } from '@sveltejs/kit';
 import { http, HttpResponse } from 'msw';
 
-const mockUrl = vi.hoisted(() => 'http://localhost:8080/emulator/run');
+const mockUrl = vi.hoisted(() => 'http://localhost:8080/version');
 vi.mock('$lib/url', () => ({
 	versionEndpoint: vi.fn(() => mockUrl)
 }));

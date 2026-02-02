@@ -20,6 +20,6 @@ describe('Layout Route', () => {
 		} as any);
 
 		await expect.element(screen.getByRole('link', { name: 'MINT logo MINT' })).toBeVisible();
-		await expect.element(screen.getByRole('link', { name: 'minte v2.0.0' })).toBeVisible();
+		await expect.element(screen.getByRole('link', { name: 'MINTe v2.0.0' })).toBeVisible();
 	});
 });
