@@ -25,13 +25,17 @@ test.describe('E2E Compare Page', () => {
 		await expect(page.getByRole('button', { name: `${projectName} - nz` })).toBeVisible();
 	});
 
-	test('should compare prevalence when baseline slider is adjusted', async ({ page }) => {
+	test('should compare prevalence & cases when baseline slider is adjusted', async ({ page }) => {
 		await page.getByRole('button', { name: 'Run baseline' }).click();
 		await page.getByRole('link', { name: 'Long term comparison' }).click();
 
 		changeSlider(page, 'baseline-parameter-slider', 0.7);
 
+		// prevlalence plot
 		await expect(page.getByRole('button', { name: 'Show No Intervention Long term' })).toBeVisible();
 		await expect(page.getByRole('button', { name: 'Show No Intervention Present' })).toBeVisible();
+		// cases plot
+		await expect(page.getByRole('button', { name: 'Show Long term' })).toBeVisible();
+		await expect(page.getByRole('button', { name: 'Show Present' })).toBeVisible();
 	});
 });
