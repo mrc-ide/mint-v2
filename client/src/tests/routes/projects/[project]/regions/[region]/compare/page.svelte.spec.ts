@@ -3,7 +3,7 @@ import Page from '$routes/projects/[project]/regions/[region]/compare/+page.svel
 import { createRawSnippet } from 'svelte';
 import { render } from 'vitest-browser-svelte';
 
-vi.mock('$routes/projects/[project]/regions/[region]/compare/_components/BaselineCompare.svelte', () => ({
+vi.mock('$routes/projects/[project]/regions/[region]/compare/_components/Compare.svelte', async () => ({
 	default: () =>
 		render(
 			createRawSnippet(() => ({

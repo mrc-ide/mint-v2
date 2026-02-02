@@ -7,6 +7,7 @@ vi.mock('$lib/url', () => ({
 }));
 describe('Compare component', () => {
 	it('should render fields + present day charts initially', async () => {
+		const compareParameters = structuredClone(MOCK_COMPARE_PARAMETERS);
 		const screen = render(Compare, {
 			props: {
 				presentResults: {
@@ -14,20 +15,23 @@ describe('Compare component', () => {
 					prevalence: MOCK_PREVALENCE_DATA,
 					eirValid: true
 				},
-				compareBaselineParameters: MOCK_COMPARE_PARAMETERS.baselineParameters.map((param) => ({
-					...param,
-					value: 50
-				})),
+				compareParameters: {
+					...compareParameters,
+					baselineParameters: compareParameters.baselineParameters.map((param) => ({
+						...param,
+						value: 50
+					}))
+				},
 				chartTheme: 'highcharts-dark',
 				regionFormValues: MOCK_FORM_VALUES
 			}
 		} as any);
 
 		await expect
-			.element(screen.getByRole('radio', { name: MOCK_COMPARE_PARAMETERS.baselineParameters[0].label }))
+			.element(screen.getByRole('radio', { name: compareParameters.baselineParameters[0].label }))
 			.toBeVisible();
 		await expect
-			.element(screen.getByRole('radio', { name: MOCK_COMPARE_PARAMETERS.baselineParameters[1].label }))
+			.element(screen.getByRole('radio', { name: compareParameters.baselineParameters[1].label }))
 			.toBeVisible();
 		await expect.element(screen.getByRole('slider')).toBeInTheDocument();
 		await expect.element(screen.getByText('50%').first()).toBeVisible();
