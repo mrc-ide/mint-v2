@@ -2,7 +2,6 @@
 	import type { FormValue } from '$lib/components/dynamic-region-form/types';
 	import { DEBOUNCE_DELAY_MS } from '$lib/components/dynamic-region-form/utils';
 	import Loader from '$lib/components/Loader.svelte';
-	import SliderWithMarker from '$lib/components/SliderWithMarker.svelte';
 	import * as Field from '$lib/components/ui/field';
 	import * as RadioGroup from '$lib/components/ui/radio-group';
 	import { apiFetch } from '$lib/fetch';
@@ -13,6 +12,7 @@
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import Plots from './Plots.svelte';
+	import SliderWithMarker from '$lib/components/SliderWithMarker.svelte';
 
 	interface Props {
 		presentResults: EmulatorResults;
