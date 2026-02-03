@@ -6,7 +6,7 @@ vi.mock('$lib/url', () => ({
 }));
 describe('root +layout.server.ts', () => {
 	describe('load function', () => {
-		it('should return user data from locals & version info from server', async () => {
+		it('should return user data from locals', async () => {
 			const mockLocals = {
 				userState: {
 					userId: 'test-user-id',
