@@ -32,15 +32,3 @@
 <main class="flex min-h-svh px-5 pt-18 pb-5">
 	<div class="flex-1">{@render children?.()}</div>
 </main>
-<footer class="py-3">
-	<div class="text-center text-sm text-muted-foreground">
-		Powered by <a
-			target="_blank"
-			href="https://github.com/mrc-ide/MINTe-python"
-			class="hover:underline"
-			rel="noopener noreferrer"
-		>
-			MINTe v{data.versionInfo.minte}
-		</a>
-	</div>
-</footer>

@@ -1,6 +1,4 @@
-import { server } from '$mocks/server';
 import { load } from '$routes/+layout.server';
-import { http, HttpResponse } from 'msw';
 
 const mockUrl = vi.hoisted(() => 'http://localhost:8080/version');
 vi.mock('$lib/url', () => ({
@@ -16,23 +14,10 @@ describe('root +layout.server.ts', () => {
 					projects: []
 				}
 			};
-			server.use(http.get(mockUrl, () => HttpResponse.json({ data: { server: '1.0.0', minte: '2.0.0' } })));
 
 			const data = (await load({ locals: mockLocals } as any)) as any;
 
 			expect(data.userData).toEqual(mockLocals.userState);
-			expect(data.versionInfo).toEqual({ server: '1.0.0', minte: '2.0.0' });
-		});
-
-		it('should throw error if version info fetch fails', async () => {
-			server.use(http.get(mockUrl, () => HttpResponse.error()));
-
-			await expect(load({ locals: {} } as any)).rejects.toMatchObject({
-				status: 500,
-				body: {
-					message: 'Failed to fetch version info from server'
-				}
-			});
 		});
 	});
 });
