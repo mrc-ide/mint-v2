@@ -26,8 +26,7 @@ def get_dynamic_form_options() -> dict:
 def get_compare_parameters() -> CompareParametersResponse:
     form_options = get_dynamic_form_options()
     baseline_param_names = [
-        ("current_malaria_prevalence", "Prevalence"),
-        ("preference_for_biting_in_bed", "Preference for Biting in Bed"),
+        ("current_malaria_prevalence", "Baseline prevalence"),
     ]
     intervention_param_names = [("irs_future", "IRS coverage"), ("itn_future", "ITN usage"), ("lsm", "LSM coverage")]
 
