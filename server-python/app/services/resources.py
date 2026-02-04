@@ -28,6 +28,7 @@ def get_compare_parameters() -> CompareParametersResponse:
     form_options = get_dynamic_form_options()
     baseline_param_names = [
         ("current_malaria_prevalence", "Baseline prevalence"),
+        ("preference_for_biting", "Mosquito biting preference"),  # TODO: for testing only remvove before commit
     ]
     intervention_param_names = [
         ("irs_future", "IRS coverage", "irs_household_annual_cost_product"),

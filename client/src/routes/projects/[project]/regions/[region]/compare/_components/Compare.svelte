@@ -18,35 +18,24 @@
 	interface Props {
 		presentResults: EmulatorResults;
 		compareParameters: CompareParameters;
-		regionFormValues: Record<string, FormValue>;
+		presentFormValues: Record<string, FormValue>;
 		chartTheme: string;
 		params: { project: string; region: string };
 	}
 
-	let { presentResults, compareParameters, regionFormValues, chartTheme, params }: Props = $props();
+	let { presentResults, compareParameters, presentFormValues, chartTheme, params }: Props = $props();
 	let selectedBaselineParameter = $state(compareParameters.baselineParameters[0]);
-	let baselineSliderValue = $derived(regionFormValues[selectedBaselineParameter.parameterName]);
 	let longTermResults = $state<EmulatorResults>();
 	let isLoading = $state(true);
-
-	$inspect(compareParameters, 'compareParameters');
-
-	let interventionFormValues = $state(
-		compareParameters.interventionParameters.reduce(
-			(acc, param) => {
-				acc[param.parameterName] = regionFormValues[param.parameterName] as number;
-				acc[param.linkedCostName] = regionFormValues[param.linkedCostName] as number;
-				return acc;
-			},
-			{} as Record<string, number>
-		)
-	);
+	let longTermFormValues = $state(presentFormValues);
 
 	const updateBaselineParam = (paramName: string) => {
+		longTermFormValues[selectedBaselineParameter.parameterName] =
+			presentFormValues[selectedBaselineParameter.parameterName]; // reset old param
+
 		selectedBaselineParameter = compareParameters.baselineParameters.find(
 			(param) => param.parameterName === paramName
 		)!;
-		longTermResults = undefined;
 	};
 
 	const runEmulator = async () => {
@@ -57,11 +46,7 @@
 				url: regionCompareUrl(params.project, params.region),
 				method: 'POST',
 				body: {
-					formValues: {
-						...regionFormValues,
-						[selectedBaselineParameter.parameterName]: baselineSliderValue,
-						...interventionFormValues
-					}
+					formValues: longTermFormValues
 				}
 			});
 			isLoading = false;
@@ -73,8 +58,8 @@
 	};
 	const debounceRunEmulator = debounce(runEmulator, DEBOUNCE_DELAY_MS);
 
-	const onInterventionSliderChange = async (value: number, paramName: string) => {
-		interventionFormValues[paramName] = value;
+	const onSliderChange = async (value: number, paramName: string) => {
+		longTermFormValues[paramName] = value;
 		debounceRunEmulator();
 	};
 
@@ -106,13 +91,15 @@
 				<SliderWithMarker
 					id="baseline-parameter-slider"
 					type="single"
-					bind:value={baselineSliderValue}
-					onValueChange={debounceRunEmulator}
+					value={longTermFormValues[selectedBaselineParameter.parameterName]}
+					onValueChange={(value: number) => {
+						onSliderChange(value, selectedBaselineParameter.parameterName);
+					}}
 					max={selectedBaselineParameter.max}
 					min={selectedBaselineParameter.min}
 					disabled={isLoading}
 					aria-label="Adjust baseline parameter slider"
-					markerValue={regionFormValues[selectedBaselineParameter.parameterName] as number}
+					markerValue={presentFormValues[selectedBaselineParameter.parameterName] as number}
 					unit="%"
 					class="h-full"
 				/>
@@ -131,31 +118,41 @@
 						id={param.parameterName}
 						type="single"
 						onValueChange={(value: number) => {
-							onInterventionSliderChange(value, param.parameterName);
+							onSliderChange(value, param.parameterName);
 						}}
 						max={param.max}
 						min={param.min}
 						disabled={isLoading}
 						aria-label={`Adjust ${param.label} slider`}
-						value={interventionFormValues[param.parameterName]}
-						markerValue={regionFormValues[param.parameterName] as number}
+						value={longTermFormValues[param.parameterName]}
+						markerValue={presentFormValues[param.parameterName] as number}
 						unit="%"
 						class="h-full"
 					/>
 				</Field.Field>
 				<Field.Field>
 					<Field.Label for={param.linkedCostName}>{param.linkedCostLabel}</Field.Label>
-					<Input
-						id={param.linkedCostName}
-						type="number"
-						min={0}
-						step="any"
-						disabled={isLoading}
-						value={String(interventionFormValues[param.linkedCostName])}
-						oninput={(e) => {
-							interventionFormValues[param.linkedCostName] = Number(e.currentTarget.value);
-						}}
-					/>
+					<div class="items flex flex-row items-center gap-2">
+						<Input
+							id={param.linkedCostName}
+							type="number"
+							min={0}
+							step="any"
+							disabled={isLoading}
+							value={String(longTermFormValues[param.linkedCostName])}
+							oninput={(e) => {
+								longTermFormValues[param.linkedCostName] = Number(e.currentTarget.value);
+							}}
+							class="flex-1"
+						/>
+						<span class="text-right text-sm font-medium tabular-nums">
+							{#if (longTermFormValues[param.linkedCostName] as number) - (presentFormValues[param.linkedCostName] as number) >= 0}+{:else}-{/if}
+							{Math.abs(
+								(longTermFormValues[param.linkedCostName] as number) -
+									(presentFormValues[param.linkedCostName] as number)
+							).toFixed(1)}
+						</span>
+					</div>
 				</Field.Field>
 			{/each}
 		</Field.Group>
@@ -166,6 +163,6 @@
 			<Loader text="Loading..." />
 		</div>
 	{:else}
-		<Plots {chartTheme} {presentResults} {longTermResults} {regionFormValues} />
+		<Plots {chartTheme} {presentResults} {longTermResults} {presentFormValues} {longTermFormValues} />
 	{/if}
 </div>

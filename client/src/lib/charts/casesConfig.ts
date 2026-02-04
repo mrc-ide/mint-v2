@@ -156,11 +156,11 @@ export const createBreakToMinimizeEmptySpace = (
 export const getCasesConfigCompare = (
 	currentCases: CasesData[],
 	newCases: CasesData[],
-	formValues: Record<string, FormValue>
+	presentFormValues: Record<string, FormValue>,
+	longTermFormValues: Record<string, FormValue>
 ): Options => {
-	const presentSeries = createCasesCompareSeries(currentCases, formValues, 'Present');
-	const futureSeries = createCasesCompareSeries(newCases, formValues, 'Long term');
-
+	const presentSeries = createCasesCompareSeries(currentCases, presentFormValues, 'Present');
+	const futureSeries = createCasesCompareSeries(newCases, longTermFormValues, 'Long term');
 	return {
 		chart: {
 			type: 'line',
@@ -187,7 +187,6 @@ export const getCasesConfigCompare = (
 			labels: { format: '{value:,.0f}' }
 		},
 		tooltip: {
-			shared: true,
 			shadow: true,
 			useHTML: true,
 			headerFormat: 'Total Cost: ${point.x:,.0f}',
@@ -199,6 +198,15 @@ export const getCasesConfigCompare = (
 				</span>
 			</div>`
 		},
+		// plotOptions: {
+		// 	line: {
+		// 		dataLabels: {
+		// 			enabled: true,
+
+		// 			format: '{point.custom.intervention}'
+		// 		}
+		// 	}
+		// },
 		legend: { enabled: true },
 		series: futureSeries.data?.length ? [presentSeries, futureSeries] : [presentSeries]
 	};
