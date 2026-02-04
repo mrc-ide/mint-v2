@@ -3,7 +3,7 @@ import Layout from '$routes/+layout.svelte';
 import { render } from 'vitest-browser-svelte';
 
 describe('Layout Route', () => {
-	it('should render layout', async () => {
+	it('should render layout ', async () => {
 		const screen = render(Layout, {
 			props: {
 				data: {
