@@ -23,18 +23,31 @@
 	}
 
 	let { presentResults, compareParameters, regionFormValues, chartTheme, params }: Props = $props();
-	let selectedParameter = $state(compareParameters.baselineParameters[0]);
-	let sliderValue = $derived(selectedParameter.value);
+	let selectedBaselineParameter = $state(compareParameters.baselineParameters[0]);
+	let baselineSliderValue = $derived(selectedBaselineParameter.value);
 	let longTermResults = $state<EmulatorResults>();
 	let isLoading = $state(true);
 
+	let interventionSliderValues = $state(
+		compareParameters.interventionParameters.reduce(
+			(acc, param) => {
+				acc[param.parameterName] = param.value;
+				return acc;
+			},
+			{} as Record<string, number>
+		)
+	);
+
 	const updateBaselineParam = (paramName: string) => {
-		selectedParameter = compareParameters.baselineParameters.find((param) => param.parameterName === paramName)!;
+		selectedBaselineParameter = compareParameters.baselineParameters.find(
+			(param) => param.parameterName === paramName
+		)!;
 		longTermResults = undefined;
 	};
 
 	const runEmulator = async () => {
 		isLoading = true;
+
 		try {
 			const res = await apiFetch<EmulatorResults>({
 				url: regionCompareUrl(params.project, params.region),
@@ -42,7 +55,8 @@
 				body: {
 					formValues: {
 						...regionFormValues,
-						[selectedParameter.parameterName]: sliderValue
+						[selectedBaselineParameter.parameterName]: baselineSliderValue,
+						...interventionSliderValues
 					}
 				}
 			});
@@ -55,18 +69,23 @@
 	};
 	const debounceRunEmulator = debounce(runEmulator, DEBOUNCE_DELAY_MS);
 
+	const onInterventionSliderChange = async (value: number, paramName: string) => {
+		interventionSliderValues[paramName] = value;
+		debounceRunEmulator();
+	};
+
 	onMount(() => {
 		isLoading = false;
 	});
 </script>
 
 <div class="flex flex-row gap-4">
-	<div class="flex w-1/4 flex-col rounded-md border p-4">
+	<div class="flex w-1/4 flex-col gap-6 rounded-md border p-4">
 		<Field.Group class="gap-4">
 			<Field.Field>
 				<Field.Label for="parameter-select">What do you want to adjust?</Field.Label>
 				<RadioGroup.Root
-					value={selectedParameter.parameterName}
+					value={selectedBaselineParameter.parameterName}
 					onValueChange={updateBaselineParam}
 					disabled={isLoading}
 				>
@@ -80,26 +99,44 @@
 			</Field.Field>
 			<Field.Field>
 				<Field.Label for="baseline-parameter-slider">Change from baseline (%)</Field.Label>
-				<div class="flex flex-row items-center gap-2">
+				<SliderWithMarker
+					id="baseline-parameter-slider"
+					type="single"
+					bind:value={baselineSliderValue}
+					onValueChange={debounceRunEmulator}
+					max={selectedBaselineParameter.max}
+					min={selectedBaselineParameter.min}
+					disabled={isLoading}
+					aria-label="Adjust baseline parameter slider"
+					markerValue={selectedBaselineParameter.value}
+					unit="%"
+					class="h-full"
+				/>
+			</Field.Field>
+		</Field.Group>
+
+		<Field.Group class="gap-4">
+			<Field.Legend>Alternative control strategies</Field.Legend>
+			{#each compareParameters.interventionParameters as param (param.parameterName)}
+				<Field.Field>
+					<Field.Label for={param.parameterName}>{param.label}</Field.Label>
 					<SliderWithMarker
-						id="baseline-parameter-slider"
+						id={param.parameterName}
 						type="single"
-						bind:value={sliderValue}
-						onValueCommit={debounceRunEmulator}
-						max={selectedParameter.max}
-						min={selectedParameter.min}
+						onValueChange={(value: number) => {
+							onInterventionSliderChange(value, param.parameterName);
+						}}
+						max={param.max}
+						min={param.min}
 						disabled={isLoading}
-						aria-label="Adjust baseline parameter slider"
-						markerValue={selectedParameter.value}
+						aria-label={`Adjust ${param.label} slider`}
+						value={interventionSliderValues[param.parameterName]}
+						markerValue={param.value}
 						unit="%"
 						class="h-full"
 					/>
-					<span class="text-right text-sm font-medium tabular-nums">
-						{#if sliderValue - selectedParameter.value >= 0}+{:else}-{/if}
-						{Math.abs(sliderValue - selectedParameter.value)}%</span
-					>
-				</div>
-			</Field.Field>
+				</Field.Field>
+			{/each}
 		</Field.Group>
 	</div>
 
