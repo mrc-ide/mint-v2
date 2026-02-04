@@ -1,9 +1,5 @@
 import { load } from '$routes/+layout.server';
 
-const mockUrl = vi.hoisted(() => 'http://localhost:8080/version');
-vi.mock('$lib/url', () => ({
-	versionUrl: vi.fn(() => mockUrl)
-}));
 describe('root +layout.server.ts', () => {
 	describe('load function', () => {
 		it('should return user data from locals', async () => {
