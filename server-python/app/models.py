@@ -108,12 +108,17 @@ class EmulatorResponse(BaseModel):
 
 
 class CompareParameter(BaseModel):
-    parameter_name: str = Field(alias="parameterName")
+    parameter_name: str = Field(serialization_alias="parameterName")
     label: str
     min: float
     max: float
 
 
+class InterventionCompareParameter(CompareParameter):
+    linked_cost_name: str = Field(serialization_alias="linkedCostName")
+    linked_cost_label: str = Field(serialization_alias="linkedCostLabel")
+
+
 class CompareParametersResponse(BaseModel):
-    baseline_parameters: list[CompareParameter] = Field(alias="baselineParameters")
-    intervention_parameters: list[CompareParameter] = Field(alias="interventionParameters")
+    baseline_parameters: list[CompareParameter] = Field(serialization_alias="baselineParameters")
+    intervention_parameters: list[InterventionCompareParameter] = Field(serialization_alias="interventionParameters")

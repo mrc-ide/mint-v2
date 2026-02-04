@@ -2,21 +2,22 @@
 	import type { FormValue } from '$lib/components/dynamic-region-form/types';
 	import { DEBOUNCE_DELAY_MS } from '$lib/components/dynamic-region-form/utils';
 	import Loader from '$lib/components/Loader.svelte';
+	import SliderWithMarker from '$lib/components/SliderWithMarker.svelte';
 	import * as Field from '$lib/components/ui/field';
 	import * as RadioGroup from '$lib/components/ui/radio-group';
 	import { apiFetch } from '$lib/fetch';
-	import type { CompareParametersWithValue } from '$lib/types/compare';
+	import type { CompareParameters } from '$lib/types/compare';
 	import type { EmulatorResults } from '$lib/types/userState';
 	import { regionCompareUrl } from '$lib/url';
 	import debounce from 'debounce';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import Plots from './Plots.svelte';
-	import SliderWithMarker from '$lib/components/SliderWithMarker.svelte';
+	import { Input } from '$lib/components/ui/input';
 
 	interface Props {
 		presentResults: EmulatorResults;
-		compareParameters: CompareParametersWithValue;
+		compareParameters: CompareParameters;
 		regionFormValues: Record<string, FormValue>;
 		chartTheme: string;
 		params: { project: string; region: string };
@@ -24,14 +25,17 @@
 
 	let { presentResults, compareParameters, regionFormValues, chartTheme, params }: Props = $props();
 	let selectedBaselineParameter = $state(compareParameters.baselineParameters[0]);
-	let baselineSliderValue = $derived(selectedBaselineParameter.value);
+	let baselineSliderValue = $derived(regionFormValues[selectedBaselineParameter.parameterName]);
 	let longTermResults = $state<EmulatorResults>();
 	let isLoading = $state(true);
 
-	let interventionSliderValues = $state(
+	$inspect(compareParameters, 'compareParameters');
+
+	let interventionFormValues = $state(
 		compareParameters.interventionParameters.reduce(
 			(acc, param) => {
-				acc[param.parameterName] = param.value;
+				acc[param.parameterName] = regionFormValues[param.parameterName] as number;
+				acc[param.linkedCostName] = regionFormValues[param.linkedCostName] as number;
 				return acc;
 			},
 			{} as Record<string, number>
@@ -56,7 +60,7 @@
 					formValues: {
 						...regionFormValues,
 						[selectedBaselineParameter.parameterName]: baselineSliderValue,
-						...interventionSliderValues
+						...interventionFormValues
 					}
 				}
 			});
@@ -70,7 +74,7 @@
 	const debounceRunEmulator = debounce(runEmulator, DEBOUNCE_DELAY_MS);
 
 	const onInterventionSliderChange = async (value: number, paramName: string) => {
-		interventionSliderValues[paramName] = value;
+		interventionFormValues[paramName] = value;
 		debounceRunEmulator();
 	};
 
@@ -108,7 +112,7 @@
 					min={selectedBaselineParameter.min}
 					disabled={isLoading}
 					aria-label="Adjust baseline parameter slider"
-					markerValue={selectedBaselineParameter.value}
+					markerValue={regionFormValues[selectedBaselineParameter.parameterName] as number}
 					unit="%"
 					class="h-full"
 				/>
@@ -116,7 +120,10 @@
 		</Field.Group>
 
 		<Field.Group class="gap-4">
-			<Field.Legend>Alternative control strategies</Field.Legend>
+			<div>
+				<Field.Legend class="mb-2">Adjust control strategies</Field.Legend>
+				<Field.Description>Update % usage/coverage, then adjust associated cost fields</Field.Description>
+			</div>
 			{#each compareParameters.interventionParameters as param (param.parameterName)}
 				<Field.Field>
 					<Field.Label for={param.parameterName}>{param.label}</Field.Label>
@@ -130,10 +137,24 @@
 						min={param.min}
 						disabled={isLoading}
 						aria-label={`Adjust ${param.label} slider`}
-						value={interventionSliderValues[param.parameterName]}
-						markerValue={param.value}
+						value={interventionFormValues[param.parameterName]}
+						markerValue={regionFormValues[param.parameterName] as number}
 						unit="%"
 						class="h-full"
+					/>
+				</Field.Field>
+				<Field.Field>
+					<Field.Label for={param.linkedCostName}>{param.linkedCostLabel}</Field.Label>
+					<Input
+						id={param.linkedCostName}
+						type="number"
+						min={0}
+						step="any"
+						disabled={isLoading}
+						value={String(interventionFormValues[param.linkedCostName])}
+						oninput={(e) => {
+							interventionFormValues[param.linkedCostName] = Number(e.currentTarget.value);
+						}}
 					/>
 				</Field.Field>
 			{/each}
