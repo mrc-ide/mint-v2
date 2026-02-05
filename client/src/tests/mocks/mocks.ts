@@ -578,8 +578,8 @@ export const MOCK_COMPARE_PARAMETERS: Readonly<CompareParameters> = Object.freez
 			label: 'IRS coverage',
 			min: 0,
 			max: 100,
-			linkedCostName: 'irs_household_annual_cost',
-			linkedCostLabel: 'IRS household annual cost'
+			linkedCostName: 'irs_household_annual_cost_product',
+			linkedCostLabel: 'IRS annual household cost product'
 		},
 		{
 			parameterName: 'itn_future',

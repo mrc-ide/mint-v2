@@ -48,7 +48,7 @@
 		</Field.Field>
 		<Field.Field>
 			<Field.Label for={`${param.linkedCostName}-compare-input`}>{param.linkedCostLabel}</Field.Label>
-			<div class="items flex flex-row items-center gap-2">
+			<div class="flex flex-row items-center gap-2">
 				<Input
 					id={`${param.linkedCostName}-compare-input`}
 					type="number"
