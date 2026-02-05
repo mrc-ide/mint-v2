@@ -15,15 +15,9 @@ describe('Compare component', () => {
 					prevalence: MOCK_PREVALENCE_DATA,
 					eirValid: true
 				},
-				compareParameters: {
-					...compareParameters,
-					baselineParameters: compareParameters.baselineParameters.map((param) => ({
-						...param,
-						value: 50
-					}))
-				},
+				compareParameters: compareParameters,
 				chartTheme: 'highcharts-dark',
-				regionFormValues: MOCK_FORM_VALUES
+				presentFormValues: MOCK_FORM_VALUES
 			}
 		} as any);
 
@@ -33,8 +27,13 @@ describe('Compare component', () => {
 		await expect
 			.element(screen.getByRole('radio', { name: compareParameters.baselineParameters[1].label }))
 			.toBeVisible();
-		await expect.element(screen.getByRole('slider')).toBeInTheDocument();
-		await expect.element(screen.getByText('50%').first()).toBeVisible();
+
+		const sliders = screen.getByRole('slider').all();
+		expect(sliders).toHaveLength(1 + compareParameters.interventionParameters.length); // baseline + 3 interventions
+		for (const param of compareParameters.interventionParameters) {
+			await expect.element(screen.getByLabelText(param.linkedCostLabel)).toBeVisible();
+		}
+
 		await expect.element(screen.getByRole('region', { name: 'prevalence compare graph' })).toBeVisible();
 		await expect.element(screen.getByRole('region', { name: 'cases compare graph' })).toBeVisible();
 	});

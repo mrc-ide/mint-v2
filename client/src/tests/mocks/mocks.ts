@@ -577,19 +577,25 @@ export const MOCK_COMPARE_PARAMETERS: Readonly<CompareParameters> = Object.freez
 			parameterName: 'irs_future',
 			label: 'IRS coverage',
 			min: 0,
-			max: 100
+			max: 100,
+			linkedCostName: 'irs_household_annual_cost',
+			linkedCostLabel: 'IRS household annual cost'
 		},
 		{
 			parameterName: 'itn_future',
 			label: 'ITN usage',
 			min: 0,
-			max: 100
+			max: 100,
+			linkedCostName: 'mass_distribution_cost',
+			linkedCostLabel: 'Mass distribution cost'
 		},
 		{
 			parameterName: 'lsm',
 			label: 'LSM coverage',
 			min: 0,
-			max: 90
+			max: 90,
+			linkedCostName: 'lsm_cost',
+			linkedCostLabel: 'LSM cost'
 		}
 	]
 });

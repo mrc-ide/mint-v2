@@ -154,7 +154,7 @@ export const createBreakToMinimizeEmptySpace = (
 	return breakPoint !== Infinity ? [{ from: 0, to: breakPoint * 0.9 }] : undefined;
 };
 
-const createCompareTooltipHtml = function (this: Highcharts.Point): string {
+export const createCompareTooltipHtml = function (this: Highcharts.Point): string {
 	const currentIntervention: string = this.options.custom!.intervention;
 	const tooltipLines: string[] = [`<div class="mb-1"><span class="font-semibold ">${currentIntervention}</span></div>`];
 

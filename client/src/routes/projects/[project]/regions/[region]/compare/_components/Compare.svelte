@@ -4,7 +4,6 @@
 	import Loader from '$lib/components/Loader.svelte';
 	import SliderWithMarker from '$lib/components/SliderWithMarker.svelte';
 	import * as Field from '$lib/components/ui/field';
-	import { Input } from '$lib/components/ui/input';
 	import * as RadioGroup from '$lib/components/ui/radio-group';
 	import { apiFetch } from '$lib/fetch';
 	import type { CompareParameters } from '$lib/types/compare';
@@ -13,6 +12,7 @@
 	import debounce from 'debounce';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
+	import InterventionFields from './InterventionFields.svelte';
 	import Plots from './Plots.svelte';
 
 	interface Props {
@@ -104,52 +104,13 @@
 			</Field.Field>
 		</Field.Group>
 
-		<Field.Group class="gap-4">
-			<div>
-				<Field.Legend class="mb-2">Adjust control strategies</Field.Legend>
-				<Field.Description>Update % slider, then adjust associated cost fields</Field.Description>
-			</div>
-			{#each compareParameters.interventionParameters as param (param.parameterName)}
-				<Field.Field>
-					<Field.Label for={param.parameterName}>{param.label}</Field.Label>
-					<SliderWithMarker
-						id={param.parameterName}
-						type="single"
-						onValueChange={(value: number) => onSliderChange(value, param.parameterName)}
-						max={param.max}
-						min={param.min}
-						disabled={isLoading}
-						aria-label={`Adjust ${param.label} slider`}
-						value={longTermFormValues[param.parameterName]}
-						markerValue={presentFormValues[param.parameterName] as number}
-						unit="%"
-						class="h-full"
-					/>
-				</Field.Field>
-				<Field.Field>
-					<Field.Label for={param.linkedCostName}>{param.linkedCostLabel}</Field.Label>
-					<div class="items flex flex-row items-center gap-2">
-						<Input
-							id={param.linkedCostName}
-							type="number"
-							min={0}
-							step="any"
-							disabled={isLoading}
-							value={String(longTermFormValues[param.linkedCostName])}
-							oninput={(e) => (longTermFormValues[param.linkedCostName] = Number(e.currentTarget.value))}
-							class="flex-1"
-						/>
-						<span class="text-right text-sm font-medium tabular-nums">
-							{#if (longTermFormValues[param.linkedCostName] as number) - (presentFormValues[param.linkedCostName] as number) >= 0}+{:else}-{/if}
-							${Math.abs(
-								(longTermFormValues[param.linkedCostName] as number) -
-									(presentFormValues[param.linkedCostName] as number)
-							).toFixed(1)}
-						</span>
-					</div>
-				</Field.Field>
-			{/each}
-		</Field.Group>
+		<InterventionFields
+			interventionParameters={compareParameters.interventionParameters}
+			{isLoading}
+			{presentFormValues}
+			bind:longTermFormValues
+			{onSliderChange}
+		/>
 	</div>
 
 	{#if isLoading}

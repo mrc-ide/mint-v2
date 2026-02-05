@@ -4,7 +4,8 @@ import {
 	createCasesCompareDataPoints,
 	createCasesCompareSeries,
 	getCasesConfig,
-	getCasesConfigCompare
+	getCasesConfigCompare,
+	createCompareTooltipHtml
 } from '$lib/charts/casesConfig';
 import * as processCases from '$lib/process-results/processCases';
 import type { CasesData, Scenario } from '$lib/types/userState';
@@ -202,8 +203,11 @@ describe('cases compare config', () => {
 		{ scenario: 'py_only_with_lsm', casesPer1000: 15, year: 3 }
 	];
 
-	const mockFormValues: Record<string, FormValue> = {
+	const mockPresentFormValues: Record<string, FormValue> = {
 		population: 10000
+	};
+	const mockLongTermFormValues: Record<string, FormValue> = {
+		population: 20000
 	};
 
 	beforeEach(() => {
@@ -220,7 +224,7 @@ describe('cases compare config', () => {
 
 	describe('createCasesCompareDataPoints', () => {
 		it('should return sorted data points based on totalCost in ascending order', () => {
-			const result = createCasesCompareDataPoints(mockCases, mockFormValues);
+			const result = createCasesCompareDataPoints(mockCases, mockPresentFormValues);
 
 			expect(result[0]).toEqual({
 				scenario: 'py_only_only',
@@ -241,22 +245,22 @@ describe('cases compare config', () => {
 			expect(processCases.collectPostInterventionCases).toHaveBeenCalledWith(mockCases);
 			expect(costs.getTotalCostsPerScenario).toHaveBeenCalledWith(
 				['py_only_only', 'irs_only', 'py_only_with_lsm'],
-				mockFormValues
+				mockPresentFormValues
 			);
 			expect(processCases.getTotalCasesPer1000).toHaveBeenCalledTimes(3);
 			expect(processCases.convertPer1000ToTotal).toHaveBeenCalledTimes(3);
-			expect(processCases.convertPer1000ToTotal).toHaveBeenCalledWith(100, mockFormValues['population']);
+			expect(processCases.convertPer1000ToTotal).toHaveBeenCalledWith(100, mockPresentFormValues['population']);
 		});
 
 		it('should handle empty cases array', () => {
-			const result = createCasesCompareDataPoints([], mockFormValues);
+			const result = createCasesCompareDataPoints([], mockPresentFormValues);
 			expect(result).toEqual([]);
 		});
 	});
 
 	describe('createCasesCompareSeries', () => {
 		it('should create a series with correct name and data points', () => {
-			const series = createCasesCompareSeries(mockCases, mockFormValues, 'Present');
+			const series = createCasesCompareSeries(mockCases, mockPresentFormValues, 'Present');
 
 			expect(series.name).toBe('Present');
 			expect(series.type).toBe('line');
@@ -310,6 +314,137 @@ describe('cases compare config', () => {
 		});
 	});
 
+	describe('createCompareTooltipHtml', () => {
+		it('should include data from all series with matching intervention', () => {
+			const mockPoint1 = {
+				setState: vi.fn(),
+				options: { custom: { intervention: 'IRS Only' } },
+				y: 1500,
+				x: 5000
+			};
+			const mockPoint2 = {
+				setState: vi.fn(),
+				options: { custom: { intervention: 'Pyrethroid ITN (Only)' } },
+				y: 2000,
+				x: 3000
+			};
+			const mockPoint3 = {
+				setState: vi.fn(),
+				options: { custom: { intervention: 'IRS Only' } },
+				y: 1800,
+				x: 6000
+			};
+
+			const mockSeries1 = {
+				name: 'Present',
+				color: '#ff0000',
+				points: [mockPoint1, mockPoint2]
+			};
+			const mockSeries2 = {
+				name: 'Long term',
+				color: '#00ff00',
+				points: [mockPoint3]
+			};
+
+			const mockThis = {
+				options: {
+					custom: { intervention: 'IRS Only' }
+				},
+				series: {
+					chart: {
+						series: [mockSeries1, mockSeries2]
+					}
+				}
+			} as any;
+
+			const result = createCompareTooltipHtml.call(mockThis);
+
+			expect(result).toContain('<div class="mb-1"><span class="font-semibold ">IRS Only</span></div>');
+			expect(result).toContain('Present');
+			expect(result).toContain('Long term');
+			expect(result).toContain('1,500.0 cases');
+			expect(result).toContain('$5,000');
+			expect(result).toContain('1,800.0 cases');
+			expect(result).toContain('$6,000');
+			expect(result).not.toContain('2,000.0 cases');
+		});
+
+		it('should set hover state on matching points', () => {
+			const mockPoint1 = {
+				setState: vi.fn(),
+				options: { custom: { intervention: 'IRS Only' } },
+				y: 1500,
+				x: 5000
+			};
+			const mockPoint2 = {
+				setState: vi.fn(),
+				options: { custom: { intervention: 'IRS Only' } },
+				y: 1800,
+				x: 6000
+			};
+
+			const mockSeries1 = {
+				name: 'Present',
+				color: '#ff0000',
+				points: [mockPoint1]
+			};
+			const mockSeries2 = {
+				name: 'Long term',
+				color: '#00ff00',
+				points: [mockPoint2]
+			};
+
+			const mockThis = {
+				options: {
+					custom: { intervention: 'IRS Only' }
+				},
+				series: {
+					chart: {
+						series: [mockSeries1, mockSeries2]
+					}
+				}
+			} as any;
+
+			createCompareTooltipHtml.call(mockThis);
+
+			expect(mockPoint1.setState).toHaveBeenCalledWith('');
+			expect(mockPoint1.setState).toHaveBeenCalledWith('hover');
+			expect(mockPoint2.setState).toHaveBeenCalledWith('');
+			expect(mockPoint2.setState).toHaveBeenCalledWith('hover');
+		});
+
+		it('should format large numbers with locale string', () => {
+			const mockPoint = {
+				setState: vi.fn(),
+				options: { custom: { intervention: 'IRS Only' } },
+				y: 1234567.89,
+				x: 9876543.21
+			};
+
+			const mockSeries = {
+				name: 'Present',
+				color: '#ff0000',
+				points: [mockPoint]
+			};
+
+			const mockThis = {
+				options: {
+					custom: { intervention: 'IRS Only' }
+				},
+				series: {
+					chart: {
+						series: [mockSeries]
+					}
+				}
+			} as any;
+
+			const result = createCompareTooltipHtml.call(mockThis);
+
+			expect(result).toContain('1,234,567.9 cases');
+			expect(result).toContain('$9,876,543');
+		});
+	});
+
 	describe('getCasesConfigCompare integration', () => {
 		const mockCurrentCases: CasesData[] = [
 			{ scenario: 'irs_only', casesPer1000: 10, year: 2 },
@@ -322,7 +457,12 @@ describe('cases compare config', () => {
 		];
 
 		it('should return a valid Highcharts Options object', () => {
-			const config = getCasesConfigCompare(mockCurrentCases, mockNewCases, mockFormValues);
+			const config = getCasesConfigCompare(
+				mockCurrentCases,
+				mockNewCases,
+				mockPresentFormValues,
+				mockLongTermFormValues
+			);
 
 			expect(config).toBeDefined();
 			expect(config.chart?.type).toBe('line');
@@ -332,7 +472,12 @@ describe('cases compare config', () => {
 		});
 
 		it('should include both Present and Long term series when newCases has data', () => {
-			const config = getCasesConfigCompare(mockCurrentCases, mockNewCases, mockFormValues);
+			const config = getCasesConfigCompare(
+				mockCurrentCases,
+				mockNewCases,
+				mockPresentFormValues,
+				mockLongTermFormValues
+			);
 
 			expect(config.series).toHaveLength(2);
 			expect((config.series as any)[0].name).toBe('Present');
@@ -342,7 +487,7 @@ describe('cases compare config', () => {
 		it('should include only Present series when newCases is empty', () => {
 			vi.spyOn(processCases, 'collectPostInterventionCases').mockReturnValue({} as any);
 
-			const config = getCasesConfigCompare(mockCurrentCases, [], mockFormValues);
+			const config = getCasesConfigCompare(mockCurrentCases, [], mockPresentFormValues, mockLongTermFormValues);
 
 			expect(config.series).toHaveLength(1);
 			expect((config.series as any)[0].name).toBe('Present');
@@ -358,17 +503,33 @@ describe('cases compare config', () => {
 				py_only_only: 5000
 			});
 
-			const config = getCasesConfigCompare(mockCurrentCases, mockNewCases, mockFormValues);
+			const config = getCasesConfigCompare(
+				mockCurrentCases,
+				mockNewCases,
+				mockPresentFormValues,
+				mockLongTermFormValues
+			);
 
 			expect((config.xAxis as any).breaks).toBeDefined();
 		});
 
 		it('should pass data to createCasesCompareSeries correctly', () => {
-			getCasesConfigCompare(mockCurrentCases, mockNewCases, mockFormValues);
+			getCasesConfigCompare(mockCurrentCases, mockNewCases, mockPresentFormValues, mockLongTermFormValues);
 
 			// Verify the function processes the data through helper functions
 			expect(processCases.collectPostInterventionCases).toHaveBeenCalled();
 			expect(costs.getTotalCostsPerScenario).toHaveBeenCalled();
+		});
+
+		it('should set tooltip formatter to createCompareTooltipHtml', () => {
+			const config = getCasesConfigCompare(
+				mockCurrentCases,
+				mockNewCases,
+				mockPresentFormValues,
+				mockLongTermFormValues
+			);
+
+			expect(config.tooltip?.formatter).toBe(createCompareTooltipHtml);
 		});
 	});
 });
