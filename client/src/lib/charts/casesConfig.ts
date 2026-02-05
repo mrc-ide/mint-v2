@@ -159,8 +159,8 @@ const createCompareTooltipHtml = function (this: Highcharts.Point): string {
 	const tooltipLines: string[] = [`<div class="mb-1"><span class="font-semibold ">${currentIntervention}</span></div>`];
 
 	for (const series of this.series.chart.series) {
-		// clear all hover states first
 		series.points.forEach((p) => p.setState(''));
+
 		const point = series.points.find((p) => p.options.custom!.intervention === currentIntervention);
 		if (!point) continue;
 

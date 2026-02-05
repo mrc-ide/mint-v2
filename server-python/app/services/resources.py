@@ -1,14 +1,10 @@
 import json
 from pathlib import Path
+from typing import Annotated
 
 import jsonschema
 
-from app.models import (
-    CompareParameter,
-    CompareParametersResponse,
-    InterventionCompareParameter,
-)
-from typing import Annotated
+from app.models import CompareParameter, CompareParametersResponse, InterventionCompareParameter
 
 APP_DIR = Path(__file__).parent.parent
 
@@ -39,13 +35,9 @@ def get_compare_parameters() -> CompareParametersResponse:
         ("lsm", "LSM coverage", "lsm_cost"),
     ]
 
-    baseline_parameters = [
-        create_compare_parameter(param_name, form_options)
-        for param_name in baseline_param_names
-    ]
+    baseline_parameters = [create_compare_parameter(param_name, form_options) for param_name in baseline_param_names]
     intervention_parameters = [
-        create_intervention_compare_parameter(param_name, form_options)
-        for param_name in intervention_param_names
+        create_intervention_compare_parameter(param_name, form_options) for param_name in intervention_param_names
     ]
 
     return CompareParametersResponse(

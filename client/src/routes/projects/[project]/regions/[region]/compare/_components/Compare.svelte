@@ -107,7 +107,7 @@
 		<Field.Group class="gap-4">
 			<div>
 				<Field.Legend class="mb-2">Adjust control strategies</Field.Legend>
-				<Field.Description>Update % usage/coverage, then adjust associated cost fields</Field.Description>
+				<Field.Description>Update % slider, then adjust associated cost fields</Field.Description>
 			</div>
 			{#each compareParameters.interventionParameters as param (param.parameterName)}
 				<Field.Field>
@@ -136,9 +136,7 @@
 							step="any"
 							disabled={isLoading}
 							value={String(longTermFormValues[param.linkedCostName])}
-							oninput={(e) => {
-								longTermFormValues[param.linkedCostName] = Number(e.currentTarget.value);
-							}}
+							oninput={(e) => (longTermFormValues[param.linkedCostName] = Number(e.currentTarget.value))}
 							class="flex-1"
 						/>
 						<span class="text-right text-sm font-medium tabular-nums">
