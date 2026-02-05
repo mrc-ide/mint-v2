@@ -128,13 +128,11 @@ export const createCasesCompareSeries = (
 	data: createCasesCompareDataPoints(cases, formValues).map(({ totalCases, totalCost, scenario }) => ({
 		x: totalCost,
 		y: totalCases,
-		color: name === 'Present' ? 'var(--chart-1)' : 'var(--chart-2)',
 		custom: {
 			intervention: ScenarioToLabel[scenario as Scenario]
 		}
 	})),
-	step: 'left',
-	color: name === 'Present' ? 'var(--chart-1)' : 'var(--chart-2)'
+	step: 'left'
 });
 
 /**
@@ -163,9 +161,6 @@ export const getCasesConfigCompare = (
 ): Options => {
 	const presentSeries = createCasesCompareSeries(currentCases, presentFormValues, 'Present');
 	const futureSeries = createCasesCompareSeries(newCases, longTermFormValues, 'Long term');
-	const presentData = presentSeries.data as PointOptionsObject[];
-	const futureData = futureSeries.data as PointOptionsObject[];
-
 	return {
 		chart: {
 			type: 'line',
@@ -182,7 +177,10 @@ export const getCasesConfigCompare = (
 			labels: { format: '${value:,.0f}' },
 			min: 0,
 			tickPixelInterval: 50,
-			breaks: createBreakToMinimizeEmptySpace(presentData, futureData)
+			breaks: createBreakToMinimizeEmptySpace(
+				presentSeries.data as PointOptionsObject[],
+				futureSeries.data as PointOptionsObject[]
+			)
 		},
 		yAxis: {
 			title: { text: 'Total Cases' },
@@ -190,37 +188,19 @@ export const getCasesConfigCompare = (
 		},
 		tooltip: {
 			shadow: true,
-			shared: false,
+			shared: true,
 			useHTML: true,
-			formatter: function () {
-				const currentIntervention = this.point.custom?.intervention;
-
-				let s = `<div class="mb-1"><span class="font-semibold">${currentIntervention}</span></div>`;
-
-				const presentPoint = presentData.find((p) => p.custom?.intervention === currentIntervention);
-				const futurePoint = futureData.find((p) => p.custom?.intervention === currentIntervention);
-
-				if (presentPoint) {
-					s += `<div class="flex items-center">
-						<span style="color:${presentPoint.color};" class="mr-1">●</span>
-						<span class="font-medium">Present:</span>
-						<span class="ml-0.5">${(presentPoint.y as number).toFixed(1)} cases (Cost: $${(presentPoint.x as number).toLocaleString()})</span>
-					</div>`;
-				}
-
-				if (futurePoint) {
-					s += `<div class="flex items-center">
-						<span style="color:${futurePoint.color}" class="mr-1">●</span>
-						<span class="font-medium">Long term:</span>
-						<span class="ml-0.5">${(futurePoint.y as number).toFixed(1)} cases (Cost: $${(futurePoint.x as number).toLocaleString()})</span>
-					</div>`;
-				}
-
-				return s;
-			}
+			headerFormat: 'Total Cost: ${point.x:,.0f}',
+			pointFormat: `<div class="flex items-center">
+				<span style="color:{point.color}" class="mr-1">●</span>
+				<span class="font-medium">{series.name}:</span>
+				<span class="ml-0.5">{point.y:,.1f} cases
+					<span class="text-muted-foreground font-semibold">{point.custom.intervention}</span>
+				</span>
+			</div>`
 		},
 
 		legend: { enabled: true },
-		series: futureData.length ? [presentSeries, futureSeries] : [presentSeries]
+		series: futureSeries.data?.length ? [presentSeries, futureSeries] : [presentSeries]
 	};
 };
