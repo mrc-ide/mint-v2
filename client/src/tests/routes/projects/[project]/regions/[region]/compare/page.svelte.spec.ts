@@ -13,7 +13,7 @@ vi.mock('$routes/projects/[project]/regions/[region]/compare/_components/Compare
 
 describe('Compare page', () => {
 	it('should render if baseline has run & there is results', async () => {
-		vi.mocked(CompareComponent).mockReturnValue(render(snippet) as any);
+		vi.mocked(CompareComponent).mockImplementation(() => render(snippet) as any);
 		const screen = render(Page, {
 			props: {
 				data: {

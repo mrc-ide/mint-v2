@@ -8,7 +8,7 @@ vi.mock(import('$lib/url'), () => ({
 }));
 describe('Compare component', () => {
 	it('should render fields + present day charts initially', async () => {
-		vi.mocked(regionCompareUrl).mockReturnValue('http://test-emulator-url');
+		vi.mocked(regionCompareUrl).mockImplementation(() => 'http://test-emulator-url');
 		const compareParameters = structuredClone(MOCK_COMPARE_PARAMETERS);
 		const screen = render(Compare, {
 			props: {
