@@ -6,14 +6,6 @@ import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ request, fetch }) => {
 	const { formValues } = await request.json();
-	console.log({
-		prev: formValues['current_malaria_prevalence'],
-		biting: formValues['preference_for_biting'],
-		irs: formValues['irs_future'],
-		lsm: formValues['lsm'],
-		itn_future: formValues['itn_future']
-	});
-
 	try {
 		const res = await apiFetch<EmulatorResults>({
 			url: runEmulatorUrl(),

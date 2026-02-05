@@ -3,7 +3,11 @@ from pathlib import Path
 
 import jsonschema
 
-from app.models import CompareParameter, CompareParametersResponse, InterventionCompareParameter
+from app.models import (
+    CompareParameter,
+    CompareParametersResponse,
+    InterventionCompareParameter,
+)
 from typing import Annotated
 
 APP_DIR = Path(__file__).parent.parent
@@ -28,17 +32,20 @@ def get_compare_parameters() -> CompareParametersResponse:
     form_options = get_dynamic_form_options()
     baseline_param_names = [
         ("current_malaria_prevalence", "Baseline prevalence"),
-        ("preference_for_biting", "Mosquito biting preference"),  # TODO: for testing only remvove before commit
     ]
     intervention_param_names = [
-        ("irs_future", "IRS coverage", "irs_household_annual_cost_product"),
         ("itn_future", "ITN usage", "mass_distribution_cost"),
+        ("irs_future", "IRS coverage", "irs_household_annual_cost_product"),
         ("lsm", "LSM coverage", "lsm_cost"),
     ]
 
-    baseline_parameters = [create_compare_parameter(param_name, form_options) for param_name in baseline_param_names]
+    baseline_parameters = [
+        create_compare_parameter(param_name, form_options)
+        for param_name in baseline_param_names
+    ]
     intervention_parameters = [
-        create_intervention_compare_parameter(param_name, form_options) for param_name in intervention_param_names
+        create_intervention_compare_parameter(param_name, form_options)
+        for param_name in intervention_param_names
     ]
 
     return CompareParametersResponse(
@@ -48,7 +55,8 @@ def get_compare_parameters() -> CompareParametersResponse:
 
 
 def create_intervention_compare_parameter(
-    param: Annotated[tuple[str, str, str], "parameter name, label, linked cost name"], form_options: dict
+    param: Annotated[tuple[str, str, str], "parameter name, label, linked cost name"],
+    form_options: dict,
 ) -> InterventionCompareParameter:
     param_name, label, linked_cost_name = param
     cost_field = get_form_field(linked_cost_name, form_options)

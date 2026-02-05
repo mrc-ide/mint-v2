@@ -188,25 +188,18 @@ export const getCasesConfigCompare = (
 		},
 		tooltip: {
 			shadow: true,
+			shared: true,
 			useHTML: true,
 			headerFormat: 'Total Cost: ${point.x:,.0f}',
 			pointFormat: `<div class="flex items-center">
 				<span style="color:{point.color}" class="mr-1">●</span>
 				<span class="font-medium">{series.name}:</span>
 				<span class="ml-0.5">{point.y:,.1f} cases
-					<span class="text-muted-foreground">{point.custom.intervention}</span>
+					<span class="text-muted-foreground font-semibold">{point.custom.intervention}</span>
 				</span>
 			</div>`
 		},
-		// plotOptions: {
-		// 	line: {
-		// 		dataLabels: {
-		// 			enabled: true,
 
-		// 			format: '{point.custom.intervention}'
-		// 		}
-		// 	}
-		// },
 		legend: { enabled: true },
 		series: futureSeries.data?.length ? [presentSeries, futureSeries] : [presentSeries]
 	};

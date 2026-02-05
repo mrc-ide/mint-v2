@@ -4,6 +4,7 @@
 	import Loader from '$lib/components/Loader.svelte';
 	import SliderWithMarker from '$lib/components/SliderWithMarker.svelte';
 	import * as Field from '$lib/components/ui/field';
+	import { Input } from '$lib/components/ui/input';
 	import * as RadioGroup from '$lib/components/ui/radio-group';
 	import { apiFetch } from '$lib/fetch';
 	import type { CompareParameters } from '$lib/types/compare';
@@ -13,7 +14,6 @@
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import Plots from './Plots.svelte';
-	import { Input } from '$lib/components/ui/input';
 
 	interface Props {
 		presentResults: EmulatorResults;
@@ -25,7 +25,7 @@
 
 	let { presentResults, compareParameters, presentFormValues, chartTheme, params }: Props = $props();
 	let selectedBaselineParameter = $state(compareParameters.baselineParameters[0]);
-	let longTermResults = $state<EmulatorResults>();
+	let longTermResults = $state<EmulatorResults>(presentResults);
 	let isLoading = $state(true);
 	let longTermFormValues = $state(presentFormValues);
 
@@ -92,9 +92,7 @@
 					id="baseline-parameter-slider"
 					type="single"
 					value={longTermFormValues[selectedBaselineParameter.parameterName]}
-					onValueChange={(value: number) => {
-						onSliderChange(value, selectedBaselineParameter.parameterName);
-					}}
+					onValueChange={(value: number) => onSliderChange(value, selectedBaselineParameter.parameterName)}
 					max={selectedBaselineParameter.max}
 					min={selectedBaselineParameter.min}
 					disabled={isLoading}
@@ -117,9 +115,7 @@
 					<SliderWithMarker
 						id={param.parameterName}
 						type="single"
-						onValueChange={(value: number) => {
-							onSliderChange(value, param.parameterName);
-						}}
+						onValueChange={(value: number) => onSliderChange(value, param.parameterName)}
 						max={param.max}
 						min={param.min}
 						disabled={isLoading}
