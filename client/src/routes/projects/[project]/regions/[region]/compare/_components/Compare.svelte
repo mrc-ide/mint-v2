@@ -143,7 +143,7 @@
 						/>
 						<span class="text-right text-sm font-medium tabular-nums">
 							{#if (longTermFormValues[param.linkedCostName] as number) - (presentFormValues[param.linkedCostName] as number) >= 0}+{:else}-{/if}
-							{Math.abs(
+							${Math.abs(
 								(longTermFormValues[param.linkedCostName] as number) -
 									(presentFormValues[param.linkedCostName] as number)
 							).toFixed(1)}

@@ -9,6 +9,7 @@ import {
 import type { CasesData, Scenario } from '$lib/types/userState';
 import type { Options, PointOptionsObject, SeriesColumnOptions, SeriesLineOptions } from 'highcharts';
 import { getColumnFill, ScenarioToLabel } from './baseChart';
+import { convertToLocaleString } from '$lib/number';
 
 const getCasesSeriesData = (
 	casesAverted: Partial<Record<Scenario, CasesAverted>>
@@ -128,13 +129,11 @@ export const createCasesCompareSeries = (
 	data: createCasesCompareDataPoints(cases, formValues).map(({ totalCases, totalCost, scenario }) => ({
 		x: totalCost,
 		y: totalCases,
-		color: name === 'Present' ? 'var(--chart-1)' : 'var(--chart-2)',
 		custom: {
 			intervention: ScenarioToLabel[scenario as Scenario]
 		}
 	})),
-	step: 'left',
-	color: name === 'Present' ? 'var(--chart-1)' : 'var(--chart-2)'
+	step: 'left'
 });
 
 /**
@@ -153,6 +152,29 @@ export const createBreakToMinimizeEmptySpace = (
 	const breakPoint = Math.min(data1Breakpoint, data2Breakpoint);
 
 	return breakPoint !== Infinity ? [{ from: 0, to: breakPoint * 0.9 }] : undefined;
+};
+
+const createCompareTooltipHtml = function (this: Highcharts.Point): string {
+	const currentIntervention: string = this.options.custom!.intervention;
+	const tooltipLines: string[] = [`<div class="mb-1"><span class="font-semibold ">${currentIntervention}</span></div>`];
+
+	for (const series of this.series.chart.series) {
+		// clear all hover states first
+		series.points.forEach((p) => p.setState(''));
+		const point = series.points.find((p) => p.options.custom!.intervention === currentIntervention);
+		if (!point) continue;
+
+		point.setState('hover');
+		tooltipLines.push(`
+			<div class="flex items-center">
+				<span style="color:${series.color};" class="mr-1">●</span>
+				<span class="text-muted-foreground">${series.name}:</span>
+				<span class="ml-0.5">${convertToLocaleString(point.y as number, 1)} cases • $${convertToLocaleString(point.x, 0)}</span>
+			</div>
+		`);
+	}
+
+	return tooltipLines.join('');
 };
 
 export const getCasesConfigCompare = (
@@ -190,36 +212,23 @@ export const getCasesConfigCompare = (
 		},
 		tooltip: {
 			shadow: true,
-			shared: false,
 			useHTML: true,
-			formatter: function () {
-				const currentIntervention = this.point.custom?.intervention;
-
-				let s = `<div class="mb-1"><span class="font-semibold">${currentIntervention}</span></div>`;
-
-				const presentPoint = presentData.find((p) => p.custom?.intervention === currentIntervention);
-				const futurePoint = futureData.find((p) => p.custom?.intervention === currentIntervention);
-
-				if (presentPoint) {
-					s += `<div class="flex items-center">
-						<span style="color:${presentPoint.color};" class="mr-1">●</span>
-						<span class="font-medium">Present:</span>
-						<span class="ml-0.5">${(presentPoint.y as number).toFixed(1)} cases (Cost: $${(presentPoint.x as number).toLocaleString()})</span>
-					</div>`;
+			formatter: createCompareTooltipHtml
+		},
+		plotOptions: {
+			line: {
+				states: {
+					inactive: {
+						enabled: false
+					}
+				},
+				events: {
+					mouseOut: function () {
+						this.chart.series.forEach((series) => series.points.forEach((p) => p.setState('')));
+					}
 				}
-
-				if (futurePoint) {
-					s += `<div class="flex items-center">
-						<span style="color:${futurePoint.color}" class="mr-1">●</span>
-						<span class="font-medium">Long term:</span>
-						<span class="ml-0.5">${(futurePoint.y as number).toFixed(1)} cases (Cost: $${(futurePoint.x as number).toLocaleString()})</span>
-					</div>`;
-				}
-
-				return s;
 			}
 		},
-
 		legend: { enabled: true },
 		series: futureData.length ? [presentSeries, futureSeries] : [presentSeries]
 	};
