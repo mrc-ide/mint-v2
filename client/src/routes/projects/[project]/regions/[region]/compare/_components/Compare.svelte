@@ -91,7 +91,7 @@
 				<SliderWithMarker
 					id="baseline-parameter-slider"
 					type="single"
-					value={longTermFormValues[selectedBaselineParameter.parameterName]}
+					value={longTermFormValues[selectedBaselineParameter.parameterName] as number}
 					onValueChange={(value: number) => onSliderChange(value, selectedBaselineParameter.parameterName)}
 					max={selectedBaselineParameter.max}
 					min={selectedBaselineParameter.min}

@@ -42,7 +42,7 @@ describe('Compare InterventionFields component', () => {
 
 	it('should calculate correct cost delta and display with appropriate sign', async () => {
 		const param = MOCK_COMPARE_PARAMETERS.interventionParameters[0];
-		const presentCost = MOCK_FORM_VALUES[param.linkedCostName];
+		const presentCost = MOCK_FORM_VALUES[param.linkedCostName as keyof typeof MOCK_FORM_VALUES] as number;
 
 		const screen = renderComponent();
 
