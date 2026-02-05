@@ -26,10 +26,11 @@ test.describe('E2E Compare Page', () => {
 	});
 
 	test('should compare prevalence & cases when baseline slider is adjusted', async ({ page }) => {
+		await changeSlider(page, 'current_malaria_prevalence', 0.2);
 		await page.getByRole('button', { name: 'Run baseline' }).click();
 		await page.getByRole('link', { name: 'Long term comparison' }).click();
 
-		changeSlider(page, 'baseline-parameter-slider', 0.7);
+		await changeSlider(page, 'baseline-parameter-slider', 0.5);
 
 		// prevalence plot
 		await expect(page.getByRole('button', { name: 'Show No Intervention Long term' })).toBeVisible();
