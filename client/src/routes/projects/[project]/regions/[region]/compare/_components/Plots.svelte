@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createHighchart } from '$lib/charts/baseChart';
-	import { getCasesConfigCompare } from '$lib/charts/casesConfig';
+	import { getCasesCompareConfig } from '$lib/charts/casesConfig';
 	import { createPresentPrevalenceSeries, getPrevalenceConfigCompare } from '$lib/charts/prevalenceConfig';
 	import type { FormValue } from '$lib/components/dynamic-region-form/types';
 	import type { EmulatorResults } from '$lib/types/userState';
@@ -17,7 +17,7 @@
 		getPrevalenceConfigCompare(presentPrevalenceSeries, longTermResults?.prevalence ?? [])
 	);
 	let casesConfig = $derived(
-		getCasesConfigCompare(presentResults.cases, longTermResults?.cases ?? [], regionFormValues)
+		getCasesCompareConfig(presentResults.cases, longTermResults?.cases ?? [], regionFormValues)
 	);
 </script>
 

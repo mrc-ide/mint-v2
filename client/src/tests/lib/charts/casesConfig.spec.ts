@@ -4,7 +4,7 @@ import {
 	createCasesCompareDataPoints,
 	createCasesCompareSeries,
 	getCasesConfig,
-	getCasesConfigCompare
+	getCasesCompareConfig
 } from '$lib/charts/casesConfig';
 import * as processCases from '$lib/process-results/processCases';
 import type { CasesData, Scenario } from '$lib/types/userState';
@@ -322,7 +322,7 @@ describe('cases compare config', () => {
 		];
 
 		it('should return a valid Highcharts Options object', () => {
-			const config = getCasesConfigCompare(mockCurrentCases, mockNewCases, mockFormValues);
+			const config = getCasesCompareConfig(mockCurrentCases, mockNewCases, mockFormValues);
 
 			expect(config).toBeDefined();
 			expect(config.chart?.type).toBe('line');
@@ -332,7 +332,7 @@ describe('cases compare config', () => {
 		});
 
 		it('should include both Present and Long term series when newCases has data', () => {
-			const config = getCasesConfigCompare(mockCurrentCases, mockNewCases, mockFormValues);
+			const config = getCasesCompareConfig(mockCurrentCases, mockNewCases, mockFormValues);
 
 			expect(config.series).toHaveLength(2);
 			expect((config.series as any)[0].name).toBe('Present');
@@ -342,7 +342,7 @@ describe('cases compare config', () => {
 		it('should include only Present series when newCases is empty', () => {
 			vi.spyOn(processCases, 'collectPostInterventionCases').mockReturnValue({} as any);
 
-			const config = getCasesConfigCompare(mockCurrentCases, [], mockFormValues);
+			const config = getCasesCompareConfig(mockCurrentCases, [], mockFormValues);
 
 			expect(config.series).toHaveLength(1);
 			expect((config.series as any)[0].name).toBe('Present');
@@ -358,13 +358,13 @@ describe('cases compare config', () => {
 				py_only_only: 5000
 			});
 
-			const config = getCasesConfigCompare(mockCurrentCases, mockNewCases, mockFormValues);
+			const config = getCasesCompareConfig(mockCurrentCases, mockNewCases, mockFormValues);
 
 			expect((config.xAxis as any).breaks).toBeDefined();
 		});
 
 		it('should pass data to createCasesCompareSeries correctly', () => {
-			getCasesConfigCompare(mockCurrentCases, mockNewCases, mockFormValues);
+			getCasesCompareConfig(mockCurrentCases, mockNewCases, mockFormValues);
 
 			// Verify the function processes the data through helper functions
 			expect(processCases.collectPostInterventionCases).toHaveBeenCalled();

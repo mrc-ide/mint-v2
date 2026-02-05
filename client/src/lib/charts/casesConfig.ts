@@ -150,10 +150,10 @@ export const createBreakToMinimizeEmptySpace = (
 
 	const breakPoint = Math.min(data1Breakpoint, data2Breakpoint);
 
-	return breakPoint !== Infinity ? [{ from: 0, to: breakPoint * 0.9 }] : undefined;
+	return breakPoint !== Infinity ? [{ from: 0, to: breakPoint * 0.9, breakSize: 1 }] : undefined;
 };
 
-export const getCasesConfigCompare = (
+export const getCasesCompareConfig = (
 	currentCases: CasesData[],
 	newCases: CasesData[],
 	formValues: Record<string, FormValue>
