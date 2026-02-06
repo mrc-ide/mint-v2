@@ -7,7 +7,6 @@
 	import { apiFetch } from '$lib/fetch';
 	import type { CompareParametersWithValue } from '$lib/types/compare';
 	import type { EmulatorResults } from '$lib/types/userState';
-	import { regionCompareUrl } from '$lib/url';
 	import debounce from 'debounce';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
@@ -36,18 +35,18 @@
 	const runEmulator = async () => {
 		isLoading = true;
 		try {
-			const res = await apiFetch<EmulatorResults>({
-				url: regionCompareUrl(params.project, params.region),
-				method: 'POST',
-				body: {
-					formValues: {
-						...regionFormValues,
-						[selectedParameter.parameterName]: sliderValue
-					}
-				}
-			});
+			// const res = await apiFetch<EmulatorResults>({
+			// 	url: regionCompareUrl(params.project, params.region),
+			// 	method: 'POST',
+			// 	body: {
+			// 		formValues: {
+			// 			...regionFormValues,
+			// 			[selectedParameter.parameterName]: sliderValue
+			// 		}
+			// 	}
+			// });
 			isLoading = false;
-			longTermResults = res.data;
+			// longTermResults = res.data;
 		} catch (_err) {
 			toast.error('Failed to run long term scenario planning emulator');
 			isLoading = false;
