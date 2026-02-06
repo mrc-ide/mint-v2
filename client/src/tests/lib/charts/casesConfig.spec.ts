@@ -307,10 +307,25 @@ describe('cases compare config', () => {
 
 			const result = createBreakToMinimizeEmptySpace(data1, data2);
 
-			expect(result).toBeDefined();
 			expect(result).toHaveLength(1);
 			expect(result![0].from).toBe(0);
 			expect(result![0].to).toBe(3000 * 0.9);
+		});
+
+		it('should set break size to 20% of the break point', () => {
+			const data1: PointOptionsObject[] = [
+				{ x: 0, y: 100 },
+				{ x: 10000, y: 200 }
+			];
+			const data2: PointOptionsObject[] = [
+				{ x: 0, y: 150 },
+				{ x: 5000, y: 250 }
+			];
+
+			const result = createBreakToMinimizeEmptySpace(data1, data2);
+
+			expect(result).toHaveLength(1);
+			expect(result![0].breakSize).toBe(5000 * 0.9 * 0.2);
 		});
 	});
 

@@ -149,9 +149,10 @@ export const createBreakToMinimizeEmptySpace = (
 	const data1Breakpoint = getSecondPoint(data1);
 	const data2Breakpoint = getSecondPoint(data2);
 
-	const breakPoint = Math.min(data1Breakpoint, data2Breakpoint);
+	const breakPoint = Math.min(data1Breakpoint, data2Breakpoint) * 0.9; // set break point at 90%
+	const breakSize = breakPoint * 0.2; // add a 20% buffer to ensure the break is visible
 
-	return breakPoint !== Infinity ? [{ from: 0, to: breakPoint * 0.9, breakSize: 1 }] : undefined;
+	return breakPoint !== Infinity ? [{ from: 0, to: breakPoint, breakSize }] : undefined;
 };
 
 export const createCompareTooltipHtml = function (this: Highcharts.Point): string {
