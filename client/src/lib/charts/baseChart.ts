@@ -2,7 +2,7 @@ import Highcharts from 'highcharts/esm/highcharts.js';
 import 'highcharts/esm/modules/accessibility';
 import 'highcharts/esm/modules/pattern-fill.js';
 import 'highcharts/esm/modules/exporting';
-import 'highcharts/esm/modules/broken-axis.js';
+// import 'highcharts/esm/modules/broken-axis.js';
 
 import type { Attachment } from 'svelte/attachments';
 import type { Scenario } from '../types/userState';
