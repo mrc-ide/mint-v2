@@ -13,7 +13,13 @@ vi.mock('mode-watcher', () => ({
 vi.mock('highcharts/esm/highcharts.js', () => ({
 	default: {
 		chart: vi.fn(),
-		setOptions: vi.fn()
+		setOptions: vi.fn(),
+		wrap: vi.fn(),
+		Axis: {
+			prototype: {
+				getLinePath: vi.fn()
+			}
+		}
 	}
 }));
 vi.mock('highcharts/esm/modules/accessibility', () => ({}));
@@ -66,9 +72,10 @@ describe('getColumnFill', () => {
 });
 
 describe('configureHighcharts', () => {
-	it('should call Highcharts.setOptions', () => {
+	it('should call Highcharts.setOptions & wrap', () => {
 		configureHighcharts();
 		expect(Highcharts.setOptions).toHaveBeenCalledTimes(1);
+		expect(Highcharts.wrap).toHaveBeenCalledWith(Highcharts.Axis.prototype, 'getLinePath', expect.any(Function));
 	});
 });
 
