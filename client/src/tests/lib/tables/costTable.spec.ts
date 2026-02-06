@@ -6,7 +6,7 @@ vi.mock('$lib/components/ui/data-table', () => ({
 	renderComponent: vi.fn()
 }));
 
-vi.mock(import('$lib/components/data-table/DataTableSortHeader.svelte'), () => ({
+vi.mock('$lib/components/data-table/DataTableSortHeader.svelte', () => ({
 	default: vi.fn()
 }));
 

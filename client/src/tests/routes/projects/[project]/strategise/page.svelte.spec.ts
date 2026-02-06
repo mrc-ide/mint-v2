@@ -2,7 +2,7 @@ import { convertToLocaleString } from '$lib/number';
 import Page from '$routes/projects/[project]/strategise/+page.svelte';
 import { strategiseSchema } from '$routes/projects/[project]/strategise/schema';
 import { superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 } from 'sveltekit-superforms/adapters';
 import { render } from 'vitest-browser-svelte';
 
 describe('+page.server.ts', () => {
@@ -10,7 +10,7 @@ describe('+page.server.ts', () => {
 		const screen = render(Page, {
 			props: {
 				data: {
-					form: await superValidate(zod(strategiseSchema)),
+					form: await superValidate(zod4(strategiseSchema)),
 					project: { regions: [] },
 					regionalStrategies: [
 						{
@@ -31,7 +31,7 @@ describe('+page.server.ts', () => {
 		const screen = render(Page, {
 			props: {
 				data: {
-					form: await superValidate({ minCost, maxCost, budget: maxCost }, zod(strategiseSchema)),
+					form: await superValidate({ minCost, maxCost, budget: maxCost }, zod4(strategiseSchema)),
 					project: { regions: [] },
 					regionalStrategies: [
 						{

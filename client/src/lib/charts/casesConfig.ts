@@ -151,7 +151,7 @@ export const createBreakToMinimizeEmptySpace = (
 
 	const breakPoint = Math.min(data1Breakpoint, data2Breakpoint);
 
-	return breakPoint !== Infinity ? [{ from: 0, to: breakPoint * 0.9 }] : undefined;
+	return breakPoint !== Infinity ? [{ from: 0, to: breakPoint * 0.9, breakSize: 1 }] : undefined;
 };
 
 export const createCompareTooltipHtml = function (this: Highcharts.Point): string {
@@ -177,7 +177,7 @@ export const createCompareTooltipHtml = function (this: Highcharts.Point): strin
 	return tooltipLines.join('');
 };
 
-export const getCasesConfigCompare = (
+export const getCasesCompareConfig = (
 	currentCases: CasesData[],
 	newCases: CasesData[],
 	presentFormValues: Record<string, FormValue>,

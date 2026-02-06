@@ -4,7 +4,7 @@ import {
 	createCasesCompareDataPoints,
 	createCasesCompareSeries,
 	getCasesConfig,
-	getCasesConfigCompare,
+	getCasesCompareConfig,
 	createCompareTooltipHtml
 } from '$lib/charts/casesConfig';
 import * as processCases from '$lib/process-results/processCases';
@@ -445,7 +445,7 @@ describe('cases compare config', () => {
 		});
 	});
 
-	describe('getCasesConfigCompare integration', () => {
+	describe('getCasesCompareConfig integration', () => {
 		const mockCurrentCases: CasesData[] = [
 			{ scenario: 'irs_only', casesPer1000: 10, year: 2 },
 			{ scenario: 'irs_only', casesPer1000: 10, year: 3 }
@@ -457,7 +457,7 @@ describe('cases compare config', () => {
 		];
 
 		it('should return a valid Highcharts Options object', () => {
-			const config = getCasesConfigCompare(
+			const config = getCasesCompareConfig(
 				mockCurrentCases,
 				mockNewCases,
 				mockPresentFormValues,
@@ -472,7 +472,7 @@ describe('cases compare config', () => {
 		});
 
 		it('should include both Present and Long term series when newCases has data', () => {
-			const config = getCasesConfigCompare(
+			const config = getCasesCompareConfig(
 				mockCurrentCases,
 				mockNewCases,
 				mockPresentFormValues,
@@ -487,7 +487,7 @@ describe('cases compare config', () => {
 		it('should include only Present series when newCases is empty', () => {
 			vi.spyOn(processCases, 'collectPostInterventionCases').mockReturnValue({} as any);
 
-			const config = getCasesConfigCompare(mockCurrentCases, [], mockPresentFormValues, mockLongTermFormValues);
+			const config = getCasesCompareConfig(mockCurrentCases, [], mockPresentFormValues, mockLongTermFormValues);
 
 			expect(config.series).toHaveLength(1);
 			expect((config.series as any)[0].name).toBe('Present');
@@ -503,7 +503,7 @@ describe('cases compare config', () => {
 				py_only_only: 5000
 			});
 
-			const config = getCasesConfigCompare(
+			const config = getCasesCompareConfig(
 				mockCurrentCases,
 				mockNewCases,
 				mockPresentFormValues,
@@ -514,7 +514,7 @@ describe('cases compare config', () => {
 		});
 
 		it('should pass data to createCasesCompareSeries correctly', () => {
-			getCasesConfigCompare(mockCurrentCases, mockNewCases, mockPresentFormValues, mockLongTermFormValues);
+			getCasesCompareConfig(mockCurrentCases, mockNewCases, mockPresentFormValues, mockLongTermFormValues);
 
 			// Verify the function processes the data through helper functions
 			expect(processCases.collectPostInterventionCases).toHaveBeenCalled();
@@ -522,7 +522,7 @@ describe('cases compare config', () => {
 		});
 
 		it('should set tooltip formatter to createCompareTooltipHtml', () => {
-			const config = getCasesConfigCompare(
+			const config = getCasesCompareConfig(
 				mockCurrentCases,
 				mockNewCases,
 				mockPresentFormValues,

@@ -1,7 +1,7 @@
 import { setError, superValidate } from 'sveltekit-superforms';
 import type { PageServerLoad } from './$types';
 import { createProjectSchema } from './schema';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 } from 'sveltekit-superforms/adapters';
 import { fail, type Actions } from '@sveltejs/kit';
 
 export const load: PageServerLoad = async ({ url }) => {
@@ -9,13 +9,13 @@ export const load: PageServerLoad = async ({ url }) => {
 
 	return {
 		userGuideLanguage,
-		form: await superValidate(zod(createProjectSchema))
+		form: await superValidate(zod4(createProjectSchema))
 	};
 };
 
 export const actions: Actions = {
 	create: async ({ request, locals }) => {
-		const form = await superValidate(request, zod(createProjectSchema));
+		const form = await superValidate(request, zod4(createProjectSchema));
 		const isDuplicateProjectName = locals.userState.projects.some((project) => project.name === form.data.name);
 		if (isDuplicateProjectName) {
 			setError(form, 'name', 'Project names must be unique');

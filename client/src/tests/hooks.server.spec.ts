@@ -36,7 +36,7 @@ describe('handle', () => {
 	it('should bypass middleware for /healthz endpoint', async () => {
 		mockEvent.url = new URL('http://localhost:5173/healthz');
 
-		await handle({ event: mockEvent as RequestEvent, resolve: mockResolve });
+		await handle({ event: mockEvent as RequestEvent, resolve: mockResolve as any });
 
 		expect(redis.loadOrSetupUserState).not.toHaveBeenCalled();
 		expect(redis.saveUserState).not.toHaveBeenCalled();
@@ -44,7 +44,7 @@ describe('handle', () => {
 	});
 
 	it('should load user state before request & save user state after request', async () => {
-		await handle({ event: mockEvent as RequestEvent, resolve: mockResolve });
+		await handle({ event: mockEvent as RequestEvent, resolve: mockResolve as any });
 
 		expect(redis.loadOrSetupUserState).toHaveBeenCalledWith(mockEvent.cookies, mockEvent);
 		expect(mockEvent.locals!.userState).toEqual({
@@ -59,7 +59,7 @@ describe('handle', () => {
 		const expectedResponse = new Response('Test Response');
 		mockResolve.mockResolvedValue(expectedResponse);
 
-		const response = await handle({ event: mockEvent as RequestEvent, resolve: mockResolve });
+		const response = await handle({ event: mockEvent as RequestEvent, resolve: mockResolve as any });
 
 		expect(response).toBe(expectedResponse);
 	});
