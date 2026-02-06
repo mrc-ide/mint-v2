@@ -2,23 +2,27 @@
 	import type { FormValue } from '$lib/components/dynamic-region-form/types';
 	import { DEBOUNCE_DELAY_MS } from '$lib/components/dynamic-region-form/utils';
 	import Loader from '$lib/components/Loader.svelte';
-	import SliderWithMarker from '$lib/components/SliderWithMarker.svelte';
 	import * as Field from '$lib/components/ui/field';
 	import * as RadioGroup from '$lib/components/ui/radio-group';
+	import { apiFetch } from '$lib/fetch';
 	import type { CompareParametersWithValue } from '$lib/types/compare';
 	import type { EmulatorResults } from '$lib/types/userState';
+	import { regionCompareUrl } from '$lib/url';
 	import debounce from 'debounce';
 	import { onMount } from 'svelte';
+	import { toast } from 'svelte-sonner';
 	import Plots from './Plots.svelte';
+	import SliderWithMarker from '$lib/components/SliderWithMarker.svelte';
 
 	interface Props {
 		presentResults: EmulatorResults;
 		compareParameters: CompareParametersWithValue;
 		regionFormValues: Record<string, FormValue>;
 		chartTheme: string;
+		params: { project: string; region: string };
 	}
 
-	let { presentResults, compareParameters, regionFormValues, chartTheme }: Props = $props();
+	let { presentResults, compareParameters, regionFormValues, chartTheme, params }: Props = $props();
 	let selectedParameter = $state(compareParameters.baselineParameters[0]);
 	let sliderValue = $derived(selectedParameter.value);
 	let longTermResults = $state<EmulatorResults>();
@@ -31,23 +35,23 @@
 
 	const runEmulator = async () => {
 		isLoading = true;
-		// try {
-		// 	// const res = await apiFetch<EmulatorResults>({
-		// 	// 	url: regionCompareUrl(params.project, params.region),
-		// 	// 	method: 'POST',
-		// 	// 	body: {
-		// 	// 		formValues: {
-		// 	// 			...regionFormValues,
-		// 	// 			[selectedParameter.parameterName]: sliderValue
-		// 	// 		}
-		// 	// 	}
-		// 	// });
-		// 	isLoading = false;
-		// 	// longTermResults = res.data;
-		// } catch (_err) {
-		// 	toast.error('Failed to run long term scenario planning emulator');
-		// 	isLoading = false;
-		// }
+		try {
+			const res = await apiFetch<EmulatorResults>({
+				url: regionCompareUrl(params.project, params.region),
+				method: 'POST',
+				body: {
+					formValues: {
+						...regionFormValues,
+						[selectedParameter.parameterName]: sliderValue
+					}
+				}
+			});
+			isLoading = false;
+			longTermResults = res.data;
+		} catch (_err) {
+			toast.error('Failed to run long term scenario planning emulator');
+			isLoading = false;
+		}
 	};
 	const debounceRunEmulator = debounce(runEmulator, DEBOUNCE_DELAY_MS);
 
