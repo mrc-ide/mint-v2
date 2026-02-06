@@ -10,7 +10,7 @@
 	import ChevronsUpDownIcon from '@lucide/svelte/icons/chevrons-up-down';
 	import Plus from '@lucide/svelte/icons/plus';
 	import { superForm } from 'sveltekit-superforms';
-	import { zodClient } from 'sveltekit-superforms/adapters';
+	import { zod4Client } from 'sveltekit-superforms/adapters';
 	import { addRegionSchema } from '../projects/[project]/regions/[region]/schema';
 
 	interface Props {
@@ -20,7 +20,7 @@
 
 	const { region, project }: Props = $props();
 	const form = superForm(page.data.addRegionForm ?? { name: '' }, {
-		validators: zodClient(addRegionSchema),
+		validators: zod4Client(addRegionSchema),
 		resetForm: true,
 		onResult({ result }) {
 			if (result.type === 'redirect') {
