@@ -12,59 +12,62 @@ import { mode } from 'mode-watcher';
  * Copied from Highcharts demo to add slanted lines to indicate axis breaks on axis with a break. See:
  * https://jsfiddle.net/gh/get/library/pure/highcharts/highcharts/tree/master/samples/highcharts/axisbreak/break-visualized/
  */
-const setupAxisBreaks = () => {
+const setupAxisBreaks = (
+	axis: Highcharts.Axis,
+	brokenAxis: { hasBreaks: boolean; breakArray?: Highcharts.XAxisBreaksOptions[]; axis: Highcharts.Axis },
+	path: [string, number, number][],
+	start: [string, number, number]
+) => {
+	let x = start[1];
+	let y = start[2];
+	const breakArray = brokenAxis?.breakArray || [];
+
+	breakArray.forEach((brk: Highcharts.XAxisBreaksOptions) => {
+		// Skip breaks outside the view
+		if (Number(brk.to) <= Number(axis.min) || Number(brk.from) >= Number(axis.max)) {
+			return;
+		}
+
+		const isHorizontal = axis.horiz;
+
+		if (isHorizontal) {
+			x = axis.toPixels(Number(brk.to));
+			path.splice(
+				1,
+				0,
+				['L', x - 4, y], // stop
+				['M', x - 9, y + 5],
+				['L', x + 1, y - 5], // left slanted line
+				['M', x - 1, y + 5],
+				['L', x + 9, y - 5], // higher slanted line
+				['M', x + 4, y]
+			);
+		} else {
+			y = axis.toPixels(Number(brk.to));
+			path.splice(
+				1,
+				0,
+				['L', x, y - 4], // stop
+				['M', x + 5, y - 9],
+				['L', x - 5, y + 1], // lower slanted line
+				['M', x + 5, y - 1],
+				['L', x - 5, y + 9], // higher slanted line
+				['M', x, y + 4]
+			);
+		}
+	});
+
+	return path;
+};
+export const configureHighcharts = () => {
 	Highcharts.wrap(Highcharts.Axis.prototype, 'getLinePath', function (proceed, lineWidth) {
 		// @ts-expect-error: 'this' context is the Axis instance, but TypeScript doesn't know that
 		const axis = this; // eslint-disable-line @typescript-eslint/no-this-alias
 		const { brokenAxis } = axis;
 		const path = proceed.call(axis, lineWidth);
 		const start = path[0];
-
-		let x = start[1];
-		let y = start[2];
-
-		const breakArray = brokenAxis?.breakArray || [];
-
-		breakArray.forEach((brk: Highcharts.XAxisBreaksOptions) => {
-			// Skip breaks outside the view
-			if (Number(brk.to) <= Number(axis.min) || Number(brk.from) >= Number(axis.max)) {
-				return;
-			}
-
-			const isHorizontal = axis.horiz;
-
-			if (isHorizontal) {
-				x = axis.toPixels(Number(brk.to));
-				path.splice(
-					1,
-					0,
-					['L', x - 4, y], // stop
-					['M', x - 9, y + 5],
-					['L', x + 1, y - 5], // left slanted line
-					['M', x - 1, y + 5],
-					['L', x + 9, y - 5], // higher slanted line
-					['M', x + 4, y]
-				);
-			} else {
-				y = axis.toPixels(Number(brk.to));
-				path.splice(
-					1,
-					0,
-					['L', x, y - 4], // stop
-					['M', x + 5, y - 9],
-					['L', x - 5, y + 1], // lower slanted line
-					['M', x + 5, y - 1],
-					['L', x - 5, y + 9], // higher slanted line
-					['M', x, y + 4]
-				);
-			}
-		});
-
-		return path;
+		return setupAxisBreaks(axis, brokenAxis, path, start);
 	});
-};
-export const configureHighcharts = () => {
-	setupAxisBreaks();
 	Highcharts.setOptions({
 		exporting: {
 			buttons: {
