@@ -16,10 +16,9 @@
 		compareParameters: CompareParametersWithValue;
 		regionFormValues: Record<string, FormValue>;
 		chartTheme: string;
-		params: { project: string; region: string };
 	}
 
-	let { presentResults, compareParameters, regionFormValues, chartTheme, params }: Props = $props();
+	let { presentResults, compareParameters, regionFormValues, chartTheme }: Props = $props();
 	let selectedParameter = $state(compareParameters.baselineParameters[0]);
 	let sliderValue = $derived(selectedParameter.value);
 	let longTermResults = $state<EmulatorResults>();
