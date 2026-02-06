@@ -1,6 +1,6 @@
-import { regionCompareUrl } from '$lib/url';
+// import { regionCompareUrl } from '$lib/url';
 import { MOCK_CASES_DATA, MOCK_COMPARE_PARAMETERS, MOCK_FORM_VALUES, MOCK_PREVALENCE_DATA } from '$mocks/mocks';
-import Compare from '$routes/projects/[project]/regions/[region]/compare/_components/Compare.svelte';
+import CompareComponent from '$routes/projects/[project]/regions/[region]/compare/_components/Compare.svelte';
 import { render } from 'vitest-browser-svelte';
 
 vi.mock(import('$lib/url'), () => ({
@@ -8,9 +8,9 @@ vi.mock(import('$lib/url'), () => ({
 }));
 describe('Compare component', () => {
 	it('should render fields + present day charts initially', async () => {
-		vi.mocked(regionCompareUrl).mockImplementation(() => 'http://test-emulator-url');
+		// vi.mocked(regionCompareUrl).mockImplementation(() => 'http://test-emulator-url');
 		const compareParameters = structuredClone(MOCK_COMPARE_PARAMETERS);
-		const screen = render(Compare, {
+		const screen = render(CompareComponent, {
 			props: {
 				presentResults: {
 					cases: MOCK_CASES_DATA,
