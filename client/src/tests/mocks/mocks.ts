@@ -27,7 +27,8 @@ export const MOCK_FORM_VALUES = Object.freeze({
 	py_ppf_cost: 2.86,
 	mass_distribution_cost: 2.75,
 	continuous_itn_distribution_cost: 2.75,
-	irs_household_annual_cost: 20,
+	irs_household_annual_cost_deployment: 12,
+	irs_household_annual_cost_product: 12,
 	lsm_cost: 5
 });
 export const MOCK_CASES_DATA = Object.freeze([

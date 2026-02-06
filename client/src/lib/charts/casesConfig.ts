@@ -203,7 +203,6 @@ export const getCasesCompareConfig = (
 			title: { text: 'Total Cost ($USD)' },
 			labels: { format: '${value:,.0f}' },
 			min: 0,
-			tickPixelInterval: 50,
 			breaks: createBreakToMinimizeEmptySpace(presentData, futureData)
 		},
 		yAxis: {

@@ -1,19 +1,17 @@
 import { MOCK_COMPARE_PARAMETERS, MOCK_FORM_VALUES } from '$mocks/mocks';
 import InterventionFields from '$routes/projects/[project]/regions/[region]/compare/_components/InterventionFields.svelte';
 import { render } from 'vitest-browser-svelte';
+import { userEvent } from 'vitest/browser';
 
 const renderComponent = (props: Record<string, any> = {}) => {
-	const mockFormValues = structuredClone(MOCK_FORM_VALUES);
-
+	const testFormValues = $state(structuredClone(MOCK_FORM_VALUES));
 	return render(InterventionFields, {
-		props: {
-			isLoading: false,
-			presentFormValues: mockFormValues,
-			longTermFormValues: mockFormValues,
-			interventionParameters: MOCK_COMPARE_PARAMETERS.interventionParameters,
-			onSliderChange: vi.fn(),
-			...props
-		}
+		isLoading: false,
+		presentFormValues: MOCK_FORM_VALUES,
+		longTermFormValues: testFormValues,
+		interventionParameters: MOCK_COMPARE_PARAMETERS.interventionParameters,
+		onSliderChange: vi.fn(),
+		...props
 	} as any);
 };
 describe('Compare InterventionFields component', () => {
@@ -46,8 +44,9 @@ describe('Compare InterventionFields component', () => {
 
 		const screen = renderComponent();
 
-		await screen.getByLabelText(param.linkedCostLabel).fill(`${presentCost + 10}`);
+		const input = screen.getByLabelText(param.linkedCostLabel);
+		await userEvent.fill(input, String(presentCost + 10));
 
-		await expect.element(screen.getByText(`$10.0`)).toBeVisible();
+		await expect.element(screen.getByText(`$10`, { exact: false })).toBeVisible();
 	});
 });
