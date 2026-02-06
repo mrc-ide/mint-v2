@@ -3,9 +3,9 @@ import { MOCK_CASES_DATA, MOCK_COMPARE_PARAMETERS, MOCK_FORM_VALUES, MOCK_PREVAL
 import CompareComponent from '$routes/projects/[project]/regions/[region]/compare/_components/Compare.svelte';
 import { render } from 'vitest-browser-svelte';
 
-vi.mock(import('$lib/url'), () => ({
-	regionCompareUrl: vi.fn(() => 'http://test-emulator-url')
-}));
+// vi.mock(import('$lib/url'), () => ({
+// 	regionCompareUrl: vi.fn(() => 'http://test-emulator-url')
+// }));
 describe('Compare component', () => {
 	it('should render fields + present day charts initially', async () => {
 		// vi.mocked(regionCompareUrl).mockImplementation(() => 'http://test-emulator-url');
@@ -25,7 +25,11 @@ describe('Compare component', () => {
 					}))
 				},
 				chartTheme: 'highcharts-dark',
-				regionFormValues: MOCK_FORM_VALUES
+				regionFormValues: MOCK_FORM_VALUES,
+				params: {
+					project: 'test-project',
+					region: 'test-region'
+				}
 			}
 		} as any);
 
