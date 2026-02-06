@@ -21,7 +21,7 @@
 		<Compare
 			{params}
 			{chartTheme}
-			regionFormValues={data.region.formValues}
+			presentFormValues={data.region.formValues}
 			compareParameters={data.compareParameters}
 			presentResults={data.region.results}
 		/>

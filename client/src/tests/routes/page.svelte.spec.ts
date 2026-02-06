@@ -1,9 +1,9 @@
 import { createProjectSchema } from '$routes/schema';
-import { userEvent } from '@vitest/browser/context';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
 import { render } from 'vitest-browser-svelte';
 import Page from '../../routes/+page.svelte';
+import { userEvent } from 'vitest/browser';
 
 describe('/+page.svelte', () => {
 	it('should render base page with project info', async () => {

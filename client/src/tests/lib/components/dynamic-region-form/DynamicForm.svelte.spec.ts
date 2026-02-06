@@ -3,7 +3,6 @@ import { forEachField, forEachGroup, forEachSubGroup } from '$lib/components/dyn
 import { MOCK_FORM_SCHEMA } from '$mocks/mocks';
 import { createRawSnippet } from 'svelte';
 import { render } from 'vitest-browser-svelte';
-
 beforeEach(() => {
 	vi.useFakeTimers();
 });

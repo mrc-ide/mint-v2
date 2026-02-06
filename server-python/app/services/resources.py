@@ -1,9 +1,10 @@
 import json
 from pathlib import Path
+from typing import Annotated
 
 import jsonschema
 
-from app.models import CompareParameter, CompareParametersResponse
+from app.models import CompareParameter, CompareParametersResponse, InterventionCompareParameter
 
 APP_DIR = Path(__file__).parent.parent
 
@@ -28,25 +29,44 @@ def get_compare_parameters() -> CompareParametersResponse:
     baseline_param_names = [
         ("current_malaria_prevalence", "Baseline prevalence"),
     ]
-    intervention_param_names = [("irs_future", "IRS coverage"), ("itn_future", "ITN usage"), ("lsm", "LSM coverage")]
+    intervention_param_names = [
+        ("itn_future", "ITN usage", "mass_distribution_cost"),
+        ("irs_future", "IRS coverage", "irs_household_annual_cost_product"),
+        ("lsm", "LSM coverage", "lsm_cost"),
+    ]
 
     baseline_parameters = [create_compare_parameter(param_name, form_options) for param_name in baseline_param_names]
     intervention_parameters = [
-        create_compare_parameter(param_name, form_options) for param_name in intervention_param_names
+        create_intervention_compare_parameter(param_name, form_options) for param_name in intervention_param_names
     ]
 
     return CompareParametersResponse(
-        baselineParameters=baseline_parameters,
-        interventionParameters=intervention_parameters,
+        baseline_parameters=baseline_parameters,
+        intervention_parameters=intervention_parameters,
     )
 
 
-def create_compare_parameter(param: tuple[str, str], form_options: dict) -> CompareParameter:
-    """Create a CompareParameter from form field data."""
+def create_intervention_compare_parameter(
+    param: Annotated[tuple[str, str, str], "parameter name, label, linked cost name"],
+    form_options: dict,
+) -> InterventionCompareParameter:
+    param_name, label, linked_cost_name = param
+    cost_field = get_form_field(linked_cost_name, form_options)
+
+    return InterventionCompareParameter(
+        **create_compare_parameter((param_name, label), form_options).model_dump(),
+        linked_cost_name=linked_cost_name,
+        linked_cost_label=cost_field.get("label", linked_cost_name),
+    )
+
+
+def create_compare_parameter(
+    param: Annotated[tuple[str, str], "parameter name, label"], form_options: dict
+) -> CompareParameter:
     param_name, label = param
     field = get_form_field(param_name, form_options)
     return CompareParameter(
-        parameterName=param_name,
+        parameter_name=param_name,
         label=label,
         min=field.get("min", 0.0),
         max=field.get("max", 100.0),

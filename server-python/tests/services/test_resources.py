@@ -5,9 +5,10 @@ from unittest.mock import Mock, patch
 import jsonschema
 import pytest
 
-from app.models import CompareParameter, CompareParametersResponse
+from app.models import CompareParameter, CompareParametersResponse, InterventionCompareParameter
 from app.services.resources import (
     create_compare_parameter,
+    create_intervention_compare_parameter,
     get_compare_parameters,
     get_dynamic_form_options,
     get_form_field,
@@ -96,6 +97,8 @@ class TestCreateCompareParameter:
                             {"id": "current_malaria_prevalence", "min": 2, "max": 70},
                             {"id": "preference_for_biting_in_bed", "min": 40, "max": 90},
                             {"id": "no_min_max_field"},
+                            {"id": "itn_future"},
+                            {"id": "itn_cost", "label": "ITN Cost"},
                         ]
                     }
                 ]
@@ -136,37 +139,78 @@ class TestCreateCompareParameter:
             "max": 100.0,
         }
 
+    def test_create_intervention_compare_parameter(self):
+        param = ("itn_future", "ITN Usage", "itn_cost")
+
+        intervention_compare_param = create_intervention_compare_parameter(param, self.form_options)
+
+        assert intervention_compare_param.model_dump() == {
+            "parameter_name": "itn_future",
+            "label": "ITN Usage",
+            "min": 0.0,
+            "max": 100.0,
+            "linked_cost_name": "itn_cost",
+            "linked_cost_label": "ITN Cost",
+        }
+
 
 @patch("app.services.resources.get_dynamic_form_options")
 @patch("app.services.resources.create_compare_parameter")
+@patch("app.services.resources.create_intervention_compare_parameter")
 class TestGetCompareParameters:
-    def test_get_compare_parameters(self, mock_compare: Mock, mock_options: Mock):
+    def test_get_compare_parameters(self, mock_intervention_compare: Mock, mock_compare: Mock, mock_options: Mock):
         options = {"field": "test"}
         baseline_parameters = [
             CompareParameter(
-                parameterName="preference_for_biting_in_bed", label="Preference for Biting in Bed", min=0, max=100
+                parameter_name="preference_for_biting_in_bed", label="Preference for Biting in Bed", min=0, max=100
             ),
         ]
         intervention_parameters = [
-            CompareParameter(parameterName="irs_future", label="IRS coverage", min=0, max=100),
-            CompareParameter(parameterName="itn_future", label="ITN usage", min=0, max=100),
-            CompareParameter(parameterName="lsm", label="LSM coverage", min=0, max=100),
+            InterventionCompareParameter(
+                parameter_name="irs_future",
+                label="IRS coverage",
+                min=0,
+                max=100,
+                linked_cost_label="irs_cost",
+                linked_cost_name="irs_household_annual_cost_product",
+            ),
+            InterventionCompareParameter(
+                parameter_name="itn_future",
+                label="ITN usage",
+                min=0,
+                max=100,
+                linked_cost_name="mass_distribution_cost",
+                linked_cost_label="Mass Distribution Cost",
+            ),
+            InterventionCompareParameter(
+                parameter_name="lsm",
+                label="LSM coverage",
+                min=0,
+                max=100,
+                linked_cost_name="lsm_cost",
+                linked_cost_label="LSM Cost",
+            ),
         ]
         mock_options.return_value = options
-        mock_compare.side_effect = [*baseline_parameters, *intervention_parameters]
+        mock_compare.side_effect = baseline_parameters
+        mock_intervention_compare.side_effect = intervention_parameters
 
         response = get_compare_parameters()
 
         mock_options.assert_called_once()
         expected_compare_calls = [
             (("current_malaria_prevalence", "Baseline prevalence"), options),
-            (("irs_future", "IRS coverage"), options),
-            (("itn_future", "ITN usage"), options),
-            (("lsm", "LSM coverage"), options),
         ]
-        actual_calls = [call.args for call in mock_compare.call_args_list]
-        assert actual_calls == expected_compare_calls
+        expected_intervention_compare_calls = [
+            (("itn_future", "ITN usage", "mass_distribution_cost"), options),
+            (("irs_future", "IRS coverage", "irs_household_annual_cost_product"), options),
+            (("lsm", "LSM coverage", "lsm_cost"), options),
+        ]
+        actual_compare_calls = [call.args for call in mock_compare.call_args_list]
+        actual_intervention_compare_calls = [call.args for call in mock_intervention_compare.call_args_list]
+        assert actual_compare_calls == expected_compare_calls
+        assert actual_intervention_compare_calls == expected_intervention_compare_calls
         assert response == CompareParametersResponse(
-            baselineParameters=baseline_parameters,
-            interventionParameters=intervention_parameters,
+            baseline_parameters=baseline_parameters,
+            intervention_parameters=intervention_parameters,
         )
