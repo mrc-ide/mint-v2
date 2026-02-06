@@ -161,8 +161,8 @@ describe('createPresentPrevalenceSeries', () => {
 
 		const series = createPresentPrevalenceSeries(mockData);
 
-		expect(series[0].name).toBe('<span style="opacity: 0.4;">Pyrethroid ITN (Only) <em>Present</em></span> ');
-		expect(series[1].name).toBe('<span style="opacity: 0.4;">IRS Only <em>Present</em></span> ');
+		expect(series[0].name).toBe('<span style="opacity: 0.4;">Pyrethroid ITN (Only) <em>Present</em></span>');
+		expect(series[1].name).toBe('<span style="opacity: 0.4;">IRS Only <em>Present</em></span>');
 	});
 
 	it('should apply color-mix to make colors 40% transparent', () => {

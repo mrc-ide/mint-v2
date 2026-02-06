@@ -4,7 +4,7 @@
 	import { mapRegionsToPopulation } from '$lib/project';
 	import CircleAlert from '@lucide/svelte/icons/circle-alert';
 	import { superForm } from 'sveltekit-superforms';
-	import { zodClient } from 'sveltekit-superforms/adapters';
+	import { zod4Client } from 'sveltekit-superforms/adapters';
 	import type { PageProps } from './$types';
 	import BudgetInput from './_components/BudgetInput.svelte';
 	import StrategiseResults from './_components/StrategiseResults.svelte';
@@ -15,7 +15,7 @@
 	let loading = $state(false);
 
 	const form = superForm(data.form, {
-		validators: zodClient(strategiseSchema),
+		validators: zod4Client(strategiseSchema),
 		resetForm: false,
 		dataType: 'json',
 		async onSubmit({ cancel }) {

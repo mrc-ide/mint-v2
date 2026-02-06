@@ -41,6 +41,13 @@ const BASE_OPTIONS: Partial<Highcharts.Options> = {
 		itemStyle: {
 			fontSize: '.75em'
 		}
+	},
+	plotOptions: {
+		series: {
+			marker: {
+				enabled: false
+			}
+		}
 	}
 };
 export const getPrevalenceConfig = (prevalence: PrevalenceData[]): Highcharts.Options => ({
@@ -86,13 +93,7 @@ export const getPrevalenceConfig = (prevalence: PrevalenceData[]): Highcharts.Op
 			}
 		]
 	},
-	plotOptions: {
-		series: {
-			marker: {
-				enabled: false
-			}
-		}
-	},
+
 	...BASE_OPTIONS,
 	series: createPrevalenceSeries(prevalence)
 });
@@ -100,7 +101,7 @@ export const getPrevalenceConfig = (prevalence: PrevalenceData[]): Highcharts.Op
 export const createPresentPrevalenceSeries = (prevalence: PrevalenceData[]): Highcharts.SeriesSplineOptions[] =>
 	createPrevalenceSeries(prevalence).map((series) => ({
 		...series,
-		name: `<span style="opacity: 0.4;">${series.name} <em>Present</em></span> `,
+		name: `<span style="opacity: 0.4;">${series.name} <em>Present</em></span>`,
 		color: `color-mix(in oklab, ${series.color}, transparent 40%)`
 	}));
 

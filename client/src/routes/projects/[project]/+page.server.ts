@@ -1,13 +1,19 @@
 import { regionUrl } from '$lib/url';
-import { addRegionSchema } from '$routes/projects/[project]/regions/[region]/schema';
+// import { addRegionSchema } from '$routes/projects/[project]/regions/[region]/schema';
 import { redirect, type Actions } from '@sveltejs/kit';
 import { fail, setError, superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 } from 'sveltekit-superforms/adapters';
+import { z } from 'zod';
+
+const regionNameSchema = z.string().min(1, 'Region name is required');
+const addRegionSchema = z.object({
+	name: regionNameSchema
+});
 
 export const actions: Actions = {
 	addRegion: async ({ request, params, locals }) => {
 		const { project } = params;
-		const addRegionForm = await superValidate(request, zod(addRegionSchema));
+		const addRegionForm = await superValidate(request, zod4(addRegionSchema));
 
 		const projectData = locals.userState.projects.find((p) => p.name === project);
 		if (!projectData) {

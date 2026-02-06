@@ -1,7 +1,7 @@
 import { ScenarioToLabel } from '$lib/charts/baseChart';
 import DataTableSortHeader from '$lib/components/data-table/DataTableSortHeader.svelte';
 import { renderComponent } from '$lib/components/ui/data-table';
-import { getMeanCasesPostIntervention, type CasesAverted } from '$lib/process-results/processCases';
+import { getMeanCasesPer1000, type CasesAverted } from '$lib/process-results/processCases';
 import { getMeanPrevalencePostIntervention } from '$lib/process-results/processPrevalence';
 import type { CasesData, PrevalenceData, Scenario } from '$lib/types/userState';
 import type { ColumnDef } from '@tanstack/table-core';
@@ -23,7 +23,7 @@ export const buildImpactTableData = (
 	postInterventionCasesMap: Record<Scenario, CasesData[]>
 ): ImpactTableMetrics[] => {
 	const meanPrevalenceNoIntervention = getMeanPrevalencePostIntervention(prevalenceData, 'no_intervention');
-	const noInterventionMeanCasesPer1000 = getMeanCasesPostIntervention(postInterventionCasesMap['no_intervention']) ?? 0;
+	const noInterventionMeanCasesPer1000 = getMeanCasesPer1000(postInterventionCasesMap['no_intervention']) ?? 0;
 
 	const tableMetrics: ImpactTableMetrics[] = Object.entries(casesAverted).map(
 		([
@@ -31,7 +31,7 @@ export const buildImpactTableData = (
 			{ casesAvertedMeanPer1000, casesAvertedYear1Per1000, casesAvertedYear2Per1000, casesAvertedYear3Per1000 }
 		]) => {
 			const meanPrevalence = getMeanPrevalencePostIntervention(prevalenceData, scenario as Scenario);
-			const meanCasesPer1000 = getMeanCasesPostIntervention(postInterventionCasesMap[scenario as Scenario]) ?? 0;
+			const meanCasesPer1000 = getMeanCasesPer1000(postInterventionCasesMap[scenario as Scenario]) ?? 0;
 
 			return {
 				intervention: ScenarioToLabel[scenario as Scenario],

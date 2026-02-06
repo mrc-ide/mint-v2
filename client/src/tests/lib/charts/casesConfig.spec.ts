@@ -1,10 +1,18 @@
 import { describe, it, expect } from 'vitest';
-import { getCasesConfig } from '$lib/charts/casesConfig';
-import type { CasesAverted } from '$lib/process-results/processCases';
-import type { Scenario } from '$lib/types/userState';
-
+import {
+	createBreakToMinimizeEmptySpace,
+	createCasesCompareDataPoints,
+	createCasesCompareSeries,
+	getCasesConfig,
+	getCasesCompareConfig
+} from '$lib/charts/casesConfig';
+import * as processCases from '$lib/process-results/processCases';
+import type { CasesData, Scenario } from '$lib/types/userState';
+import type { FormValue } from '$lib/components/dynamic-region-form/types';
+import * as costs from '$lib/process-results/costs';
+import type { PointOptionsObject } from 'highcharts';
 describe('getCasesConfig', () => {
-	const mockCasesAverted: Partial<Record<Scenario, CasesAverted>> = {
+	const mockCasesAverted: Partial<Record<Scenario, processCases.CasesAverted>> = {
 		irs_only: {
 			casesAvertedMeanPer1000: 10.5,
 			casesAvertedYear1Per1000: 8.2,
@@ -145,7 +153,7 @@ describe('getCasesConfig', () => {
 	});
 
 	it('should handle single scenario', () => {
-		const singleScenario: Partial<Record<Scenario, CasesAverted>> = {
+		const singleScenario: Partial<Record<Scenario, processCases.CasesAverted>> = {
 			irs_only: {
 				casesAvertedMeanPer1000: 15.2,
 				casesAvertedYear1Per1000: 14.0,
@@ -181,5 +189,186 @@ describe('getCasesConfig', () => {
 		expect(firstLineSeries.data[0].y).toBe(8.2);
 		expect(firstLineSeries.data[1].y).toBe(11.3);
 		expect(firstLineSeries.data[2].y).toBe(12.0);
+	});
+});
+
+describe('cases compare config', () => {
+	const mockCases: CasesData[] = [
+		{ scenario: 'irs_only', casesPer1000: 10, year: 2 },
+		{ scenario: 'irs_only', casesPer1000: 10, year: 3 },
+		{ scenario: 'py_only_only', casesPer1000: 20, year: 2 },
+		{ scenario: 'py_only_only', casesPer1000: 20, year: 3 },
+		{ scenario: 'py_only_with_lsm', casesPer1000: 15, year: 2 },
+		{ scenario: 'py_only_with_lsm', casesPer1000: 15, year: 3 }
+	];
+
+	const mockFormValues: Record<string, FormValue> = {
+		population: 10000
+	};
+
+	beforeEach(() => {
+		vi.resetAllMocks();
+		vi.spyOn(processCases, 'collectPostInterventionCases');
+		vi.spyOn(processCases, 'getTotalCasesPer1000').mockReturnValue(100);
+		vi.spyOn(processCases, 'convertPer1000ToTotal').mockReturnValue(1000);
+		vi.spyOn(costs, 'getTotalCostsPerScenario').mockReturnValue({
+			irs_only: 5000,
+			py_only_only: 2000,
+			py_only_with_lsm: 8000
+		});
+	});
+
+	describe('createCasesCompareDataPoints', () => {
+		it('should return sorted data points based on totalCost in ascending order', () => {
+			const result = createCasesCompareDataPoints(mockCases, mockFormValues);
+
+			expect(result[0]).toEqual({
+				scenario: 'py_only_only',
+				totalCases: 1000,
+				totalCost: 2000
+			});
+			expect(result[1]).toEqual({
+				scenario: 'irs_only',
+				totalCases: 1000,
+				totalCost: 5000
+			});
+			expect(result[2]).toEqual({
+				scenario: 'py_only_with_lsm',
+				totalCases: 1000,
+				totalCost: 8000
+			});
+
+			expect(processCases.collectPostInterventionCases).toHaveBeenCalledWith(mockCases);
+			expect(costs.getTotalCostsPerScenario).toHaveBeenCalledWith(
+				['py_only_only', 'irs_only', 'py_only_with_lsm'],
+				mockFormValues
+			);
+			expect(processCases.getTotalCasesPer1000).toHaveBeenCalledTimes(3);
+			expect(processCases.convertPer1000ToTotal).toHaveBeenCalledTimes(3);
+			expect(processCases.convertPer1000ToTotal).toHaveBeenCalledWith(100, mockFormValues['population']);
+		});
+
+		it('should handle empty cases array', () => {
+			const result = createCasesCompareDataPoints([], mockFormValues);
+			expect(result).toEqual([]);
+		});
+	});
+
+	describe('createCasesCompareSeries', () => {
+		it('should create a series with correct name and data points', () => {
+			const series = createCasesCompareSeries(mockCases, mockFormValues, 'Present');
+
+			expect(series.name).toBe('Present');
+			expect(series.type).toBe('line');
+			expect(series.step).toBe('left');
+
+			expect(series.data).toHaveLength(3);
+			expect(series.data![0]).toEqual({
+				x: 2000,
+				y: 1000,
+				custom: { intervention: 'Pyrethroid ITN (Only)' }
+			});
+			expect(series.data![1]).toEqual({
+				x: 5000,
+				y: 1000,
+				custom: { intervention: 'IRS Only' }
+			});
+			expect(series.data![2]).toEqual({
+				x: 8000,
+				y: 1000,
+				custom: { intervention: 'Pyrethroid ITN (with LSM)' }
+			});
+		});
+	});
+
+	describe('createBreakToMinimizeEmptySpace', () => {
+		it('should return undefined when both datasets have only one point', () => {
+			const data1: PointOptionsObject[] = [{ x: 1000, y: 500 }];
+			const data2: PointOptionsObject[] = [{ x: 2000, y: 600 }];
+
+			const result = createBreakToMinimizeEmptySpace(data1, data2);
+
+			expect(result).toBeUndefined();
+		});
+
+		it('should calculate break point based on the smaller second x value', () => {
+			const data1: PointOptionsObject[] = [
+				{ x: 0, y: 100 },
+				{ x: 5000, y: 200 }
+			];
+			const data2: PointOptionsObject[] = [
+				{ x: 0, y: 150 },
+				{ x: 3000, y: 250 }
+			];
+
+			const result = createBreakToMinimizeEmptySpace(data1, data2);
+
+			expect(result).toBeDefined();
+			expect(result).toHaveLength(1);
+			expect(result![0].from).toBe(0);
+			expect(result![0].to).toBe(3000 * 0.9);
+		});
+	});
+
+	describe('getCasesConfigCompare integration', () => {
+		const mockCurrentCases: CasesData[] = [
+			{ scenario: 'irs_only', casesPer1000: 10, year: 2 },
+			{ scenario: 'irs_only', casesPer1000: 10, year: 3 }
+		];
+
+		const mockNewCases: CasesData[] = [
+			{ scenario: 'py_only_only', casesPer1000: 20, year: 2 },
+			{ scenario: 'py_only_only', casesPer1000: 20, year: 3 }
+		];
+
+		it('should return a valid Highcharts Options object', () => {
+			const config = getCasesCompareConfig(mockCurrentCases, mockNewCases, mockFormValues);
+
+			expect(config).toBeDefined();
+			expect(config.chart?.type).toBe('line');
+			expect(config.chart?.height).toBe(450);
+			expect(config.title?.text).toBe('Present vs Long term - Total Cases vs Total Cost');
+			expect(config.subtitle?.text).toBe('Step lines indicate changes in intervention strategy as budget increases.');
+		});
+
+		it('should include both Present and Long term series when newCases has data', () => {
+			const config = getCasesCompareConfig(mockCurrentCases, mockNewCases, mockFormValues);
+
+			expect(config.series).toHaveLength(2);
+			expect((config.series as any)[0].name).toBe('Present');
+			expect((config.series as any)[1].name).toBe('Long term');
+		});
+
+		it('should include only Present series when newCases is empty', () => {
+			vi.spyOn(processCases, 'collectPostInterventionCases').mockReturnValue({} as any);
+
+			const config = getCasesCompareConfig(mockCurrentCases, [], mockFormValues);
+
+			expect(config.series).toHaveLength(1);
+			expect((config.series as any)[0].name).toBe('Present');
+		});
+
+		it('should apply breaks to xAxis when data points exist', () => {
+			vi.spyOn(processCases, 'collectPostInterventionCases').mockReturnValue({
+				irs_only: mockCurrentCases.filter((c) => c.scenario === 'irs_only'),
+				py_only_only: mockNewCases.filter((c) => c.scenario === 'py_only_only')
+			} as any);
+			vi.spyOn(costs, 'getTotalCostsPerScenario').mockReturnValue({
+				irs_only: 1000,
+				py_only_only: 5000
+			});
+
+			const config = getCasesCompareConfig(mockCurrentCases, mockNewCases, mockFormValues);
+
+			expect((config.xAxis as any).breaks).toBeDefined();
+		});
+
+		it('should pass data to createCasesCompareSeries correctly', () => {
+			getCasesCompareConfig(mockCurrentCases, mockNewCases, mockFormValues);
+
+			// Verify the function processes the data through helper functions
+			expect(processCases.collectPostInterventionCases).toHaveBeenCalled();
+			expect(costs.getTotalCostsPerScenario).toHaveBeenCalled();
+		});
 	});
 });

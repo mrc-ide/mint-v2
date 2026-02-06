@@ -6,7 +6,7 @@
 	import PlusIcon from '@lucide/svelte/icons/plus';
 	import { toast } from 'svelte-sonner';
 	import { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
-	import { zodClient } from 'sveltekit-superforms/adapters';
+	import { zod4Client } from 'sveltekit-superforms/adapters';
 	import { createProjectSchema } from '../schema';
 	import { Input } from '$lib/components/ui/input';
 	interface Props {
@@ -15,7 +15,7 @@
 
 	let { pageForm }: Props = $props();
 	const form = superForm(pageForm, {
-		validators: zodClient(createProjectSchema),
+		validators: zod4Client(createProjectSchema),
 		onUpdated({ form }) {
 			if (form.valid) {
 				toast.success('Project created successfully!');

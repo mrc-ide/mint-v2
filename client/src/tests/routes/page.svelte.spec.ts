@@ -1,7 +1,7 @@
 import { createProjectSchema } from '$routes/schema';
 import { userEvent } from '@vitest/browser/context';
 import { superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 } from 'sveltekit-superforms/adapters';
 import { render } from 'vitest-browser-svelte';
 import Page from '../../routes/+page.svelte';
 
@@ -50,7 +50,7 @@ describe('/+page.svelte', () => {
 	});
 
 	it('should be able to see create project dialog', async () => {
-		const form = await superValidate(zod(createProjectSchema));
+		const form = await superValidate(zod4(createProjectSchema));
 		const screen = render(Page, {
 			props: {
 				data: {
