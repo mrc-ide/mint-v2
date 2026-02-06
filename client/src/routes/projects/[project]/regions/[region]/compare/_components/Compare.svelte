@@ -7,6 +7,7 @@
 	import { apiFetch } from '$lib/fetch';
 	import type { CompareParametersWithValue } from '$lib/types/compare';
 	import type { EmulatorResults } from '$lib/types/userState';
+	import { regionCompareUrl } from '$lib/url';
 	import debounce from 'debounce';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
@@ -36,7 +37,7 @@
 		isLoading = true;
 		try {
 			const res = await apiFetch<EmulatorResults>({
-				url: `/projects/${params.project}/regions/${params.region}/compare`,
+				url: regionCompareUrl(params.project, params.region),
 				method: 'POST',
 				body: {
 					formValues: {
