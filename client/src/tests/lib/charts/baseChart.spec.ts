@@ -24,7 +24,8 @@ vi.mock('highcharts/esm/highcharts.js', () => ({
 		Axis: {
 			prototype: {
 				getLinePath: vi.fn()
-			}
+			},
+			toPixels: vi.fn()
 		}
 	}
 }));
@@ -82,6 +83,29 @@ describe('configureHighcharts', () => {
 		configureHighcharts();
 		expect(Highcharts.setOptions).toHaveBeenCalledTimes(1);
 		expect(Highcharts.wrap).toHaveBeenCalledWith(Highcharts.Axis.prototype, 'getLinePath', expect.any(Function));
+	});
+
+	it('should ensure wrapped getLinePath calls setupAxisBreaks correctly', () => {
+		configureHighcharts();
+
+		// Get the wrapper function
+		const wrapperFunction = vi.mocked(Highcharts.wrap).mock.calls[0][2];
+
+		const mockBrokenAxis = {
+			hasBreaks: true,
+			breakArray: [{ from: 10, to: 20 }],
+			axis: {} as any
+		};
+
+		const mockAxis = { brokenAxis: mockBrokenAxis, toPixels: vi.fn() };
+		const mockPath: [string, number, number][] = [['M', 0, 0]];
+		const lineWidth = 5;
+		const mockProceed = vi.fn().mockReturnValue(mockPath);
+
+		const result = wrapperFunction.call(mockAxis, mockProceed, lineWidth);
+
+		expect(mockProceed).toHaveBeenCalledWith(lineWidth);
+		expect(result).toEqual(mockPath);
 	});
 });
 
