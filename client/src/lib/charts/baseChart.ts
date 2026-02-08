@@ -15,9 +15,9 @@ import { mode } from 'mode-watcher';
 const setupAxisBreaks = (
 	axis: Highcharts.Axis,
 	brokenAxis: { hasBreaks: boolean; breakArray?: Highcharts.XAxisBreaksOptions[]; axis: Highcharts.Axis },
-	path: [string, number, number][],
-	start: [string, number, number]
+	path: [string, number, number][]
 ) => {
+	const start = path[0];
 	let x = start[1];
 	let y = start[2];
 	const breakArray = brokenAxis?.breakArray || [];
@@ -65,8 +65,7 @@ export const configureHighcharts = () => {
 		const axis = this; // eslint-disable-line @typescript-eslint/no-this-alias
 		const { brokenAxis } = axis;
 		const path = proceed.call(axis, lineWidth);
-		const start = path[0];
-		return setupAxisBreaks(axis, brokenAxis, path, start);
+		return setupAxisBreaks(axis, brokenAxis, path);
 	});
 	Highcharts.setOptions({
 		exporting: {
