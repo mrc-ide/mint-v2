@@ -12,7 +12,7 @@ import { mode } from 'mode-watcher';
  * Copied from Highcharts demo to add slanted lines to indicate axis breaks on axis with a break. See:
  * https://jsfiddle.net/gh/get/library/pure/highcharts/highcharts/tree/master/samples/highcharts/axisbreak/break-visualized/
  */
-const setupAxisBreaks = (
+export const setupAxisBreaks = (
 	axis: Highcharts.Axis,
 	brokenAxis: { hasBreaks: boolean; breakArray?: Highcharts.XAxisBreaksOptions[]; axis: Highcharts.Axis },
 	path: [string, number, number][]
@@ -59,6 +59,7 @@ const setupAxisBreaks = (
 
 	return path;
 };
+
 export const configureHighcharts = () => {
 	Highcharts.wrap(Highcharts.Axis.prototype, 'getLinePath', function (proceed, lineWidth) {
 		// @ts-expect-error: 'this' context is the Axis instance, but TypeScript doesn't know that
