@@ -9,11 +9,13 @@ vi.mock('$lib/url', () => ({
 
 describe('load function', () => {
 	it('should return version info from server', async () => {
-		server.use(http.get(mockUrl, () => HttpResponse.json({ data: { server: '1.0.0', minte: '2.0.0' } })));
+		server.use(
+			http.get(mockUrl, () => HttpResponse.json({ data: { server: '1.0.0', minte: '2.0.0', estimint: '3.0.0' } }))
+		);
 
 		const data = (await load({} as any)) as any;
 
-		expect(data.versionInfo).toEqual({ server: '1.0.0', minte: '2.0.0' });
+		expect(data.versionInfo).toEqual({ server: '1.0.0', minte: '2.0.0', estimint: '3.0.0' });
 	});
 	it('should throw error if version info fetch fails', async () => {
 		server.use(http.get(mockUrl, () => HttpResponse.error()));

@@ -8,13 +8,15 @@ describe('Version page', () => {
 				data: {
 					versionInfo: {
 						server: '1.0.0',
-						minte: '2.0.0'
+						minte: '2.0.0',
+						estimint: '3.0.0'
 					}
 				}
 			}
 		} as any);
 
 		await expect.element(screen.getByRole('link', { name: /MINTe v2.0.0/ })).toBeVisible();
+		await expect.element(screen.getByRole('link', { name: /EstiMint v3.0.0/ })).toBeVisible();
 		await expect.element(screen.getByText('API v1.0.0')).toBeVisible();
 	});
 });
