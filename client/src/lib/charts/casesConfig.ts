@@ -1,6 +1,13 @@
-import type { CasesAverted } from '$lib/process-results/processCases';
-import type { Scenario } from '$lib/types/userState';
-import type { Options, SeriesColumnOptions, SeriesLineOptions } from 'highcharts';
+import type { FormValue } from '$lib/components/dynamic-region-form/types';
+import { getTotalCostsPerScenario } from '$lib/process-results/costs';
+import {
+	collectPostInterventionCases,
+	convertPer1000ToTotal,
+	getTotalCasesPer1000,
+	type CasesAverted
+} from '$lib/process-results/processCases';
+import type { CasesData, Scenario } from '$lib/types/userState';
+import type { Options, PointOptionsObject, SeriesColumnOptions, SeriesLineOptions } from 'highcharts';
 import { getColumnFill, ScenarioToLabel } from './baseChart';
 
 const getCasesSeriesData = (
@@ -81,5 +88,118 @@ export const getCasesConfig = (casesAverted: Partial<Record<Scenario, CasesAvert
 		tooltip: {
 			valueDecimals: 1
 		}
+	};
+};
+
+interface CasesCompareDataPoint {
+	scenario: Scenario;
+	totalCases: number;
+	totalCost: number;
+}
+export const createCasesCompareDataPoints = (
+	cases: CasesData[],
+	formValues: Record<string, FormValue>
+): CasesCompareDataPoint[] => {
+	const postInterventionCases = collectPostInterventionCases(cases);
+	const scenarios = Object.entries(postInterventionCases)
+		.filter(([_, scenarioCases]) => scenarioCases.length > 0)
+		.map(([scenario]) => scenario as Scenario);
+	const scenarioCosts = getTotalCostsPerScenario(scenarios, formValues);
+
+	return scenarios
+		.map((scenario) => {
+			const totalCasesPer1000 = getTotalCasesPer1000(postInterventionCases[scenario]);
+			return {
+				scenario,
+				totalCases: convertPer1000ToTotal(totalCasesPer1000, Number(formValues['population'])),
+				totalCost: scenarioCosts[scenario]!
+			};
+		})
+		.sort((a, b) => a.totalCost - b.totalCost);
+};
+
+export const createCasesCompareSeries = (
+	cases: CasesData[],
+	formValues: Record<string, FormValue>,
+	name: 'Present' | 'Long term'
+): SeriesLineOptions => ({
+	name,
+	type: 'line',
+	data: createCasesCompareDataPoints(cases, formValues).map(({ totalCases, totalCost, scenario }) => ({
+		x: totalCost,
+		y: totalCases,
+		custom: {
+			intervention: ScenarioToLabel[scenario as Scenario]
+		}
+	})),
+	step: 'left'
+});
+
+/**
+ * The function creates an x-axis break to minimize the empty space between the first and second data points.
+ * This is because the first point is always at x=0 (no intervention), and the second point can be far away, leading to a large empty space on the chart.
+ */
+export const createBreakToMinimizeEmptySpace = (
+	data1: PointOptionsObject[],
+	data2: PointOptionsObject[]
+): Highcharts.XAxisBreaksOptions[] | undefined => {
+	const getSecondPoint = (data: PointOptionsObject[]): number => (data.length > 1 ? (data[1].x as number) : Infinity);
+
+	const data1Breakpoint = getSecondPoint(data1);
+	const data2Breakpoint = getSecondPoint(data2);
+
+	const breakPoint = Math.min(data1Breakpoint, data2Breakpoint);
+
+	return breakPoint !== Infinity ? [{ from: 0, to: breakPoint * 0.9, breakSize: 1 }] : undefined;
+};
+
+export const getCasesCompareConfig = (
+	currentCases: CasesData[],
+	newCases: CasesData[],
+	formValues: Record<string, FormValue>
+): Options => {
+	const presentSeries = createCasesCompareSeries(currentCases, formValues, 'Present');
+	const futureSeries = createCasesCompareSeries(newCases, formValues, 'Long term');
+
+	return {
+		chart: {
+			type: 'line',
+			height: 450
+		},
+		title: {
+			text: 'Present vs Long term - Total Cases vs Total Cost'
+		},
+		subtitle: {
+			text: 'Step lines indicate changes in intervention strategy as budget increases.'
+		},
+		xAxis: {
+			title: { text: 'Total Cost ($USD)' },
+			labels: { format: '${value:,.0f}' },
+			min: 0,
+			tickPixelInterval: 50,
+			breaks: createBreakToMinimizeEmptySpace(
+				presentSeries.data as PointOptionsObject[],
+				futureSeries.data as PointOptionsObject[]
+			)
+		},
+		yAxis: {
+			title: { text: 'Total Cases' },
+			labels: { format: '{value:,.0f}' }
+		},
+		tooltip: {
+			shared: true,
+			shadow: true,
+			useHTML: true,
+			headerFormat: 'Total Cost: ${point.x:,.0f}',
+			pointFormat: `<div class="flex items-center">
+				<span style="color:{point.color}" class="mr-1">●</span>
+				<span class="font-medium">{series.name}:</span>
+				<span class="ml-0.5">{point.y:,.1f} cases
+					<span class="text-muted-foreground">{point.custom.intervention}</span>
+				</span>
+			</div>`
+		},
+		legend: { enabled: true },
+		series: futureSeries.data?.length ? [presentSeries, futureSeries] : [presentSeries]
 	};
 };

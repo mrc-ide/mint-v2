@@ -1,6 +1,6 @@
 import { getProjectFromUserState } from '$lib/server/region';
 import { fail, superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 } from 'sveltekit-superforms/adapters';
 import type { Actions, PageServerLoad } from './$types';
 import { strategiseSchema } from './schema';
 import {
@@ -26,7 +26,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 				maxCost: maximumCost,
 				budget: projectData.strategy?.budget || maximumCost
 			},
-			zod(strategiseSchema)
+			zod4(strategiseSchema)
 		)
 	};
 };
@@ -35,7 +35,7 @@ export const actions: Actions = {
 	default: async ({ request, locals, params }) => {
 		const { project } = params;
 		const projectData = getProjectFromUserState(locals.userState, project);
-		const form = await superValidate(request, zod(strategiseSchema));
+		const form = await superValidate(request, zod4(strategiseSchema));
 		if (!form.valid) {
 			return fail(400, { form });
 		}

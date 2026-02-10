@@ -2,7 +2,7 @@
 	import * as Alert from '$lib/components/ui/alert/index';
 	import CircleAlert from '@lucide/svelte/icons/circle-alert';
 	import type { PageProps } from './$types';
-	import BaselineCompare from './_components/BaselineCompare.svelte';
+	import Compare from './_components/Compare.svelte';
 	import { getChartTheme } from '$lib/charts/baseChart';
 
 	let { data, params }: PageProps = $props();
@@ -18,17 +18,13 @@
 		</p>
 	</div>
 	{#if data.region.hasRunBaseline && data.region.results}
-		<div class="flex flex-col gap-6">
-			<BaselineCompare
-				{params}
-				{chartTheme}
-				regionFormValues={data.region.formValues}
-				compareBaselineParameters={data.compareParameters.baselineParameters}
-				presentResults={data.region.results}
-			/>
-
-			<div class="flex gap-3">Varying interventions graphs</div>
-		</div>
+		<Compare
+			{params}
+			{chartTheme}
+			regionFormValues={data.region.formValues}
+			compareParameters={data.compareParameters}
+			presentResults={data.region.results}
+		/>
 	{:else}
 		<Alert.Root variant="warning">
 			<CircleAlert />

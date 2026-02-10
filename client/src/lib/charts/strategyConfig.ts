@@ -113,7 +113,7 @@ export const getStrategyConfig = (
 		pointFormat: `<div class="flex items-center">
 			    <span style="color:{point.color}" class="mr-1">●</span>
 			    <span class="font-medium">{series.name}:</span>
-			    <span class="ml-0.5">{point.y:,.1f} cases 
+			    <span class="ml-0.5">{point.y:,.1f} cases
 			        <span class="text-muted-foreground">
 			            {point.custom.intervention}
 			        </span>

@@ -19,6 +19,7 @@ vi.mock('highcharts/esm/highcharts.js', () => ({
 vi.mock('highcharts/esm/modules/accessibility', () => ({}));
 vi.mock('highcharts/esm/modules/pattern-fill.js', () => ({}));
 vi.mock('highcharts/esm/modules/exporting', () => ({}));
+vi.mock('highcharts/esm/modules/broken-axis.js', () => ({}));
 
 beforeEach(() => {
 	vi.resetAllMocks();
