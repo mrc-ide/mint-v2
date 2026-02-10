@@ -5,7 +5,7 @@ import type { LayoutServerLoad } from '../$types';
 
 export const load: LayoutServerLoad = async ({ fetch }) => {
 	try {
-		const response = await apiFetch<{ server: string; minte: string }>({
+		const response = await apiFetch<{ server: string; minte: string; estimint: string }>({
 			url: versionUrl(),
 			fetcher: fetch
 		});

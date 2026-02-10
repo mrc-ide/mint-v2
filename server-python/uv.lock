@@ -200,7 +200,7 @@ wheels = [
 
 [[package]]
 name = "estimint"
-version = "1.2.0"
+version = "1.2.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "duckdb" },
@@ -210,9 +210,9 @@ dependencies = [
     { name = "scikit-learn" },
     { name = "xgboost" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/d5/0b/aef3f425f58f848beb155748abd159b7d4d7daca959fd85b03153c47a11f/estimint-1.2.0.tar.gz", hash = "sha256:d55886456d65b9c82d5bb28b1fa40b934ffcea40cd1a50dfb84c25d0ebe47e4d", size = 6805516, upload-time = "2026-01-26T00:02:55.407Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/1f/e5/7c1edd9e5bd9f5b0df68286b8e0185fba01cc3b8106298cedaaa480ff4d4/estimint-1.2.1.tar.gz", hash = "sha256:2d195df0472c86b6763af41fdd3f54603ae79111a3a81f05c3bfbea8bb2c4369", size = 6362971, upload-time = "2026-02-05T16:43:16.583Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/9e/1b/ed8cc62bc0572aadc02ea968a41f81f72e71cc7c940b641c271aebf316be/estimint-1.2.0-py3-none-any.whl", hash = "sha256:645d39eb82990b5c87cb633dfd31cf0903e1d07b912930d68d9b160626f86d36", size = 6937118, upload-time = "2026-01-26T00:02:50.498Z" },
+    { url = "https://files.pythonhosted.org/packages/96/0d/e64f483cffda4ce5bdb1e5becfa03dde4a8bb9b4f6e6e526daf6ee12cc0a/estimint-1.2.1-py3-none-any.whl", hash = "sha256:837490b3ae3df6bef6c2504714b13cc21c8858a60cf57a1dc8ed500affc3dec7", size = 6495577, upload-time = "2026-02-05T16:43:13.929Z" },
 ]
 
 [[package]]

@@ -1,6 +1,7 @@
 import logging
 import time
 
+from estimint import __version__ as estimint_version
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -63,7 +64,7 @@ async def internal_server_error_handler(_req, exc):
 
 @app.get("/version")
 async def get_version() -> Response[Version]:
-    return Response(data=Version(server=__version__, minte=minte_version))
+    return Response(data=Version(server=__version__, minte=minte_version, estimint=estimint_version))
 
 
 @app.get("/healthz")
