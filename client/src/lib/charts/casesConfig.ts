@@ -155,12 +155,15 @@ export const createBreakToMinimizeEmptySpace = (
 	return breakPoint !== Infinity ? [{ from: 0, to: breakPoint, breakSize }] : undefined;
 };
 
+const resetSeriesPointStates = (seriesList: Highcharts.Series[]) => {
+	seriesList.forEach((s) => s.points.forEach((p) => p.setState('')));
+};
 export const createCompareTooltipHtml = function (this: Highcharts.Point): string {
 	const currentIntervention: string = this.options.custom!.intervention;
 	const tooltipLines: string[] = [`<div class="mb-1"><span class="font-semibold ">${currentIntervention}</span></div>`];
 
 	for (const series of this.series.chart.series) {
-		series.points.forEach((p) => p.setState(''));
+		resetSeriesPointStates([series]);
 
 		const point = series.points.find((p) => p.options.custom!.intervention === currentIntervention);
 		if (!point) continue;
@@ -224,7 +227,7 @@ export const getCasesCompareConfig = (
 				},
 				events: {
 					mouseOut: function () {
-						this.chart.series.forEach((series) => series.points.forEach((p) => p.setState('')));
+						resetSeriesPointStates(this.chart.series);
 					}
 				}
 			}
