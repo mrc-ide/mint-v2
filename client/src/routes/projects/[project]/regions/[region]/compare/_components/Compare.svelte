@@ -5,13 +5,12 @@
 	import SliderWithMarker from '$lib/components/SliderWithMarker.svelte';
 	import * as Field from '$lib/components/ui/field';
 	import * as RadioGroup from '$lib/components/ui/radio-group';
-	import { apiFetch } from '$lib/fetch';
 	import type { CompareParameters } from '$lib/types/compare';
 	import type { EmulatorResults } from '$lib/types/userState';
-	import { regionCompareUrl } from '$lib/url';
 	import debounce from 'debounce';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
+	import { runCompareEmulator } from '../utils';
 	import InterventionFields from './InterventionFields.svelte';
 	import Plots from './Plots.svelte';
 
@@ -42,27 +41,13 @@
 	const runEmulator = async () => {
 		isLoading = true;
 		try {
-			const fullLongTermPromise = apiFetch<EmulatorResults>({
-				url: regionCompareUrl(params.project, params.region),
-				method: 'POST',
-				body: {
-					formValues: longTermFormValues
-				}
-			});
-			const baselineLongTermPromise = apiFetch<EmulatorResults>({
-				url: regionCompareUrl(params.project, params.region),
-				method: 'POST',
-				body: {
-					formValues: {
-						...presentFormValues,
-						[selectedBaselineParameter.parameterName]: longTermFormValues[selectedBaselineParameter.parameterName]
-					}
-				}
-			});
-			const [{ data: fullLongTermResData }, { data: baselineLongTermResData }] = await Promise.all([
-				fullLongTermPromise,
-				baselineLongTermPromise
-			]);
+			const { baselineLongTermResData, fullLongTermResData } = await runCompareEmulator(
+				params.project,
+				params.region,
+				longTermFormValues,
+				presentFormValues,
+				selectedBaselineParameter
+			);
 			fullLongTermResults = fullLongTermResData;
 			baselineLongTermResults = baselineLongTermResData;
 		} catch (_err) {
