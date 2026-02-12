@@ -475,6 +475,7 @@ describe('cases compare config', () => {
 			const config = getCasesCompareConfig(
 				mockCurrentCases,
 				mockNewCases,
+				mockNewCases,
 				mockPresentFormValues,
 				mockLongTermFormValues
 			);
@@ -490,19 +491,21 @@ describe('cases compare config', () => {
 			const config = getCasesCompareConfig(
 				mockCurrentCases,
 				mockNewCases,
+				mockNewCases,
 				mockPresentFormValues,
 				mockLongTermFormValues
 			);
 
-			expect(config.series).toHaveLength(2);
+			expect(config.series).toHaveLength(3);
 			expect((config.series as any)[0].name).toBe('Present');
-			expect((config.series as any)[1].name).toBe('Long term');
+			expect((config.series as any)[1].name).toBe('Long term (baseline)');
+			expect((config.series as any)[2].name).toBe('Long term (combined)');
 		});
 
 		it('should include only Present series when newCases is empty', () => {
 			vi.spyOn(processCases, 'collectPostInterventionCases').mockReturnValue({} as any);
 
-			const config = getCasesCompareConfig(mockCurrentCases, [], mockPresentFormValues, mockLongTermFormValues);
+			const config = getCasesCompareConfig(mockCurrentCases, [], [], mockPresentFormValues, mockLongTermFormValues);
 
 			expect(config.series).toHaveLength(1);
 			expect((config.series as any)[0].name).toBe('Present');
@@ -521,6 +524,7 @@ describe('cases compare config', () => {
 			const config = getCasesCompareConfig(
 				mockCurrentCases,
 				mockNewCases,
+				mockNewCases,
 				mockPresentFormValues,
 				mockLongTermFormValues
 			);
@@ -529,7 +533,13 @@ describe('cases compare config', () => {
 		});
 
 		it('should pass data to createCasesCompareSeries correctly', () => {
-			getCasesCompareConfig(mockCurrentCases, mockNewCases, mockPresentFormValues, mockLongTermFormValues);
+			getCasesCompareConfig(
+				mockCurrentCases,
+				mockNewCases,
+				mockNewCases,
+				mockPresentFormValues,
+				mockLongTermFormValues
+			);
 
 			// Verify the function processes the data through helper functions
 			expect(processCases.collectPostInterventionCases).toHaveBeenCalled();
@@ -539,6 +549,7 @@ describe('cases compare config', () => {
 		it('should set tooltip formatter to createCompareTooltipHtml', () => {
 			const config = getCasesCompareConfig(
 				mockCurrentCases,
+				mockNewCases,
 				mockNewCases,
 				mockPresentFormValues,
 				mockLongTermFormValues
