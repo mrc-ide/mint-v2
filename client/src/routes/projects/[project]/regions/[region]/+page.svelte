@@ -11,6 +11,7 @@
 	import Loader from '$lib/components/Loader.svelte';
 	import { onMount } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
+	import { bodyType } from 'msw';
 	let { data, params }: PageProps = $props();
 
 	let isRunning = $state(true);
@@ -54,6 +55,7 @@
 	// hydration complete can render the results
 	onMount(() => {
 		isRunning = false;
+		document.body.classList.add('region-started');
 	});
 </script>
 

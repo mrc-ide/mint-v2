@@ -271,6 +271,7 @@ class TestCompareParametersResponse:
         assert len(response.intervention_parameters) == 1
         assert response.baseline_parameters[0].parameter_name == "param1"
         assert response.intervention_parameters[0].label == "Parameter 3"
-        for cost in response.intervention_parameters[0].linked_costs:
-            assert cost.cost_name in {"cost3", "cost4"}
-            assert cost.cost_label in {"Cost 3", "Cost 4"}
+        assert {(cost.cost_name, cost.cost_label) for cost in response.intervention_parameters[0].linked_costs} == {
+            ("cost3", "Cost 3"),
+            ("cost4", "Cost 4"),
+        }

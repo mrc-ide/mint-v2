@@ -25,9 +25,9 @@
 	let { presentResults, compareParameters, presentFormValues, chartTheme, params }: Props = $props();
 	let selectedBaselineParameter = $state(compareParameters.baselineParameters[0]);
 	let fullLongTermResults = $state<EmulatorResults>(presentResults);
-	let baselineLongTermResults = $derived(presentResults);
+	let baselineLongTermResults = $state<EmulatorResults>(presentResults);
 	let isLoading = $state(true);
-	let longTermFormValues = $state(presentFormValues);
+	let longTermFormValues = $state({ ...presentFormValues });
 
 	const updateBaselineParam = (paramName: string) => {
 		longTermFormValues[selectedBaselineParameter.parameterName] =
