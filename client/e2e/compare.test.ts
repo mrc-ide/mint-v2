@@ -40,11 +40,17 @@ test.describe('E2E Compare Page', () => {
 		await changeSlider(page, 'lsm-compare-slider', 0.9);
 
 		// adjust costs
-		const lsmCostLabel = page.getByLabel(/estimated cost of lsm/i);
+		const itnCostLabel = page.getByRole('spinbutton', { name: 'ITN mass distribution' });
+		await itnCostLabel.scrollIntoViewIfNeeded();
+		await itnCostLabel.fill('5');
+		const irsCostLabel = page.getByRole('spinbutton', {
+			name: 'Estimated annual cost of IRS product per household structure ($USD)'
+		});
+		await irsCostLabel.scrollIntoViewIfNeeded();
+		await irsCostLabel.fill('10');
+		const lsmCostLabel = page.getByRole('spinbutton', { name: 'Estimated cost of LSM' });
 		await lsmCostLabel.scrollIntoViewIfNeeded();
-		await page.getByLabel(/itn mass distribution/i).fill('3');
-		await page.getByLabel(/estimated annual cost of irs product/i).fill('15');
-		await lsmCostLabel.fill('25');
+		await lsmCostLabel.fill('20');
 
 		// prevalence plot
 		await expect(page.getByRole('button', { name: 'Show No Intervention Long term' })).toBeVisible();
