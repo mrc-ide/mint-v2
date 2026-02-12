@@ -47,7 +47,7 @@ describe('Compare InterventionFields component', () => {
 		const input = screen.getByLabelText(param.linkedCosts[0].costLabel);
 		await userEvent.fill(input, String(presentCost + 10));
 
-		await expect.element(screen.getByText(`$10`, { exact: false })).toBeVisible();
+		await expect.element(screen.getByText(`10`, { exact: false })).toBeVisible();
 	});
 
 	it('should be able to collapse cost fields', async () => {

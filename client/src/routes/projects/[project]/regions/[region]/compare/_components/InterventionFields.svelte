@@ -73,7 +73,6 @@
 					<Field.Field>
 						<Field.Label for={`${cost.costName}-compare-input`}>{cost.costLabel}</Field.Label>
 						<FieldWithChange
-							prefixUnit="$"
 							value={longTermFormValues[cost.costName] as number}
 							baseline={presentFormValues[cost.costName] as number}
 						>
