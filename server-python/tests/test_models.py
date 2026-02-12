@@ -8,6 +8,7 @@ from app.models import (
     EmulatorRequest,
     EmulatorResponse,
     EmulatorScenario,
+    InterventionCompareCost,
     InterventionCompareParameter,
     ItnFutureType,
     Prevalence,
@@ -256,8 +257,10 @@ class TestCompareParametersResponse:
                 label="Parameter 3",
                 min=20.0,
                 max=70.0,
-                linked_cost_name="cost3",
-                linked_cost_label="Cost 3",
+                linked_costs=[
+                    InterventionCompareCost(cost_name="cost3", cost_label="Cost 3"),
+                    InterventionCompareCost(cost_name="cost4", cost_label="Cost 4"),
+                ],
             ),
         ]
         response = CompareParametersResponse(
@@ -268,5 +271,6 @@ class TestCompareParametersResponse:
         assert len(response.intervention_parameters) == 1
         assert response.baseline_parameters[0].parameter_name == "param1"
         assert response.intervention_parameters[0].label == "Parameter 3"
-        assert response.intervention_parameters[0].linked_cost_name == "cost3"
-        assert response.intervention_parameters[0].linked_cost_label == "Cost 3"
+        for cost in response.intervention_parameters[0].linked_costs:
+            assert cost.cost_name in {"cost3", "cost4"}
+            assert cost.cost_label in {"Cost 3", "Cost 4"}
