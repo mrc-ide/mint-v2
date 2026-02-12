@@ -4,6 +4,7 @@
 	import SliderWithMarker from '$lib/components/SliderWithMarker.svelte';
 	import type { InterventionCompareParameter } from '$lib/types/compare';
 	import type { FormValue } from '$lib/components/dynamic-region-form/types';
+	import FieldWithChange from '$lib/components/FieldWithChange.svelte';
 
 	interface Props {
 		interventionParameters: InterventionCompareParameter[];
@@ -48,7 +49,11 @@
 		</Field.Field>
 		<Field.Field>
 			<Field.Label for={`${param.linkedCostName}-compare-input`}>{param.linkedCostLabel}</Field.Label>
-			<div class="flex flex-row items-center gap-2">
+			<FieldWithChange
+				prefixUnit="$"
+				value={longTermFormValues[param.linkedCostName] as number}
+				baseline={presentFormValues[param.linkedCostName] as number}
+			>
 				<Input
 					id={`${param.linkedCostName}-compare-input`}
 					type="number"
@@ -59,11 +64,7 @@
 					oninput={(e) => (longTermFormValues[param.linkedCostName] = Number(e.currentTarget.value))}
 					class="flex-1"
 				/>
-				<span class="text-right text-sm font-medium tabular-nums">
-					{#if costDelta >= 0}+{:else}-{/if}
-					${Math.abs(costDelta).toFixed(1)}
-				</span>
-			</div>
+			</FieldWithChange>
 		</Field.Field>
 	{/each}
 </Field.Group>

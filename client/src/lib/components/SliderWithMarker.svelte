@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { WithoutChildrenOrChild } from '$lib/utils';
 	import { cn } from '$lib/utils';
+	import FieldWithChange from './FieldWithChange.svelte';
 	import { Slider } from './ui/slider';
 	import { Slider as SliderPrimitive } from 'bits-ui';
 	let {
@@ -24,7 +25,7 @@
 	let markerPos = $derived(((markerValue - min) / (max - min)) * 100);
 </script>
 
-<div class="flex flex-row items-center gap-2">
+<FieldWithChange {value} baseline={markerValue} postFixUnit={unit}>
 	<div class={cn('relative h-7 flex-1', containerClass)}>
 		<Slider bind:value={value as never} class={className} {min} {max} {...restProps} />
 		<div class="pointer-events-none absolute top-0 h-full" style="left: {markerPos}%;">
@@ -34,8 +35,4 @@
 			</div>
 		</div>
 	</div>
-	<span class="text-right text-sm font-medium tabular-nums">
-		{#if value - markerValue >= 0}+{:else}-{/if}
-		{Math.abs(value - markerValue)}%</span
-	>
-</div>
+</FieldWithChange>
