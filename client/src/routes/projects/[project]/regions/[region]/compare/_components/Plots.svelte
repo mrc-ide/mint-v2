@@ -10,15 +10,27 @@
 		presentResults: EmulatorResults;
 		presentFormValues: Record<string, FormValue>;
 		longTermFormValues: Record<string, FormValue>;
-		longTermResults?: EmulatorResults;
+		fullLongTermResults: EmulatorResults;
+		baselineLongTermResults: EmulatorResults;
 	}
-	let { chartTheme, presentResults, longTermResults, presentFormValues, longTermFormValues }: Props = $props();
+	let {
+		chartTheme,
+		presentResults,
+		fullLongTermResults,
+		presentFormValues,
+		longTermFormValues,
+		baselineLongTermResults
+	}: Props = $props();
 	let presentPrevalenceSeries = $derived(createPresentPrevalenceSeries(presentResults.prevalence));
-	let prevalenceConfig = $derived(
-		getPrevalenceConfigCompare(presentPrevalenceSeries, longTermResults?.prevalence ?? [])
-	);
+	let prevalenceConfig = $derived(getPrevalenceConfigCompare(presentPrevalenceSeries, fullLongTermResults.prevalence));
 	let casesConfig = $derived(
-		getCasesCompareConfig(presentResults.cases, longTermResults?.cases ?? [], presentFormValues, longTermFormValues)
+		getCasesCompareConfig(
+			presentResults.cases,
+			fullLongTermResults.cases,
+			baselineLongTermResults.cases,
+			presentFormValues,
+			longTermFormValues
+		)
 	);
 </script>
 

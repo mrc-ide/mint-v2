@@ -25,7 +25,8 @@
 
 	let { presentResults, compareParameters, presentFormValues, chartTheme, params }: Props = $props();
 	let selectedBaselineParameter = $state(compareParameters.baselineParameters[0]);
-	let longTermResults = $state<EmulatorResults>(presentResults);
+	let fullLongTermResults = $state<EmulatorResults>(presentResults);
+	let baselineLongTermResults = $derived(presentResults);
 	let isLoading = $state(true);
 	let longTermFormValues = $state(presentFormValues);
 
@@ -40,19 +41,33 @@
 
 	const runEmulator = async () => {
 		isLoading = true;
-
 		try {
-			const res = await apiFetch<EmulatorResults>({
+			const fullLongTermPromise = apiFetch<EmulatorResults>({
 				url: regionCompareUrl(params.project, params.region),
 				method: 'POST',
 				body: {
 					formValues: longTermFormValues
 				}
 			});
-			isLoading = false;
-			longTermResults = res.data;
+			const baselineLongTermPromise = apiFetch<EmulatorResults>({
+				url: regionCompareUrl(params.project, params.region),
+				method: 'POST',
+				body: {
+					formValues: {
+						...presentFormValues,
+						[selectedBaselineParameter.parameterName]: longTermFormValues[selectedBaselineParameter.parameterName]
+					}
+				}
+			});
+			const [{ data: fullLongTermResData }, { data: baselineLongTermResData }] = await Promise.all([
+				fullLongTermPromise,
+				baselineLongTermPromise
+			]);
+			fullLongTermResults = fullLongTermResData;
+			baselineLongTermResults = baselineLongTermResData;
 		} catch (_err) {
 			toast.error('Failed to run long term scenario planning emulator');
+		} finally {
 			isLoading = false;
 		}
 	};
@@ -118,6 +133,13 @@
 			<Loader text="Loading..." />
 		</div>
 	{:else}
-		<Plots {chartTheme} {presentResults} {longTermResults} {presentFormValues} {longTermFormValues} />
+		<Plots
+			{chartTheme}
+			{presentResults}
+			{fullLongTermResults}
+			{baselineLongTermResults}
+			{presentFormValues}
+			{longTermFormValues}
+		/>
 	{/if}
 </div>
