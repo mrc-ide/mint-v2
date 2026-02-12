@@ -4,7 +4,12 @@ from typing import Annotated
 
 import jsonschema
 
-from app.models import CompareParameter, CompareParametersResponse, InterventionCompareParameter
+from app.models import (
+    CompareParameter,
+    CompareParametersResponse,
+    InterventionCompareCost,
+    InterventionCompareParameter,
+)
 
 APP_DIR = Path(__file__).parent.parent
 
@@ -30,9 +35,13 @@ def get_compare_parameters() -> CompareParametersResponse:
         ("current_malaria_prevalence", "Baseline prevalence"),
     ]
     intervention_param_names = [
-        ("itn_future", "ITN usage", "mass_distribution_cost"),
-        ("irs_future", "IRS coverage", "irs_household_annual_cost_product"),
-        ("lsm", "LSM coverage", "lsm_cost"),
+        (
+            "itn_future",
+            "ITN usage",
+            ["people_per_bednet", "mass_distribution_cost", "continuous_itn_distribution_cost"],
+        ),
+        ("irs_future", "IRS coverage", ["irs_household_annual_cost_product", "irs_household_annual_cost_deployment"]),
+        ("lsm", "LSM coverage", ["lsm_cost"]),
     ]
 
     baseline_parameters = [create_compare_parameter(param_name, form_options) for param_name in baseline_param_names]
@@ -47,16 +56,21 @@ def get_compare_parameters() -> CompareParametersResponse:
 
 
 def create_intervention_compare_parameter(
-    param: Annotated[tuple[str, str, str], "parameter name, label, linked cost name"],
+    param: Annotated[tuple[str, str, list[str]], "parameter name, label, linked cost names"],
     form_options: dict,
 ) -> InterventionCompareParameter:
-    param_name, label, linked_cost_name = param
-    cost_field = get_form_field(linked_cost_name, form_options)
-
+    param_name, label, linked_cost_names = param
+    cost_fields = [get_form_field(cost_name, form_options) for cost_name in linked_cost_names]
+    linked_costs = [
+        InterventionCompareCost(
+            cost_name=cost_field["id"],
+            cost_label=cost_field.get("label", cost_field["id"]),
+        )
+        for cost_field in cost_fields
+    ]
     return InterventionCompareParameter(
         **create_compare_parameter((param_name, label), form_options).model_dump(),
-        linked_cost_name=linked_cost_name,
-        linked_cost_label=cost_field.get("label", linked_cost_name),
+        linked_costs=linked_costs,
     )
 
 

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { convertToLocaleString } from '$lib/number';
 	import type { Snippet } from 'svelte';
 
 	interface Props {
@@ -15,6 +16,6 @@
 	{@render children()}
 	<span class="text-right text-sm font-medium tabular-nums">
 		{#if value - baseline >= 0}+{:else}-{/if}
-		{prefixUnit}{Math.abs(value - baseline)}{postFixUnit}</span
+		{prefixUnit}{convertToLocaleString(Math.abs(value - baseline), 1)}{postFixUnit}</span
 	>
 </div>
