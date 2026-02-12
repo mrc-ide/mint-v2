@@ -39,6 +39,7 @@ test.describe('E2E Compare Page', () => {
 		await changeSlider(page, 'irs_future-compare-slider', 0.3);
 		await changeSlider(page, 'lsm-compare-slider', 0.9);
 
+		await page.waitForTimeout(1000); // wait for chart to update
 		// adjust costs
 		const itnCostLabel = page.getByRole('spinbutton', { name: 'ITN mass distribution' });
 		await itnCostLabel.scrollIntoViewIfNeeded();
