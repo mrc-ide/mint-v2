@@ -115,9 +115,13 @@ class CompareParameter(BaseModel):
     max: float
 
 
+class InterventionCompareCost(BaseModel):
+    cost_name: str = Field(serialization_alias="costName")
+    cost_label: str = Field(serialization_alias="costLabel")
+
+
 class InterventionCompareParameter(CompareParameter):
-    linked_cost_name: str = Field(serialization_alias="linkedCostName")
-    linked_cost_label: str = Field(serialization_alias="linkedCostLabel")
+    linked_costs: list[InterventionCompareCost] = Field(serialization_alias="linkedCosts")
 
 
 class CompareParametersResponse(BaseModel):

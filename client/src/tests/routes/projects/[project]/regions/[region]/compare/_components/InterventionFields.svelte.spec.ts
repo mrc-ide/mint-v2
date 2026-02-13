@@ -21,7 +21,7 @@ describe('Compare InterventionFields component', () => {
 		const sliders = screen.getByRole('slider').all();
 		expect(sliders).toHaveLength(MOCK_COMPARE_PARAMETERS.interventionParameters.length); // baseline + 3 interventions
 		for (const param of MOCK_COMPARE_PARAMETERS.interventionParameters) {
-			await expect.element(screen.getByLabelText(param.linkedCostLabel)).toBeVisible();
+			await expect.element(screen.getByLabelText(param.linkedCosts[0].costLabel)).toBeVisible();
 		}
 	});
 
@@ -34,19 +34,31 @@ describe('Compare InterventionFields component', () => {
 		}
 
 		for (const param of MOCK_COMPARE_PARAMETERS.interventionParameters) {
-			await expect.element(screen.getByLabelText(param.linkedCostLabel)).toBeDisabled();
+			await expect.element(screen.getByLabelText(param.linkedCosts[0].costLabel)).toBeDisabled();
 		}
 	});
 
 	it('should calculate correct cost delta and display with appropriate sign', async () => {
 		const param = MOCK_COMPARE_PARAMETERS.interventionParameters[0];
-		const presentCost = MOCK_FORM_VALUES[param.linkedCostName as keyof typeof MOCK_FORM_VALUES] as number;
+		const presentCost = MOCK_FORM_VALUES[param.linkedCosts[0].costName as keyof typeof MOCK_FORM_VALUES] as number;
 
 		const screen = renderComponent();
 
-		const input = screen.getByLabelText(param.linkedCostLabel);
+		const input = screen.getByLabelText(param.linkedCosts[0].costLabel);
 		await userEvent.fill(input, String(presentCost + 10));
 
-		await expect.element(screen.getByText(`$10`, { exact: false })).toBeVisible();
+		await expect.element(screen.getByText(`10`, { exact: false })).toBeVisible();
+	});
+
+	it('should be able to collapse cost fields', async () => {
+		const screen = renderComponent();
+		const testParam = MOCK_COMPARE_PARAMETERS.interventionParameters[0];
+
+		const testCostField = screen.getByLabelText(testParam.linkedCosts[0].costLabel);
+		await expect.element(testCostField).toBeVisible();
+
+		await userEvent.click(screen.getByRole('button', { name: testParam.label }));
+
+		await expect.element(testCostField).not.toBeInTheDocument();
 	});
 });

@@ -37,7 +37,7 @@ describe('Compare component', () => {
 		const sliders = screen.getByRole('slider').all();
 		expect(sliders).toHaveLength(1 + compareParameters.interventionParameters.length); // baseline + 3 interventions
 		for (const param of compareParameters.interventionParameters) {
-			await expect.element(screen.getByLabelText(param.linkedCostLabel)).toBeVisible();
+			await expect.element(screen.getByLabelText(param.linkedCosts[0].costLabel)).toBeVisible();
 		}
 
 		await expect.element(screen.getByRole('region', { name: 'prevalence compare graph' })).toBeVisible();

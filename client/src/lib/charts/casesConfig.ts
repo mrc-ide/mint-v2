@@ -122,7 +122,7 @@ export const createCasesCompareDataPoints = (
 export const createCasesCompareSeries = (
 	cases: CasesData[],
 	formValues: Record<string, FormValue>,
-	name: 'Present' | 'Long term'
+	name: 'Present' | 'Long term (combined)' | 'Long term (baseline)'
 ): SeriesLineOptions => ({
 	name,
 	type: 'line',
@@ -182,16 +182,21 @@ export const createCompareTooltipHtml = function (this: Highcharts.Point): strin
 };
 
 export const getCasesCompareConfig = (
-	currentCases: CasesData[],
-	newCases: CasesData[],
+	presentCases: CasesData[],
+	fullLongTermCases: CasesData[],
+	baselineLongTermCases: CasesData[],
 	presentFormValues: Record<string, FormValue>,
 	longTermFormValues: Record<string, FormValue>
 ): Options => {
-	const presentSeries = createCasesCompareSeries(currentCases, presentFormValues, 'Present');
-	const futureSeries = createCasesCompareSeries(newCases, longTermFormValues, 'Long term');
+	const presentSeries = createCasesCompareSeries(presentCases, presentFormValues, 'Present');
+	const baselineLongTermSeries = createCasesCompareSeries(
+		baselineLongTermCases,
+		presentFormValues,
+		'Long term (baseline)'
+	);
+	const fullLongTermSeries = createCasesCompareSeries(fullLongTermCases, longTermFormValues, 'Long term (combined)');
 	const presentData = presentSeries.data as PointOptionsObject[];
-	const futureData = futureSeries.data as PointOptionsObject[];
-
+	const fullLongTermData = fullLongTermSeries.data as PointOptionsObject[];
 	return {
 		chart: {
 			type: 'line',
@@ -207,7 +212,7 @@ export const getCasesCompareConfig = (
 			title: { text: 'Total Cost ($USD)' },
 			labels: { format: '${value:,.0f}' },
 			min: 0,
-			breaks: createBreakToMinimizeEmptySpace(presentData, futureData)
+			breaks: createBreakToMinimizeEmptySpace(presentData, fullLongTermData)
 		},
 		yAxis: {
 			title: { text: 'Total Cases' },
@@ -233,6 +238,6 @@ export const getCasesCompareConfig = (
 			}
 		},
 		legend: { enabled: true },
-		series: futureData.length ? [presentSeries, futureSeries] : [presentSeries]
+		series: fullLongTermData.length ? [presentSeries, baselineLongTermSeries, fullLongTermSeries] : [presentSeries]
 	};
 };

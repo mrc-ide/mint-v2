@@ -7,7 +7,7 @@ import { expect, Page } from '@playwright/test';
 export const goto = async (page: Page, path: string, waitForStarted = true) => {
 	await page.goto(path);
 	if (waitForStarted) {
-		await page.waitForSelector('body.started');
+		await page.locator('body.started').waitFor({ state: 'visible' });
 	}
 };
 

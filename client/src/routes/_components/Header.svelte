@@ -30,13 +30,6 @@
 		>
 		{#if project}
 			<HeaderRegionsDropdown {project} {region} />
-			<a
-				class={buttonVariants({ variant: 'link', class: 'p-1', size: 'sm' })}
-				href={`/projects/${project.name}/strategise`}
-			>
-				<ChartIcon class="size-3.5" />
-				Strategise across regions
-			</a>
 			{#if region}
 				{@const isComparePage = page.url.pathname.endsWith('/compare')}
 				{#if isComparePage}
@@ -53,10 +46,17 @@
 						href={`/projects/${project.name}/regions/${region.name}/compare`}
 					>
 						<CalendarClockIcon class="size-3.5" />
-						Long term comparison
+						Region long term comparison
 					</a>
 				{/if}
 			{/if}
+			<a
+				class={buttonVariants({ variant: 'link', class: 'p-1', size: 'sm' })}
+				href={`/projects/${project.name}/strategise`}
+			>
+				<ChartIcon class="size-3.5" />
+				Strategise across regions
+			</a>
 		{/if}
 		<div class="ml-auto flex items-center gap-3 px-4">
 			<a href="/privacy" class="text-muted-foreground hover:underline">Privacy</a>
