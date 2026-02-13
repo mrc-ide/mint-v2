@@ -12,7 +12,8 @@ describe('Compare plots component', () => {
 					prevalence: MOCK_PREVALENCE_DATA,
 					eirValid: true
 				},
-				regionFormValues: MOCK_FORM_VALUES,
+				presentFormValues: MOCK_FORM_VALUES,
+				longTermFormValues: MOCK_FORM_VALUES,
 				longTermResults: null
 			}
 		} as any);
@@ -41,7 +42,8 @@ describe('Compare plots component', () => {
 					prevalence: MOCK_PREVALENCE_DATA,
 					eirValid: true
 				},
-				regionFormValues: MOCK_FORM_VALUES
+				presentFormValues: MOCK_FORM_VALUES,
+				longTermFormValues: MOCK_FORM_VALUES
 			}
 		} as any);
 

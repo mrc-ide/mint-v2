@@ -1,4 +1,10 @@
-import { configureHighcharts, createHighchart, getChartTheme, getColumnFill } from '$lib/charts/baseChart';
+import {
+	configureHighcharts,
+	createHighchart,
+	getChartTheme,
+	getColumnFill,
+	setupAxisBreaks
+} from '$lib/charts/baseChart';
 import type { Scenario } from '$lib/types/userState';
 import Highcharts from 'highcharts/esm/highcharts.js';
 
@@ -13,7 +19,14 @@ vi.mock('mode-watcher', () => ({
 vi.mock('highcharts/esm/highcharts.js', () => ({
 	default: {
 		chart: vi.fn(),
-		setOptions: vi.fn()
+		setOptions: vi.fn(),
+		wrap: vi.fn(),
+		Axis: {
+			prototype: {
+				getLinePath: vi.fn()
+			},
+			toPixels: vi.fn()
+		}
 	}
 }));
 vi.mock('highcharts/esm/modules/accessibility', () => ({}));
@@ -66,9 +79,33 @@ describe('getColumnFill', () => {
 });
 
 describe('configureHighcharts', () => {
-	it('should call Highcharts.setOptions', () => {
+	it('should call Highcharts.setOptions & wrap', () => {
 		configureHighcharts();
 		expect(Highcharts.setOptions).toHaveBeenCalledTimes(1);
+		expect(Highcharts.wrap).toHaveBeenCalledWith(Highcharts.Axis.prototype, 'getLinePath', expect.any(Function));
+	});
+
+	it('should ensure wrapped getLinePath calls setupAxisBreaks correctly', () => {
+		configureHighcharts();
+
+		// Get the wrapper function
+		const wrapperFunction = vi.mocked(Highcharts.wrap).mock.calls[0][2];
+
+		const mockBrokenAxis = {
+			hasBreaks: true,
+			breakArray: [{ from: 10, to: 20 }],
+			axis: {} as any
+		};
+
+		const mockAxis = { brokenAxis: mockBrokenAxis, toPixels: vi.fn() };
+		const mockPath: [string, number, number][] = [['M', 0, 0]];
+		const lineWidth = 5;
+		const mockProceed = vi.fn().mockReturnValue(mockPath);
+
+		const result = wrapperFunction.call(mockAxis, mockProceed, lineWidth);
+
+		expect(mockProceed).toHaveBeenCalledWith(lineWidth);
+		expect(result).toEqual(mockPath);
 	});
 });
 
@@ -110,5 +147,92 @@ describe('createHighchart', () => {
 		cleanup();
 
 		expect(mockDestroy).toHaveBeenCalledTimes(1);
+	});
+});
+
+describe('setupAxisBreaks', () => {
+	it('should return path unchanged when no breaks exist', () => {
+		const axis = { horiz: true, min: 0, max: 100, toPixels: vi.fn() } as any;
+		const brokenAxis = { hasBreaks: false, breakArray: [], axis };
+		const path: [string, number, number][] = [
+			['M', 10, 20],
+			['L', 30, 40]
+		];
+
+		const result = setupAxisBreaks(axis, brokenAxis, path);
+
+		expect(result).toEqual(path);
+	});
+
+	it('should skip breaks outside axis view', () => {
+		const axis = { horiz: true, min: 50, max: 100, toPixels: vi.fn() } as any;
+		const brokenAxis = {
+			hasBreaks: true,
+			breakArray: [{ from: 10, to: 20 }],
+			axis
+		};
+		const path: [string, number, number][] = [['M', 10, 20]];
+
+		const result = setupAxisBreaks(axis, brokenAxis, path);
+
+		expect(result).toEqual(path);
+	});
+
+	it('should add slanted lines for horizontal axis breaks', () => {
+		const axis = { horiz: true, min: 0, max: 100, toPixels: vi.fn().mockReturnValue(50) } as any;
+		const brokenAxis = {
+			hasBreaks: true,
+			breakArray: [{ from: 30, to: 40 }],
+			axis
+		};
+		const path: [string, number, number][] = [['M', 10, 20]];
+
+		const result = setupAxisBreaks(axis, brokenAxis, path);
+
+		expect(result.length).toBe(7); // original move + 6 new commands for the break
+		expect(axis.toPixels).toHaveBeenCalledWith(40);
+	});
+
+	it('should add slanted lines for vertical axis breaks', () => {
+		const axis = { horiz: false, min: 0, max: 100, toPixels: vi.fn().mockReturnValue(50) } as any;
+		const brokenAxis = {
+			hasBreaks: true,
+			breakArray: [{ from: 30, to: 40 }],
+			axis
+		};
+		const path: [string, number, number][] = [['M', 10, 20]];
+
+		const result = setupAxisBreaks(axis, brokenAxis, path);
+
+		expect(result.length).toBe(7); // original move + 6 new commands for the break
+		expect(axis.toPixels).toHaveBeenCalledWith(40);
+	});
+
+	it('should handle multiple breaks', () => {
+		const axis = { horiz: true, min: 0, max: 100, toPixels: vi.fn().mockReturnValue(50) } as any;
+		const brokenAxis = {
+			hasBreaks: true,
+			breakArray: [
+				{ from: 20, to: 30 },
+				{ from: 60, to: 70 }
+			],
+			axis
+		};
+		const path: [string, number, number][] = [['M', 10, 20]];
+
+		const result = setupAxisBreaks(axis, brokenAxis, path);
+
+		expect(axis.toPixels).toHaveBeenCalledTimes(2);
+		expect(result.length).toBeGreaterThan(1);
+	});
+
+	it('should handle undefined breakArray', () => {
+		const axis = { horiz: true, min: 0, max: 100, toPixels: vi.fn() } as any;
+		const brokenAxis = { hasBreaks: false, axis };
+		const path: [string, number, number][] = [['M', 10, 20]];
+
+		const result = setupAxisBreaks(axis, brokenAxis, path);
+
+		expect(result).toEqual(path);
 	});
 });

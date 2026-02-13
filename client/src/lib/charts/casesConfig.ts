@@ -9,6 +9,7 @@ import {
 import type { CasesData, Scenario } from '$lib/types/userState';
 import type { Options, PointOptionsObject, SeriesColumnOptions, SeriesLineOptions } from 'highcharts';
 import { getColumnFill, ScenarioToLabel } from './baseChart';
+import { convertToLocaleString } from '$lib/number';
 
 const getCasesSeriesData = (
 	casesAverted: Partial<Record<Scenario, CasesAverted>>
@@ -148,18 +149,48 @@ export const createBreakToMinimizeEmptySpace = (
 	const data1Breakpoint = getSecondPoint(data1);
 	const data2Breakpoint = getSecondPoint(data2);
 
-	const breakPoint = Math.min(data1Breakpoint, data2Breakpoint);
+	const breakPoint = Math.min(data1Breakpoint, data2Breakpoint) * 0.9; // set break point at 90%
+	const breakSize = breakPoint * 0.2; // add a 20% buffer to ensure the break is visible
 
-	return breakPoint !== Infinity ? [{ from: 0, to: breakPoint * 0.9, breakSize: 1 }] : undefined;
+	return breakPoint !== Infinity ? [{ from: 0, to: breakPoint, breakSize }] : undefined;
+};
+
+const resetSeriesPointStates = (seriesList: Highcharts.Series[]) => {
+	seriesList.forEach((s) => s.points.forEach((p) => p.setState('')));
+};
+export const createCompareTooltipHtml = function (this: Highcharts.Point): string {
+	const currentIntervention: string = this.options.custom!.intervention;
+	const tooltipLines: string[] = [`<div class="mb-1"><span class="font-semibold ">${currentIntervention}</span></div>`];
+
+	for (const series of this.series.chart.series) {
+		resetSeriesPointStates([series]);
+
+		const point = series.points.find((p) => p.options.custom!.intervention === currentIntervention);
+		if (!point) continue;
+
+		point.setState('hover');
+		tooltipLines.push(`
+			<div class="flex items-center">
+				<span style="color:${series.color};" class="mr-1">●</span>
+				<span class="text-muted-foreground">${series.name}:</span>
+				<span class="ml-0.5">${convertToLocaleString(point.y as number, 1)} cases • $${convertToLocaleString(point.x, 0)}</span>
+			</div>
+		`);
+	}
+
+	return tooltipLines.join('');
 };
 
 export const getCasesCompareConfig = (
 	currentCases: CasesData[],
 	newCases: CasesData[],
-	formValues: Record<string, FormValue>
+	presentFormValues: Record<string, FormValue>,
+	longTermFormValues: Record<string, FormValue>
 ): Options => {
-	const presentSeries = createCasesCompareSeries(currentCases, formValues, 'Present');
-	const futureSeries = createCasesCompareSeries(newCases, formValues, 'Long term');
+	const presentSeries = createCasesCompareSeries(currentCases, presentFormValues, 'Present');
+	const futureSeries = createCasesCompareSeries(newCases, longTermFormValues, 'Long term');
+	const presentData = presentSeries.data as PointOptionsObject[];
+	const futureData = futureSeries.data as PointOptionsObject[];
 
 	return {
 		chart: {
@@ -176,30 +207,32 @@ export const getCasesCompareConfig = (
 			title: { text: 'Total Cost ($USD)' },
 			labels: { format: '${value:,.0f}' },
 			min: 0,
-			tickPixelInterval: 50,
-			breaks: createBreakToMinimizeEmptySpace(
-				presentSeries.data as PointOptionsObject[],
-				futureSeries.data as PointOptionsObject[]
-			)
+			breaks: createBreakToMinimizeEmptySpace(presentData, futureData)
 		},
 		yAxis: {
 			title: { text: 'Total Cases' },
 			labels: { format: '{value:,.0f}' }
 		},
 		tooltip: {
-			shared: true,
 			shadow: true,
 			useHTML: true,
-			headerFormat: 'Total Cost: ${point.x:,.0f}',
-			pointFormat: `<div class="flex items-center">
-				<span style="color:{point.color}" class="mr-1">●</span>
-				<span class="font-medium">{series.name}:</span>
-				<span class="ml-0.5">{point.y:,.1f} cases
-					<span class="text-muted-foreground">{point.custom.intervention}</span>
-				</span>
-			</div>`
+			formatter: createCompareTooltipHtml
+		},
+		plotOptions: {
+			line: {
+				states: {
+					inactive: {
+						enabled: false
+					}
+				},
+				events: {
+					mouseOut: function () {
+						resetSeriesPointStates(this.chart.series);
+					}
+				}
+			}
 		},
 		legend: { enabled: true },
-		series: futureSeries.data?.length ? [presentSeries, futureSeries] : [presentSeries]
+		series: futureData.length ? [presentSeries, futureSeries] : [presentSeries]
 	};
 };

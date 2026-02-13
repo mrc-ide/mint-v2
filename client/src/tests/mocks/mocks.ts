@@ -27,7 +27,8 @@ export const MOCK_FORM_VALUES = Object.freeze({
 	py_ppf_cost: 2.86,
 	mass_distribution_cost: 2.75,
 	continuous_itn_distribution_cost: 2.75,
-	irs_household_annual_cost: 20,
+	irs_household_annual_cost_deployment: 12,
+	irs_household_annual_cost_product: 12,
 	lsm_cost: 5
 });
 export const MOCK_CASES_DATA = Object.freeze([
@@ -577,19 +578,25 @@ export const MOCK_COMPARE_PARAMETERS: Readonly<CompareParameters> = Object.freez
 			parameterName: 'irs_future',
 			label: 'IRS coverage',
 			min: 0,
-			max: 100
+			max: 100,
+			linkedCostName: 'irs_household_annual_cost_product',
+			linkedCostLabel: 'IRS annual household cost product'
 		},
 		{
 			parameterName: 'itn_future',
 			label: 'ITN usage',
 			min: 0,
-			max: 100
+			max: 100,
+			linkedCostName: 'mass_distribution_cost',
+			linkedCostLabel: 'Mass distribution cost'
 		},
 		{
 			parameterName: 'lsm',
 			label: 'LSM coverage',
 			min: 0,
-			max: 90
+			max: 90,
+			linkedCostName: 'lsm_cost',
+			linkedCostLabel: 'LSM cost'
 		}
 	]
 });

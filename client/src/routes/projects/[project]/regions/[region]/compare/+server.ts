@@ -6,7 +6,6 @@ import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ request, fetch }) => {
 	const { formValues } = await request.json();
-
 	try {
 		const res = await apiFetch<EmulatorResults>({
 			url: runEmulatorUrl(),

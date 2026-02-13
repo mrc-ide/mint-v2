@@ -2,48 +2,51 @@
 	import type { FormValue } from '$lib/components/dynamic-region-form/types';
 	import { DEBOUNCE_DELAY_MS } from '$lib/components/dynamic-region-form/utils';
 	import Loader from '$lib/components/Loader.svelte';
+	import SliderWithMarker from '$lib/components/SliderWithMarker.svelte';
 	import * as Field from '$lib/components/ui/field';
 	import * as RadioGroup from '$lib/components/ui/radio-group';
 	import { apiFetch } from '$lib/fetch';
-	import type { CompareParametersWithValue } from '$lib/types/compare';
+	import type { CompareParameters } from '$lib/types/compare';
 	import type { EmulatorResults } from '$lib/types/userState';
 	import { regionCompareUrl } from '$lib/url';
 	import debounce from 'debounce';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
+	import InterventionFields from './InterventionFields.svelte';
 	import Plots from './Plots.svelte';
-	import SliderWithMarker from '$lib/components/SliderWithMarker.svelte';
 
 	interface Props {
 		presentResults: EmulatorResults;
-		compareParameters: CompareParametersWithValue;
-		regionFormValues: Record<string, FormValue>;
+		compareParameters: CompareParameters;
+		presentFormValues: Record<string, FormValue>;
 		chartTheme: string;
 		params: { project: string; region: string };
 	}
 
-	let { presentResults, compareParameters, regionFormValues, chartTheme, params }: Props = $props();
-	let selectedParameter = $state(compareParameters.baselineParameters[0]);
-	let sliderValue = $derived(selectedParameter.value);
-	let longTermResults = $state<EmulatorResults>();
+	let { presentResults, compareParameters, presentFormValues, chartTheme, params }: Props = $props();
+	let selectedBaselineParameter = $state(compareParameters.baselineParameters[0]);
+	let longTermResults = $state<EmulatorResults>(presentResults);
 	let isLoading = $state(true);
+	let longTermFormValues = $state(presentFormValues);
 
 	const updateBaselineParam = (paramName: string) => {
-		selectedParameter = compareParameters.baselineParameters.find((param) => param.parameterName === paramName)!;
-		longTermResults = undefined;
+		longTermFormValues[selectedBaselineParameter.parameterName] =
+			presentFormValues[selectedBaselineParameter.parameterName]; // reset old param
+
+		selectedBaselineParameter = compareParameters.baselineParameters.find(
+			(param) => param.parameterName === paramName
+		)!;
 	};
 
 	const runEmulator = async () => {
 		isLoading = true;
+
 		try {
 			const res = await apiFetch<EmulatorResults>({
 				url: regionCompareUrl(params.project, params.region),
 				method: 'POST',
 				body: {
-					formValues: {
-						...regionFormValues,
-						[selectedParameter.parameterName]: sliderValue
-					}
+					formValues: longTermFormValues
 				}
 			});
 			isLoading = false;
@@ -55,18 +58,23 @@
 	};
 	const debounceRunEmulator = debounce(runEmulator, DEBOUNCE_DELAY_MS);
 
+	const onSliderChange = async (value: number, paramName: string) => {
+		longTermFormValues[paramName] = value;
+		debounceRunEmulator();
+	};
+
 	onMount(() => {
 		isLoading = false;
 	});
 </script>
 
 <div class="flex flex-row gap-4">
-	<div class="flex w-1/4 flex-col rounded-md border p-4">
+	<div class="flex w-1/4 flex-col gap-6 rounded-md border p-4">
 		<Field.Group class="gap-4">
 			<Field.Field>
 				<Field.Label for="parameter-select">What do you want to adjust?</Field.Label>
 				<RadioGroup.Root
-					value={selectedParameter.parameterName}
+					value={selectedBaselineParameter.parameterName}
 					onValueChange={updateBaselineParam}
 					disabled={isLoading}
 				>
@@ -80,27 +88,29 @@
 			</Field.Field>
 			<Field.Field>
 				<Field.Label for="baseline-parameter-slider">Change from baseline (%)</Field.Label>
-				<div class="flex flex-row items-center gap-2">
-					<SliderWithMarker
-						id="baseline-parameter-slider"
-						type="single"
-						bind:value={sliderValue}
-						onValueCommit={debounceRunEmulator}
-						max={selectedParameter.max}
-						min={selectedParameter.min}
-						disabled={isLoading}
-						aria-label="Adjust baseline parameter slider"
-						markerValue={selectedParameter.value}
-						unit="%"
-						class="h-full"
-					/>
-					<span class="text-right text-sm font-medium tabular-nums">
-						{#if sliderValue - selectedParameter.value >= 0}+{:else}-{/if}
-						{Math.abs(sliderValue - selectedParameter.value)}%</span
-					>
-				</div>
+				<SliderWithMarker
+					id="baseline-parameter-slider"
+					type="single"
+					value={longTermFormValues[selectedBaselineParameter.parameterName] as number}
+					onValueChange={(value: number) => onSliderChange(value, selectedBaselineParameter.parameterName)}
+					max={selectedBaselineParameter.max}
+					min={selectedBaselineParameter.min}
+					disabled={isLoading}
+					aria-label="Adjust baseline parameter slider"
+					markerValue={presentFormValues[selectedBaselineParameter.parameterName] as number}
+					unit="%"
+					class="h-full"
+				/>
 			</Field.Field>
 		</Field.Group>
+
+		<InterventionFields
+			interventionParameters={compareParameters.interventionParameters}
+			{isLoading}
+			{presentFormValues}
+			bind:longTermFormValues
+			{onSliderChange}
+		/>
 	</div>
 
 	{#if isLoading}
@@ -108,6 +118,6 @@
 			<Loader text="Loading..." />
 		</div>
 	{:else}
-		<Plots {chartTheme} {presentResults} {longTermResults} {regionFormValues} />
+		<Plots {chartTheme} {presentResults} {longTermResults} {presentFormValues} {longTermFormValues} />
 	{/if}
 </div>

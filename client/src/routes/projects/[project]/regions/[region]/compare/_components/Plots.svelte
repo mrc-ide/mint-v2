@@ -8,16 +8,17 @@
 	interface Props {
 		chartTheme: string;
 		presentResults: EmulatorResults;
-		regionFormValues: Record<string, FormValue>;
+		presentFormValues: Record<string, FormValue>;
+		longTermFormValues: Record<string, FormValue>;
 		longTermResults?: EmulatorResults;
 	}
-	let { chartTheme, presentResults, longTermResults, regionFormValues }: Props = $props();
+	let { chartTheme, presentResults, longTermResults, presentFormValues, longTermFormValues }: Props = $props();
 	let presentPrevalenceSeries = $derived(createPresentPrevalenceSeries(presentResults.prevalence));
 	let prevalenceConfig = $derived(
 		getPrevalenceConfigCompare(presentPrevalenceSeries, longTermResults?.prevalence ?? [])
 	);
 	let casesConfig = $derived(
-		getCasesCompareConfig(presentResults.cases, longTermResults?.cases ?? [], regionFormValues)
+		getCasesCompareConfig(presentResults.cases, longTermResults?.cases ?? [], presentFormValues, longTermFormValues)
 	);
 </script>
 
