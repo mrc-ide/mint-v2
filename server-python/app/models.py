@@ -13,6 +13,7 @@ class Response(BaseModel, Generic[T]):
 class Version(BaseModel):
     server: str
     minte: str
+    estimint: str
 
 
 class ItnFutureType(Enum):

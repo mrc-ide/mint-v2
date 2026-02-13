@@ -30,9 +30,10 @@ class TestResponse:
 
 class TestVersion:
     def test_version_creation(self):
-        version = Version(server="1.0.0", minte="2.0.0")
+        version = Version(server="1.0.0", minte="2.0.0", estimint="1.2.1")
         assert version.server == "1.0.0"
         assert version.minte == "2.0.0"
+        assert version.estimint == "1.2.1"
 
 
 class TestItnFutureType:
