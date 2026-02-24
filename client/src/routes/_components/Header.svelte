@@ -30,7 +30,7 @@
 		>
 		{#if project}
 			<HeaderRegionsDropdown {project} {region} />
-			{#if region}
+			<!-- {#if region}
 				{@const isComparePage = page.url.pathname.endsWith('/compare')}
 				{#if isComparePage}
 					<a
@@ -49,7 +49,7 @@
 						Region long term comparison
 					</a>
 				{/if}
-			{/if}
+			{/if} -->
 			<a
 				class={buttonVariants({ variant: 'link', class: 'p-1', size: 'sm' })}
 				href={`/projects/${project.name}/strategise`}
