@@ -50,5 +50,13 @@ export const actions: Actions = {
 		locals.userState.projects = locals.userState.projects.filter((project) => project.name !== name);
 
 		return { success: true };
+	},
+	// use basic sveltekit form handling for toggling compare mode
+	setCompareEnabled: async ({ request, locals }) => {
+		const formData = await request.formData();
+		const compareEnabled = formData.get('compare-enabled-switch') === 'on';
+		locals.userState.compareEnabled = compareEnabled;
+
+		return { success: true };
 	}
 };

@@ -65,4 +65,5 @@ export interface UserState {
 	userId: string;
 	createdAt: string;
 	projects: Project[];
+	compareEnabled?: boolean;
 }
