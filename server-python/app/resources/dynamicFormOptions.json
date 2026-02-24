@@ -37,8 +37,8 @@
             },
             {
               "id": "current_malaria_prevalence",
-              "label": "Current malaria prevalence",
-              "helpText": "Define the current endemicity of your setting as measured by the prevalence of children 6-month to 59-months of age who are diagnosed with falciparum malaria by microscopy. The prevalence estimate should relate to the mean value from the previous year.",
+              "label": "Recent malaria prevalence",
+              "helpText": "Define the recent endemicity of your setting as measured by the prevalence of children 6-month to 59-months of age who are diagnosed with falciparum malaria by microscopy. The prevalence estimate should relate to the mean value from the previous year.",
               "required": true,
               "default": 2,
               "type": "slider",
@@ -98,10 +98,10 @@
           ]
         },
         {
-          "id": "past_vector_control",
-          "title": "Past Vector Control",
+          "id": "recent_vector_control",
+          "title": "Recent Vector Control",
           "description": "",
-          "helpText": "The current endemicity of a region is partly determined by the performance and quantity of vector control leading up to now. This is required to approximate the efficacy of interventions moving forward. ",
+          "helpText": "The recent endemicity of a region is partly determined by the performance and quantity of vector control leading up to now. This is required to approximate the efficacy of interventions moving forward. ",
           "collapsible": false,
           "fields": [
             {
@@ -195,7 +195,7 @@
       "subGroups": [
         {
           "id": "future_intervention",
-          "title": "Future Intervention Options",
+          "title": "Intervention Options",
           "helpText": "",
           "description": "",
           "collapsible": false,
@@ -215,7 +215,7 @@
             },
             {
               "id": "itn_future_types",
-              "label": "Future ITN types",
+              "label": "ITN types",
               "helpText": "Select the type of ITN that will be distributed in the planned mass campaign. Note these options are only enabled when “Expected ITN population usage” is above 0%.",
               "type": "multiselect",
               "disabled": {

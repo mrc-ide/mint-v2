@@ -46,7 +46,7 @@
 						href={`/projects/${project.name}/regions/${region.name}/compare`}
 					>
 						<CalendarClockIcon class="size-3.5" />
-						Region long term comparison
+						Region long term planning
 					</a>
 				{/if}
 			{/if}
@@ -55,7 +55,7 @@
 				href={`/projects/${project.name}/strategise`}
 			>
 				<ChartIcon class="size-3.5" />
-				Strategise across regions
+				Sub-national tailoring
 			</a>
 		{/if}
 		<div class="ml-auto flex items-center gap-3 px-4">
