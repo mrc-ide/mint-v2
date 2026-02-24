@@ -5,7 +5,12 @@ from unittest.mock import Mock, patch
 import jsonschema
 import pytest
 
-from app.models import CompareParameter, CompareParametersResponse, InterventionCompareParameter
+from app.models import (
+    CompareParameter,
+    CompareParametersResponse,
+    InterventionCompareCost,
+    InterventionCompareParameter,
+)
 from app.services.resources import (
     create_compare_parameter,
     create_intervention_compare_parameter,
@@ -98,7 +103,8 @@ class TestCreateCompareParameter:
                             {"id": "preference_for_biting_in_bed", "min": 40, "max": 90},
                             {"id": "no_min_max_field"},
                             {"id": "itn_future"},
-                            {"id": "itn_cost", "label": "ITN Cost"},
+                            {"id": "itn_cost1", "label": "ITN Cost 1"},
+                            {"id": "itn_cost2", "label": "ITN Cost 2"},
                         ]
                     }
                 ]
@@ -140,7 +146,7 @@ class TestCreateCompareParameter:
         }
 
     def test_create_intervention_compare_parameter(self):
-        param = ("itn_future", "ITN Usage", "itn_cost")
+        param = ("itn_future", "ITN Usage", ["itn_cost1", "itn_cost2"])
 
         intervention_compare_param = create_intervention_compare_parameter(param, self.form_options)
 
@@ -149,8 +155,10 @@ class TestCreateCompareParameter:
             "label": "ITN Usage",
             "min": 0.0,
             "max": 100.0,
-            "linked_cost_name": "itn_cost",
-            "linked_cost_label": "ITN Cost",
+            "linked_costs": [
+                {"cost_name": "itn_cost1", "cost_label": "ITN Cost 1"},
+                {"cost_name": "itn_cost2", "cost_label": "ITN Cost 2"},
+            ],
         }
 
 
@@ -171,24 +179,27 @@ class TestGetCompareParameters:
                 label="IRS coverage",
                 min=0,
                 max=100,
-                linked_cost_label="irs_cost",
-                linked_cost_name="irs_household_annual_cost_product",
+                linked_costs=[
+                    InterventionCompareCost(
+                        cost_name="irs_household_annual_cost_product", cost_label="IRSHousehold Annual Cost Product"
+                    )
+                ],
             ),
             InterventionCompareParameter(
                 parameter_name="itn_future",
                 label="ITN usage",
                 min=0,
                 max=100,
-                linked_cost_name="mass_distribution_cost",
-                linked_cost_label="Mass Distribution Cost",
+                linked_costs=[
+                    InterventionCompareCost(cost_name="mass_distribution_cost", cost_label="Mass Distribution Cost"),
+                ],
             ),
             InterventionCompareParameter(
                 parameter_name="lsm",
                 label="LSM coverage",
                 min=0,
                 max=100,
-                linked_cost_name="lsm_cost",
-                linked_cost_label="LSM Cost",
+                linked_costs=[InterventionCompareCost(cost_name="lsm_cost", cost_label="LSM Cost")],
             ),
         ]
         mock_options.return_value = options
@@ -202,9 +213,23 @@ class TestGetCompareParameters:
             (("current_malaria_prevalence", "Baseline prevalence"), options),
         ]
         expected_intervention_compare_calls = [
-            (("itn_future", "ITN usage", "mass_distribution_cost"), options),
-            (("irs_future", "IRS coverage", "irs_household_annual_cost_product"), options),
-            (("lsm", "LSM coverage", "lsm_cost"), options),
+            (
+                (
+                    "itn_future",
+                    "ITN usage",
+                    ["people_per_bednet", "mass_distribution_cost", "continuous_itn_distribution_cost"],
+                ),
+                options,
+            ),
+            (
+                (
+                    "irs_future",
+                    "IRS coverage",
+                    ["irs_household_annual_cost_product", "irs_household_annual_cost_deployment"],
+                ),
+                options,
+            ),
+            (("lsm", "LSM coverage", ["lsm_cost"]), options),
         ]
         actual_compare_calls = [call.args for call in mock_compare.call_args_list]
         actual_intervention_compare_calls = [call.args for call in mock_intervention_compare.call_args_list]

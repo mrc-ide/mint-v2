@@ -5,13 +5,12 @@
 	import SliderWithMarker from '$lib/components/SliderWithMarker.svelte';
 	import * as Field from '$lib/components/ui/field';
 	import * as RadioGroup from '$lib/components/ui/radio-group';
-	import { apiFetch } from '$lib/fetch';
 	import type { CompareParameters } from '$lib/types/compare';
 	import type { EmulatorResults } from '$lib/types/userState';
-	import { regionCompareUrl } from '$lib/url';
 	import debounce from 'debounce';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
+	import { runCompareEmulator } from '../utils';
 	import InterventionFields from './InterventionFields.svelte';
 	import Plots from './Plots.svelte';
 
@@ -25,9 +24,10 @@
 
 	let { presentResults, compareParameters, presentFormValues, chartTheme, params }: Props = $props();
 	let selectedBaselineParameter = $state(compareParameters.baselineParameters[0]);
-	let longTermResults = $state<EmulatorResults>(presentResults);
+	let fullLongTermResults = $state<EmulatorResults>(presentResults);
+	let baselineLongTermResults = $state<EmulatorResults>(presentResults);
 	let isLoading = $state(true);
-	let longTermFormValues = $state(presentFormValues);
+	let longTermFormValues = $state({ ...presentFormValues });
 
 	const updateBaselineParam = (paramName: string) => {
 		longTermFormValues[selectedBaselineParameter.parameterName] =
@@ -40,19 +40,19 @@
 
 	const runEmulator = async () => {
 		isLoading = true;
-
 		try {
-			const res = await apiFetch<EmulatorResults>({
-				url: regionCompareUrl(params.project, params.region),
-				method: 'POST',
-				body: {
-					formValues: longTermFormValues
-				}
-			});
-			isLoading = false;
-			longTermResults = res.data;
+			const { baselineLongTermResData, fullLongTermResData } = await runCompareEmulator(
+				params.project,
+				params.region,
+				longTermFormValues,
+				presentFormValues,
+				selectedBaselineParameter
+			);
+			fullLongTermResults = fullLongTermResData;
+			baselineLongTermResults = baselineLongTermResData;
 		} catch (_err) {
 			toast.error('Failed to run long term scenario planning emulator');
+		} finally {
 			isLoading = false;
 		}
 	};
@@ -118,6 +118,13 @@
 			<Loader text="Loading..." />
 		</div>
 	{:else}
-		<Plots {chartTheme} {presentResults} {longTermResults} {presentFormValues} {longTermFormValues} />
+		<Plots
+			{chartTheme}
+			{presentResults}
+			{fullLongTermResults}
+			{baselineLongTermResults}
+			{presentFormValues}
+			{longTermFormValues}
+		/>
 	{/if}
 </div>

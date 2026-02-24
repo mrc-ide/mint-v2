@@ -38,17 +38,17 @@ test.describe('E2E Compare Page', () => {
 		await changeSlider(page, 'itn_future-compare-slider', 0.7);
 		await changeSlider(page, 'irs_future-compare-slider', 0.3);
 		await changeSlider(page, 'lsm-compare-slider', 0.9);
-
 		// adjust costs
 		await page.getByLabel(/itn mass distribution/i).fill('3');
-		await page.getByLabel(/estimated annual cost of irs/i).fill('15');
+		await page.getByLabel(/estimated annual cost of irs product/i).fill('15');
 		await page.getByLabel(/estimated cost of lsm/i).fill('25');
 
 		// prevalence plot
 		await expect(page.getByRole('button', { name: 'Show No Intervention Long term' })).toBeVisible();
 		await expect(page.getByRole('button', { name: 'Show No Intervention Present' })).toBeVisible();
 		// cases plot
-		await expect(page.getByRole('button', { name: 'Show Long term' })).toBeVisible();
+		await expect(page.getByRole('button', { name: 'Show Long term (baseline only)' })).toBeVisible();
+		await expect(page.getByRole('button', { name: 'Show Long term (baseline + control strategy)' })).toBeVisible();
 		await expect(page.getByRole('button', { name: 'Show Present' })).toBeVisible();
 	});
 });
