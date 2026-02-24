@@ -47,8 +47,8 @@ test.describe('E2E Compare Page', () => {
 		await expect(page.getByRole('button', { name: 'Show No Intervention Long term' })).toBeVisible();
 		await expect(page.getByRole('button', { name: 'Show No Intervention Present' })).toBeVisible();
 		// cases plot
-		await expect(page.getByRole('button', { name: 'Show Long term (baseline)' })).toBeVisible();
-		await expect(page.getByRole('button', { name: 'Show Long term (combined)' })).toBeVisible();
+		await expect(page.getByRole('button', { name: 'Show Long term (baseline only)' })).toBeVisible();
+		await expect(page.getByRole('button', { name: 'Show Long term (baseline + control strategy)' })).toBeVisible();
 		await expect(page.getByRole('button', { name: 'Show Present' })).toBeVisible();
 	});
 });

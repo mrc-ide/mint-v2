@@ -498,8 +498,8 @@ describe('cases compare config', () => {
 
 			expect(config.series).toHaveLength(3);
 			expect((config.series as any)[0].name).toBe('Present');
-			expect((config.series as any)[1].name).toBe('Long term (baseline)');
-			expect((config.series as any)[2].name).toBe('Long term (combined)');
+			expect((config.series as any)[1].name).toBe('Long term (baseline only)');
+			expect((config.series as any)[2].name).toBe('Long term (baseline + control strategy)');
 		});
 
 		it('should include only Present series when newCases is empty', () => {

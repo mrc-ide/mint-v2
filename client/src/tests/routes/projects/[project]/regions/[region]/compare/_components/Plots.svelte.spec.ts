@@ -33,7 +33,9 @@ describe('Compare plots component', () => {
 
 		await expect.element(screen.getByRole('region', { name: 'cases compare graph' })).toBeVisible();
 		await expect.element(screen.getByRole('button', { name: 'Show Present' })).toBeVisible();
-		await expect.element(screen.getByRole('button', { name: 'Show Long Term (baseline)' })).toBeVisible();
-		await expect.element(screen.getByRole('button', { name: 'Show Long Term (combined)' })).toBeVisible();
+		await expect.element(screen.getByRole('button', { name: 'Show Long Term (baseline only)' })).toBeVisible();
+		await expect
+			.element(screen.getByRole('button', { name: 'Show Long Term (baseline + control strategy)' }))
+			.toBeVisible();
 	});
 });

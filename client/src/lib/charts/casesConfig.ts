@@ -122,7 +122,7 @@ export const createCasesCompareDataPoints = (
 export const createCasesCompareSeries = (
 	cases: CasesData[],
 	formValues: Record<string, FormValue>,
-	name: 'Present' | 'Long term (combined)' | 'Long term (baseline)'
+	name: 'Present' | 'Long term (baseline + control strategy)' | 'Long term (baseline only)'
 ): SeriesLineOptions => ({
 	name,
 	type: 'line',
@@ -192,9 +192,13 @@ export const getCasesCompareConfig = (
 	const baselineLongTermSeries = createCasesCompareSeries(
 		baselineLongTermCases,
 		presentFormValues,
-		'Long term (baseline)'
+		'Long term (baseline only)'
 	);
-	const fullLongTermSeries = createCasesCompareSeries(fullLongTermCases, longTermFormValues, 'Long term (combined)');
+	const fullLongTermSeries = createCasesCompareSeries(
+		fullLongTermCases,
+		longTermFormValues,
+		'Long term (baseline + control strategy)'
+	);
 	const presentData = presentSeries.data as PointOptionsObject[];
 	const fullLongTermData = fullLongTermSeries.data as PointOptionsObject[];
 	return {
