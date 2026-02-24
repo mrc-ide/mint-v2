@@ -84,7 +84,11 @@ describe('Header component', () => {
 		await screen.getByRole('button', { name: /open header menu/i }).click();
 		await screen.getByRole('menuitem', { name: /news/i }).click();
 
-		expect(mockWindowOpen).toHaveBeenCalledWith('https://mrc-ide.github.io/mint-news/', '_blank');
+		expect(mockWindowOpen).toHaveBeenCalledWith(
+			'https://mrc-ide.github.io/mint-news/',
+			'_blank',
+			'noopener,noreferrer'
+		);
 	});
 
 	it('should expect compare switch to be enabled when userState has compareEnabled set to true', async () => {

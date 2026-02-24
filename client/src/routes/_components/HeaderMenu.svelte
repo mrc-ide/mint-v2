@@ -25,7 +25,9 @@
 	<DropdownMenu.Content align="end">
 		<DropdownMenu.Item onclick={() => goto('/privacy')}>Privacy</DropdownMenu.Item>
 		<DropdownMenu.Item onclick={() => goto('/accessibility')}>Accessibility</DropdownMenu.Item>
-		<DropdownMenu.Item onclick={() => window.open('https://mrc-ide.github.io/mint-news/', '_blank')}>
+		<DropdownMenu.Item
+			onclick={() => window.open('https://mrc-ide.github.io/mint-news/', '_blank', 'noopener,noreferrer')}
+		>
 			News
 		</DropdownMenu.Item>
 		<DropdownMenu.Separator />
