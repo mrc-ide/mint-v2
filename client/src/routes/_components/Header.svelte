@@ -5,8 +5,8 @@
 	import MoonIcon from '@lucide/svelte/icons/moon';
 	import SunIcon from '@lucide/svelte/icons/sun';
 	import ChartIcon from '@lucide/svelte/icons/chart-spline';
-	// import CalendarClockIcon from '@lucide/svelte/icons/calendar-clock';
-	// import BackIcon from '@lucide/svelte/icons/arrow-left';
+	import CalendarClockIcon from '@lucide/svelte/icons/calendar-clock';
+	import BackIcon from '@lucide/svelte/icons/arrow-left';
 	import { toggleMode } from 'mode-watcher';
 	import HeaderRegionsDropdown from './HeaderRegionsDropdown.svelte';
 	import type { UserState } from '$lib/types/userState';
@@ -30,7 +30,7 @@
 		>
 		{#if project}
 			<HeaderRegionsDropdown {project} {region} />
-			<!-- {#if region}
+			{#if region}
 				{@const isComparePage = page.url.pathname.endsWith('/compare')}
 				{#if isComparePage}
 					<a
@@ -49,7 +49,7 @@
 						Region long term comparison
 					</a>
 				{/if}
-			{/if} -->
+			{/if}
 			<a
 				class={buttonVariants({ variant: 'link', class: 'p-1', size: 'sm' })}
 				href={`/projects/${project.name}/strategise`}
