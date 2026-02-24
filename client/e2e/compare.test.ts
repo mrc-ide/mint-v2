@@ -5,10 +5,23 @@ test.describe('E2E Compare Page', () => {
 	const projectName = randomProjectName();
 	test.beforeEach(async ({ page }) => {
 		await goto(page, '/');
+		await page.getByRole('button', { name: 'open header menu' }).click();
+		await page.getByRole('switch', { name: 'Long term planning' }).click();
+		await page.locator('html').click();
 		await createProject(page, projectName);
 		await goto(page, `/projects/${projectName}/regions/nz`);
 	});
 
+	test('shows long term planning link only when switched on in header menu', async ({ page }) => {
+		await page.getByRole('button', { name: 'Run baseline' }).click();
+		await expect(page.getByRole('link', { name: 'Long term planning' })).toBeVisible();
+
+		// toggle off
+		await page.getByRole('button', { name: 'open header menu' }).click();
+		await page.getByRole('switch', { name: 'Long term planning' }).click();
+		await page.locator('html').click();
+		await expect(page.getByRole('link', { name: 'Long term planning' })).toBeHidden();
+	});
 	test('can navigate to compare page from region page if has run baseline', async ({ page }) => {
 		await page.getByRole('button', { name: 'Run baseline' }).click();
 

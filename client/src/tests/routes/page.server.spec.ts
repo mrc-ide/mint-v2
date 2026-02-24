@@ -97,5 +97,37 @@ describe('root +page.server.ts', () => {
 				expect(res.data.error).toBe('Project name is required');
 			});
 		});
+
+		describe('setCompareEnabled action', () => {
+			it('should enable compare mode when switch is on', async () => {
+				const formData = new FormData();
+				formData.append('compare-enabled-switch', 'on');
+				const request = new Request(new URL('http://localhost:3000'), {
+					method: 'POST',
+					body: formData
+				});
+
+				const locals = { userState: { compareEnabled: false } as any };
+				const data = await (actions.setCompareEnabled({ request, locals } as any) as any);
+
+				expect(locals.userState.compareEnabled).toBe(true);
+				expect(data.success).toBe(true);
+			});
+
+			it('should disable compare mode when switch is off', async () => {
+				const formData = new FormData();
+				formData.append('compare-enabled-switch', 'off');
+				const request = new Request(new URL('http://localhost:3000'), {
+					method: 'POST',
+					body: formData
+				});
+
+				const locals = { userState: { compareEnabled: true } as any };
+				const data = await (actions.setCompareEnabled({ request, locals } as any) as any);
+
+				expect(locals.userState.compareEnabled).toBe(false);
+				expect(data.success).toBe(true);
+			});
+		});
 	});
 });
