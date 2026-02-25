@@ -98,38 +98,31 @@ export const getPrevalenceConfig = (prevalence: PrevalenceData[]): Highcharts.Op
 	series: createPrevalenceSeries(prevalence)
 });
 
+const createComparisonSeries = (
+	data: PrevalenceData[],
+	selectedIntervention: ScenarioLabel,
+	name: string
+): Highcharts.SeriesSplineOptions[] =>
+	createPrevalenceSeries(data)
+		.filter((series) => series.name === selectedIntervention)
+		.map((series) => ({
+			...series,
+			name,
+			color: undefined,
+			dashStyle: 'Solid'
+		}));
+
 export const getPrevalenceConfigCompare = (
 	presentPrevalence: PrevalenceData[],
 	baselineLongTermPrevalence: PrevalenceData[],
 	fullLongTermPrevalence: PrevalenceData[],
 	selectedIntervention: ScenarioLabel
 ): Highcharts.Options => {
-	const presentSeries: Highcharts.SeriesSplineOptions[] = createPrevalenceSeries(presentPrevalence)
-		.filter((series) => series.name === selectedIntervention)
-		.map((series) => ({
-			...series,
-			name: `Present`,
-			color: undefined,
-			dashStyle: 'Solid'
-		}));
-	const baselineLongTermPrevalenceSeries: Highcharts.SeriesSplineOptions[] = createPrevalenceSeries(
-		baselineLongTermPrevalence
-	)
-		.filter((series) => series.name === selectedIntervention)
-		.map((series) => ({
-			...series,
-			name: `Long term (baseline only)`,
-			color: undefined,
-			dashStyle: 'Solid'
-		}));
-	const longTermPrevalenceSeries: Highcharts.SeriesSplineOptions[] = createPrevalenceSeries(fullLongTermPrevalence)
-		.filter((series) => series.name === selectedIntervention)
-		.map((series) => ({
-			...series,
-			name: `Long term (baseline + control strategy)`,
-			color: undefined,
-			dashStyle: 'Solid'
-		}));
+	const series: Highcharts.SeriesSplineOptions[] = [
+		{ data: presentPrevalence, name: 'Present' },
+		{ data: baselineLongTermPrevalence, name: 'Long term (baseline only)' },
+		{ data: fullLongTermPrevalence, name: 'Long term (baseline + control strategy)' }
+	].flatMap(({ data, name }) => createComparisonSeries(data, selectedIntervention, name));
 
 	return {
 		...BASE_OPTIONS,
@@ -145,6 +138,6 @@ export const getPrevalenceConfigCompare = (
 			...BASE_OPTIONS.tooltip,
 			shared: true
 		},
-		series: [...presentSeries, ...baselineLongTermPrevalenceSeries, ...longTermPrevalenceSeries]
+		series
 	};
 };

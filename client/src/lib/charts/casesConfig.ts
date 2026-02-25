@@ -7,7 +7,7 @@ import {
 	type CasesAverted
 } from '$lib/process-results/processCases';
 import type { CasesData, Scenario } from '$lib/types/userState';
-import type { Options, PointOptionsObject, SeriesColumnOptions, SeriesLineOptions } from 'highcharts';
+import { type Options, type PointOptionsObject, type SeriesColumnOptions, type SeriesLineOptions } from 'highcharts';
 import { getColumnFill, ScenarioToLabel, type ScenarioLabel } from './baseChart';
 import { convertToLocaleString } from '$lib/number';
 
@@ -191,6 +191,14 @@ export const createCompareTooltipHtml = function (this: Highcharts.Point): strin
 	return tooltipLines.join('');
 };
 
+export const getClosestPoint = (cost: number, allSeries: Highcharts.Series[]): Highcharts.Point | null =>
+	allSeries
+		.flatMap((series) => series.data)
+		.reduce<Highcharts.Point | null>((closest, point) => {
+			if (closest === null) return point;
+			return Math.abs((point.x as number) - cost) < Math.abs((closest.x as number) - cost) ? point : closest;
+		}, null);
+
 export const getCasesCompareConfig = (
 	presentCases: CasesData[],
 	fullLongTermCases: CasesData[],
@@ -219,12 +227,7 @@ export const getCasesCompareConfig = (
 			events: {
 				click: function (event) {
 					const xValue = Math.round((event as Highcharts.ChartClickEventObject).xAxis[0].value);
-					const allPoints = this.series.reduce<Highcharts.Point[]>((acc, series) => [...acc, ...series.data], []);
-					const closestPoint = allPoints.reduce<Highcharts.Point | null>((closest, point) => {
-						if (closest === null) return point;
-						return Math.abs((point.x as number) - xValue) < Math.abs((closest.x as number) - xValue) ? point : closest;
-					}, null);
-
+					const closestPoint = getClosestPoint(xValue, this.series);
 					if (closestPoint) setSelectedIntervention(closestPoint.options.custom!.intervention);
 				}
 			}
