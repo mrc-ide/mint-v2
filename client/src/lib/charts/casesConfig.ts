@@ -219,14 +219,11 @@ export const getCasesCompareConfig = (
 			events: {
 				click: function (event) {
 					const xValue = Math.round((event as Highcharts.ChartClickEventObject).xAxis[0].value);
-					console.log('Clicked x value:', xValue);
 					const allPoints = this.series.reduce<Highcharts.Point[]>((acc, series) => [...acc, ...series.data], []);
 					const closestPoint = allPoints.reduce<Highcharts.Point | null>((closest, point) => {
 						if (closest === null) return point;
-						console.log('point.x:', point.x, 'closest.x:', closest.x);
 						return Math.abs((point.x as number) - xValue) < Math.abs((closest.x as number) - xValue) ? point : closest;
 					}, null);
-					console.log('Closest point:', closestPoint);
 
 					if (closestPoint) setSelectedIntervention(closestPoint.options.custom!.intervention);
 				}
