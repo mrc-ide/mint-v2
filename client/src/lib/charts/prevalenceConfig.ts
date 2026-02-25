@@ -109,7 +109,8 @@ export const getPrevalenceConfigCompare = (
 		.map((series) => ({
 			...series,
 			name: `Present`,
-			color: undefined
+			color: undefined,
+			dashStyle: 'Solid'
 		}));
 	const baselineLongTermPrevalenceSeries: Highcharts.SeriesSplineOptions[] = createPrevalenceSeries(
 		baselineLongTermPrevalence
@@ -118,14 +119,16 @@ export const getPrevalenceConfigCompare = (
 		.map((series) => ({
 			...series,
 			name: `Long term (baseline only)`,
-			color: undefined
+			color: undefined,
+			dashStyle: 'Solid'
 		}));
 	const longTermPrevalenceSeries: Highcharts.SeriesSplineOptions[] = createPrevalenceSeries(fullLongTermPrevalence)
 		.filter((series) => series.name === selectedIntervention)
 		.map((series) => ({
 			...series,
 			name: `Long term (baseline + control strategy)`,
-			color: undefined
+			color: undefined,
+			dashStyle: 'Solid'
 		}));
 
 	return {
