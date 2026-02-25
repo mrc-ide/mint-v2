@@ -239,7 +239,7 @@ export const getCasesCompareConfig = (
 			}
 		},
 		caption: {
-			text: 'Click on any point to view prevalence across all timeframes for that intervention strategy',
+			text: 'Click on graph to view prevalence across all timeframes for that intervention strategy',
 			align: 'left',
 			verticalAlign: 'bottom',
 			style: {
