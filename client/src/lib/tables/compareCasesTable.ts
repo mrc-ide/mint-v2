@@ -36,24 +36,43 @@ export const compareCasesTableColumns: ColumnDef<ComparisonTimeFramesData>[] = [
 	}
 ];
 
-const createComparisonTimeFramesData = (cases: CasesData[], formValues: Record<string, FormValue>) => {
+interface ScenarioTotals {
+	totalCost: number;
+	totalCases: number;
+}
+
+const createCasesSummary = (
+	cases: CasesData[],
+	formValues: Record<string, FormValue>
+): Partial<Record<Scenario, ScenarioTotals>> => {
 	const postInterventionCases = collectPostInterventionCases(cases);
 	const scenarios = Object.entries(postInterventionCases)
 		.filter(([_, scenarioCases]) => scenarioCases.length > 0)
 		.map(([scenario]) => scenario as Scenario);
 	const scenarioCosts = getTotalCostsPerScenario(scenarios, formValues);
 
-	const casesByTotalCost = scenarios.map((scenario) => {
+	const totalsByScenario = {} as Partial<Record<Scenario, ScenarioTotals>>;
+	for (const scenario of scenarios) {
 		const totalCasesPer1000 = getTotalCasesPer1000(postInterventionCases[scenario]);
-		return {
-			scenario,
-			totalCases: convertPer1000ToTotal(totalCasesPer1000, Number(formValues['population'])),
-			totalCost: scenarioCosts[scenario]!
-		};
-	});
 
-	return casesByTotalCost;
+		totalsByScenario[scenario as Scenario] = {
+			totalCost: scenarioCosts[scenario] ?? 0,
+			totalCases: convertPer1000ToTotal(totalCasesPer1000, Number(formValues['population']))
+		};
+	}
+
+	return totalsByScenario;
 };
+
+const getScenarioKeys = (...summaryByTimeFrames: Partial<Record<Scenario, ScenarioTotals>>[]): Scenario[] => [
+	...new Set(summaryByTimeFrames.flatMap((summary) => Object.keys(summary) as Scenario[]))
+];
+
+const formatScenarioTotals = (totals?: ScenarioTotals): string =>
+	totals
+		? `${convertToLocaleString(totals.totalCases, 1)} cases, $${convertToLocaleString(totals.totalCost, 1)}`
+		: 'N/A';
+
 export const buildCompareCasesTableData = (
 	presentCases: CasesData[],
 	fullLongTermCases: CasesData[],
@@ -61,31 +80,16 @@ export const buildCompareCasesTableData = (
 	presentFormValues: Record<string, FormValue>,
 	longTermFormValues: Record<string, FormValue>
 ): ComparisonTimeFramesData[] => {
-	const presentData = createComparisonTimeFramesData(presentCases, presentFormValues);
-	const baselineLongTermData = createComparisonTimeFramesData(baselineLongTermCases, presentFormValues);
-	const fullLongTermData = createComparisonTimeFramesData(fullLongTermCases, longTermFormValues);
+	const presentData = createCasesSummary(presentCases, presentFormValues);
+	const baselineLongTermData = createCasesSummary(baselineLongTermCases, presentFormValues);
+	const fullLongTermData = createCasesSummary(fullLongTermCases, longTermFormValues);
 
-	const scenarios = [...new Set([...presentData, ...baselineLongTermData, ...fullLongTermData].map((d) => d.scenario))];
-	const tableData: ComparisonTimeFramesData[] = [];
+	const scenarios = getScenarioKeys(presentData, baselineLongTermData, fullLongTermData);
 
-	for (const scenario of scenarios) {
-		const presentScenario = presentData.find((d) => d.scenario === scenario);
-		const fullLongTermScenario = fullLongTermData.find((d) => d.scenario === scenario);
-		const baselineLongTermScenario = baselineLongTermData.find((d) => d.scenario === scenario);
-
-		tableData.push({
-			intervention: ScenarioToLabel[scenario],
-			present: presentScenario
-				? `${convertToLocaleString(presentScenario.totalCases, 1)} cases - $${convertToLocaleString(presentScenario.totalCost, 0)}`
-				: 'N/A',
-			longTermBaseline: baselineLongTermScenario
-				? `${convertToLocaleString(baselineLongTermScenario.totalCases, 1)} cases - $${convertToLocaleString(baselineLongTermScenario.totalCost, 0)}`
-				: 'N/A',
-			fullLongTerm: fullLongTermScenario
-				? `${convertToLocaleString(fullLongTermScenario.totalCases, 1)} cases - $${convertToLocaleString(fullLongTermScenario.totalCost, 0)}`
-				: 'N/A'
-		});
-	}
-
-	return tableData;
+	return scenarios.map((scenario) => ({
+		intervention: ScenarioToLabel[scenario as Scenario],
+		present: formatScenarioTotals(presentData[scenario as Scenario]),
+		longTermBaseline: formatScenarioTotals(baselineLongTermData[scenario as Scenario]),
+		fullLongTerm: formatScenarioTotals(fullLongTermData[scenario as Scenario])
+	}));
 };
