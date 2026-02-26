@@ -19,7 +19,7 @@ describe('FieldWithChange component', () => {
 		await expect.element(screen.getByText('+')).toBeVisible();
 	});
 
-	it('should render change as % is displayChangeAsPercentage is true', async () => {
+	it('should render change as % if displayChangeAsPercentage is true', async () => {
 		const screen = render(FieldWithChange, {
 			value: 150,
 			baseline: 100,

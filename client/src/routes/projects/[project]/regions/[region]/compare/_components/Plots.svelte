@@ -3,7 +3,7 @@
 	import { getCasesCompareConfig } from '$lib/charts/casesConfig';
 	import { getPrevalenceConfigCompare } from '$lib/charts/prevalenceConfig';
 	import type { FormValue } from '$lib/components/dynamic-region-form/types';
-	import type { EmulatorResults, Scenario } from '$lib/types/userState';
+	import type { EmulatorResults } from '$lib/types/userState';
 
 	interface Props {
 		chartTheme: string;

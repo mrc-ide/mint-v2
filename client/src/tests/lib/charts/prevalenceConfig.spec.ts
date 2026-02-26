@@ -149,7 +149,7 @@ describe('getPrevalenceConfig', () => {
 });
 
 describe('getPrevalenceConfigCompare', () => {
-	it('createComparisonSeries should create filtered series by slected intervention', () => {
+	it('createComparisonSeries should create filtered series by selected intervention', () => {
 		const mockData: PrevalenceData[] = [
 			{ scenario: 'irs_only', days: 365, prevalence: 0.15 },
 			{ scenario: 'py_only_only', days: 365, prevalence: 0.12 }
