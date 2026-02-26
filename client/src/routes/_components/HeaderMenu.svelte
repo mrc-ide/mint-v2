@@ -19,7 +19,7 @@
 <DropdownMenu.Root>
 	<DropdownMenu.Trigger>
 		{#snippet child({ props })}
-			<Button {...props} variant="ghost" size="icon" aria-label="open header menu"><Menu /></Button>
+			<Button {...props} variant="ghost" size="icon" aria-label="open header menu"><Menu class="size-4.5" /></Button>
 		{/snippet}
 	</DropdownMenu.Trigger>
 	<DropdownMenu.Content align="end">
@@ -31,11 +31,11 @@
 			News
 		</DropdownMenu.Item>
 		<DropdownMenu.Separator />
-		<DropdownMenu.Sub>
+		<DropdownMenu.Group>
 			<form use:enhance method="POST" action="/?/setCompareEnabled" class="flex items-center space-x-2 p-1.5">
 				<Switch id="compare-enabled-switch" name="compare-enabled-switch" bind:checked={compareEnabled} type="submit" />
 				<Label for="compare-enabled-switch" class="text-sm">Long term planning</Label>
 			</form>
-		</DropdownMenu.Sub>
+		</DropdownMenu.Group>
 	</DropdownMenu.Content>
 </DropdownMenu.Root>
