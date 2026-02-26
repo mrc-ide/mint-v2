@@ -98,7 +98,7 @@ export const getPrevalenceConfig = (prevalence: PrevalenceData[]): Highcharts.Op
 	series: createPrevalenceSeries(prevalence)
 });
 
-const createComparisonSeries = (
+export const createComparisonSeries = (
 	data: PrevalenceData[],
 	selectedIntervention: ScenarioLabel,
 	name: string

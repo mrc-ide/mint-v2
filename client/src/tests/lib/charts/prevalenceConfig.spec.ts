@@ -1,9 +1,5 @@
 import { ScenarioToLabel } from '$lib/charts/baseChart';
-import {
-	createPresentPrevalenceSeries,
-	getPrevalenceConfig,
-	getPrevalenceConfigCompare
-} from '$lib/charts/prevalenceConfig';
+import { createComparisonSeries, getPrevalenceConfig, getPrevalenceConfigCompare } from '$lib/charts/prevalenceConfig';
 import { SCENARIOS, type PrevalenceData } from '$lib/types/userState';
 
 describe('createPrevalenceSeries', () => {
@@ -152,90 +148,55 @@ describe('getPrevalenceConfig', () => {
 	});
 });
 
-describe('createPresentPrevalenceSeries', () => {
-	it('should wrap series names with opacity styling and Present label', () => {
+describe('getPrevalenceConfigCompare', () => {
+	it('createComparisonSeries should create filtered series by slected intervention', () => {
 		const mockData: PrevalenceData[] = [
 			{ scenario: 'irs_only', days: 365, prevalence: 0.15 },
 			{ scenario: 'py_only_only', days: 365, prevalence: 0.12 }
 		];
+		const selectedIntervention = 'Pyrethroid ITN (Only)';
+		const name = 'Present';
 
-		const series = createPresentPrevalenceSeries(mockData);
+		const series = createComparisonSeries(mockData, selectedIntervention, name);
 
-		expect(series[0].name).toBe('<span style="opacity: 0.4;">Pyrethroid ITN (Only) <em>Present</em></span>');
-		expect(series[1].name).toBe('<span style="opacity: 0.4;">IRS Only <em>Present</em></span>');
+		expect(series).toHaveLength(1);
+		expect(series[0].name).toBe(name);
+		expect(series[0].data).toEqual([[0, 12]]);
+		expect(series[0].dashStyle).toBe('Solid');
 	});
 
-	it('should apply color-mix to make colors 40% transparent', () => {
-		const mockData: PrevalenceData[] = [{ scenario: 'irs_only', days: 365, prevalence: 0.15 }];
-
-		const series = createPresentPrevalenceSeries(mockData);
-
-		expect(series[0].color).toContain('color-mix(in oklab,');
-		expect(series[0].color).toContain('transparent 40%)');
-	});
-
-	it('should preserve original series data and properties', () => {
-		const mockData: PrevalenceData[] = [
-			{ scenario: 'irs_only', days: 0, prevalence: 0.2 },
-			{ scenario: 'irs_only', days: 365, prevalence: 0.15 }
+	it('should create series for each time frame', () => {
+		const prevalence: PrevalenceData[] = [
+			{ scenario: 'irs_only', days: 365, prevalence: 0.15 },
+			{ scenario: 'py_only_only', days: 365, prevalence: 0.12 }
 		];
 
-		const series = createPresentPrevalenceSeries(mockData);
+		const selectedSeries = 'Pyrethroid ITN (Only)';
 
-		expect(series[0].data).toEqual([
-			[-1, 20],
-			[0, 15]
-		]);
-		expect(series[0].type).toBe('spline');
-	});
-});
-
-describe('getPrevalenceConfigCompare', () => {
-	it('should add Long term label to new series', () => {
-		const currentSeries: Highcharts.SeriesSplineOptions[] = [];
-		const newData: PrevalenceData[] = [
-			{ scenario: 'irs_only', days: 365, prevalence: 0.12 },
-			{ scenario: 'py_only_only', days: 365, prevalence: 0.1 }
-		];
-
-		const config = getPrevalenceConfigCompare(currentSeries, newData);
+		const config = getPrevalenceConfigCompare(prevalence, prevalence, prevalence, selectedSeries);
 		const series = config.series as Highcharts.SeriesSplineOptions[];
 
-		expect(series[0].name).toBe('Pyrethroid ITN (Only) <em>Long term</em>');
-		expect(series[1].name).toBe('IRS Only <em>Long term</em>');
+		expect(series).toHaveLength(3);
+		expect(series[0].name).toBe('Present');
+		expect(series[1].name).toBe('Long term (baseline only)');
+		expect(series[2].name).toContain('Long term (baseline + control strategy)');
 	});
 
-	it('should handle multiple scenarios in both current and new series', () => {
-		const currentSeries: Highcharts.SeriesSplineOptions[] = [
-			{ name: 'IRS Only Present', data: [[0, 15]], type: 'spline' },
-			{ name: 'Pyrethroid ITN Present', data: [[0, 12]], type: 'spline' }
-		];
-		const newData: PrevalenceData[] = [
-			{ scenario: 'irs_only', days: 365, prevalence: 0.12 },
-			{ scenario: 'py_only_only', days: 365, prevalence: 0.1 },
-			{ scenario: 'lsm_only', days: 365, prevalence: 0.09 }
+	it('should handle empty long term data', () => {
+		const prevalence: PrevalenceData[] = [
+			{ scenario: 'irs_only', days: 365, prevalence: 0.15 },
+			{ scenario: 'py_only_only', days: 365, prevalence: 0.12 }
 		];
 
-		const config = getPrevalenceConfigCompare(currentSeries, newData);
-		const series = config.series as Highcharts.SeriesSplineOptions[];
-
-		expect(series).toHaveLength(5);
-		expect(series[0].name).toBe('IRS Only Present');
-		expect(series[1].name).toBe('Pyrethroid ITN Present');
-		expect(series[2].name).toContain('Long term');
-		expect(series[3].name).toContain('Long term');
-		expect(series[4].name).toContain('Long term');
-	});
-
-	it('should handle empty new data', () => {
-		const currentSeries: Highcharts.SeriesSplineOptions[] = [
-			{ name: 'IRS Only Present', data: [[0, 15]], type: 'spline' }
-		];
-
-		const config = getPrevalenceConfigCompare(currentSeries, []);
+		const config = getPrevalenceConfigCompare(prevalence, [], [], 'Pyrethroid ITN (Only)');
 		const series = config.series as Highcharts.SeriesSplineOptions[];
 
 		expect(series).toHaveLength(1);
-		expect(series[0].name).toBe('IRS Only Present');
+		expect(series[0].name).toBe('Present');
+	});
+	it('should have selected intervention in title', () => {
+		const config = getPrevalenceConfigCompare([], [], [], 'Pyrethroid ITN (Only)');
+
+		expect(config.title?.text).toContain('Pyrethroid ITN (Only)');
 	});
 });

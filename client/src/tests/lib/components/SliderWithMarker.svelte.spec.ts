@@ -17,7 +17,6 @@ describe('SliderWithMarker component', () => {
 		} as any);
 
 		await expect.element(screen.getByRole('slider')).toBeInTheDocument();
-		await expect.element(screen.getByText('5%')).toBeVisible();
-		await expect.element(screen.getByText('-')).toBeVisible();
+		await expect.element(screen.getByText(/- 5%/i)).toBeVisible();
 	});
 });

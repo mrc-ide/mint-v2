@@ -57,11 +57,37 @@ test.describe('E2E Compare Page', () => {
 		await page.getByLabel(/estimated cost of lsm/i).fill('25');
 
 		// prevalence plot
-		await expect(page.getByRole('button', { name: 'Show No Intervention Long term' })).toBeVisible();
-		await expect(page.getByRole('button', { name: 'Show No Intervention Present' })).toBeVisible();
+		const prevalencePlot = page.getByRole('region', { name: 'prevalence compare graph' });
+		await expect(prevalencePlot).toBeVisible();
+		await expect(prevalencePlot.getByRole('button', { name: 'Show Long term (baseline only)' })).toBeVisible();
+		await expect(
+			prevalencePlot.getByRole('button', { name: 'Show Long term (baseline + control strategy)' })
+		).toBeVisible();
+		await expect(prevalencePlot.getByRole('button', { name: 'Show Present' })).toBeVisible();
 		// cases plot
-		await expect(page.getByRole('button', { name: 'Show Long term (baseline only)' })).toBeVisible();
-		await expect(page.getByRole('button', { name: 'Show Long term (baseline + control strategy)' })).toBeVisible();
-		await expect(page.getByRole('button', { name: 'Show Present' })).toBeVisible();
+		const casesPlot = page.getByRole('region', { name: 'cases compare graph' });
+		await expect(casesPlot).toBeVisible();
+		await expect(casesPlot.getByRole('button', { name: 'Show Long term (baseline only)' })).toBeVisible();
+		await expect(casesPlot.getByRole('button', { name: 'Show Long term (baseline + control strategy)' })).toBeVisible();
+		await expect(casesPlot.getByRole('button', { name: 'Show Present' })).toBeVisible();
+	});
+
+	test('should be able to click on cases plot and see prevalence plot for that intervention', async ({ page }) => {
+		await changeSlider(page, 'current_malaria_prevalence', 0.2);
+		await page.getByRole('button', { name: 'Run baseline' }).click();
+		await page.waitForTimeout(500); // wait for chart to fully render
+		await changeSlider(page, 'itn_future', 0.8);
+		await page.getByRole('checkbox', { name: 'Pyrethroid-only ITNs' }).click();
+		await page.getByRole('link', { name: 'Long term planning' }).click();
+
+		// initial is no intervention plot
+		await expect(page.getByText('Prevalence in under 5 year olds - No Intervention').first()).toBeVisible();
+
+		// click on cases x value is 54 thousand something (exact value may change based on emulator result)
+		await page.getByRole('img', { name: 'x, 54', exact: false }).click();
+
+		await expect(
+			page.getByLabel('prevalence compare graph').getByText('Pyrethroid ITN (Only)', { exact: true })
+		).toBeVisible();
 	});
 });
