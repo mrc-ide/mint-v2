@@ -2,14 +2,15 @@
 	import { page } from '$app/state';
 	import logo from '$lib/assets/logo.png';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
+	import type { UserState } from '$lib/types/userState';
+	import BackIcon from '@lucide/svelte/icons/arrow-left';
+	import CalendarClockIcon from '@lucide/svelte/icons/calendar-clock';
+	import ChartIcon from '@lucide/svelte/icons/chart-spline';
 	import MoonIcon from '@lucide/svelte/icons/moon';
 	import SunIcon from '@lucide/svelte/icons/sun';
-	import ChartIcon from '@lucide/svelte/icons/chart-spline';
-	import CalendarClockIcon from '@lucide/svelte/icons/calendar-clock';
-	import BackIcon from '@lucide/svelte/icons/arrow-left';
 	import { toggleMode } from 'mode-watcher';
+	import HeaderMenu from './HeaderMenu.svelte';
 	import HeaderRegionsDropdown from './HeaderRegionsDropdown.svelte';
-	import type { UserState } from '$lib/types/userState';
 
 	interface Props {
 		userData: UserState;
@@ -30,7 +31,7 @@
 		>
 		{#if project}
 			<HeaderRegionsDropdown {project} {region} />
-			{#if region}
+			{#if region && userData.compareEnabled}
 				{@const isComparePage = page.url.pathname.endsWith('/compare')}
 				{#if isComparePage}
 					<a
@@ -46,7 +47,7 @@
 						href={`/projects/${project.name}/regions/${region.name}/compare`}
 					>
 						<CalendarClockIcon class="size-3.5" />
-						Region long term comparison
+						Region long term planning
 					</a>
 				{/if}
 			{/if}
@@ -55,15 +56,11 @@
 				href={`/projects/${project.name}/strategise`}
 			>
 				<ChartIcon class="size-3.5" />
-				Strategise across regions
+				Sub-national tailoring
 			</a>
 		{/if}
 		<div class="ml-auto flex items-center gap-3 px-4">
-			<a href="/privacy" class="text-muted-foreground hover:underline">Privacy</a>
-			<a href="/accessibility" class="text-muted-foreground hover:underline">Accessibility</a>
-			<a href="https://mrc-ide.github.io/mint-news/" target="_blank" class="text-muted-foreground hover:underline"
-				>News</a
-			>
+			<HeaderMenu {userData} />
 			<Button onclick={toggleMode} variant="ghost" size="icon">
 				<SunIcon class="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 !transition-all dark:scale-0 dark:-rotate-90" />
 				<MoonIcon

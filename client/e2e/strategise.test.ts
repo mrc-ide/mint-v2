@@ -25,7 +25,7 @@ test.describe('Strategise page', () => {
 		await page.getByRole('button', { name: 'Run baseline' }).click();
 		await expect(page.getByRole('region', { name: 'Impact prevalence graph' })).toBeVisible();
 
-		await page.getByRole('link', { name: 'Strategise across regions' }).click();
+		await page.getByRole('link', { name: 'Sub-national tailoring' }).click();
 		await expect(page.getByRole('alert').getByText('Strategise Tool Unavailable')).toBeVisible();
 	});
 
@@ -36,7 +36,7 @@ test.describe('Strategise page', () => {
 		await goto(page, `/projects/${projectName}/regions/australia`);
 		await runRegionWithLSM(page);
 
-		await page.getByRole('link', { name: 'Strategise across regions' }).click();
+		await page.getByRole('link', { name: 'Sub-national tailoring' }).click();
 
 		await page.getByRole('button', { name: 'Explore defined budget range' }).click();
 
@@ -57,7 +57,7 @@ test.describe('Strategise page', () => {
 		await goto(page, `/projects/${projectName}/regions/australia`);
 		await runRegionWithLSM(page);
 
-		await page.getByRole('link', { name: 'Strategise across regions' }).click();
+		await page.getByRole('link', { name: 'Sub-national tailoring' }).click();
 		await page.getByRole('button', { name: 'Explore defined budget range' }).click();
 
 		// Verify strategise data is present
@@ -70,7 +70,7 @@ test.describe('Strategise page', () => {
 		await runRegionWithLSM(page);
 
 		// Go back to strategise page
-		await page.getByRole('link', { name: 'Strategise across regions' }).click();
+		await page.getByRole('link', { name: 'Sub-national tailoring' }).click();
 
 		await expect(
 			page.getByLabel('Interactive chart', { exact: true }).getByText('Total Cases Averted vs Total')

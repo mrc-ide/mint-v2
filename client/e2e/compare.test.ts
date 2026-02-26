@@ -5,21 +5,34 @@ test.describe('E2E Compare Page', () => {
 	const projectName = randomProjectName();
 	test.beforeEach(async ({ page }) => {
 		await goto(page, '/');
+		await page.getByRole('button', { name: 'open header menu' }).click();
+		await page.getByRole('switch', { name: 'Long term planning' }).click();
+		await page.locator('html').click();
 		await createProject(page, projectName);
 		await goto(page, `/projects/${projectName}/regions/nz`);
 	});
 
+	test('shows long term planning link only when switched on in header menu', async ({ page }) => {
+		await page.getByRole('button', { name: 'Run baseline' }).click();
+		await expect(page.getByRole('link', { name: 'Long term planning' })).toBeVisible();
+
+		// toggle off
+		await page.getByRole('button', { name: 'open header menu' }).click();
+		await page.getByRole('switch', { name: 'Long term planning' }).click();
+		await page.locator('html').click();
+		await expect(page.getByRole('link', { name: 'Long term planning' })).toBeHidden();
+	});
 	test('can navigate to compare page from region page if has run baseline', async ({ page }) => {
 		await page.getByRole('button', { name: 'Run baseline' }).click();
 
-		await page.getByRole('link', { name: 'Long term comparison' }).click();
+		await page.getByRole('link', { name: 'Long term planning' }).click();
 
 		await expect(page.getByText('Long term Scenario planning')).toBeVisible();
 	});
 
 	test('can return from compare page to region page', async ({ page }) => {
 		await page.getByRole('button', { name: 'Run baseline' }).click();
-		await page.getByRole('link', { name: 'Long term comparison' }).click();
+		await page.getByRole('link', { name: 'Long term planning' }).click();
 		await page.getByRole('link', { name: 'Back to region' }).click();
 
 		await expect(page.getByRole('button', { name: `${projectName} - nz` })).toBeVisible();
@@ -31,7 +44,7 @@ test.describe('E2E Compare Page', () => {
 		await page.waitForTimeout(500); // wait for chart to fully render
 		await changeSlider(page, 'itn_future', 0.8);
 		await page.getByRole('checkbox', { name: 'Pyrethroid-only ITNs' }).click();
-		await page.getByRole('link', { name: 'Long term comparison' }).click();
+		await page.getByRole('link', { name: 'Long term planning' }).click();
 
 		// adjust sliders
 		await changeSlider(page, 'baseline-parameter-slider', 0.5);
