@@ -28,14 +28,18 @@ describe('Compare plots component', () => {
 		} as any);
 
 		await expect.element(screen.getByRole('region', { name: 'prevalence compare graph' })).toBeVisible();
-		await expect.element(screen.getByRole('button', { name: 'Show No Intervention Present' })).toBeVisible();
-		await expect.element(screen.getByRole('button', { name: 'Show No Intervention Long Term' })).toBeVisible();
-
 		await expect.element(screen.getByRole('region', { name: 'cases compare graph' })).toBeVisible();
-		await expect.element(screen.getByRole('button', { name: 'Show Present' })).toBeVisible();
-		await expect.element(screen.getByRole('button', { name: 'Show Long Term (baseline only)' })).toBeVisible();
-		await expect
-			.element(screen.getByRole('button', { name: 'Show Long Term (baseline + control strategy)' }))
-			.toBeVisible();
+
+		const presentLegendLabels = screen.getByRole('button', { name: 'Show Present' }).all();
+		const baselineLongTermLegendLabels = screen.getByRole('button', { name: 'Show Long Term (baseline only)' }).all();
+		const fullLongTermLegendLabels = screen
+			.getByRole('button', { name: 'Show Long Term (baseline + control strategy)' })
+			.all();
+		// cases + prevalence for each of the 3 series types
+		for (let i = 0; i < 2; i++) {
+			await expect.element(presentLegendLabels[i]).toBeVisible();
+			await expect.element(baselineLongTermLegendLabels[i]).toBeVisible();
+			await expect.element(fullLongTermLegendLabels[i]).toBeVisible();
+		}
 	});
 });

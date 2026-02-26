@@ -5,7 +5,9 @@ import {
 	createCasesCompareSeries,
 	getCasesConfig,
 	getCasesCompareConfig,
-	createCompareTooltipHtml
+	createCompareTooltipHtml,
+	filterInefficientStrategies,
+	getClosestPoint
 } from '$lib/charts/casesConfig';
 import * as processCases from '$lib/process-results/processCases';
 import type { CasesData, Scenario } from '$lib/types/userState';
@@ -222,34 +224,91 @@ describe('cases compare config', () => {
 		});
 	});
 
+	describe('getClosesPoint', () => {
+		it('getClosestPoint should return null for empty series data', () => {
+			const result = getClosestPoint(1000, [] as any[]);
+			expect(result).toBeNull();
+		});
+
+		it('getClosestPoint should return nearest point across all series', () => {
+			const p1 = { x: 1000, options: { custom: { intervention: 'A' } } };
+			const p2 = { x: 2600, options: { custom: { intervention: 'B' } } };
+			const p3 = { x: 1800, options: { custom: { intervention: 'C' } } };
+
+			const allSeries = [{ data: [p1, p2] }, { data: [p3] }] as any[];
+
+			const result = getClosestPoint(2000, allSeries);
+
+			expect(result).toBe(p3);
+		});
+
+		it('getClosestPoint should keep first encountered point on distance tie', () => {
+			const left = { x: 100, options: { custom: { intervention: 'Left' } } };
+			const right = { x: 300, options: { custom: { intervention: 'Right' } } };
+			const allSeries = [{ data: [left, right] }] as any[];
+
+			const result = getClosestPoint(200, allSeries);
+
+			expect(result).toBe(left);
+		});
+	});
+	describe('filterInefficientStrategies', () => {
+		it('filterInefficientStrategies should sort by cost and keep only strictly improving strategies', () => {
+			const input = [
+				{ scenario: 'irs_only', totalCost: 5000, totalCases: 1000 },
+				{ scenario: 'py_only_only', totalCost: 2000, totalCases: 1200 },
+				{ scenario: 'py_only_with_lsm', totalCost: 3000, totalCases: 1100 },
+				{ scenario: 'irs_only', totalCost: 4000, totalCases: 1150 }
+			] as any[];
+
+			const result = filterInefficientStrategies(input);
+
+			expect(result).toEqual([
+				{ scenario: 'py_only_only', totalCost: 2000, totalCases: 1200 },
+				{ scenario: 'py_only_with_lsm', totalCost: 3000, totalCases: 1100 },
+				{ scenario: 'irs_only', totalCost: 5000, totalCases: 1000 }
+			]);
+		});
+
+		it('filterInefficientStrategies should drop equal-cases higher-cost points', () => {
+			const input = [
+				{ scenario: 'irs_only', totalCost: 1000, totalCases: 1000 },
+				{ scenario: 'py_only_only', totalCost: 2000, totalCases: 1000 }
+			] as any[];
+
+			const result = filterInefficientStrategies(input);
+
+			expect(result).toHaveLength(1);
+			expect(result[0]).toEqual({ scenario: 'irs_only', totalCost: 1000, totalCases: 1000 });
+		});
+	});
 	describe('createCasesCompareDataPoints', () => {
-		it('should return sorted data points based on totalCost in ascending order', () => {
-			const result = createCasesCompareDataPoints(mockCases, mockPresentFormValues);
+		it('should filter out non-improving strategies after sorting by cost', () => {
+			vi.spyOn(processCases, 'collectPostInterventionCases').mockReturnValue({
+				irs_only: [{ scenario: 'irs_only', casesPer1000: 1, year: 2 }],
+				py_only_only: [{ scenario: 'py_only_only', casesPer1000: 1, year: 2 }],
+				py_only_with_lsm: [{ scenario: 'py_only_with_lsm', casesPer1000: 1, year: 2 }]
+			} as any);
 
-			expect(result[0]).toEqual({
-				scenario: 'py_only_only',
-				totalCases: 1000,
-				totalCost: 2000
-			});
-			expect(result[1]).toEqual({
-				scenario: 'irs_only',
-				totalCases: 1000,
-				totalCost: 5000
-			});
-			expect(result[2]).toEqual({
-				scenario: 'py_only_with_lsm',
-				totalCases: 1000,
-				totalCost: 8000
+			vi.spyOn(costs, 'getTotalCostsPerScenario').mockReturnValue({
+				irs_only: 3000,
+				py_only_only: 1000,
+				py_only_with_lsm: 2000
 			});
 
-			expect(processCases.collectPostInterventionCases).toHaveBeenCalledWith(mockCases);
-			expect(costs.getTotalCostsPerScenario).toHaveBeenCalledWith(
-				['py_only_only', 'irs_only', 'py_only_with_lsm'],
-				mockPresentFormValues
-			);
-			expect(processCases.getTotalCasesPer1000).toHaveBeenCalledTimes(3);
-			expect(processCases.convertPer1000ToTotal).toHaveBeenCalledTimes(3);
-			expect(processCases.convertPer1000ToTotal).toHaveBeenCalledWith(100, mockPresentFormValues['population']);
+			vi.spyOn(processCases, 'getTotalCasesPer1000').mockReturnValue(100);
+
+			vi.spyOn(processCases, 'convertPer1000ToTotal')
+				.mockReturnValueOnce(960) // irs_only
+				.mockReturnValueOnce(1000) // py_only_only
+				.mockReturnValueOnce(950); // py_only_with_lsm
+
+			const result = createCasesCompareDataPoints([] as any, mockPresentFormValues);
+
+			expect(result).toEqual([
+				{ scenario: 'py_only_only', totalCases: 1000, totalCost: 1000 },
+				{ scenario: 'py_only_with_lsm', totalCases: 950, totalCost: 2000 }
+			]);
 		});
 
 		it('should handle empty cases array', () => {
@@ -260,26 +319,25 @@ describe('cases compare config', () => {
 
 	describe('createCasesCompareSeries', () => {
 		it('should create a series with correct name and data points', () => {
+			vi.spyOn(processCases, 'convertPer1000ToTotal')
+				.mockReturnValueOnce(960) // irs_only
+				.mockReturnValueOnce(1000) // py_only_only
+				.mockReturnValueOnce(950); // py_only_with_lsm
 			const series = createCasesCompareSeries(mockCases, mockPresentFormValues, 'Present');
 
 			expect(series.name).toBe('Present');
 			expect(series.type).toBe('line');
 			expect(series.step).toBe('left');
 
-			expect(series.data).toHaveLength(3);
+			expect(series.data).toHaveLength(2);
 			expect(series.data![0]).toEqual({
 				x: 2000,
-				y: 1000,
+				y: 960,
 				custom: { intervention: 'Pyrethroid ITN (Only)' }
 			});
 			expect(series.data![1]).toEqual({
-				x: 5000,
-				y: 1000,
-				custom: { intervention: 'IRS Only' }
-			});
-			expect(series.data![2]).toEqual({
 				x: 8000,
-				y: 1000,
+				y: 950,
 				custom: { intervention: 'Pyrethroid ITN (with LSM)' }
 			});
 		});
@@ -477,7 +535,8 @@ describe('cases compare config', () => {
 				mockNewCases,
 				mockNewCases,
 				mockPresentFormValues,
-				mockLongTermFormValues
+				mockLongTermFormValues,
+				vi.fn()
 			);
 
 			expect(config).toBeDefined();
@@ -493,7 +552,8 @@ describe('cases compare config', () => {
 				mockNewCases,
 				mockNewCases,
 				mockPresentFormValues,
-				mockLongTermFormValues
+				mockLongTermFormValues,
+				vi.fn()
 			);
 
 			expect(config.series).toHaveLength(3);
@@ -505,13 +565,24 @@ describe('cases compare config', () => {
 		it('should include only Present series when newCases is empty', () => {
 			vi.spyOn(processCases, 'collectPostInterventionCases').mockReturnValue({} as any);
 
-			const config = getCasesCompareConfig(mockCurrentCases, [], [], mockPresentFormValues, mockLongTermFormValues);
+			const config = getCasesCompareConfig(
+				mockCurrentCases,
+				[],
+				[],
+				mockPresentFormValues,
+				mockLongTermFormValues,
+				vi.fn()
+			);
 
 			expect(config.series).toHaveLength(1);
 			expect((config.series as any)[0].name).toBe('Present');
 		});
 
 		it('should apply breaks to xAxis when data points exist', () => {
+			const convertPer1000Spy = vi.spyOn(processCases, 'convertPer1000ToTotal');
+			[960, 900, 850, 700, 650, 600].forEach((value) => {
+				convertPer1000Spy.mockReturnValueOnce(value);
+			});
 			vi.spyOn(processCases, 'collectPostInterventionCases').mockReturnValue({
 				irs_only: mockCurrentCases.filter((c) => c.scenario === 'irs_only'),
 				py_only_only: mockNewCases.filter((c) => c.scenario === 'py_only_only')
@@ -526,7 +597,8 @@ describe('cases compare config', () => {
 				mockNewCases,
 				mockNewCases,
 				mockPresentFormValues,
-				mockLongTermFormValues
+				mockLongTermFormValues,
+				vi.fn()
 			);
 
 			expect((config.xAxis as any).breaks).toBeDefined();
@@ -538,7 +610,8 @@ describe('cases compare config', () => {
 				mockNewCases,
 				mockNewCases,
 				mockPresentFormValues,
-				mockLongTermFormValues
+				mockLongTermFormValues,
+				vi.fn()
 			);
 
 			// Verify the function processes the data through helper functions
@@ -552,10 +625,86 @@ describe('cases compare config', () => {
 				mockNewCases,
 				mockNewCases,
 				mockPresentFormValues,
-				mockLongTermFormValues
+				mockLongTermFormValues,
+				vi.fn()
 			);
 
 			expect(config.tooltip?.formatter).toBe(createCompareTooltipHtml);
+		});
+
+		it('line mouseOut should reset all series point states', () => {
+			const setSelectedIntervention = vi.fn();
+
+			const config = getCasesCompareConfig(
+				[],
+				[],
+				[],
+				mockPresentFormValues,
+				mockLongTermFormValues,
+				setSelectedIntervention
+			);
+			const mouseOutHandler = (config.plotOptions as any).line.events.mouseOut;
+
+			const p1 = { setState: vi.fn() };
+			const p2 = { setState: vi.fn() };
+			const p3 = { setState: vi.fn() };
+
+			mouseOutHandler.call({
+				chart: {
+					series: [{ points: [p1, p2] }, { points: [p3] }]
+				}
+			});
+
+			expect(p1.setState).toHaveBeenCalledWith('');
+			expect(p2.setState).toHaveBeenCalledWith('');
+			expect(p3.setState).toHaveBeenCalledWith('');
+		});
+		it('line click should pass clicked intervention to setSelectedIntervention', () => {
+			const setSelectedIntervention = vi.fn();
+
+			const config = getCasesCompareConfig(
+				[],
+				[],
+				[],
+				mockPresentFormValues,
+				mockLongTermFormValues,
+				setSelectedIntervention
+			);
+			const lineClickHandler = (config.plotOptions as any).line.events.click;
+
+			lineClickHandler.call(
+				{},
+				{
+					point: {
+						options: {
+							custom: { intervention: 'IRS Only' }
+						}
+					}
+				}
+			);
+
+			expect(setSelectedIntervention).toHaveBeenCalledWith('IRS Only');
+		});
+
+		it('chart click should select closest intervention using setSelectedIntervention', () => {
+			const setSelectedIntervention = vi.fn();
+
+			const config = getCasesCompareConfig(
+				[],
+				[],
+				[],
+				mockPresentFormValues,
+				mockLongTermFormValues,
+				setSelectedIntervention
+			);
+			const clickHandler = (config.chart as any).events.click;
+
+			const pointA = { x: 1000, options: { custom: { intervention: 'IRS Only' } } };
+			const pointB = { x: 1500, options: { custom: { intervention: 'Pyrethroid ITN (Only)' } } };
+
+			clickHandler.call({ series: [{ data: [pointA, pointB] }] }, { xAxis: [{ value: 1400 }] });
+
+			expect(setSelectedIntervention).toHaveBeenCalledWith('Pyrethroid ITN (Only)');
 		});
 	});
 });
