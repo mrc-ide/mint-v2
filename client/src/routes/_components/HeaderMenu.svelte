@@ -22,7 +22,7 @@
 			<Button {...props} variant="ghost" size="icon" aria-label="open header menu"><Menu class="size-4.5" /></Button>
 		{/snippet}
 	</DropdownMenu.Trigger>
-	<DropdownMenu.Content align="end">
+	<DropdownMenu.Content align="end" preventScroll={false}>
 		<DropdownMenu.Item onclick={() => goto('/privacy')}>Privacy</DropdownMenu.Item>
 		<DropdownMenu.Item onclick={() => goto('/accessibility')}>Accessibility</DropdownMenu.Item>
 		<DropdownMenu.Item
