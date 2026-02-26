@@ -1,6 +1,7 @@
 import { ScenarioToLabel } from '$lib/charts/baseChart';
+import DataTableSortHeader from '$lib/components/data-table/DataTableSortHeader.svelte';
 import type { FormValue } from '$lib/components/dynamic-region-form/types';
-import { convertToLocaleString } from '$lib/number';
+import { renderComponent } from '$lib/components/ui/data-table';
 import { getTotalCostsPerScenario } from '$lib/process-results/costs';
 import {
 	collectPostInterventionCases,
@@ -8,17 +9,67 @@ import {
 	getTotalCasesPer1000
 } from '$lib/process-results/processCases';
 import type { CasesData, Scenario } from '$lib/types/userState';
-import type { ColumnDef } from '@tanstack/table-core';
+import type {
+	CompareFormValues,
+	CompareResults
+} from '$routes/projects/[project]/regions/[region]/compare/_components/CompareResults.svelte';
+import type { CellContext, ColumnDef, HeaderContext } from '@tanstack/table-core';
 
 export interface ComparisonTimeFramesData {
 	intervention: string;
-	presentCost: string;
-	presentCases: string;
-	longTermBaselineCost: string;
-	longTermBaselineCases: string;
-	fullLongTermCost: string;
-	fullLongTermCases: string;
+	presentCost?: number;
+	presentCases?: number;
+	longTermBaselineCost?: number;
+	longTermBaselineCases?: number;
+	fullLongTermCost?: number;
+	fullLongTermCases?: number;
 }
+
+const getCasesHeader = () => ({
+	header: ({ column }: HeaderContext<ComparisonTimeFramesData, string>) => {
+		return renderComponent(DataTableSortHeader, {
+			onclick: column.getToggleSortingHandler(),
+			label: 'Cases'
+		});
+	}
+});
+
+export const getCasesCell = () => ({
+	cell: ({ getValue }: CellContext<ComparisonTimeFramesData, number | undefined>) => {
+		const cellValue = getValue();
+		if (cellValue === undefined) return '-';
+
+		const formatter = new Intl.NumberFormat('en-US', {
+			style: 'decimal',
+			trailingZeroDisplay: 'stripIfInteger',
+			maximumFractionDigits: 0
+		});
+		return formatter.format(cellValue);
+	}
+});
+
+const getCostsHeader = () => ({
+	header: ({ column }: HeaderContext<ComparisonTimeFramesData, string>) => {
+		return renderComponent(DataTableSortHeader, {
+			onclick: column.getToggleSortingHandler(),
+			label: 'Cost'
+		});
+	}
+});
+const getCostsCell = () => ({
+	cell: ({ getValue }: CellContext<ComparisonTimeFramesData, number | undefined>) => {
+		const value = getValue();
+		if (value === undefined) return '-';
+
+		const formatter = new Intl.NumberFormat('en-US', {
+			style: 'currency',
+			trailingZeroDisplay: 'stripIfInteger',
+			currency: 'USD',
+			maximumFractionDigits: 0
+		});
+		return formatter.format(value);
+	}
+});
 
 export const compareCasesTableColumns: ColumnDef<ComparisonTimeFramesData>[] = [
 	{
@@ -28,7 +79,7 @@ export const compareCasesTableColumns: ColumnDef<ComparisonTimeFramesData>[] = [
 			{
 				accessorKey: 'intervention',
 				cell: ({ getValue }) => getValue(),
-				header: ''
+				header: undefined
 			}
 		]
 	},
@@ -38,13 +89,13 @@ export const compareCasesTableColumns: ColumnDef<ComparisonTimeFramesData>[] = [
 		columns: [
 			{
 				accessorKey: 'presentCases',
-				cell: ({ getValue }) => getValue(),
-				header: 'Cases'
+				...getCasesHeader(),
+				...getCasesCell()
 			},
 			{
 				accessorKey: 'presentCost',
-				cell: ({ getValue }) => getValue(),
-				header: 'Cost'
+				...getCostsHeader(),
+				...getCostsCell()
 			}
 		]
 	},
@@ -54,13 +105,13 @@ export const compareCasesTableColumns: ColumnDef<ComparisonTimeFramesData>[] = [
 		columns: [
 			{
 				accessorKey: 'longTermBaselineCases',
-				cell: ({ getValue }) => getValue(),
-				header: 'Cases'
+				...getCasesHeader(),
+				...getCasesCell()
 			},
 			{
 				accessorKey: 'longTermBaselineCost',
-				cell: ({ getValue }) => getValue(),
-				header: 'Cost'
+				...getCostsHeader(),
+				...getCostsCell()
 			}
 		]
 	},
@@ -70,13 +121,13 @@ export const compareCasesTableColumns: ColumnDef<ComparisonTimeFramesData>[] = [
 		columns: [
 			{
 				accessorKey: 'fullLongTermCases',
-				cell: ({ getValue }) => getValue(),
-				header: 'Cases'
+				...getCasesHeader(),
+				...getCasesCell()
 			},
 			{
 				accessorKey: 'fullLongTermCost',
-				cell: ({ getValue }) => getValue(),
-				header: 'Cost'
+				...getCostsHeader(),
+				...getCostsCell()
 			}
 		]
 	}
@@ -98,12 +149,13 @@ const createCasesSummary = (
 	const scenarioCosts = getTotalCostsPerScenario(scenarios, formValues);
 
 	const totalsByScenario = {} as Partial<Record<Scenario, ScenarioTotals>>;
+	const population = Number(formValues['population']);
 	for (const scenario of scenarios) {
 		const totalCasesPer1000 = getTotalCasesPer1000(postInterventionCases[scenario]);
 
 		totalsByScenario[scenario as Scenario] = {
 			totalCost: scenarioCosts[scenario] ?? 0,
-			totalCases: convertPer1000ToTotal(totalCasesPer1000, Number(formValues['population']))
+			totalCases: convertPer1000ToTotal(totalCasesPer1000, population)
 		};
 	}
 
@@ -114,29 +166,23 @@ const getScenarioKeys = (...summaryByTimeFrames: Partial<Record<Scenario, Scenar
 	...new Set(summaryByTimeFrames.flatMap((summary) => Object.keys(summary) as Scenario[]))
 ];
 
-const formatCell = (value?: number, prefix?: string): string =>
-	value !== undefined ? `${prefix || ''}${convertToLocaleString(value, 0)}` : 'N/A';
-
 export const buildCompareCasesTableData = (
-	presentCases: CasesData[],
-	fullLongTermCases: CasesData[],
-	baselineLongTermCases: CasesData[],
-	presentFormValues: Record<string, FormValue>,
-	longTermFormValues: Record<string, FormValue>
+	{ present, baselineLongTerm, fullLongTerm }: CompareResults,
+	{ presentFormValues, longTermFormValues }: CompareFormValues
 ): ComparisonTimeFramesData[] => {
-	const presentData = createCasesSummary(presentCases, presentFormValues);
-	const baselineLongTermData = createCasesSummary(baselineLongTermCases, presentFormValues);
-	const fullLongTermData = createCasesSummary(fullLongTermCases, longTermFormValues);
+	const presentData = createCasesSummary(present.cases, presentFormValues);
+	const baselineLongTermData = createCasesSummary(baselineLongTerm.cases, presentFormValues);
+	const fullLongTermData = createCasesSummary(fullLongTerm.cases, longTermFormValues);
 
 	const scenarios = getScenarioKeys(presentData, baselineLongTermData, fullLongTermData);
 
 	return scenarios.map((scenario) => ({
 		intervention: ScenarioToLabel[scenario as Scenario],
-		presentCost: formatCell(presentData[scenario as Scenario]?.totalCost, '$'),
-		presentCases: formatCell(presentData[scenario as Scenario]?.totalCases),
-		longTermBaselineCost: formatCell(baselineLongTermData[scenario as Scenario]?.totalCost, '$'),
-		longTermBaselineCases: formatCell(baselineLongTermData[scenario as Scenario]?.totalCases),
-		fullLongTermCost: formatCell(fullLongTermData[scenario as Scenario]?.totalCost, '$'),
-		fullLongTermCases: formatCell(fullLongTermData[scenario as Scenario]?.totalCases)
+		presentCost: presentData[scenario as Scenario]?.totalCost,
+		presentCases: presentData[scenario as Scenario]?.totalCases,
+		longTermBaselineCost: baselineLongTermData[scenario as Scenario]?.totalCost,
+		longTermBaselineCases: baselineLongTermData[scenario as Scenario]?.totalCases,
+		fullLongTermCost: fullLongTermData[scenario as Scenario]?.totalCost,
+		fullLongTermCases: fullLongTermData[scenario as Scenario]?.totalCases
 	}));
 };

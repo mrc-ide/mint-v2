@@ -7,52 +7,30 @@
 	import { buildCompareCasesTableData, compareCasesTableColumns } from '$lib/tables/compareCasesTable';
 	import DataTable from '$lib/components/data-table/DataTable.svelte';
 
-	interface Props {
-		chartTheme: string;
-		presentResults: EmulatorResults;
+	export interface CompareResults {
+		present: EmulatorResults;
+		fullLongTerm: EmulatorResults;
+		baselineLongTerm: EmulatorResults;
+	}
+	export interface CompareFormValues {
 		presentFormValues: Record<string, FormValue>;
 		longTermFormValues: Record<string, FormValue>;
-		fullLongTermResults: EmulatorResults;
-		baselineLongTermResults: EmulatorResults;
 	}
-	let {
-		chartTheme,
-		presentResults,
-		fullLongTermResults,
-		presentFormValues,
-		longTermFormValues,
-		baselineLongTermResults
-	}: Props = $props();
+
+	interface Props {
+		chartTheme: string;
+		results: CompareResults;
+		formValues: CompareFormValues;
+	}
+	let { chartTheme, results, formValues }: Props = $props();
 	let selectedIntervention = $state<ScenarioLabel>('No Intervention');
 
-	let prevalenceConfig = $derived(
-		getPrevalenceConfigCompare(
-			presentResults.prevalence,
-			baselineLongTermResults.prevalence,
-			fullLongTermResults.prevalence,
-			selectedIntervention
-		)
-	);
+	let prevalenceConfig = $derived(getPrevalenceConfigCompare(results, selectedIntervention));
 	let casesConfig = $derived(
-		getCasesCompareConfig(
-			presentResults.cases,
-			fullLongTermResults.cases,
-			baselineLongTermResults.cases,
-			presentFormValues,
-			longTermFormValues,
-			(intervention) => (selectedIntervention = intervention)
-		)
+		getCasesCompareConfig(results, formValues, (intervention) => (selectedIntervention = intervention))
 	);
 
-	let tableData = $derived(
-		buildCompareCasesTableData(
-			presentResults.cases,
-			fullLongTermResults.cases,
-			baselineLongTermResults.cases,
-			presentFormValues,
-			longTermFormValues
-		)
-	);
+	let tableData = $derived(buildCompareCasesTableData(results, formValues));
 </script>
 
 <div class="flex flex-3/4 flex-col gap-4">

@@ -1,8 +1,8 @@
 import { MOCK_CASES_DATA, MOCK_FORM_VALUES, MOCK_PREVALENCE_DATA } from '$mocks/mocks';
-import ComparePlots from '$routes/projects/[project]/regions/[region]/compare/_components/Plots.svelte';
+import ComparePlots from '$routes/projects/[project]/regions/[region]/compare/_components/CompareResults.svelte';
 import { render } from 'vitest-browser-svelte';
 
-describe('Compare plots component', () => {
+describe('Compare CompareResults component', () => {
 	it('should render graphs with present and long term results', async () => {
 		const screen = render(ComparePlots, {
 			props: {

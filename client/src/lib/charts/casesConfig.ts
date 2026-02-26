@@ -10,6 +10,10 @@ import type { CasesData, Scenario } from '$lib/types/userState';
 import { type Options, type PointOptionsObject, type SeriesColumnOptions, type SeriesLineOptions } from 'highcharts';
 import { getColumnFill, ScenarioToLabel, type ScenarioLabel } from './baseChart';
 import { convertToLocaleString } from '$lib/number';
+import type {
+	CompareFormValues,
+	CompareResults
+} from '$routes/projects/[project]/regions/[region]/compare/_components/CompareResults.svelte';
 
 const getCasesSeriesData = (
 	casesAverted: Partial<Record<Scenario, CasesAverted>>
@@ -200,21 +204,18 @@ export const getClosestPoint = (cost: number, allSeries: Highcharts.Series[]): H
 		}, null);
 
 export const getCasesCompareConfig = (
-	presentCases: CasesData[],
-	fullLongTermCases: CasesData[],
-	baselineLongTermCases: CasesData[],
-	presentFormValues: Record<string, FormValue>,
-	longTermFormValues: Record<string, FormValue>,
+	{ present, baselineLongTerm, fullLongTerm }: CompareResults,
+	{ presentFormValues, longTermFormValues }: CompareFormValues,
 	setSelectedIntervention: (intervention: ScenarioLabel) => void
 ): Options => {
-	const presentSeries = createCasesCompareSeries(presentCases, presentFormValues, 'Present');
+	const presentSeries = createCasesCompareSeries(present.cases, presentFormValues, 'Present');
 	const baselineLongTermSeries = createCasesCompareSeries(
-		baselineLongTermCases,
+		baselineLongTerm.cases,
 		presentFormValues,
 		'Long term (baseline only)'
 	);
 	const fullLongTermSeries = createCasesCompareSeries(
-		fullLongTermCases,
+		fullLongTerm.cases,
 		longTermFormValues,
 		'Long term (baseline + control strategy)'
 	);
