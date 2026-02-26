@@ -12,27 +12,73 @@ import type { ColumnDef } from '@tanstack/table-core';
 
 export interface ComparisonTimeFramesData {
 	intervention: string;
-	present: string;
-	longTermBaseline: string;
-	fullLongTerm: string;
+	presentCost: string;
+	presentCases: string;
+	longTermBaselineCost: string;
+	longTermBaselineCases: string;
+	fullLongTermCost: string;
+	fullLongTermCases: string;
 }
 
 export const compareCasesTableColumns: ColumnDef<ComparisonTimeFramesData>[] = [
 	{
 		accessorKey: 'intervention',
-		header: 'Intervention'
+		header: 'Intervention',
+		columns: [
+			{
+				accessorKey: 'intervention',
+				cell: ({ getValue }) => getValue(),
+				header: ''
+			}
+		]
 	},
 	{
 		accessorKey: 'present',
-		header: 'Present'
+		header: 'Present',
+		columns: [
+			{
+				accessorKey: 'presentCases',
+				cell: ({ getValue }) => getValue(),
+				header: 'Cases'
+			},
+			{
+				accessorKey: 'presentCost',
+				cell: ({ getValue }) => getValue(),
+				header: 'Cost'
+			}
+		]
 	},
 	{
 		accessorKey: 'longTermBaseline',
-		header: 'Long term (baseline only)'
+		header: 'Long term (baseline only)',
+		columns: [
+			{
+				accessorKey: 'longTermBaselineCases',
+				cell: ({ getValue }) => getValue(),
+				header: 'Cases'
+			},
+			{
+				accessorKey: 'longTermBaselineCost',
+				cell: ({ getValue }) => getValue(),
+				header: 'Cost'
+			}
+		]
 	},
 	{
 		accessorKey: 'fullLongTerm',
-		header: 'Long term (baseline + control strategy)'
+		header: 'Long term (baseline + control strategy)',
+		columns: [
+			{
+				accessorKey: 'fullLongTermCases',
+				cell: (info) => info.getValue(),
+				header: 'Cases'
+			},
+			{
+				accessorKey: 'fullLongTermCost',
+				cell: (info) => info.getValue(),
+				header: 'Cost'
+			}
+		]
 	}
 ];
 
@@ -68,10 +114,8 @@ const getScenarioKeys = (...summaryByTimeFrames: Partial<Record<Scenario, Scenar
 	...new Set(summaryByTimeFrames.flatMap((summary) => Object.keys(summary) as Scenario[]))
 ];
 
-const formatScenarioTotals = (totals?: ScenarioTotals): string =>
-	totals
-		? `${convertToLocaleString(totals.totalCases, 1)} cases, $${convertToLocaleString(totals.totalCost, 1)}`
-		: 'N/A';
+const formatCell = (value?: number, prefix?: string): string =>
+	value !== undefined ? `${prefix || ''}${convertToLocaleString(value, 0)}` : 'N/A';
 
 export const buildCompareCasesTableData = (
 	presentCases: CasesData[],
@@ -88,8 +132,11 @@ export const buildCompareCasesTableData = (
 
 	return scenarios.map((scenario) => ({
 		intervention: ScenarioToLabel[scenario as Scenario],
-		present: formatScenarioTotals(presentData[scenario as Scenario]),
-		longTermBaseline: formatScenarioTotals(baselineLongTermData[scenario as Scenario]),
-		fullLongTerm: formatScenarioTotals(fullLongTermData[scenario as Scenario])
+		presentCost: formatCell(presentData[scenario as Scenario]?.totalCost, '$'),
+		presentCases: formatCell(presentData[scenario as Scenario]?.totalCases),
+		longTermBaselineCost: formatCell(baselineLongTermData[scenario as Scenario]?.totalCost, '$'),
+		longTermBaselineCases: formatCell(baselineLongTermData[scenario as Scenario]?.totalCases),
+		fullLongTermCost: formatCell(fullLongTermData[scenario as Scenario]?.totalCost, '$'),
+		fullLongTermCases: formatCell(fullLongTermData[scenario as Scenario]?.totalCases)
 	}));
 };

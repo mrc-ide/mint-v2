@@ -40,7 +40,7 @@
 			{#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
 				<Table.Row>
 					{#each headerGroup.headers as header (header.id)}
-						<Table.Head colspan={header.colSpan} class="whitespace-normal">
+						<Table.Head colspan={header.colSpan} class="p-2.5 whitespace-normal">
 							{#if !header.isPlaceholder}
 								<FlexRender content={header.column.columnDef.header} context={header.getContext()} />
 							{/if}
@@ -53,7 +53,7 @@
 			{#each table.getRowModel().rows as row (row.id)}
 				<Table.Row data-state={row.getIsSelected() && 'selected'}>
 					{#each row.getVisibleCells() as cell (cell.id)}
-						<Table.Cell class="whitespace-normal">
+						<Table.Cell class="p-2.5 whitespace-normal">
 							<FlexRender content={cell.column.columnDef.cell} context={cell.getContext()} />
 						</Table.Cell>
 					{/each}
