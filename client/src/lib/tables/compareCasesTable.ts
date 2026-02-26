@@ -70,12 +70,12 @@ export const compareCasesTableColumns: ColumnDef<ComparisonTimeFramesData>[] = [
 		columns: [
 			{
 				accessorKey: 'fullLongTermCases',
-				cell: (info) => info.getValue(),
+				cell: ({ getValue }) => getValue(),
 				header: 'Cases'
 			},
 			{
 				accessorKey: 'fullLongTermCost',
-				cell: (info) => info.getValue(),
+				cell: ({ getValue }) => getValue(),
 				header: 'Cost'
 			}
 		]
