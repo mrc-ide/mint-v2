@@ -17,7 +17,7 @@ export interface ComparisonTimeFramesData {
 }
 
 export const getCasesHeader = () => ({
-	header: ({ column }: HeaderContext<ComparisonTimeFramesData, string>) => {
+	header: ({ column }: HeaderContext<ComparisonTimeFramesData, number | undefined>) => {
 		return renderComponent(DataTableSortHeader, {
 			onclick: column.getToggleSortingHandler(),
 			label: 'Cases'
@@ -40,7 +40,7 @@ export const getCasesCell = () => ({
 });
 
 export const getCostsHeader = () => ({
-	header: ({ column }: HeaderContext<ComparisonTimeFramesData, string>) => {
+	header: ({ column }: HeaderContext<ComparisonTimeFramesData, number | undefined>) => {
 		return renderComponent(DataTableSortHeader, {
 			onclick: column.getToggleSortingHandler(),
 			label: 'Cost'
