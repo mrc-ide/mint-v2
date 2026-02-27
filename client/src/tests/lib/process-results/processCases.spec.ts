@@ -1,9 +1,11 @@
+import * as processCosts from '$lib/process-results/costs';
 import {
 	collectPostInterventionCases,
 	convertPer1000ToTotal,
 	convertTotalToPer1000,
 	getAvertedCasesData,
 	getMeanCasesPer1000,
+	getTotalCasesAndCostsPerScenario,
 	getTotalCasesPer1000
 } from '$lib/process-results/processCases';
 import { PRE_INTERVENTION_YEAR, SCENARIOS, type CasesData, type Scenario } from '$lib/types/userState';
@@ -271,5 +273,64 @@ describe('getTotalCasesPer1000', () => {
 		const totalCases = getTotalCasesPer1000(casesData);
 
 		expect(totalCases).toBe(45);
+	});
+});
+
+describe('getTotalCasesAndCostsPerScenario', () => {
+	const formValues = { population: '5000' } as any;
+	let getTotalCostsPerScenarioSpy: ReturnType<typeof vi.spyOn>;
+	beforeEach(() => {
+		vi.resetAllMocks();
+		getTotalCostsPerScenarioSpy = vi.spyOn(processCosts, 'getTotalCostsPerScenario').mockReturnValue({
+			irs_only: 1000,
+			lsm_only: 500,
+			no_intervention: 0
+		});
+	});
+	it('calculates totalCases per scenario from post-intervention years only', async () => {
+		const cases: CasesData[] = [
+			{ year: PRE_INTERVENTION_YEAR, scenario: 'irs_only', casesPer1000: 999 }, // should be ignored
+			{ year: 2, scenario: 'irs_only', casesPer1000: 10 },
+			{ year: 3, scenario: 'irs_only', casesPer1000: 20 },
+			{ year: 4, scenario: 'irs_only', casesPer1000: 30 },
+			{ year: 2, scenario: 'lsm_only', casesPer1000: 5 },
+			{ year: 3, scenario: 'lsm_only', casesPer1000: 10 },
+			{ year: PRE_INTERVENTION_YEAR, scenario: 'py_only_only', casesPer1000: 50 } // ignored entirely
+		];
+
+		const result = getTotalCasesAndCostsPerScenario(cases, formValues);
+
+		expect(result.irs_only?.totalCases).toBe(300); // (10+20+30)/1000 * 5000
+		expect(result.lsm_only?.totalCases).toBe(75); // (5+10)/1000 * 5000
+		expect(result).not.toHaveProperty('py_only_only');
+		expect(getTotalCostsPerScenarioSpy).toHaveBeenCalledWith(['irs_only', 'lsm_only'], formValues);
+	});
+
+	it('returns an empty object when there are no post-intervention cases', async () => {
+		const cases: CasesData[] = [
+			{ year: PRE_INTERVENTION_YEAR, scenario: 'irs_only', casesPer1000: 20 },
+			{ year: PRE_INTERVENTION_YEAR, scenario: 'no_intervention', casesPer1000: 30 }
+		];
+
+		const result = getTotalCasesAndCostsPerScenario(cases, { population: 1000 } as any);
+
+		expect(result).toEqual({});
+	});
+
+	it('converts population from string and wires totalCost from getTotalCostsPerScenario', async () => {
+		const cases: CasesData[] = [
+			{ year: 2, scenario: 'no_intervention', casesPer1000: 40 },
+			{ year: 3, scenario: 'no_intervention', casesPer1000: 50 },
+			{ year: 4, scenario: 'no_intervention', casesPer1000: 60 },
+			{ year: 2, scenario: 'irs_only', casesPer1000: 10 },
+			{ year: 3, scenario: 'irs_only', casesPer1000: 20 },
+			{ year: 4, scenario: 'irs_only', casesPer1000: 30 }
+		];
+
+		const result = getTotalCasesAndCostsPerScenario(cases, formValues);
+
+		expect(result.irs_only?.totalCost).toBe(1000);
+		expect(result.no_intervention?.totalCost).toBe(0);
+		expect(getTotalCostsPerScenarioSpy).toHaveBeenCalledWith(['no_intervention', 'irs_only'], formValues);
 	});
 });

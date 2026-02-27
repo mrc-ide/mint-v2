@@ -1,34 +1,39 @@
 import { MOCK_CASES_DATA, MOCK_FORM_VALUES, MOCK_PREVALENCE_DATA } from '$mocks/mocks';
-import ComparePlots from '$routes/projects/[project]/regions/[region]/compare/_components/Plots.svelte';
+import ComparePlots from '$routes/projects/[project]/regions/[region]/compare/_components/CompareResults.svelte';
 import { render } from 'vitest-browser-svelte';
 
-describe('Compare plots component', () => {
-	it('should render graphs with present and long term results', async () => {
+describe('Compare CompareResults component', () => {
+	it('should render graphs & table with present and long term results', async () => {
 		const screen = render(ComparePlots, {
 			props: {
 				chartTheme: 'highcharts-dark',
-				presentResults: {
-					cases: MOCK_CASES_DATA,
-					prevalence: MOCK_PREVALENCE_DATA,
-					eirValid: true
+				results: {
+					present: {
+						cases: MOCK_CASES_DATA,
+						prevalence: MOCK_PREVALENCE_DATA,
+						eirValid: true
+					},
+					fullLongTerm: {
+						cases: MOCK_CASES_DATA,
+						prevalence: MOCK_PREVALENCE_DATA,
+						eirValid: true
+					},
+					baselineLongTerm: {
+						cases: MOCK_CASES_DATA,
+						prevalence: MOCK_PREVALENCE_DATA,
+						eirValid: true
+					}
 				},
-				fullLongTermResults: {
-					cases: MOCK_CASES_DATA,
-					prevalence: MOCK_PREVALENCE_DATA,
-					eirValid: true
-				},
-				baselineLongTermResults: {
-					cases: MOCK_CASES_DATA,
-					prevalence: MOCK_PREVALENCE_DATA,
-					eirValid: true
-				},
-				presentFormValues: MOCK_FORM_VALUES,
-				longTermFormValues: MOCK_FORM_VALUES
+				formValues: {
+					presentFormValues: MOCK_FORM_VALUES,
+					longTermFormValues: MOCK_FORM_VALUES
+				}
 			}
 		} as any);
 
 		await expect.element(screen.getByRole('region', { name: 'prevalence compare graph' })).toBeVisible();
 		await expect.element(screen.getByRole('region', { name: 'cases compare graph' })).toBeVisible();
+		await expect.element(screen.getByRole('table')).toBeVisible();
 
 		const presentLegendLabels = screen.getByRole('button', { name: 'Show Present' }).all();
 		const baselineLongTermLegendLabels = screen.getByRole('button', { name: 'Show Long Term (baseline only)' }).all();

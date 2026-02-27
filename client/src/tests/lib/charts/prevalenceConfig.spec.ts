@@ -149,6 +149,12 @@ describe('getPrevalenceConfig', () => {
 });
 
 describe('getPrevalenceConfigCompare', () => {
+	const emulatorResults = {
+		prevalence: [
+			{ scenario: 'irs_only', days: 365, prevalence: 0.15 },
+			{ scenario: 'py_only_only', days: 365, prevalence: 0.12 }
+		]
+	} as any;
 	it('createComparisonSeries should create filtered series by selected intervention', () => {
 		const mockData: PrevalenceData[] = [
 			{ scenario: 'irs_only', days: 365, prevalence: 0.15 },
@@ -166,14 +172,12 @@ describe('getPrevalenceConfigCompare', () => {
 	});
 
 	it('should create series for each time frame', () => {
-		const prevalence: PrevalenceData[] = [
-			{ scenario: 'irs_only', days: 365, prevalence: 0.15 },
-			{ scenario: 'py_only_only', days: 365, prevalence: 0.12 }
-		];
-
 		const selectedSeries = 'Pyrethroid ITN (Only)';
 
-		const config = getPrevalenceConfigCompare(prevalence, prevalence, prevalence, selectedSeries);
+		const config = getPrevalenceConfigCompare(
+			{ present: emulatorResults, baselineLongTerm: emulatorResults, fullLongTerm: emulatorResults },
+			selectedSeries
+		);
 		const series = config.series as Highcharts.SeriesSplineOptions[];
 
 		expect(series).toHaveLength(3);
@@ -183,19 +187,28 @@ describe('getPrevalenceConfigCompare', () => {
 	});
 
 	it('should handle empty long term data', () => {
-		const prevalence: PrevalenceData[] = [
-			{ scenario: 'irs_only', days: 365, prevalence: 0.15 },
-			{ scenario: 'py_only_only', days: 365, prevalence: 0.12 }
-		];
-
-		const config = getPrevalenceConfigCompare(prevalence, [], [], 'Pyrethroid ITN (Only)');
+		const config = getPrevalenceConfigCompare(
+			{
+				present: emulatorResults,
+				baselineLongTerm: { prevalence: [] } as any,
+				fullLongTerm: { prevalence: [] } as any
+			},
+			'Pyrethroid ITN (Only)'
+		);
 		const series = config.series as Highcharts.SeriesSplineOptions[];
 
 		expect(series).toHaveLength(1);
 		expect(series[0].name).toBe('Present');
 	});
 	it('should have selected intervention in title', () => {
-		const config = getPrevalenceConfigCompare([], [], [], 'Pyrethroid ITN (Only)');
+		const config = getPrevalenceConfigCompare(
+			{
+				present: emulatorResults,
+				baselineLongTerm: emulatorResults,
+				fullLongTerm: emulatorResults
+			},
+			'Pyrethroid ITN (Only)'
+		);
 
 		expect(config.title?.text).toContain('Pyrethroid ITN (Only)');
 	});
