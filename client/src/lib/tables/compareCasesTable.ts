@@ -2,8 +2,8 @@ import { ScenarioToLabel } from '$lib/charts/baseChart';
 import DataTableSortHeader from '$lib/components/data-table/DataTableSortHeader.svelte';
 import { renderComponent } from '$lib/components/ui/data-table';
 import { type ScenarioTotals } from '$lib/process-results/processCases';
+import type { CompareTotals } from '$lib/types/compare';
 import type { Scenario } from '$lib/types/userState';
-import type { CompareTotals } from '$routes/projects/[project]/regions/[region]/compare/_components/CompareResults.svelte';
 import type { CellContext, ColumnDef, HeaderContext } from '@tanstack/table-core';
 
 export interface ComparisonTimeFramesData {

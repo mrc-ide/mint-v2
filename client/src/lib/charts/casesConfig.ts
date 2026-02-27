@@ -1,7 +1,7 @@
 import { convertToLocaleString } from '$lib/number';
 import { type CasesAverted, type ScenarioTotals } from '$lib/process-results/processCases';
+import type { CompareTotals } from '$lib/types/compare';
 import type { Scenario } from '$lib/types/userState';
-import type { CompareTotals } from '$routes/projects/[project]/regions/[region]/compare/_components/CompareResults.svelte';
 import { type Options, type PointOptionsObject, type SeriesColumnOptions, type SeriesLineOptions } from 'highcharts';
 import { getColumnFill, ScenarioToLabel, type ScenarioLabel } from './baseChart';
 

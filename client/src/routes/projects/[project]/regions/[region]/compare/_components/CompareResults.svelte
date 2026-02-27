@@ -2,22 +2,11 @@
 	import { createHighchart, type ScenarioLabel } from '$lib/charts/baseChart';
 	import { getCasesCompareConfig } from '$lib/charts/casesConfig';
 	import { getPrevalenceConfigCompare } from '$lib/charts/prevalenceConfig';
-	import type { FormValue } from '$lib/components/dynamic-region-form/types';
-	import type { EmulatorResults } from '$lib/types/userState';
-	import { buildCompareCasesTableData, compareCasesTableColumns } from '$lib/tables/compareCasesTable';
 	import DataTable from '$lib/components/data-table/DataTable.svelte';
+	import type { FormValue } from '$lib/components/dynamic-region-form/types';
 	import { getTotalCasesAndCostsPerScenario } from '$lib/process-results/processCases';
-
-	export interface CompareResults {
-		present: EmulatorResults;
-		fullLongTerm: EmulatorResults;
-		baselineLongTerm: EmulatorResults;
-	}
-	export interface CompareTotals {
-		presentTotals: ReturnType<typeof getTotalCasesAndCostsPerScenario>;
-		baselineLongTermTotals: ReturnType<typeof getTotalCasesAndCostsPerScenario>;
-		fullLongTermTotals: ReturnType<typeof getTotalCasesAndCostsPerScenario>;
-	}
+	import { buildCompareCasesTableData, compareCasesTableColumns } from '$lib/tables/compareCasesTable';
+	import type { CompareResults } from '$lib/types/compare';
 
 	interface Props {
 		chartTheme: string;

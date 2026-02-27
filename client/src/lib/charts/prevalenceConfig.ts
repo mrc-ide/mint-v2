@@ -1,5 +1,5 @@
+import type { CompareResults } from '$lib/types/compare';
 import { SCENARIOS, type PrevalenceData, type Scenario } from '$lib/types/userState';
-import type { CompareResults } from '$routes/projects/[project]/regions/[region]/compare/_components/CompareResults.svelte';
 import { ScenarioToColor, ScenarioToLabel, type ScenarioLabel } from './baseChart';
 
 const createPrevalenceSeries = (data: PrevalenceData[]): Highcharts.SeriesSplineOptions[] => {

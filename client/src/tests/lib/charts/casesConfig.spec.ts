@@ -9,8 +9,8 @@ import {
 	getClosestPoint
 } from '$lib/charts/casesConfig';
 import * as processCases from '$lib/process-results/processCases';
+import type { CompareTotals } from '$lib/types/compare';
 import type { Scenario } from '$lib/types/userState';
-import type { CompareTotals } from '$routes/projects/[project]/regions/[region]/compare/_components/CompareResults.svelte';
 import type { PointOptionsObject } from 'highcharts';
 import { describe, expect, it } from 'vitest';
 describe('getCasesConfig', () => {
@@ -210,7 +210,7 @@ describe('cases compare config', () => {
 			totalCases: 300
 		}
 	};
-	const compareTotals = {
+	const compareTotals: CompareTotals = {
 		presentTotals: totals,
 		baselineLongTermTotals: totals,
 		fullLongTermTotals: totals
