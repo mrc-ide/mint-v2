@@ -16,7 +16,7 @@ export interface ComparisonTimeFramesData {
 	fullLongTermCases?: number;
 }
 
-const getCasesHeader = () => ({
+export const getCasesHeader = () => ({
 	header: ({ column }: HeaderContext<ComparisonTimeFramesData, string>) => {
 		return renderComponent(DataTableSortHeader, {
 			onclick: column.getToggleSortingHandler(),
@@ -39,7 +39,7 @@ export const getCasesCell = () => ({
 	}
 });
 
-const getCostsHeader = () => ({
+export const getCostsHeader = () => ({
 	header: ({ column }: HeaderContext<ComparisonTimeFramesData, string>) => {
 		return renderComponent(DataTableSortHeader, {
 			onclick: column.getToggleSortingHandler(),
@@ -124,9 +124,8 @@ export const compareCasesTableColumns: ColumnDef<ComparisonTimeFramesData>[] = [
 	}
 ];
 
-const getScenarioKeys = (...summaryByTimeFrames: Partial<Record<Scenario, ScenarioTotals>>[]): Scenario[] => [
-	...new Set(summaryByTimeFrames.flatMap((summary) => Object.keys(summary) as Scenario[]))
-];
+export const getScenarioKeys = (...totalsByTImeFrames: Partial<Record<Scenario, ScenarioTotals>>[]): Scenario[] =>
+	Array.from(new Set(totalsByTImeFrames.flatMap((summary) => Object.keys(summary) as Scenario[])));
 
 export const buildCompareCasesTableData = ({
 	presentTotals,
