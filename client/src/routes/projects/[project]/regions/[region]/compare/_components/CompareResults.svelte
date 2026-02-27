@@ -6,31 +6,44 @@
 	import type { EmulatorResults } from '$lib/types/userState';
 	import { buildCompareCasesTableData, compareCasesTableColumns } from '$lib/tables/compareCasesTable';
 	import DataTable from '$lib/components/data-table/DataTable.svelte';
+	import { getTotalCasesAndCostsPerScenario } from '$lib/process-results/processCases';
 
 	export interface CompareResults {
 		present: EmulatorResults;
 		fullLongTerm: EmulatorResults;
 		baselineLongTerm: EmulatorResults;
 	}
-	export interface CompareFormValues {
-		presentFormValues: Record<string, FormValue>;
-		longTermFormValues: Record<string, FormValue>;
+	export interface CompareTotals {
+		presentTotals: ReturnType<typeof getTotalCasesAndCostsPerScenario>;
+		baselineLongTermTotals: ReturnType<typeof getTotalCasesAndCostsPerScenario>;
+		fullLongTermTotals: ReturnType<typeof getTotalCasesAndCostsPerScenario>;
 	}
 
 	interface Props {
 		chartTheme: string;
 		results: CompareResults;
-		formValues: CompareFormValues;
+		formValues: {
+			presentFormValues: Record<string, FormValue>;
+			longTermFormValues: Record<string, FormValue>;
+		};
 	}
 	let { chartTheme, results, formValues }: Props = $props();
+
+	let totals = $derived({
+		presentTotals: getTotalCasesAndCostsPerScenario(results.present.cases, formValues.presentFormValues),
+		baselineLongTermTotals: getTotalCasesAndCostsPerScenario(
+			results.baselineLongTerm.cases,
+			formValues.presentFormValues
+		),
+		fullLongTermTotals: getTotalCasesAndCostsPerScenario(results.fullLongTerm.cases, formValues.longTermFormValues)
+	});
+
 	let selectedIntervention = $state<ScenarioLabel>('No Intervention');
+	let casesConfig = $derived(getCasesCompareConfig(totals, (intervention) => (selectedIntervention = intervention)));
+
+	let tableData = $derived(buildCompareCasesTableData(totals));
 
 	let prevalenceConfig = $derived(getPrevalenceConfigCompare(results, selectedIntervention));
-	let casesConfig = $derived(
-		getCasesCompareConfig(results, formValues, (intervention) => (selectedIntervention = intervention))
-	);
-
-	let tableData = $derived(buildCompareCasesTableData(results, formValues));
 </script>
 
 <div class="flex flex-3/4 flex-col gap-4">
