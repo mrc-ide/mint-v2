@@ -214,7 +214,7 @@ export const getCasesCompareConfig = (
 			}
 		},
 		caption: {
-			text: 'Click on graph to view prevalence across all timeframes for that intervention strategy',
+			text: '1. Suboptimal interventions are not plotted; view the table to see them. <br/> 2. Click on graph to view prevalence across all timeframes for that intervention strategy.',
 			align: 'left',
 			verticalAlign: 'bottom',
 			style: {

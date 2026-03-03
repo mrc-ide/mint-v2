@@ -124,17 +124,14 @@ export const compareCasesTableColumns: ColumnDef<ComparisonTimeFramesData>[] = [
 	}
 ];
 
-export const getScenarioKeys = (...totalsByTImeFrames: Partial<Record<Scenario, ScenarioTotals>>[]): Scenario[] =>
-	Array.from(new Set(totalsByTImeFrames.flatMap((summary) => Object.keys(summary) as Scenario[])));
+export const getScenarioKeys = (...totalsByTimeFrames: Partial<Record<Scenario, ScenarioTotals>>[]): Scenario[] =>
+	Array.from(new Set(totalsByTimeFrames.flatMap((summary) => Object.keys(summary) as Scenario[])));
 
-export const buildCompareCasesTableData = ({
-	presentTotals,
-	baselineLongTermTotals,
-	fullLongTermTotals
-}: CompareTotals): ComparisonTimeFramesData[] => {
-	const scenarios = getScenarioKeys(presentTotals, baselineLongTermTotals, fullLongTermTotals);
-
-	return scenarios.map((scenario) => ({
+export const buildCompareCasesTableData = (
+	{ presentTotals, baselineLongTermTotals, fullLongTermTotals }: CompareTotals,
+	scenarios: Scenario[]
+): ComparisonTimeFramesData[] =>
+	scenarios.map((scenario) => ({
 		intervention: ScenarioToLabel[scenario as Scenario],
 		presentCost: presentTotals[scenario as Scenario]?.totalCost,
 		presentCases: presentTotals[scenario as Scenario]?.totalCases,
@@ -143,4 +140,3 @@ export const buildCompareCasesTableData = ({
 		fullLongTermCost: fullLongTermTotals[scenario as Scenario]?.totalCost,
 		fullLongTermCases: fullLongTermTotals[scenario as Scenario]?.totalCases
 	}));
-};
