@@ -38,16 +38,16 @@ describe('Compare InterventionFields component', () => {
 		}
 	});
 
-	it('should calculate correct cost delta and display with appropriate sign', async () => {
+	it('should calculate correct cost delta as % and display with appropriate sign', async () => {
 		const param = MOCK_COMPARE_PARAMETERS.interventionParameters[0];
 		const presentCost = MOCK_FORM_VALUES[param.linkedCosts[0].costName as keyof typeof MOCK_FORM_VALUES] as number;
 
 		const screen = renderComponent();
 
 		const input = screen.getByLabelText(param.linkedCosts[0].costLabel);
-		await userEvent.fill(input, String(presentCost + 10));
+		await userEvent.fill(input, String(presentCost * 1.5)); // increase by 50%
 
-		await expect.element(screen.getByText(`10`, { exact: false })).toBeVisible();
+		await expect.element(screen.getByText('+ 50%', { exact: false })).toBeVisible();
 	});
 
 	it('should be able to collapse cost fields', async () => {

@@ -47,3 +47,11 @@ export const changeSlider = async (page: Page, inputId: string, targetPercent: n
 	await page.mouse.move(endX, startY, { steps: 10 });
 	await page.mouse.up();
 };
+
+export const runRegionWithItn = async (page: Page) => {
+	await changeSlider(page, 'current_malaria_prevalence', 0.2);
+	await page.getByRole('button', { name: 'Run baseline' }).click();
+	await page.waitForTimeout(500); // wait for chart to fully render
+	await changeSlider(page, 'itn_future', 0.8);
+	await page.getByRole('checkbox', { name: 'Pyrethroid-only ITNs' }).click();
+};

@@ -75,6 +75,9 @@
 						<FieldWithChange
 							value={longTermFormValues[cost.costName] as number}
 							baseline={presentFormValues[cost.costName] as number}
+							postfixUnit="%"
+							fractionalDigits={0}
+							displayChangeAsPercentage
 						>
 							<Input
 								id={`${cost.costName}-compare-input`}

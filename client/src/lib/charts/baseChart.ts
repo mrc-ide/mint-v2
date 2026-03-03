@@ -179,7 +179,19 @@ export const createHighchart = (config: Highcharts.Options, onLoad?: () => void)
 	};
 };
 
-export const ScenarioToLabel: Record<Scenario, string> = {
+export type ScenarioLabel =
+	| 'No Intervention'
+	| 'IRS Only'
+	| 'LSM Only'
+	| 'Pyrethroid ITN (Only)'
+	| 'Pyrethroid ITN (with LSM)'
+	| 'Pyrethroid-PBO ITN (Only)'
+	| 'Pyrethroid-PBO ITN (with LSM)'
+	| 'Pyrethroid-Pyrrole ITN (Only)'
+	| 'Pyrethroid-Pyrrole ITN (with LSM)'
+	| 'Pyrethroid-PPF ITN (Only)'
+	| 'Pyrethroid-PPF ITN (with LSM)';
+export const ScenarioToLabel: Record<Scenario, ScenarioLabel> = {
 	no_intervention: 'No Intervention',
 	irs_only: 'IRS Only',
 	lsm_only: 'LSM Only',
@@ -192,6 +204,7 @@ export const ScenarioToLabel: Record<Scenario, string> = {
 	py_ppf_only: 'Pyrethroid-PPF ITN (Only)',
 	py_ppf_with_lsm: 'Pyrethroid-PPF ITN (with LSM)'
 };
+
 export const ScenarioToColor: Record<Scenario, string> = {
 	no_intervention: 'var(--muted-foreground)',
 	irs_only: 'var(--chart-1)',

@@ -1,5 +1,6 @@
+import type { CompareResults } from '$lib/types/compare';
 import { SCENARIOS, type PrevalenceData, type Scenario } from '$lib/types/userState';
-import { ScenarioToColor, ScenarioToLabel } from './baseChart';
+import { ScenarioToColor, ScenarioToLabel, type ScenarioLabel } from './baseChart';
 
 const createPrevalenceSeries = (data: PrevalenceData[]): Highcharts.SeriesSplineOptions[] => {
 	const seriesMap = new Map<Scenario, Highcharts.SeriesSplineOptions>();
@@ -48,15 +49,6 @@ const BASE_OPTIONS: Partial<Highcharts.Options> = {
 				enabled: false
 			}
 		}
-	}
-};
-export const getPrevalenceConfig = (prevalence: PrevalenceData[]): Highcharts.Options => ({
-	chart: {
-		type: 'spline',
-		height: 450
-	},
-	title: {
-		text: 'Projected prevalence in under 5 year olds'
 	},
 	xAxis: {
 		title: {
@@ -69,7 +61,7 @@ export const getPrevalenceConfig = (prevalence: PrevalenceData[]): Highcharts.Op
 				from: -1,
 				to: 0,
 				label: {
-					text: 'Previous interventions',
+					text: 'Recent interventions',
 					style: {
 						color: 'var(--muted-foreground)'
 					},
@@ -92,43 +84,59 @@ export const getPrevalenceConfig = (prevalence: PrevalenceData[]): Highcharts.Op
 				}
 			}
 		]
+	}
+};
+export const getPrevalenceConfig = (prevalence: PrevalenceData[]): Highcharts.Options => ({
+	...BASE_OPTIONS,
+	chart: {
+		type: 'spline',
+		height: 450
+	},
+	title: {
+		text: 'Projected prevalence in under 5 year olds'
 	},
 
-	...BASE_OPTIONS,
 	series: createPrevalenceSeries(prevalence)
 });
 
-export const createPresentPrevalenceSeries = (prevalence: PrevalenceData[]): Highcharts.SeriesSplineOptions[] =>
-	createPrevalenceSeries(prevalence).map((series) => ({
-		...series,
-		name: `<span style="opacity: 0.4;">${series.name} <em>Present</em></span>`,
-		color: `color-mix(in oklab, ${series.color}, transparent 40%)`
-	}));
+export const createComparisonSeries = (
+	data: PrevalenceData[],
+	selectedIntervention: ScenarioLabel,
+	name: string
+): Highcharts.SeriesSplineOptions[] =>
+	createPrevalenceSeries(data)
+		.filter((series) => series.name === selectedIntervention)
+		.map((series) => ({
+			...series,
+			name,
+			color: undefined,
+			dashStyle: 'Solid'
+		}));
 
 export const getPrevalenceConfigCompare = (
-	currentPrevalenceSeries: Highcharts.SeriesSplineOptions[],
-	newPrevalence: PrevalenceData[]
+	{ present, baselineLongTerm, fullLongTerm }: CompareResults,
+	selectedIntervention: ScenarioLabel
 ): Highcharts.Options => {
-	const newSeries: Highcharts.SeriesSplineOptions[] = createPrevalenceSeries(newPrevalence).map((series) => ({
-		...series,
-		name: `${series.name} <em>Long term</em>`
-	}));
+	const series: Highcharts.SeriesSplineOptions[] = [
+		{ data: present.prevalence, name: 'Present' },
+		{ data: baselineLongTerm.prevalence, name: 'Long term (baseline only)' },
+		{ data: fullLongTerm.prevalence, name: 'Long term (baseline + control strategy)' }
+	].flatMap(({ data, name }) => createComparisonSeries(data, selectedIntervention, name));
 
 	return {
+		...BASE_OPTIONS,
 		chart: {
 			type: 'spline',
 			height: 500
 		},
 		title: {
-			text: '<span style="opacity: 0.4;">Present</span> vs Long term - Prevalence in under 5 year olds'
+			text: `Prevalence in under 5 year olds - <em>${selectedIntervention}</em>`
 		},
-		xAxis: {
-			title: {
-				text: 'Years since new interventions'
-			},
-			tickPositions: [0, 1, 2, 3]
+
+		tooltip: {
+			...BASE_OPTIONS.tooltip,
+			shared: true
 		},
-		...BASE_OPTIONS,
-		series: [...currentPrevalenceSeries, ...newSeries]
+		series
 	};
 };
