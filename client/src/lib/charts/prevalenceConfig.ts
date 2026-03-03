@@ -1,3 +1,4 @@
+import type { CompareResults } from '$lib/types/compare';
 import { SCENARIOS, type PrevalenceData, type Scenario } from '$lib/types/userState';
 import { ScenarioToColor, ScenarioToLabel, type ScenarioLabel } from './baseChart';
 
@@ -113,15 +114,13 @@ export const createComparisonSeries = (
 		}));
 
 export const getPrevalenceConfigCompare = (
-	presentPrevalence: PrevalenceData[],
-	baselineLongTermPrevalence: PrevalenceData[],
-	fullLongTermPrevalence: PrevalenceData[],
+	{ present, baselineLongTerm, fullLongTerm }: CompareResults,
 	selectedIntervention: ScenarioLabel
 ): Highcharts.Options => {
 	const series: Highcharts.SeriesSplineOptions[] = [
-		{ data: presentPrevalence, name: 'Present' },
-		{ data: baselineLongTermPrevalence, name: 'Long term (baseline only)' },
-		{ data: fullLongTermPrevalence, name: 'Long term (baseline + control strategy)' }
+		{ data: present.prevalence, name: 'Present' },
+		{ data: baselineLongTerm.prevalence, name: 'Long term (baseline only)' },
+		{ data: fullLongTerm.prevalence, name: 'Long term (baseline + control strategy)' }
 	].flatMap(({ data, name }) => createComparisonSeries(data, selectedIntervention, name));
 
 	return {

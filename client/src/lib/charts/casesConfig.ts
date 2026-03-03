@@ -1,15 +1,9 @@
-import type { FormValue } from '$lib/components/dynamic-region-form/types';
-import { getTotalCostsPerScenario } from '$lib/process-results/costs';
-import {
-	collectPostInterventionCases,
-	convertPer1000ToTotal,
-	getTotalCasesPer1000,
-	type CasesAverted
-} from '$lib/process-results/processCases';
-import type { CasesData, Scenario } from '$lib/types/userState';
+import { convertToLocaleString } from '$lib/number';
+import { type CasesAverted, type ScenarioTotals } from '$lib/process-results/processCases';
+import type { CompareTotals } from '$lib/types/compare';
+import type { Scenario } from '$lib/types/userState';
 import { type Options, type PointOptionsObject, type SeriesColumnOptions, type SeriesLineOptions } from 'highcharts';
 import { getColumnFill, ScenarioToLabel, type ScenarioLabel } from './baseChart';
-import { convertToLocaleString } from '$lib/number';
 
 const getCasesSeriesData = (
 	casesAverted: Partial<Record<Scenario, CasesAverted>>
@@ -108,35 +102,24 @@ export const filterInefficientStrategies = (dataPoints: CasesCompareDataPoint[])
 	}, []);
 };
 export const createCasesCompareDataPoints = (
-	cases: CasesData[],
-	formValues: Record<string, FormValue>
+	totalCasesAndCosts: Partial<Record<Scenario, ScenarioTotals>>
 ): CasesCompareDataPoint[] => {
-	const postInterventionCases = collectPostInterventionCases(cases);
-	const scenarios = Object.entries(postInterventionCases)
-		.filter(([_, scenarioCases]) => scenarioCases.length > 0)
-		.map(([scenario]) => scenario as Scenario);
-	const scenarioCosts = getTotalCostsPerScenario(scenarios, formValues);
+	const totalCasesAndCostsArray = Object.entries(totalCasesAndCosts).map(([scenario, { totalCases, totalCost }]) => ({
+		scenario: scenario as Scenario,
+		totalCases,
+		totalCost: totalCost
+	}));
 
-	const casesByTotalCost = scenarios.map((scenario) => {
-		const totalCasesPer1000 = getTotalCasesPer1000(postInterventionCases[scenario]);
-		return {
-			scenario,
-			totalCases: convertPer1000ToTotal(totalCasesPer1000, Number(formValues['population'])),
-			totalCost: scenarioCosts[scenario]!
-		};
-	});
-
-	return filterInefficientStrategies(casesByTotalCost);
+	return filterInefficientStrategies(totalCasesAndCostsArray);
 };
 
 export const createCasesCompareSeries = (
-	cases: CasesData[],
-	formValues: Record<string, FormValue>,
+	totalCasesAndCosts: Partial<Record<Scenario, ScenarioTotals>>,
 	name: 'Present' | 'Long term (baseline + control strategy)' | 'Long term (baseline only)'
 ): SeriesLineOptions => ({
 	name,
 	type: 'line',
-	data: createCasesCompareDataPoints(cases, formValues).map(({ totalCases, totalCost, scenario }) => ({
+	data: createCasesCompareDataPoints(totalCasesAndCosts).map(({ totalCases, totalCost, scenario }) => ({
 		x: totalCost,
 		y: totalCases,
 		custom: {
@@ -200,26 +183,15 @@ export const getClosestPoint = (cost: number, allSeries: Highcharts.Series[]): H
 		}, null);
 
 export const getCasesCompareConfig = (
-	presentCases: CasesData[],
-	fullLongTermCases: CasesData[],
-	baselineLongTermCases: CasesData[],
-	presentFormValues: Record<string, FormValue>,
-	longTermFormValues: Record<string, FormValue>,
+	{ presentTotals, baselineLongTermTotals, fullLongTermTotals }: CompareTotals,
 	setSelectedIntervention: (intervention: ScenarioLabel) => void
 ): Options => {
-	const presentSeries = createCasesCompareSeries(presentCases, presentFormValues, 'Present');
-	const baselineLongTermSeries = createCasesCompareSeries(
-		baselineLongTermCases,
-		presentFormValues,
-		'Long term (baseline only)'
-	);
-	const fullLongTermSeries = createCasesCompareSeries(
-		fullLongTermCases,
-		longTermFormValues,
-		'Long term (baseline + control strategy)'
-	);
+	const presentSeries = createCasesCompareSeries(presentTotals, 'Present');
+	const baselineLongTermSeries = createCasesCompareSeries(baselineLongTermTotals, 'Long term (baseline only)');
+	const fullLongTermSeries = createCasesCompareSeries(fullLongTermTotals, 'Long term (baseline + control strategy)');
 	const presentData = presentSeries.data as PointOptionsObject[];
 	const fullLongTermData = fullLongTermSeries.data as PointOptionsObject[];
+
 	return {
 		chart: {
 			type: 'line',

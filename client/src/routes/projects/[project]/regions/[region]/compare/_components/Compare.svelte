@@ -12,7 +12,7 @@
 	import { toast } from 'svelte-sonner';
 	import { runCompareEmulator } from '../utils';
 	import InterventionFields from './InterventionFields.svelte';
-	import Plots from './Plots.svelte';
+	import CompareResults from './CompareResults.svelte';
 
 	interface Props {
 		presentResults: EmulatorResults;
@@ -118,13 +118,17 @@
 			<Loader text="Loading..." />
 		</div>
 	{:else}
-		<Plots
+		<CompareResults
 			{chartTheme}
-			{presentResults}
-			{fullLongTermResults}
-			{baselineLongTermResults}
-			{presentFormValues}
-			{longTermFormValues}
+			results={{
+				present: presentResults,
+				fullLongTerm: fullLongTermResults,
+				baselineLongTerm: baselineLongTermResults
+			}}
+			formValues={{
+				presentFormValues,
+				longTermFormValues
+			}}
 		/>
 	{/if}
 </div>
