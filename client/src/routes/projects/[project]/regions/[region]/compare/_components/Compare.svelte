@@ -68,8 +68,8 @@
 	});
 </script>
 
-<div class="flex flex-row gap-4">
-	<div class="flex w-1/4 flex-col gap-6 rounded-md border p-4">
+<div class="grid grid-cols-4 gap-4">
+	<div class="col-span-1 flex flex-1/4 flex-col gap-6 rounded-md border p-4">
 		<Field.Group class="gap-4">
 			<Field.Field>
 				<Field.Label for="parameter-select">What do you want to adjust?</Field.Label>
@@ -114,7 +114,7 @@
 	</div>
 
 	{#if isLoading}
-		<div class="flex h-[500px] flex-3/4 items-center justify-center">
+		<div class="col-span-3 flex h-[500px] items-center justify-center">
 			<Loader text="Loading..." />
 		</div>
 	{:else}

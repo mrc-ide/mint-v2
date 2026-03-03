@@ -31,19 +31,18 @@
 		),
 		fullLongTermTotals: getTotalCasesAndCostsPerScenario(results.fullLongTerm.cases, formValues.longTermFormValues)
 	});
+
+	let selectedIntervention = $state<ScenarioLabel>('No Intervention');
+	let casesConfig = $derived(getCasesCompareConfig(totals));
+
 	let scenarios = $derived(
 		getScenarioKeys(totals.presentTotals, totals.baselineLongTermTotals, totals.fullLongTermTotals)
 	);
-
-	let selectedIntervention = $state<ScenarioLabel>('No Intervention');
-	let casesConfig = $derived(getCasesCompareConfig(totals, (intervention) => (selectedIntervention = intervention)));
-
 	let tableData = $derived(buildCompareCasesTableData(totals, scenarios));
-
 	let prevalenceConfig = $derived(getPrevalenceConfigCompare(results, selectedIntervention));
 </script>
 
-<div class="flex flex-3/4 flex-col gap-4">
+<div class="col-span-3 flex flex-col gap-4">
 	<Tabs.Root value="graph">
 		<div class="flex gap-2">
 			<Tabs.List class="w-full">
@@ -62,13 +61,13 @@
 	</Tabs.Root>
 	<div class="flex flex-col gap-2">
 		<Label>Select intervention to compare prevalence across timeframes:</Label>
-		<RadioGroup.Root class="flex w-full items-center space-x-1" bind:value={selectedIntervention}>
+		<RadioGroup.Root class="flex flex-wrap items-center" bind:value={selectedIntervention}>
 			{#each scenarios as scenario}
 				<div>
 					<RadioGroup.Item value={ScenarioToLabel[scenario]} id={scenario} class="peer sr-only" />
 					<Label
 						for={scenario}
-						class="flex cursor-pointer items-center rounded-md border p-2.5 text-xs peer-data-[state=checked]:border-primary hover:bg-accent"
+						class="flex cursor-pointer items-center rounded-md border p-2.5 text-xs peer-data-[state=checked]:border-primary hover:bg-accent "
 					>
 						{ScenarioToLabel[scenario]}
 					</Label>

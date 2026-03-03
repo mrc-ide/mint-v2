@@ -182,10 +182,11 @@ export const getClosestPoint = (cost: number, allSeries: Highcharts.Series[]): H
 			return Math.abs((point.x as number) - cost) < Math.abs((closest.x as number) - cost) ? point : closest;
 		}, null);
 
-export const getCasesCompareConfig = (
-	{ presentTotals, baselineLongTermTotals, fullLongTermTotals }: CompareTotals,
-	setSelectedIntervention: (intervention: ScenarioLabel) => void
-): Options => {
+export const getCasesCompareConfig = ({
+	presentTotals,
+	baselineLongTermTotals,
+	fullLongTermTotals
+}: CompareTotals): Options => {
 	const presentSeries = createCasesCompareSeries(presentTotals, 'Present');
 	const baselineLongTermSeries = createCasesCompareSeries(baselineLongTermTotals, 'Long term (baseline only)');
 	const fullLongTermSeries = createCasesCompareSeries(fullLongTermTotals, 'Long term (baseline + control strategy)');
@@ -195,14 +196,7 @@ export const getCasesCompareConfig = (
 	return {
 		chart: {
 			type: 'line',
-			height: 450,
-			events: {
-				click: function (event) {
-					const xValue = Math.round((event as Highcharts.ChartClickEventObject).xAxis[0].value);
-					const closestPoint = getClosestPoint(xValue, this.series);
-					if (closestPoint) setSelectedIntervention(closestPoint.options.custom!.intervention);
-				}
-			}
+			height: 450
 		},
 		title: {
 			text: 'Present vs Long term - Total Cases vs Total Cost'
@@ -214,7 +208,7 @@ export const getCasesCompareConfig = (
 			}
 		},
 		caption: {
-			text: '1. Suboptimal interventions are not plotted; view the table to see them. <br/> 2. Click on graph to view prevalence across all timeframes for that intervention strategy.',
+			text: 'Suboptimal interventions are not plotted; view the table to see them.',
 			align: 'left',
 			verticalAlign: 'bottom',
 			style: {
@@ -246,9 +240,6 @@ export const getCasesCompareConfig = (
 				events: {
 					mouseOut: function () {
 						resetSeriesPointStates(this.chart.series);
-					},
-					click: function (event) {
-						setSelectedIntervention(event.point.options.custom!.intervention);
 					}
 				}
 			}
