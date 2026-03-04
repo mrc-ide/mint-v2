@@ -6,11 +6,13 @@ export interface CompareParameter {
 	label: string;
 	min: number;
 	max: number;
+	step: number;
 }
 
 export interface InterventionCompareCost {
 	costName: string;
 	costLabel: string;
+	step: number;
 }
 export interface InterventionCompareParameter extends CompareParameter {
 	linkedCosts: InterventionCompareCost[];

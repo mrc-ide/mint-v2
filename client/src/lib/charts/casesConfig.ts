@@ -3,7 +3,7 @@ import { type CasesAverted, type ScenarioTotals } from '$lib/process-results/pro
 import type { CompareTotals } from '$lib/types/compare';
 import type { Scenario } from '$lib/types/userState';
 import { type Options, type PointOptionsObject, type SeriesColumnOptions, type SeriesLineOptions } from 'highcharts';
-import { getColumnFill, ScenarioToLabel, type ScenarioLabel } from './baseChart';
+import { getColumnFill, ScenarioToLabel } from './baseChart';
 
 const getCasesSeriesData = (
 	casesAverted: Partial<Record<Scenario, CasesAverted>>

@@ -1,7 +1,6 @@
 import { ScenarioToLabel } from '$lib/charts/baseChart';
 import DataTableSortHeader from '$lib/components/data-table/DataTableSortHeader.svelte';
 import { renderComponent } from '$lib/components/ui/data-table';
-import { type ScenarioTotals } from '$lib/process-results/processCases';
 import type { CompareTotals } from '$lib/types/compare';
 import type { Scenario } from '$lib/types/userState';
 import type { CellContext, ColumnDef, HeaderContext } from '@tanstack/table-core';
@@ -123,9 +122,6 @@ export const compareCasesTableColumns: ColumnDef<ComparisonTimeFramesData>[] = [
 		]
 	}
 ];
-
-export const getScenarioKeys = (...totalsByTimeFrames: Partial<Record<Scenario, ScenarioTotals>>[]): Scenario[] =>
-	Array.from(new Set(totalsByTimeFrames.flatMap((summary) => Object.keys(summary) as Scenario[])));
 
 export const buildCompareCasesTableData = (
 	{ presentTotals, baselineLongTermTotals, fullLongTermTotals }: CompareTotals,

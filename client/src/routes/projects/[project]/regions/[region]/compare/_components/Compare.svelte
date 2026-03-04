@@ -95,6 +95,7 @@
 					onValueChange={(value: number) => onSliderChange(value, selectedBaselineParameter.parameterName)}
 					max={selectedBaselineParameter.max}
 					min={selectedBaselineParameter.min}
+					step={selectedBaselineParameter.step}
 					disabled={isLoading}
 					aria-label="Adjust baseline parameter slider"
 					markerValue={presentFormValues[selectedBaselineParameter.parameterName] as number}
@@ -112,23 +113,17 @@
 			{onSliderChange}
 		/>
 	</div>
-
-	{#if isLoading}
-		<div class="col-span-3 flex h-[500px] items-center justify-center">
-			<Loader text="Loading..." />
-		</div>
-	{:else}
-		<CompareResults
-			{chartTheme}
-			results={{
-				present: presentResults,
-				fullLongTerm: fullLongTermResults,
-				baselineLongTerm: baselineLongTermResults
-			}}
-			formValues={{
-				presentFormValues,
-				longTermFormValues
-			}}
-		/>
-	{/if}
+	<CompareResults
+		{isLoading}
+		{chartTheme}
+		results={{
+			present: presentResults,
+			fullLongTerm: fullLongTermResults,
+			baselineLongTerm: baselineLongTermResults
+		}}
+		formValues={{
+			presentFormValues,
+			longTermFormValues
+		}}
+	/>
 </div>

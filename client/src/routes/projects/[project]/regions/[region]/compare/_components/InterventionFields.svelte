@@ -59,6 +59,7 @@
 				onValueChange={(value: number) => onSliderChange(value, param.parameterName)}
 				max={param.max}
 				min={param.min}
+				step={param.step}
 				disabled={isLoading}
 				aria-label={`Adjust ${param.label} slider`}
 				value={longTermFormValues[param.parameterName] as number}
@@ -83,7 +84,7 @@
 								id={`${cost.costName}-compare-input`}
 								type="number"
 								min={0}
-								step="any"
+								step={cost.step}
 								disabled={isLoading}
 								value={String(longTermFormValues[cost.costName])}
 								oninput={(e) => (longTermFormValues[cost.costName] = Number(e.currentTarget.value))}
