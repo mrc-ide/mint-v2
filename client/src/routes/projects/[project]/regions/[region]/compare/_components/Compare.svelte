@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { FormValue } from '$lib/components/dynamic-region-form/types';
 	import { DEBOUNCE_DELAY_MS } from '$lib/components/dynamic-region-form/utils';
-	import Loader from '$lib/components/Loader.svelte';
 	import SliderWithMarker from '$lib/components/SliderWithMarker.svelte';
 	import * as Field from '$lib/components/ui/field';
 	import * as RadioGroup from '$lib/components/ui/radio-group';
@@ -11,8 +10,8 @@
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import { runCompareEmulator } from '../utils';
-	import InterventionFields from './InterventionFields.svelte';
 	import CompareResults from './CompareResults.svelte';
+	import InterventionFields from './InterventionFields.svelte';
 
 	interface Props {
 		presentResults: EmulatorResults;

@@ -70,7 +70,7 @@
 		<div class="flex flex-col gap-2">
 			<Label>Select intervention to compare prevalence across timeframes:</Label>
 			<RadioGroup.Root class="flex flex-wrap items-center" bind:value={selectedIntervention}>
-				{#each scenarios as scenario}
+				{#each scenarios as scenario (scenario)}
 					<div>
 						<RadioGroup.Item value={ScenarioToLabel[scenario]} id={scenario} class="peer sr-only" />
 						<Label
