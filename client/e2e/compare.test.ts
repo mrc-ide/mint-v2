@@ -72,7 +72,7 @@ test.describe('E2E Compare Page', () => {
 		await runRegionWithItn(page);
 		await page.getByRole('link', { name: 'Long term planning' }).click();
 
-		await page.getByRole('tab', { name: 'Table ' }).click();
+		await page.getByRole('tab', { name: 'Table' }).click();
 		await expect(page.getByRole('table')).toBeVisible();
 		await expect(page.getByRole('columnheader', { name: 'Intervention' })).toBeVisible();
 		await expect(page.getByRole('columnheader', { name: 'Long term (baseline only)' })).toBeVisible();

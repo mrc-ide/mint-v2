@@ -39,6 +39,7 @@
 	let scenarios = $derived(
 		getScenariosFromTotals(totals.presentTotals, totals.baselineLongTermTotals, totals.fullLongTermTotals)
 	);
+	let selectedTab = $state<'graph' | 'table'>('graph');
 	let tableData = $derived(buildCompareCasesTableData(totals, scenarios));
 	let prevalenceConfig = $derived(getPrevalenceConfigCompare(results, selectedIntervention));
 </script>
@@ -50,7 +51,7 @@
 {:else}
 	<div class="col-span-3 flex flex-col gap-4">
 		<!-- Cases -->
-		<Tabs.Root value="graph">
+		<Tabs.Root bind:value={selectedTab}>
 			<div class="flex gap-2">
 				<Tabs.List class="w-full">
 					<Tabs.Trigger value="graph">Graph</Tabs.Trigger>

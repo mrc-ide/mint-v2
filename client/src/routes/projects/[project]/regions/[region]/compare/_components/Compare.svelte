@@ -68,7 +68,7 @@
 </script>
 
 <div class="grid grid-cols-4 gap-4">
-	<div class="col-span-1 flex flex-1/4 flex-col gap-6 rounded-md border p-4">
+	<div class="col-span-1 flex flex-col gap-6 rounded-md border p-4">
 		<Field.Group class="gap-4">
 			<Field.Field>
 				<Field.Label for="parameter-select">What do you want to adjust?</Field.Label>
