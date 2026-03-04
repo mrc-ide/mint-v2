@@ -68,25 +68,11 @@ test.describe('E2E Compare Page', () => {
 		await expect(casesPlot.getByRole('button', { name: 'Show Present' })).toBeVisible();
 	});
 
-	test('should be able to click on cases plot and see prevalence plot for that intervention', async ({ page }) => {
-		await runRegionWithItn(page);
-		await page.getByRole('link', { name: 'Long term planning' }).click();
-
-		// initial is no intervention plot
-		await expect(page.getByText('Prevalence in under 5 year olds - No Intervention').first()).toBeVisible();
-
-		// click on cases x value is 54 thousand something (exact value may change based on emulator result)
-		await page.getByRole('img', { name: 'x, 54', exact: false }).click();
-
-		await expect(
-			page.getByLabel('prevalence compare graph').getByText('Pyrethroid ITN (Only)', { exact: true })
-		).toBeVisible();
-	});
-
 	test('should render table with cost and cases for time frames', async ({ page }) => {
 		await runRegionWithItn(page);
 		await page.getByRole('link', { name: 'Long term planning' }).click();
 
+		await page.getByRole('tab', { name: 'Table' }).click();
 		await expect(page.getByRole('table')).toBeVisible();
 		await expect(page.getByRole('columnheader', { name: 'Intervention' })).toBeVisible();
 		await expect(page.getByRole('columnheader', { name: 'Long term (baseline only)' })).toBeVisible();

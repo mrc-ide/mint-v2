@@ -113,11 +113,13 @@ class CompareParameter(BaseModel):
     label: str
     min: float
     max: float
+    step: float
 
 
 class InterventionCompareCost(BaseModel):
     cost_name: str = Field(serialization_alias="costName")
     cost_label: str = Field(serialization_alias="costLabel")
+    step: float
 
 
 class InterventionCompareParameter(CompareParameter):
