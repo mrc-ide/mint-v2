@@ -49,6 +49,7 @@
 	</div>
 {:else}
 	<div class="col-span-3 flex flex-col gap-4">
+		<!-- Cases -->
 		<Tabs.Root value="graph">
 			<div class="flex gap-2">
 				<Tabs.List class="w-full">
@@ -65,6 +66,7 @@
 				<DataTable data={tableData} columns={compareCasesTableColumns} />
 			</Tabs.Content>
 		</Tabs.Root>
+		<!-- Prevalence -->
 		<div class="flex flex-col gap-2">
 			<Label>Select intervention to compare prevalence across timeframes:</Label>
 			<RadioGroup.Root class="flex flex-wrap items-center" bind:value={selectedIntervention}>

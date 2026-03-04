@@ -489,7 +489,7 @@ describe('cases compare config', () => {
 
 	describe('getCasesCompareConfig integration', () => {
 		it('should return a valid Highcharts Options object', () => {
-			const config = getCasesCompareConfig(compareTotals, vi.fn());
+			const config = getCasesCompareConfig(compareTotals);
 
 			expect(config).toBeDefined();
 			expect(config.chart?.type).toBe('line');
@@ -499,7 +499,7 @@ describe('cases compare config', () => {
 		});
 
 		it('should include both Present and Long term series when newCases has data', () => {
-			const config = getCasesCompareConfig(compareTotals, vi.fn());
+			const config = getCasesCompareConfig(compareTotals);
 
 			expect(config.series).toHaveLength(3);
 			expect((config.series as any)[0].name).toBe('Present');
@@ -510,79 +510,26 @@ describe('cases compare config', () => {
 		it('should include only Present series when newCases is empty', () => {
 			vi.spyOn(processCases, 'collectPostInterventionCases').mockReturnValue({} as any);
 
-			const config = getCasesCompareConfig(
-				{ presentTotals: totals, baselineLongTermTotals: {}, fullLongTermTotals: {} },
-				vi.fn()
-			);
+			const config = getCasesCompareConfig({
+				presentTotals: totals,
+				baselineLongTermTotals: {},
+				fullLongTermTotals: {}
+			});
 
 			expect(config.series).toHaveLength(1);
 			expect((config.series as any)[0].name).toBe('Present');
 		});
 
 		it('should apply breaks to xAxis when data points exist', () => {
-			const config = getCasesCompareConfig(compareTotals, vi.fn());
+			const config = getCasesCompareConfig(compareTotals);
 
 			expect((config.xAxis as any).breaks).toBeDefined();
 		});
 
 		it('should set tooltip formatter to createCompareTooltipHtml', () => {
-			const config = getCasesCompareConfig(compareTotals, vi.fn());
+			const config = getCasesCompareConfig(compareTotals);
 
 			expect(config.tooltip?.formatter).toBe(createCompareTooltipHtml);
-		});
-
-		it('line mouseOut should reset all series point states', () => {
-			const setSelectedIntervention = vi.fn();
-
-			const config = getCasesCompareConfig(compareTotals, setSelectedIntervention);
-			const mouseOutHandler = (config.plotOptions as any).line.events.mouseOut;
-
-			const p1 = { setState: vi.fn() };
-			const p2 = { setState: vi.fn() };
-			const p3 = { setState: vi.fn() };
-
-			mouseOutHandler.call({
-				chart: {
-					series: [{ points: [p1, p2] }, { points: [p3] }]
-				}
-			});
-
-			expect(p1.setState).toHaveBeenCalledWith('');
-			expect(p2.setState).toHaveBeenCalledWith('');
-			expect(p3.setState).toHaveBeenCalledWith('');
-		});
-		it('line click should pass clicked intervention to setSelectedIntervention', () => {
-			const setSelectedIntervention = vi.fn();
-
-			const config = getCasesCompareConfig(compareTotals, setSelectedIntervention);
-			const lineClickHandler = (config.plotOptions as any).line.events.click;
-
-			lineClickHandler.call(
-				{},
-				{
-					point: {
-						options: {
-							custom: { intervention: 'IRS Only' }
-						}
-					}
-				}
-			);
-
-			expect(setSelectedIntervention).toHaveBeenCalledWith('IRS Only');
-		});
-
-		it('chart click should select closest intervention using setSelectedIntervention', () => {
-			const setSelectedIntervention = vi.fn();
-
-			const config = getCasesCompareConfig(compareTotals, setSelectedIntervention);
-			const clickHandler = (config.chart as any).events.click;
-
-			const pointA = { x: 1000, options: { custom: { intervention: 'IRS Only' } } };
-			const pointB = { x: 1500, options: { custom: { intervention: 'Pyrethroid ITN (Only)' } } };
-
-			clickHandler.call({ series: [{ data: [pointA, pointB] }] }, { xAxis: [{ value: 1400 }] });
-
-			expect(setSelectedIntervention).toHaveBeenCalledWith('Pyrethroid ITN (Only)');
 		});
 	});
 });

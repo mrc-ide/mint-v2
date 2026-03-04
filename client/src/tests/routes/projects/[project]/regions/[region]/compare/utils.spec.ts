@@ -1,4 +1,4 @@
-import { runCompareEmulator } from '$routes/projects/[project]/regions/[region]/compare/utils';
+import { getScenariosFromTotals, runCompareEmulator } from '$routes/projects/[project]/regions/[region]/compare/utils';
 import { regionCompareUrl } from '$lib/url';
 import { apiFetch } from '$lib/fetch';
 
@@ -76,6 +76,16 @@ describe('utils', () => {
 					mockSelectedBaselineParameter
 				)
 			).rejects.toThrow(new Error('API fetch failed'));
+		});
+
+		it('getScenariosFromTotals returns unique scenarios preserving first-seen order', () => {
+			const keys = getScenariosFromTotals(
+				{ baseline: { totalCost: 1, totalCases: 2 } } as any,
+				{ intervention: { totalCost: 3, totalCases: 4 }, baseline: { totalCost: 5, totalCases: 6 } } as any,
+				{ intervention: { totalCost: 7, totalCases: 8 } } as any
+			);
+
+			expect(keys).toEqual(['baseline', 'intervention']);
 		});
 	});
 });
