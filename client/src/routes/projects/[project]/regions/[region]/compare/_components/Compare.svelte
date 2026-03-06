@@ -90,14 +90,14 @@
 				<SliderWithMarker
 					id="baseline-parameter-slider"
 					type="single"
-					value={longTermFormValues[selectedBaselineParameter.parameterName] as number}
+					value={(longTermFormValues[selectedBaselineParameter.parameterName] as number) ?? 0}
 					onValueChange={(value: number) => onSliderChange(value, selectedBaselineParameter.parameterName)}
 					max={selectedBaselineParameter.max}
 					min={selectedBaselineParameter.min}
 					step={selectedBaselineParameter.step}
 					disabled={isLoading}
 					aria-label="Adjust baseline parameter slider"
-					markerValue={presentFormValues[selectedBaselineParameter.parameterName] as number}
+					markerValue={(presentFormValues[selectedBaselineParameter.parameterName] as number) ?? 0}
 					unit="%"
 					class="h-full"
 				/>
