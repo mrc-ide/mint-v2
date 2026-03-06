@@ -39,7 +39,7 @@ class EmulatorRequest(BaseModel):
     routine: float = Field(alias="routine_coverage")
     irs_future: float = Field(ge=0, le=100)
     lsm: float = Field(ge=0, le=100)
-    mosquito_delta: float = Field(gt=-99, le=100, default=0.0)
+    mosquito_delta: float = Field(gt=-100, le=100, default=0.0)
 
     @field_validator(
         "prev",

@@ -752,7 +752,7 @@ wheels = [
 
 [[package]]
 name = "minte"
-version = "1.4.1"
+version = "1.4.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "estimint" },
@@ -764,9 +764,9 @@ dependencies = [
     { name = "scipy" },
     { name = "torch" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/30/f8/3ca01fa5fef08811b1ebaa88d8b7f2d7bae83d13d6633386ce57b307a147/minte-1.4.1.tar.gz", hash = "sha256:f27f067e7677dfce6f15a248e560edec6f7e36a872b90a295e356d5271aea494", size = 47370976, upload-time = "2026-03-05T10:59:46.171Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/bd/e8/f21d4f4a766b7dc88bf18c3f5eba8440558b0792340f8cc93c084d973706/minte-1.4.2.tar.gz", hash = "sha256:55ec81b857720eb1c70ef897912827b9c9260317561e030a1184f5a69c8a7f7e", size = 47370991, upload-time = "2026-03-06T11:14:44.89Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/8a/4d/24b1905e7238feb943e70ba1dc40d6e23e6f792b3cc5ddb9b9fcf5149de8/minte-1.4.1-py3-none-any.whl", hash = "sha256:4a638294627b63aca67a046618f4f928e12393fd4d712d911e819dbf26538f32", size = 47234379, upload-time = "2026-03-05T10:59:37.961Z" },
+    { url = "https://files.pythonhosted.org/packages/48/46/d2ebe2785beb2e71ecb80b0d686c881c470ad4a8e5a529bc1c50f0fa9833/minte-1.4.2-py3-none-any.whl", hash = "sha256:d2afeb6c88a9b78ebb2fb149e4ffa9a135a6aca936acb69083299bff1f77e198", size = 47234397, upload-time = "2026-03-06T11:14:34.079Z" },
 ]
 
 [[package]]

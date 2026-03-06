@@ -86,7 +86,7 @@
 				</RadioGroup.Root>
 			</Field.Field>
 			<Field.Field>
-				<Field.Label for="baseline-parameter-slider">Change from baseline (%)</Field.Label>
+				<Field.Label for="baseline-parameter-slider" class="sr-only" />
 				<SliderWithMarker
 					id="baseline-parameter-slider"
 					type="single"
