@@ -179,6 +179,13 @@ class TestGetCompareParameters:
                 max=100,
                 step=1.0,
             ),
+            CompareParameter(
+                parameter_name="mosquito_delta",
+                label="Change in human biting rate",
+                min=-99,
+                max=100,
+                step=1.0,
+            ),
         ]
         intervention_parameters = [
             InterventionCompareParameter(
@@ -224,7 +231,8 @@ class TestGetCompareParameters:
 
         mock_options.assert_called_once()
         expected_compare_calls = [
-            (("current_malaria_prevalence", "Prevalence"), options),
+            (("current_malaria_prevalence", "Baseline prevalence"), options),
+            (("mosquito_delta", "Change in human biting rate"), options),
         ]
         expected_intervention_compare_calls = [
             (

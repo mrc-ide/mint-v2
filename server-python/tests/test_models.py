@@ -71,6 +71,7 @@ class TestEmulatorRequest:
         assert request.Q0 == 0.8
         assert request.res_use == 0.6
         assert request.routine == 0.0
+        assert request.mosquito_delta == 0.0
 
     def test_percentage_to_fraction_conversion(self):
         data = {
@@ -89,12 +90,14 @@ class TestEmulatorRequest:
             "routine_coverage": 1,
             "irs_future": 50,
             "lsm": 25,
+            "mosquito_delta": -10,
         }
         request = EmulatorRequest(**data)
         assert request.prev == 1.0
         assert request.Q0 == 0.5
         assert request.res_use == 0.25
         assert request.py_only == 0.75
+        assert request.mosquito_delta == -0.1
 
     def test_invalid_percentage_values(self):
         data = {
@@ -159,6 +162,7 @@ class TestEmulatorScenario:
         assert scenario.irs_future == 0.0
         assert scenario.routine == 0.0
         assert scenario.lsm == 0.0
+        assert scenario.mosquito_delta == 0.0
 
     def test_scenario_creation_with_all_fields(self):
         scenario = EmulatorScenario(

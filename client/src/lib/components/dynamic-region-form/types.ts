@@ -7,6 +7,7 @@ export interface BaseField {
 	disabled?: boolean | CustomDisabled;
 	value?: FormValue | CustomValue;
 	default?: FormValue;
+	hidden?: boolean;
 }
 
 export interface NumericField extends BaseField {

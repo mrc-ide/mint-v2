@@ -32,7 +32,8 @@ def get_dynamic_form_options() -> dict:
 def get_compare_parameters() -> CompareParametersResponse:
     form_options = get_dynamic_form_options()
     baseline_param_names = [
-        ("current_malaria_prevalence", "Prevalence"),
+        ("current_malaria_prevalence", "Baseline prevalence"),
+        ("mosquito_delta", "Change in human biting rate"),
     ]
     intervention_param_names = [
         (

@@ -39,6 +39,7 @@ class EmulatorRequest(BaseModel):
     routine: float = Field(alias="routine_coverage")
     irs_future: float = Field(ge=0, le=100)
     lsm: float = Field(ge=0, le=100)
+    mosquito_delta: float = Field(gt=-100, le=100, default=0.0)
 
     @field_validator(
         "prev",
@@ -53,6 +54,7 @@ class EmulatorRequest(BaseModel):
         "itn_future",
         "irs_future",
         "lsm",
+        "mosquito_delta",
         mode="after",
     )
     @classmethod
@@ -82,6 +84,7 @@ class EmulatorScenario(BaseModel):
     irs_future: float = 0.0
     routine: float = 0.0
     lsm: float = 0.0
+    mosquito_delta: float = 0.0
 
 
 class Prevalence(BaseModel):

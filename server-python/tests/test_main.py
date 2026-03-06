@@ -14,7 +14,7 @@ def test_get_version():
     response = client.get("/version")
 
     assert response.status_code == status.HTTP_200_OK
-    assert response.json() == {"data": {"server": "1.0.0", "minte": "1.3.1", "estimint": "1.2.1"}}
+    assert response.json() == {"data": {"server": "1.0.0", "minte": "1.4.1", "estimint": "1.3.1"}}
 
 
 def test_health_check():
@@ -128,5 +128,5 @@ def test_compare_parameters():
 
     assert response.status_code == status.HTTP_200_OK
     data = response.json()["data"]
-    assert len(data["baselineParameters"]) == 1
+    assert len(data["baselineParameters"]) == 2
     assert len(data["interventionParameters"]) == 3

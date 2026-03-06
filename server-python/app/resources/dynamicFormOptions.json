@@ -47,6 +47,19 @@
               "step": 1,
               "unit": "%",
               "integer": true
+            },
+            {
+              "id": "mosquito_delta",
+              "label": "Change in human biting rate",
+              "required": false,
+              "hidden": true,
+              "default": 0,
+              "type": "slider",
+              "min": -99,
+              "max": 100,
+              "step": 1,
+              "unit": "%",
+              "integer": true
             }
           ]
         },
