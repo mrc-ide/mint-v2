@@ -40,6 +40,7 @@
 	};
 	const processCosts = async (formValues: Record<string, FormValue>) => {
 		form = formValues;
+		console.log('Processing costs with form values:', formValues);
 		try {
 			await apiFetch({
 				url: regionUrl(params.project, params.region),
