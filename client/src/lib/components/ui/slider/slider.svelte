@@ -8,8 +8,12 @@
 		orientation = 'horizontal',
 		class: className,
 		thumbClass = '',
+		renderThumbLabels = false,
 		...restProps
-	}: WithoutChildrenOrChild<SliderPrimitive.RootProps> & { thumbClass?: string } = $props();
+	}: WithoutChildrenOrChild<SliderPrimitive.RootProps> & {
+		thumbClass?: string;
+		renderThumbLabels?: boolean;
+	} = $props();
 </script>
 
 <!--
@@ -49,6 +53,11 @@ get along, so we shut typescript up by casting `value` to `never`.
 					thumbClass
 				)}
 			/>
+			{#if renderThumbLabels}
+				<SliderPrimitive.ThumbLabel {index} position="top" class="text-xs">
+					{value}
+				</SliderPrimitive.ThumbLabel>
+			{/if}
 		{/each}
 	{/snippet}
 </SliderPrimitive.Root>
