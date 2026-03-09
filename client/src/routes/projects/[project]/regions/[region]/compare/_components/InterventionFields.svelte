@@ -35,7 +35,7 @@
 		<Field.Description>Update % slider, then adjust associated cost fields</Field.Description>
 	</div>
 	{#each interventionParameters as param (param.parameterName)}
-		<Field.Field>
+		<Field.Field class="gap-3.5">
 			<Field.Label for={`${param.parameterName}-compare-slider`}>
 				<button
 					type="button"

@@ -1,9 +1,11 @@
 import { ScenarioToLabel } from '$lib/charts/baseChart';
 import DataTableSortHeader from '$lib/components/data-table/DataTableSortHeader.svelte';
-import { renderComponent } from '$lib/components/ui/data-table';
+import { renderComponent, renderSnippet } from '$lib/components/ui/data-table';
+import { roundNumber } from '$lib/number';
 import type { CompareTotals } from '$lib/types/compare';
 import type { Scenario } from '$lib/types/userState';
 import type { CellContext, ColumnDef, HeaderContext } from '@tanstack/table-core';
+import { createRawSnippet } from 'svelte';
 
 export interface ComparisonTimeFramesData {
 	intervention: string;
@@ -24,17 +26,36 @@ export const getCasesHeader = () => ({
 	}
 });
 
+export const casesCellSnippet = createRawSnippet<[{ value: number; percentageChange: number }]>((getProps) => {
+	const { value, percentageChange } = getProps();
+	const formatter = new Intl.NumberFormat('en-US', {
+		style: 'decimal',
+		trailingZeroDisplay: 'stripIfInteger',
+		maximumFractionDigits: 0
+	});
+	const percentageChangeText = percentageChange ? ` (${percentageChange >= 0 ? '+' : ''}${percentageChange}%)` : '';
+	return {
+		render: () =>
+			`<span>${formatter.format(value)}<span class="text-xs text-muted-foreground">${percentageChangeText}</span></span>`
+	};
+});
+
 export const getCasesCell = () => ({
-	cell: ({ getValue }: CellContext<ComparisonTimeFramesData, number | undefined>) => {
+	cell: ({ getValue, row, column }: CellContext<ComparisonTimeFramesData, number | undefined>) => {
 		const cellValue = getValue();
 		if (cellValue === undefined) return '-';
 
-		const formatter = new Intl.NumberFormat('en-US', {
-			style: 'decimal',
-			trailingZeroDisplay: 'stripIfInteger',
-			maximumFractionDigits: 0
+		let percentageChange = 0;
+		if (column.id !== 'presentCases') {
+			const presentCases = row.getValue('presentCases') as number;
+			if (presentCases) {
+				percentageChange = roundNumber(((cellValue - presentCases) / presentCases) * 100, 0);
+			}
+		}
+		return renderSnippet(casesCellSnippet, {
+			value: cellValue,
+			percentageChange
 		});
-		return formatter.format(cellValue);
 	}
 });
 

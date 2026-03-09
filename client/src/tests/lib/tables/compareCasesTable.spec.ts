@@ -1,21 +1,31 @@
 import { ScenarioToLabel } from '$lib/charts/baseChart';
-import { renderComponent } from '$lib/components/ui/data-table';
+import { renderComponent, renderSnippet } from '$lib/components/ui/data-table';
 import {
 	buildCompareCasesTableData,
+	casesCellSnippet,
 	compareCasesTableColumns,
 	getCasesCell,
 	getCasesHeader,
 	getCostsHeader
 } from '$lib/tables/compareCasesTable';
 import type { Scenario } from '$lib/types/userState';
-
+import { createRawSnippet } from 'svelte';
 vi.mock('$lib/components/data-table/DataTableSortHeader.svelte', () => ({
 	default: 'DataTableSortHeader'
 }));
 
 vi.mock('$lib/components/ui/data-table', () => ({
-	renderComponent: vi.fn(() => 'rendered-header')
+	renderComponent: vi.fn(() => 'rendered-header'),
+	renderSnippet: vi.fn(() => 'rendered-cell')
 }));
+
+// const hoisted = vi.hoisted(() => ({
+// 	rawSnippetRef: { render: () => '<span />' }
+// }));
+
+// vi.mock('svelte', () => ({
+// 	createRawSnippet: vi.fn(() => hoisted.rawSnippetRef)
+// }));
 
 describe('compareCasesTable', () => {
 	beforeEach(() => {
@@ -62,10 +72,35 @@ describe('compareCasesTable', () => {
 		]);
 	});
 
-	it('getCasesCell formats numeric values and handles undefined', () => {
-		const cell = getCasesCell().cell;
-		expect(cell({ getValue: () => 1200 } as any)).toBe('1,200');
-		expect(cell({ getValue: () => undefined } as any)).toBe('-');
+	describe('getCasesCell', () => {
+		it('getCasesCell handles undefined', () => {
+			const cell = getCasesCell().cell;
+			expect(cell({ getValue: () => undefined } as any)).toBe('-');
+		});
+		it('should handle presentCases with no percentage', () => {
+			const cell = getCasesCell().cell;
+			const result = cell({ getValue: () => 1000, column: { id: 'presentCases' } } as any);
+
+			expect(vi.mocked(renderSnippet)).toHaveBeenCalledWith(casesCellSnippet, {
+				value: 1000,
+				percentageChange: 0
+			});
+			expect(result).toBe('rendered-cell');
+		});
+		it('should handle not presentCases with percentage', () => {
+			const cell = getCasesCell().cell;
+			const result = cell({
+				getValue: () => 1000,
+				column: { id: 'longTermBaselineCases' },
+				row: { getValue: () => 800 }
+			} as any);
+
+			expect(vi.mocked(renderSnippet)).toHaveBeenCalledWith(casesCellSnippet, {
+				value: 1000,
+				percentageChange: 25
+			});
+			expect(result).toBe('rendered-cell');
+		});
 	});
 
 	it('getCasesHeader uses sortable header renderer with Cases label', () => {

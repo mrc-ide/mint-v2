@@ -85,7 +85,7 @@
 					{/each}
 				</RadioGroup.Root>
 			</Field.Field>
-			<Field.Field>
+			<Field.Field class="gap-3.5">
 				<Field.Label for="baseline-parameter-slider">Change from baseline (%)</Field.Label>
 				<SliderWithMarker
 					id="baseline-parameter-slider"
