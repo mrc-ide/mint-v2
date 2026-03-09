@@ -9,7 +9,6 @@ import {
 	getCostsHeader
 } from '$lib/tables/compareCasesTable';
 import type { Scenario } from '$lib/types/userState';
-import { createRawSnippet } from 'svelte';
 vi.mock('$lib/components/data-table/DataTableSortHeader.svelte', () => ({
 	default: 'DataTableSortHeader'
 }));
