@@ -181,9 +181,9 @@ describe('getPrevalenceConfigCompare', () => {
 		const series = config.series as Highcharts.SeriesSplineOptions[];
 
 		expect(series).toHaveLength(3);
-		expect(series[0].name).toBe('Present');
-		expect(series[1].name).toBe('Long term (baseline only)');
-		expect(series[2].name).toContain('Long term (baseline + control strategy)');
+		expect(series[0].name).toBe('Present (current control strategies)');
+		expect(series[1].name).toBe('Long-term (current control strategies)');
+		expect(series[2].name).toContain('Long-term (adjusted control strategies)');
 	});
 
 	it('should handle empty long term data', () => {
@@ -198,7 +198,7 @@ describe('getPrevalenceConfigCompare', () => {
 		const series = config.series as Highcharts.SeriesSplineOptions[];
 
 		expect(series).toHaveLength(1);
-		expect(series[0].name).toBe('Present');
+		expect(series[0].name).toBe('Present (current control strategies)');
 	});
 	it('should have selected intervention in title', () => {
 		const config = getPrevalenceConfigCompare(

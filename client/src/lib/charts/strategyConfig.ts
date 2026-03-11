@@ -66,7 +66,7 @@ export const getStrategyConfig = (
 		}
 	},
 	title: {
-		text: 'Total Cases Averted vs Total Budget'
+		text: 'Total Clinical Cases Averted and Cost of Strategy'
 	},
 	subtitle: {
 		text:
@@ -77,7 +77,7 @@ export const getStrategyConfig = (
 	},
 	xAxis: {
 		title: {
-			text: 'Total budget ($USD)'
+			text: 'Total cost ($USD)'
 		},
 
 		labels: {

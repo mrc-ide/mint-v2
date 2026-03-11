@@ -42,7 +42,9 @@ test.describe('Strategise page', () => {
 
 		// chart visibility
 		await expect(
-			page.getByLabel('Interactive chart', { exact: true }).getByText('Total Cases Averted vs Total')
+			page
+				.getByLabel('Interactive chart', { exact: true })
+				.getByText('Total Clinical Cases Averted and Cost of Strategy')
 		).toBeVisible();
 
 		// individual region cards
@@ -62,7 +64,9 @@ test.describe('Strategise page', () => {
 
 		// Verify strategise data is present
 		await expect(
-			page.getByLabel('Interactive chart', { exact: true }).getByText('Total Cases Averted vs Total')
+			page
+				.getByLabel('Interactive chart', { exact: true })
+				.getByText('Total Clinical Cases Averted and Cost of Strategy')
 		).toBeVisible();
 
 		// Re-run interventions for uk region
@@ -73,7 +77,9 @@ test.describe('Strategise page', () => {
 		await page.getByRole('link', { name: 'Sub-national tailoring' }).click();
 
 		await expect(
-			page.getByLabel('Interactive chart', { exact: true }).getByText('Total Cases Averted vs Total')
+			page
+				.getByLabel('Interactive chart', { exact: true })
+				.getByText('Total Clinical Cases Averted and Cost of Strategy')
 		).toBeHidden();
 	});
 });
