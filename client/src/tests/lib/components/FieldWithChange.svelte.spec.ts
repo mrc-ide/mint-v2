@@ -32,6 +32,7 @@ describe('FieldWithChange component', () => {
 
 		await expect.element(screen.getByText('50.0%')).toBeVisible();
 	});
+
 	it("should render -ve change with '-' sign", async () => {
 		const screen = render(FieldWithChange, {
 			value: 0,
@@ -44,5 +45,20 @@ describe('FieldWithChange component', () => {
 		} as any);
 
 		await expect.element(screen.getByText('-')).toBeVisible();
+	});
+
+	it('should render invert sign for change when invertSign is true', async () => {
+		const screen = render(FieldWithChange, {
+			value: 0,
+			baseline: 5,
+			prefixUnit: '$',
+			postfixUnit: '%',
+			invertSign: true,
+			children: createRawSnippet(() => ({
+				render: () => '<div>Child Content</div>'
+			}))
+		} as any);
+
+		await expect.element(screen.getByText('+')).toBeVisible();
 	});
 });

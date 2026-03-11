@@ -33,7 +33,6 @@
 <div class="flex flex-row items-center gap-2">
 	{@render children()}
 	<span class="min-w-10 text-right text-sm font-medium tabular-nums">
-		{sign}
-		{prefixUnit}{convertToLocaleString(Math.abs(change), fractionalDigits)}{postfixUnit}</span
+		{sign} {prefixUnit}{convertToLocaleString(Math.abs(change), fractionalDigits)}{postfixUnit}</span
 	>
 </div>

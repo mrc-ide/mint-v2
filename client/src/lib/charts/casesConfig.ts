@@ -205,7 +205,7 @@ export const getCasesCompareConfig = ({
 			height: 450
 		},
 		title: {
-			text: 'Present vs Long term - Total Cases vs Total Cost'
+			text: 'Total Clinical Cases and Cost of Strategy'
 		},
 		subtitle: {
 			text: 'Step lines show the most cost-effective intervention at each cost level',

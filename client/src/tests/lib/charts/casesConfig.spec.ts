@@ -494,17 +494,17 @@ describe('cases compare config', () => {
 			expect(config).toBeDefined();
 			expect(config.chart?.type).toBe('line');
 			expect(config.chart?.height).toBe(450);
-			expect(config.title?.text).toBe('Present vs Long term - Total Cases vs Total Cost');
-			expect(config.subtitle?.text).toBe('Step lines indicate changes in intervention strategy as budget increases.');
+			expect(config.title?.text).toBe('Total Clinical Cases and Cost of Strategy');
+			expect(config.subtitle?.text).toBe('Step lines show the most cost-effective intervention at each cost level');
 		});
 
 		it('should include both Present and Long term series when newCases has data', () => {
 			const config = getCasesCompareConfig(compareTotals);
 
 			expect(config.series).toHaveLength(3);
-			expect((config.series as any)[0].name).toBe('Present');
-			expect((config.series as any)[1].name).toBe('Long term (baseline only)');
-			expect((config.series as any)[2].name).toBe('Long term (baseline + control strategy)');
+			expect((config.series as any)[0].name).toBe('Present (current control strategy)');
+			expect((config.series as any)[1].name).toBe('Long-term (current control strategy)');
+			expect((config.series as any)[2].name).toBe('Long-term (adjusted control strategy)');
 		});
 
 		it('should include only Present series when newCases is empty', () => {
@@ -517,7 +517,7 @@ describe('cases compare config', () => {
 			});
 
 			expect(config.series).toHaveLength(1);
-			expect((config.series as any)[0].name).toBe('Present');
+			expect((config.series as any)[0].name).toBe('Present (current control strategy)');
 		});
 
 		it('should apply breaks to xAxis when data points exist', () => {

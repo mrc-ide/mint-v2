@@ -69,7 +69,7 @@ describe('getStrategyConfig', () => {
 
 		expect(config.chart?.type).toBe('area');
 		expect(config.chart?.height).toBe(450);
-		expect(config.title?.text).toBe('Total Cases Averted vs Total Budget');
+		expect(config.title?.text).toBe('Total Clinical Cases Averted and Cost of Strategy');
 	});
 
 	it('should configure xAxis with min and explored budget plotline', () => {
