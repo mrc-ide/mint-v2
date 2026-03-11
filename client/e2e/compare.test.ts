@@ -56,17 +56,17 @@ test.describe('E2E Compare Page', () => {
 		const prevalencePlot = page.getByRole('region', { name: 'prevalence compare graph' });
 		await expect(prevalencePlot).toBeVisible();
 		await expect(
-			prevalencePlot.getByRole('button', { name: 'Show Long-term (current control strategy)' })
+			prevalencePlot.getByRole('button', { name: 'Show Long-term (current control strategies)' })
 		).toBeVisible();
 		await expect(
-			prevalencePlot.getByRole('button', { name: 'Show Long-term (current control strategy)' })
+			prevalencePlot.getByRole('button', { name: 'Show Long-term (current control strategies)' })
 		).toBeVisible();
 		await expect(prevalencePlot.getByRole('button', { name: 'Show Present' })).toBeVisible();
 		// cases plot
 		const casesPlot = page.getByRole('region', { name: 'cases compare graph' });
 		await expect(casesPlot).toBeVisible();
-		await expect(casesPlot.getByRole('button', { name: 'Show Long-term (current control strategy)' })).toBeVisible();
-		await expect(casesPlot.getByRole('button', { name: 'Show Long-term (adjusted control strategy)' })).toBeVisible();
+		await expect(casesPlot.getByRole('button', { name: 'Show Long-term (current control strategies)' })).toBeVisible();
+		await expect(casesPlot.getByRole('button', { name: 'Show Long-term (adjusted control strategies)' })).toBeVisible();
 		await expect(casesPlot.getByRole('button', { name: 'Show Present' })).toBeVisible();
 	});
 
@@ -77,9 +77,9 @@ test.describe('E2E Compare Page', () => {
 		await page.getByRole('tab', { name: 'Table' }).click();
 		await expect(page.getByRole('table')).toBeVisible();
 		await expect(page.getByRole('columnheader', { name: 'Intervention' })).toBeVisible();
-		await expect(page.getByRole('columnheader', { name: 'Long-term (current control strategy)' })).toBeVisible();
-		await expect(page.getByRole('columnheader', { name: 'Present (current control strategy)' })).toBeVisible();
-		await expect(page.getByRole('columnheader', { name: 'Long-term (adjusted control strategy)' })).toBeVisible();
+		await expect(page.getByRole('columnheader', { name: 'Long-term (current control strategies)' })).toBeVisible();
+		await expect(page.getByRole('columnheader', { name: 'Present (current control strategies)' })).toBeVisible();
+		await expect(page.getByRole('columnheader', { name: 'Long-term (adjusted control strategies)' })).toBeVisible();
 
 		const allCostColumns = await page.getByRole('columnheader', { name: /cost/i }).all();
 		expect(allCostColumns.length).toBe(3);

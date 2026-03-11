@@ -137,9 +137,9 @@ describe('compareCasesTable', () => {
 	it('compareCasesTableColumns contains expected top-level groups', () => {
 		expect(compareCasesTableColumns.map((c: any) => c.header)).toEqual([
 			'Intervention',
-			'Present (current control strategy)',
-			'Long-term (current control strategy)',
-			'Long-term (adjusted control strategy)'
+			'Present (current control strategies)',
+			'Long-term (current control strategies)',
+			'Long-term (adjusted control strategies)'
 		]);
 	});
 

@@ -292,9 +292,9 @@ describe('cases compare config', () => {
 
 	describe('createCasesCompareSeries', () => {
 		it('should create a series with correct name and data points', () => {
-			const series = createCasesCompareSeries(totals, 'Present (current control strategy)');
+			const series = createCasesCompareSeries(totals, 'Present (current control strategies)');
 
-			expect(series.name).toBe('Present (current control strategy)');
+			expect(series.name).toBe('Present (current control strategies)');
 			expect(series.type).toBe('line');
 			expect(series.step).toBe('left');
 
@@ -502,9 +502,9 @@ describe('cases compare config', () => {
 			const config = getCasesCompareConfig(compareTotals);
 
 			expect(config.series).toHaveLength(3);
-			expect((config.series as any)[0].name).toBe('Present (current control strategy)');
-			expect((config.series as any)[1].name).toBe('Long-term (current control strategy)');
-			expect((config.series as any)[2].name).toBe('Long-term (adjusted control strategy)');
+			expect((config.series as any)[0].name).toBe('Present (current control strategies)');
+			expect((config.series as any)[1].name).toBe('Long-term (current control strategies)');
+			expect((config.series as any)[2].name).toBe('Long-term (adjusted control strategies)');
 		});
 
 		it('should include only Present series when newCases is empty', () => {
@@ -517,7 +517,7 @@ describe('cases compare config', () => {
 			});
 
 			expect(config.series).toHaveLength(1);
-			expect((config.series as any)[0].name).toBe('Present (current control strategy)');
+			expect((config.series as any)[0].name).toBe('Present (current control strategies)');
 		});
 
 		it('should apply breaks to xAxis when data points exist', () => {

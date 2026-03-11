@@ -118,9 +118,9 @@ export const getPrevalenceConfigCompare = (
 	selectedIntervention: ScenarioLabel
 ): Highcharts.Options => {
 	const series: Highcharts.SeriesSplineOptions[] = [
-		{ data: present.prevalence, name: 'Present (current control strategy)' },
-		{ data: baselineLongTerm.prevalence, name: 'Long-term (current control strategy)' },
-		{ data: fullLongTerm.prevalence, name: 'Long-term (adjusted control strategy)' }
+		{ data: present.prevalence, name: 'Present (current control strategies)' },
+		{ data: baselineLongTerm.prevalence, name: 'Long-term (current control strategies)' },
+		{ data: fullLongTerm.prevalence, name: 'Long-term (adjusted control strategies)' }
 	].flatMap(({ data, name }) => createComparisonSeries(data, selectedIntervention, name));
 
 	return {

@@ -49,12 +49,12 @@ describe('Compare CompareResults component', () => {
 		await expect.element(screen.getByRole('region', { name: 'prevalence compare graph' })).toBeVisible();
 		await expect.element(screen.getByRole('region', { name: 'cases compare graph' })).toBeVisible();
 
-		const presentLegendLabels = screen.getByRole('button', { name: 'Show Present (current control strategy)' }).all();
+		const presentLegendLabels = screen.getByRole('button', { name: 'Show Present (current control strategies)' }).all();
 		const baselineLongTermLegendLabels = screen
-			.getByRole('button', { name: 'Show Long-term (current control strategy)' })
+			.getByRole('button', { name: 'Show Long-term (current control strategies)' })
 			.all();
 		const fullLongTermLegendLabels = screen
-			.getByRole('button', { name: 'Show Long-term (adjusted control strategy)' })
+			.getByRole('button', { name: 'Show Long-term (adjusted control strategies)' })
 			.all();
 		// cases + prevalence for each of the 3 series types
 		for (let i = 0; i < 2; i++) {
@@ -71,13 +71,13 @@ describe('Compare CompareResults component', () => {
 
 		await expect.element(screen.getByRole('columnheader', { name: 'Intervention' })).toBeVisible();
 		await expect
-			.element(screen.getByRole('columnheader', { name: 'Present (current control strategy)' }))
+			.element(screen.getByRole('columnheader', { name: 'Present (current control strategies)' }))
 			.toBeVisible();
 		await expect
-			.element(screen.getByRole('columnheader', { name: 'Long-term (current control strategy)' }))
+			.element(screen.getByRole('columnheader', { name: 'Long-term (current control strategies)' }))
 			.toBeVisible();
 		await expect
-			.element(screen.getByRole('columnheader', { name: 'Long-term (adjusted control strategy)' }))
+			.element(screen.getByRole('columnheader', { name: 'Long-term (adjusted control strategies)' }))
 			.toBeVisible();
 	});
 

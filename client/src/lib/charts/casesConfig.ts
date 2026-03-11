@@ -116,9 +116,9 @@ export const createCasesCompareDataPoints = (
 export const createCasesCompareSeries = (
 	totalCasesAndCosts: Partial<Record<Scenario, ScenarioTotals>>,
 	name:
-		| 'Present (current control strategy)'
-		| 'Long-term (adjusted control strategy)'
-		| 'Long-term (current control strategy)'
+		| 'Present (current control strategies)'
+		| 'Long-term (adjusted control strategies)'
+		| 'Long-term (current control strategies)'
 ): SeriesLineOptions => ({
 	name,
 	type: 'line',
@@ -190,12 +190,12 @@ export const getCasesCompareConfig = ({
 	baselineLongTermTotals,
 	fullLongTermTotals
 }: CompareTotals): Options => {
-	const presentSeries = createCasesCompareSeries(presentTotals, 'Present (current control strategy)');
+	const presentSeries = createCasesCompareSeries(presentTotals, 'Present (current control strategies)');
 	const baselineLongTermSeries = createCasesCompareSeries(
 		baselineLongTermTotals,
-		'Long-term (current control strategy)'
+		'Long-term (current control strategies)'
 	);
-	const fullLongTermSeries = createCasesCompareSeries(fullLongTermTotals, 'Long-term (adjusted control strategy)');
+	const fullLongTermSeries = createCasesCompareSeries(fullLongTermTotals, 'Long-term (adjusted control strategies)');
 	const presentData = presentSeries.data as PointOptionsObject[];
 	const fullLongTermData = fullLongTermSeries.data as PointOptionsObject[];
 
