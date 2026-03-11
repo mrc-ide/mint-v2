@@ -63,7 +63,9 @@
 	{#if !isSubGroupCollapsed(collapsedSubGroups, group.id, subGroup.id)}
 		<div id={`subgroup-${group.id}-${subGroup.id}`} class="flex flex-col gap-5" transition:slide>
 			{#each subGroup.fields as field (field.id)}
-				<DynamicFormField {field} {form} {errors} {onFieldChange} {isInputsDisabled} />
+				{#if !field.hidden}
+					<DynamicFormField {field} {form} {errors} {onFieldChange} {isInputsDisabled} />
+				{/if}
 			{/each}
 		</div>
 	{/if}
