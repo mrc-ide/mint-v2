@@ -294,7 +294,7 @@ describe('cases compare config', () => {
 		it('should create a series with correct name and data points', () => {
 			const series = createCasesCompareSeries(totals, 'Present (current control strategy)');
 
-			expect(series.name).toBe('Present');
+			expect(series.name).toBe('Present (current control strategy)');
 			expect(series.type).toBe('line');
 			expect(series.step).toBe('left');
 
