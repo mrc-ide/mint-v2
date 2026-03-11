@@ -33,6 +33,7 @@ def get_compare_parameters() -> CompareParametersResponse:
     form_options = get_dynamic_form_options()
     baseline_param_names = [
         ("current_malaria_prevalence", "Baseline prevalence"),
+        ("mosquito_delta", "Change in human biting rate"),
     ]
     intervention_param_names = [
         (
@@ -65,6 +66,7 @@ def create_intervention_compare_parameter(
         InterventionCompareCost(
             cost_name=cost_field["id"],
             cost_label=cost_field.get("label", cost_field["id"]),
+            step=cost_field.get("step", 1.0),
         )
         for cost_field in cost_fields
     ]
@@ -84,6 +86,7 @@ def create_compare_parameter(
         label=label,
         min=field.get("min", 0.0),
         max=field.get("max", 100.0),
+        step=field.get("step", 1.0),
     )
 
 

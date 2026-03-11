@@ -1,17 +1,18 @@
-import { describe, it, expect } from 'vitest';
 import {
 	createBreakToMinimizeEmptySpace,
 	createCasesCompareDataPoints,
 	createCasesCompareSeries,
-	getCasesConfig,
+	createCompareTooltipHtml,
+	filterInefficientStrategies,
 	getCasesCompareConfig,
-	createCompareTooltipHtml
+	getCasesConfig,
+	getClosestPoint
 } from '$lib/charts/casesConfig';
 import * as processCases from '$lib/process-results/processCases';
-import type { CasesData, Scenario } from '$lib/types/userState';
-import type { FormValue } from '$lib/components/dynamic-region-form/types';
-import * as costs from '$lib/process-results/costs';
+import type { CompareTotals } from '$lib/types/compare';
+import type { Scenario } from '$lib/types/userState';
 import type { PointOptionsObject } from 'highcharts';
+import { describe, expect, it } from 'vitest';
 describe('getCasesConfig', () => {
 	const mockCasesAverted: Partial<Record<Scenario, processCases.CasesAverted>> = {
 		irs_only: {
@@ -194,93 +195,119 @@ describe('getCasesConfig', () => {
 });
 
 describe('cases compare config', () => {
-	const mockCases: CasesData[] = [
-		{ scenario: 'irs_only', casesPer1000: 10, year: 2 },
-		{ scenario: 'irs_only', casesPer1000: 10, year: 3 },
-		{ scenario: 'py_only_only', casesPer1000: 20, year: 2 },
-		{ scenario: 'py_only_only', casesPer1000: 20, year: 3 },
-		{ scenario: 'py_only_with_lsm', casesPer1000: 15, year: 2 },
-		{ scenario: 'py_only_with_lsm', casesPer1000: 15, year: 3 }
-	];
-
-	const mockPresentFormValues: Record<string, FormValue> = {
-		population: 10000
+	const totals: CompareTotals['presentTotals'] = {
+		py_only_only: {
+			totalCost: 1000,
+			totalCases: 500
+		},
+		irs_only: {
+			// inefficient strategy (higher cost, more cases than py_only_only)
+			totalCost: 1100,
+			totalCases: 600
+		},
+		lsm_only: {
+			totalCost: 1200,
+			totalCases: 300
+		}
 	};
-	const mockLongTermFormValues: Record<string, FormValue> = {
-		population: 20000
+	const compareTotals: CompareTotals = {
+		presentTotals: totals,
+		baselineLongTermTotals: totals,
+		fullLongTermTotals: totals
 	};
 
-	beforeEach(() => {
-		vi.resetAllMocks();
-		vi.spyOn(processCases, 'collectPostInterventionCases');
-		vi.spyOn(processCases, 'getTotalCasesPer1000').mockReturnValue(100);
-		vi.spyOn(processCases, 'convertPer1000ToTotal').mockReturnValue(1000);
-		vi.spyOn(costs, 'getTotalCostsPerScenario').mockReturnValue({
-			irs_only: 5000,
-			py_only_only: 2000,
-			py_only_with_lsm: 8000
+	describe('getClosesPoint', () => {
+		it('getClosestPoint should return null for empty series data', () => {
+			const result = getClosestPoint(1000, [] as any[]);
+			expect(result).toBeNull();
+		});
+
+		it('getClosestPoint should return nearest point across all series', () => {
+			const p1 = { x: 1000, options: { custom: { intervention: 'A' } } };
+			const p2 = { x: 2600, options: { custom: { intervention: 'B' } } };
+			const p3 = { x: 1800, options: { custom: { intervention: 'C' } } };
+
+			const allSeries = [{ data: [p1, p2] }, { data: [p3] }] as any[];
+
+			const result = getClosestPoint(2000, allSeries);
+
+			expect(result).toBe(p3);
+		});
+
+		it('getClosestPoint should keep first encountered point on distance tie', () => {
+			const left = { x: 100, options: { custom: { intervention: 'Left' } } };
+			const right = { x: 300, options: { custom: { intervention: 'Right' } } };
+			const allSeries = [{ data: [left, right] }] as any[];
+
+			const result = getClosestPoint(200, allSeries);
+
+			expect(result).toBe(left);
 		});
 	});
+	describe('filterInefficientStrategies', () => {
+		it('filterInefficientStrategies should sort by cost and keep only strictly improving strategies', () => {
+			const input = [
+				{ scenario: 'irs_only', totalCost: 5000, totalCases: 1000 },
+				{ scenario: 'py_only_only', totalCost: 2000, totalCases: 1200 },
+				{ scenario: 'py_only_with_lsm', totalCost: 3000, totalCases: 1100 },
+				{ scenario: 'irs_only', totalCost: 4000, totalCases: 1150 }
+			] as any[];
 
-	describe('createCasesCompareDataPoints', () => {
-		it('should return sorted data points based on totalCost in ascending order', () => {
-			const result = createCasesCompareDataPoints(mockCases, mockPresentFormValues);
+			const result = filterInefficientStrategies(input);
 
-			expect(result[0]).toEqual({
-				scenario: 'py_only_only',
-				totalCases: 1000,
-				totalCost: 2000
-			});
-			expect(result[1]).toEqual({
-				scenario: 'irs_only',
-				totalCases: 1000,
-				totalCost: 5000
-			});
-			expect(result[2]).toEqual({
-				scenario: 'py_only_with_lsm',
-				totalCases: 1000,
-				totalCost: 8000
-			});
-
-			expect(processCases.collectPostInterventionCases).toHaveBeenCalledWith(mockCases);
-			expect(costs.getTotalCostsPerScenario).toHaveBeenCalledWith(
-				['py_only_only', 'irs_only', 'py_only_with_lsm'],
-				mockPresentFormValues
-			);
-			expect(processCases.getTotalCasesPer1000).toHaveBeenCalledTimes(3);
-			expect(processCases.convertPer1000ToTotal).toHaveBeenCalledTimes(3);
-			expect(processCases.convertPer1000ToTotal).toHaveBeenCalledWith(100, mockPresentFormValues['population']);
+			expect(result).toEqual([
+				{ scenario: 'py_only_only', totalCost: 2000, totalCases: 1200 },
+				{ scenario: 'py_only_with_lsm', totalCost: 3000, totalCases: 1100 },
+				{ scenario: 'irs_only', totalCost: 5000, totalCases: 1000 }
+			]);
 		});
 
-		it('should handle empty cases array', () => {
-			const result = createCasesCompareDataPoints([], mockPresentFormValues);
+		it('filterInefficientStrategies should drop equal-cases higher-cost points', () => {
+			const input = [
+				{ scenario: 'irs_only', totalCost: 1000, totalCases: 1000 },
+				{ scenario: 'py_only_only', totalCost: 2000, totalCases: 1000 }
+			] as any[];
+
+			const result = filterInefficientStrategies(input);
+
+			expect(result).toHaveLength(1);
+			expect(result[0]).toEqual({ scenario: 'irs_only', totalCost: 1000, totalCases: 1000 });
+		});
+	});
+	describe('createCasesCompareDataPoints', () => {
+		it('should return data points filtering out inefficient strategies', () => {
+			const result = createCasesCompareDataPoints(totals);
+
+			expect(result).toEqual([
+				{ scenario: 'py_only_only', totalCases: 500, totalCost: 1000 },
+				{ scenario: 'lsm_only', totalCases: 300, totalCost: 1200 }
+			]);
+		});
+
+		it('should handle empty object', () => {
+			const result = createCasesCompareDataPoints({});
 			expect(result).toEqual([]);
 		});
 	});
 
 	describe('createCasesCompareSeries', () => {
 		it('should create a series with correct name and data points', () => {
-			const series = createCasesCompareSeries(mockCases, mockPresentFormValues, 'Present');
+			const series = createCasesCompareSeries(totals, 'Present');
 
 			expect(series.name).toBe('Present');
 			expect(series.type).toBe('line');
 			expect(series.step).toBe('left');
 
-			expect(series.data).toHaveLength(3);
+			expect(series.data).toHaveLength(2);
 			expect(series.data![0]).toEqual({
-				x: 2000,
-				y: 1000,
+				x: 1000,
+				y: 500,
 				custom: { intervention: 'Pyrethroid ITN (Only)' }
 			});
 			expect(series.data![1]).toEqual({
-				x: 5000,
-				y: 1000,
-				custom: { intervention: 'IRS Only' }
-			});
-			expect(series.data![2]).toEqual({
-				x: 8000,
-				y: 1000,
-				custom: { intervention: 'Pyrethroid ITN (with LSM)' }
+				x: 1200,
+				y: 300,
+				custom: { intervention: 'LSM Only' }
 			});
 		});
 	});
@@ -461,24 +488,8 @@ describe('cases compare config', () => {
 	});
 
 	describe('getCasesCompareConfig integration', () => {
-		const mockCurrentCases: CasesData[] = [
-			{ scenario: 'irs_only', casesPer1000: 10, year: 2 },
-			{ scenario: 'irs_only', casesPer1000: 10, year: 3 }
-		];
-
-		const mockNewCases: CasesData[] = [
-			{ scenario: 'py_only_only', casesPer1000: 20, year: 2 },
-			{ scenario: 'py_only_only', casesPer1000: 20, year: 3 }
-		];
-
 		it('should return a valid Highcharts Options object', () => {
-			const config = getCasesCompareConfig(
-				mockCurrentCases,
-				mockNewCases,
-				mockNewCases,
-				mockPresentFormValues,
-				mockLongTermFormValues
-			);
+			const config = getCasesCompareConfig(compareTotals);
 
 			expect(config).toBeDefined();
 			expect(config.chart?.type).toBe('line');
@@ -488,13 +499,7 @@ describe('cases compare config', () => {
 		});
 
 		it('should include both Present and Long term series when newCases has data', () => {
-			const config = getCasesCompareConfig(
-				mockCurrentCases,
-				mockNewCases,
-				mockNewCases,
-				mockPresentFormValues,
-				mockLongTermFormValues
-			);
+			const config = getCasesCompareConfig(compareTotals);
 
 			expect(config.series).toHaveLength(3);
 			expect((config.series as any)[0].name).toBe('Present');
@@ -505,55 +510,24 @@ describe('cases compare config', () => {
 		it('should include only Present series when newCases is empty', () => {
 			vi.spyOn(processCases, 'collectPostInterventionCases').mockReturnValue({} as any);
 
-			const config = getCasesCompareConfig(mockCurrentCases, [], [], mockPresentFormValues, mockLongTermFormValues);
+			const config = getCasesCompareConfig({
+				presentTotals: totals,
+				baselineLongTermTotals: {},
+				fullLongTermTotals: {}
+			});
 
 			expect(config.series).toHaveLength(1);
 			expect((config.series as any)[0].name).toBe('Present');
 		});
 
 		it('should apply breaks to xAxis when data points exist', () => {
-			vi.spyOn(processCases, 'collectPostInterventionCases').mockReturnValue({
-				irs_only: mockCurrentCases.filter((c) => c.scenario === 'irs_only'),
-				py_only_only: mockNewCases.filter((c) => c.scenario === 'py_only_only')
-			} as any);
-			vi.spyOn(costs, 'getTotalCostsPerScenario').mockReturnValue({
-				irs_only: 1000,
-				py_only_only: 5000
-			});
-
-			const config = getCasesCompareConfig(
-				mockCurrentCases,
-				mockNewCases,
-				mockNewCases,
-				mockPresentFormValues,
-				mockLongTermFormValues
-			);
+			const config = getCasesCompareConfig(compareTotals);
 
 			expect((config.xAxis as any).breaks).toBeDefined();
 		});
 
-		it('should pass data to createCasesCompareSeries correctly', () => {
-			getCasesCompareConfig(
-				mockCurrentCases,
-				mockNewCases,
-				mockNewCases,
-				mockPresentFormValues,
-				mockLongTermFormValues
-			);
-
-			// Verify the function processes the data through helper functions
-			expect(processCases.collectPostInterventionCases).toHaveBeenCalled();
-			expect(costs.getTotalCostsPerScenario).toHaveBeenCalled();
-		});
-
 		it('should set tooltip formatter to createCompareTooltipHtml', () => {
-			const config = getCasesCompareConfig(
-				mockCurrentCases,
-				mockNewCases,
-				mockNewCases,
-				mockPresentFormValues,
-				mockLongTermFormValues
-			);
+			const config = getCasesCompareConfig(compareTotals);
 
 			expect(config.tooltip?.formatter).toBe(createCompareTooltipHtml);
 		});

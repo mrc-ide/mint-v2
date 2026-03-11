@@ -131,6 +131,7 @@ class TestCreateCompareParameter:
             "label": "Prevalence",
             "min": 2,
             "max": 70,
+            "step": 1.0,
         }
 
     def test_create_compare_parameter_no_min_max(self):
@@ -143,6 +144,7 @@ class TestCreateCompareParameter:
             "label": "No Min Max",
             "min": 0.0,
             "max": 100.0,
+            "step": 1.0,
         }
 
     def test_create_intervention_compare_parameter(self):
@@ -155,9 +157,10 @@ class TestCreateCompareParameter:
             "label": "ITN Usage",
             "min": 0.0,
             "max": 100.0,
+            "step": 1.0,
             "linked_costs": [
-                {"cost_name": "itn_cost1", "cost_label": "ITN Cost 1"},
-                {"cost_name": "itn_cost2", "cost_label": "ITN Cost 2"},
+                {"cost_name": "itn_cost1", "cost_label": "ITN Cost 1", "step": 1.0},
+                {"cost_name": "itn_cost2", "cost_label": "ITN Cost 2", "step": 1.0},
             ],
         }
 
@@ -170,7 +173,18 @@ class TestGetCompareParameters:
         options = {"field": "test"}
         baseline_parameters = [
             CompareParameter(
-                parameter_name="preference_for_biting_in_bed", label="Preference for Biting in Bed", min=0, max=100
+                parameter_name="preference_for_biting_in_bed",
+                label="Preference for Biting in Bed",
+                min=0,
+                max=100,
+                step=1.0,
+            ),
+            CompareParameter(
+                parameter_name="mosquito_delta",
+                label="Change in human biting rate",
+                min=-99,
+                max=100,
+                step=1.0,
             ),
         ]
         intervention_parameters = [
@@ -179,9 +193,12 @@ class TestGetCompareParameters:
                 label="IRS coverage",
                 min=0,
                 max=100,
+                step=1.0,
                 linked_costs=[
                     InterventionCompareCost(
-                        cost_name="irs_household_annual_cost_product", cost_label="IRSHousehold Annual Cost Product"
+                        cost_name="irs_household_annual_cost_product",
+                        cost_label="IRSHousehold Annual Cost Product",
+                        step=1.0,
                     )
                 ],
             ),
@@ -190,8 +207,11 @@ class TestGetCompareParameters:
                 label="ITN usage",
                 min=0,
                 max=100,
+                step=1.0,
                 linked_costs=[
-                    InterventionCompareCost(cost_name="mass_distribution_cost", cost_label="Mass Distribution Cost"),
+                    InterventionCompareCost(
+                        cost_name="mass_distribution_cost", cost_label="Mass Distribution Cost", step=1.0
+                    ),
                 ],
             ),
             InterventionCompareParameter(
@@ -199,7 +219,8 @@ class TestGetCompareParameters:
                 label="LSM coverage",
                 min=0,
                 max=100,
-                linked_costs=[InterventionCompareCost(cost_name="lsm_cost", cost_label="LSM Cost")],
+                step=1.0,
+                linked_costs=[InterventionCompareCost(cost_name="lsm_cost", cost_label="LSM Cost", step=1.0)],
             ),
         ]
         mock_options.return_value = options
@@ -211,6 +232,7 @@ class TestGetCompareParameters:
         mock_options.assert_called_once()
         expected_compare_calls = [
             (("current_malaria_prevalence", "Baseline prevalence"), options),
+            (("mosquito_delta", "Change in human biting rate"), options),
         ]
         expected_intervention_compare_calls = [
             (

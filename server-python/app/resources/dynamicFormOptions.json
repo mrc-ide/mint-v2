@@ -47,6 +47,19 @@
               "step": 1,
               "unit": "%",
               "integer": true
+            },
+            {
+              "id": "mosquito_delta",
+              "label": "Change in human biting rate",
+              "required": false,
+              "hidden": true,
+              "default": 0,
+              "type": "slider",
+              "min": -99,
+              "max": 100,
+              "step": 1,
+              "unit": "%",
+              "integer": true
             }
           ]
         },
@@ -335,7 +348,7 @@
               "type": "number",
               "required": true,
               "default": 1.85,
-              "step": 0.01
+              "step": 0.1
             },
             {
               "id": "py_pbo_cost",
@@ -343,7 +356,7 @@
               "type": "number",
               "required": true,
               "default": 2.14,
-              "step": 0.01
+              "step": 0.1
             },
             {
               "id": "py_pyrrole_cost",
@@ -351,7 +364,7 @@
               "type": "number",
               "required": true,
               "default": 2.56,
-              "step": 0.01
+              "step": 0.1
             },
             {
               "id": "py_ppf_cost",
@@ -359,7 +372,7 @@
               "type": "number",
               "required": true,
               "default": 2.86,
-              "step": 0.01
+              "step": 0.1
             },
             {
               "id": "mass_distribution_cost",
@@ -368,7 +381,7 @@
               "type": "number",
               "required": true,
               "default": 2.75,
-              "step": 0.01
+              "step": 0.1
             },
             {
               "id": "continuous_itn_distribution_cost",
@@ -377,7 +390,7 @@
               "type": "number",
               "required": true,
               "default": 2.75,
-              "step": 0.01
+              "step": 0.1
             },
             {
               "id": "irs_household_annual_cost_product",

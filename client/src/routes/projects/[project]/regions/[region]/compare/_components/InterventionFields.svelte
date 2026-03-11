@@ -35,7 +35,7 @@
 		<Field.Description>Update % slider, then adjust associated cost fields</Field.Description>
 	</div>
 	{#each interventionParameters as param (param.parameterName)}
-		<Field.Field>
+		<Field.Field class="gap-3.5">
 			<Field.Label for={`${param.parameterName}-compare-slider`}>
 				<button
 					type="button"
@@ -59,6 +59,7 @@
 				onValueChange={(value: number) => onSliderChange(value, param.parameterName)}
 				max={param.max}
 				min={param.min}
+				step={param.step}
 				disabled={isLoading}
 				aria-label={`Adjust ${param.label} slider`}
 				value={longTermFormValues[param.parameterName] as number}
@@ -75,12 +76,15 @@
 						<FieldWithChange
 							value={longTermFormValues[cost.costName] as number}
 							baseline={presentFormValues[cost.costName] as number}
+							postfixUnit="%"
+							fractionalDigits={0}
+							displayChangeAsPercentage
 						>
 							<Input
 								id={`${cost.costName}-compare-input`}
 								type="number"
 								min={0}
-								step="any"
+								step={cost.step}
 								disabled={isLoading}
 								value={String(longTermFormValues[cost.costName])}
 								oninput={(e) => (longTermFormValues[cost.costName] = Number(e.currentTarget.value))}

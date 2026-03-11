@@ -74,6 +74,7 @@
         "id": { "type": "string" },
         "label": { "type": "string" },
         "helpText": { "type": "string" },
+        "hidden": { "type": "boolean" },
         "type": {
           "enum": ["number", "slider", "toggle", "multiselect", "display"]
         },

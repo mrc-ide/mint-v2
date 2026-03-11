@@ -71,6 +71,7 @@ class TestEmulatorRequest:
         assert request.Q0 == 0.8
         assert request.res_use == 0.6
         assert request.routine == 0.0
+        assert request.mosquito_delta == 0.0
 
     def test_percentage_to_fraction_conversion(self):
         data = {
@@ -89,12 +90,14 @@ class TestEmulatorRequest:
             "routine_coverage": 1,
             "irs_future": 50,
             "lsm": 25,
+            "mosquito_delta": -10,
         }
         request = EmulatorRequest(**data)
         assert request.prev == 1.0
         assert request.Q0 == 0.5
         assert request.res_use == 0.25
         assert request.py_only == 0.75
+        assert request.mosquito_delta == -0.1
 
     def test_invalid_percentage_values(self):
         data = {
@@ -159,6 +162,7 @@ class TestEmulatorScenario:
         assert scenario.irs_future == 0.0
         assert scenario.routine == 0.0
         assert scenario.lsm == 0.0
+        assert scenario.mosquito_delta == 0.0
 
     def test_scenario_creation_with_all_fields(self):
         scenario = EmulatorScenario(
@@ -238,18 +242,19 @@ class TestEmulatorResponse:
 
 class TestCompareParameter:
     def test_compare_parameter_creation(self):
-        param = CompareParameter(parameter_name="test_param", label="Test Parameter", min=0.0, max=100.0)
+        param = CompareParameter(parameter_name="test_param", label="Test Parameter", min=0.0, max=100.0, step=1.0)
         assert param.parameter_name == "test_param"
         assert param.label == "Test Parameter"
         assert param.min == 0.0
         assert param.max == 100.0
+        assert param.step == 1.0
 
 
 class TestCompareParametersResponse:
     def test_compare_parameters_response_creation(self):
         baseline_params = [
-            CompareParameter(parameter_name="param1", label="Parameter 1", min=0.0, max=50.0),
-            CompareParameter(parameter_name="param2", label="Parameter 2", min=10.0, max=60.0),
+            CompareParameter(parameter_name="param1", label="Parameter 1", min=0.0, max=50.0, step=1.0),
+            CompareParameter(parameter_name="param2", label="Parameter 2", min=10.0, max=60.0, step=1.0),
         ]
         intervention_params = [
             InterventionCompareParameter(
@@ -257,9 +262,10 @@ class TestCompareParametersResponse:
                 label="Parameter 3",
                 min=20.0,
                 max=70.0,
+                step=1.0,
                 linked_costs=[
-                    InterventionCompareCost(cost_name="cost3", cost_label="Cost 3"),
-                    InterventionCompareCost(cost_name="cost4", cost_label="Cost 4"),
+                    InterventionCompareCost(cost_name="cost3", cost_label="Cost 3", step=1.0),
+                    InterventionCompareCost(cost_name="cost4", cost_label="Cost 4", step=1.0),
                 ],
             ),
         ]
@@ -271,7 +277,9 @@ class TestCompareParametersResponse:
         assert len(response.intervention_parameters) == 1
         assert response.baseline_parameters[0].parameter_name == "param1"
         assert response.intervention_parameters[0].label == "Parameter 3"
-        assert {(cost.cost_name, cost.cost_label) for cost in response.intervention_parameters[0].linked_costs} == {
-            ("cost3", "Cost 3"),
-            ("cost4", "Cost 4"),
+        assert {
+            (cost.cost_name, cost.cost_label, cost.step) for cost in response.intervention_parameters[0].linked_costs
+        } == {
+            ("cost3", "Cost 3", 1.0),
+            ("cost4", "Cost 4", 1.0),
         }

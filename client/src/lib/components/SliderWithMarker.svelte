@@ -12,6 +12,7 @@
 		min,
 		max,
 		unit,
+		fractionalDigits = 0,
 		...restProps
 	}: WithoutChildrenOrChild<SliderPrimitive.RootProps> & {
 		value: number;
@@ -20,14 +21,15 @@
 		min: number;
 		max: number;
 		unit?: string;
+		fractionalDigits?: number;
 	} = $props();
 
 	let markerPos = $derived(((markerValue - min) / (max - min)) * 100);
 </script>
 
-<FieldWithChange {value} baseline={markerValue} postFixUnit={unit}>
+<FieldWithChange {value} baseline={markerValue} postfixUnit={unit} {fractionalDigits}>
 	<div class={cn('relative h-7 flex-1', containerClass)}>
-		<Slider bind:value={value as never} class={className} {min} {max} {...restProps} />
+		<Slider bind:value={value as never} class={className} {min} {max} {...restProps} renderThumbLabels />
 		<div class="pointer-events-none absolute top-0 h-full" style="left: {markerPos}%;">
 			<div class="z-1.5 h-full w-0.5 bg-foreground/80"></div>
 			<div class="-translate-x-1/4 text-xs text-muted-foreground">
