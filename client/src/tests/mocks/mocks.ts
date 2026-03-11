@@ -586,7 +586,8 @@ export const MOCK_COMPARE_PARAMETERS: Readonly<CompareParameters> = Object.freez
 				{
 					costName: 'irs_household_annual_cost_deployment',
 					costLabel: 'IRS annual household cost deployment',
-					step: 0.1
+					step: 0.1,
+					costDecreasesWithIncrease: false
 				}
 			]
 		},
@@ -596,7 +597,14 @@ export const MOCK_COMPARE_PARAMETERS: Readonly<CompareParameters> = Object.freez
 			min: 0,
 			max: 100,
 			step: 1,
-			linkedCosts: [{ costName: 'mass_distribution_cost', costLabel: 'Mass distribution cost', step: 0.1 }]
+			linkedCosts: [
+				{
+					costName: 'mass_distribution_cost',
+					costLabel: 'Mass distribution cost',
+					step: 0.1,
+					costDecreasesWithIncrease: false
+				}
+			]
 		},
 		{
 			parameterName: 'lsm',
@@ -604,7 +612,7 @@ export const MOCK_COMPARE_PARAMETERS: Readonly<CompareParameters> = Object.freez
 			min: 0,
 			max: 90,
 			step: 1,
-			linkedCosts: [{ costName: 'lsm_cost', costLabel: 'LSM annual cost', step: 0.1 }]
+			linkedCosts: [{ costName: 'lsm_cost', costLabel: 'LSM annual cost', step: 0.1, costDecreasesWithIncrease: false }]
 		}
 	]
 });
