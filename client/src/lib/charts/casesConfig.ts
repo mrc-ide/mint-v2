@@ -208,7 +208,7 @@ export const getCasesCompareConfig = ({
 			text: 'Present vs Long term - Total Cases vs Total Cost'
 		},
 		subtitle: {
-			text: 'Step lines indicate changes in intervention strategy as budget increases.',
+			text: 'Step lines show the most cost-effective intervention at each cost level',
 			style: {
 				color: 'var(--muted-foreground)'
 			}

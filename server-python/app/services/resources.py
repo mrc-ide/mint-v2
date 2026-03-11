@@ -5,10 +5,12 @@ from typing import Annotated
 import jsonschema
 
 from app.models import (
+    BaselineParameterOption,
     CompareParameter,
     CompareParametersResponse,
     InterventionCompareCost,
     InterventionCompareParameter,
+    InterventionParameterOption,
 )
 
 APP_DIR = Path(__file__).parent.parent
@@ -32,22 +34,26 @@ def get_dynamic_form_options() -> dict:
 def get_compare_parameters() -> CompareParametersResponse:
     form_options = get_dynamic_form_options()
     baseline_param_options = [
-        {"name": "current_malaria_prevalence", "label": "Prevalence (0-5 year olds)"},
-        {"name": "mosquito_delta", "label": "Human Biting Rate (all ages)"},
+        BaselineParameterOption(name="current_malaria_prevalence", label="Prevalence (0-5 year olds)"),
+        BaselineParameterOption(name="mosquito_delta", label="Human Biting Rate (all ages)"),
     ]
     intervention_param_options = [
-        {
-            "name": "itn_future",
-            "linked_costs": [("people_per_bednet", True), ("mass_distribution_cost", False), ("continuous_itn_distribution_cost", False)]
-        },
-        {
-            "name": "irs_future",
-            "linked_costs": [("irs_household_annual_cost_product", False), ("irs_household_annual_cost_deployment", False)]
-        },
-        {
-            "name": "lsm",
-            "linked_costs": [("lsm_cost", False)]
-        },
+        InterventionParameterOption(
+            name="itn_future",
+            linked_costs=[
+                ("people_per_bednet", True),
+                ("mass_distribution_cost", False),
+                ("continuous_itn_distribution_cost", False),
+            ],
+        ),
+        InterventionParameterOption(
+            name="irs_future",
+            linked_costs=[
+                ("irs_household_annual_cost_product", False),
+                ("irs_household_annual_cost_deployment", False),
+            ],
+        ),
+        InterventionParameterOption(name="lsm", linked_costs=[("lsm_cost", False)]),
     ]
 
     baseline_parameters = [create_compare_parameter(param, form_options) for param in baseline_param_options]
@@ -62,12 +68,15 @@ def get_compare_parameters() -> CompareParametersResponse:
 
 
 def create_intervention_compare_parameter(
-    param: Annotated[dict[str, str | list[tuple[str, bool]]], "name, linked costs [(linked cost name, cost_decreases_with_increase)]"],
+    param: InterventionParameterOption,
     form_options: dict,
 ) -> InterventionCompareParameter:
-    name, linked_costs_config = param["name"], param["linked_costs"]
+    name, linked_costs_config = param.name, param.linked_costs
     intervention_field = get_form_field(name, form_options)
-    cost_fields = [(get_form_field(cost_name, form_options), cost_decreases_with_increase) for cost_name, cost_decreases_with_increase in linked_costs_config]
+    cost_fields = [
+        (get_form_field(cost_name, form_options), cost_decreases_with_increase)
+        for cost_name, cost_decreases_with_increase in linked_costs_config
+    ]
     linked_costs = [
         InterventionCompareCost(
             cost_name=cost_field["id"],
@@ -79,15 +88,15 @@ def create_intervention_compare_parameter(
     ]
 
     return InterventionCompareParameter(
-        **create_compare_parameter({"name": name, "label": intervention_field.get("label", name)}, form_options).model_dump(),
+        **create_compare_parameter(
+            BaselineParameterOption(name=name, label=intervention_field.get("label", name)), form_options
+        ).model_dump(),
         linked_costs=linked_costs,
     )
 
 
-def create_compare_parameter(
-    param: Annotated[dict[str, str], "parameter name, label"], form_options: dict
-) -> CompareParameter:
-    name, label = param["name"], param["label"]
+def create_compare_parameter(param: BaselineParameterOption, form_options: dict) -> CompareParameter:
+    name, label = param.name, param.label
     field = get_form_field(name, form_options)
     return CompareParameter(
         parameter_name=name,

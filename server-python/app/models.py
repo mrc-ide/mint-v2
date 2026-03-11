@@ -125,6 +125,7 @@ class InterventionCompareCost(BaseModel):
     step: float
     cost_decreases_with_increase: bool = Field(serialization_alias="costDecreasesWithIncrease")
 
+
 class InterventionCompareParameter(CompareParameter):
     linked_costs: list[InterventionCompareCost] = Field(serialization_alias="linkedCosts")
 
@@ -132,3 +133,13 @@ class InterventionCompareParameter(CompareParameter):
 class CompareParametersResponse(BaseModel):
     baseline_parameters: list[CompareParameter] = Field(serialization_alias="baselineParameters")
     intervention_parameters: list[InterventionCompareParameter] = Field(serialization_alias="interventionParameters")
+
+
+class BaselineParameterOption(BaseModel):
+    name: str
+    label: str
+
+
+class InterventionParameterOption(BaseModel):
+    name: str
+    linked_costs: list[tuple[str, bool]]
