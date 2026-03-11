@@ -1,7 +1,8 @@
 import type { FormValue } from '$lib/components/dynamic-region-form/types';
 import { apiFetch } from '$lib/fetch';
+import type { ScenarioTotals } from '$lib/process-results/processCases';
 import type { ResponseBodySuccess } from '$lib/types/api';
-import type { EmulatorResults } from '$lib/types/userState';
+import type { EmulatorResults, Scenario } from '$lib/types/userState';
 import { regionCompareUrl } from '$lib/url';
 
 export const runCompareEmulator = async (
@@ -42,3 +43,7 @@ const triggerEmulator = async (
 			formValues
 		}
 	});
+
+export const getScenariosFromTotals = (
+	...totalsByTimeFrames: Partial<Record<Scenario, ScenarioTotals>>[]
+): Scenario[] => Array.from(new Set(totalsByTimeFrames.flatMap((summary) => Object.keys(summary) as Scenario[])));

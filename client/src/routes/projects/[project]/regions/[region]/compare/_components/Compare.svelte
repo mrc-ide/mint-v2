@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { FormValue } from '$lib/components/dynamic-region-form/types';
 	import { DEBOUNCE_DELAY_MS } from '$lib/components/dynamic-region-form/utils';
-	import Loader from '$lib/components/Loader.svelte';
 	import SliderWithMarker from '$lib/components/SliderWithMarker.svelte';
 	import * as Field from '$lib/components/ui/field';
 	import * as RadioGroup from '$lib/components/ui/radio-group';
@@ -11,8 +10,8 @@
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import { runCompareEmulator } from '../utils';
-	import InterventionFields from './InterventionFields.svelte';
 	import CompareResults from './CompareResults.svelte';
+	import InterventionFields from './InterventionFields.svelte';
 
 	interface Props {
 		presentResults: EmulatorResults;
@@ -68,8 +67,8 @@
 	});
 </script>
 
-<div class="flex flex-row gap-4">
-	<div class="flex w-1/4 flex-col gap-6 rounded-md border p-4">
+<div class="grid grid-cols-4 gap-4">
+	<div class="col-span-1 flex flex-col gap-6 rounded-md border p-4">
 		<Field.Group class="gap-4">
 			<Field.Field>
 				<Field.Label for="parameter-select">What do you want to adjust?</Field.Label>
@@ -86,7 +85,7 @@
 					{/each}
 				</RadioGroup.Root>
 			</Field.Field>
-			<Field.Field>
+			<Field.Field class="gap-3.5">
 				<Field.Label for="baseline-parameter-slider">Change from baseline (%)</Field.Label>
 				<SliderWithMarker
 					id="baseline-parameter-slider"
@@ -95,6 +94,7 @@
 					onValueChange={(value: number) => onSliderChange(value, selectedBaselineParameter.parameterName)}
 					max={selectedBaselineParameter.max}
 					min={selectedBaselineParameter.min}
+					step={selectedBaselineParameter.step}
 					disabled={isLoading}
 					aria-label="Adjust baseline parameter slider"
 					markerValue={presentFormValues[selectedBaselineParameter.parameterName] as number}
@@ -112,23 +112,17 @@
 			{onSliderChange}
 		/>
 	</div>
-
-	{#if isLoading}
-		<div class="flex h-[500px] flex-3/4 items-center justify-center">
-			<Loader text="Loading..." />
-		</div>
-	{:else}
-		<CompareResults
-			{chartTheme}
-			results={{
-				present: presentResults,
-				fullLongTerm: fullLongTermResults,
-				baselineLongTerm: baselineLongTermResults
-			}}
-			formValues={{
-				presentFormValues,
-				longTermFormValues
-			}}
-		/>
-	{/if}
+	<CompareResults
+		{isLoading}
+		{chartTheme}
+		results={{
+			present: presentResults,
+			fullLongTerm: fullLongTermResults,
+			baselineLongTerm: baselineLongTermResults
+		}}
+		formValues={{
+			presentFormValues,
+			longTermFormValues
+		}}
+	/>
 </div>

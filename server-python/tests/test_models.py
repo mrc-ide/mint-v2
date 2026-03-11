@@ -238,18 +238,19 @@ class TestEmulatorResponse:
 
 class TestCompareParameter:
     def test_compare_parameter_creation(self):
-        param = CompareParameter(parameter_name="test_param", label="Test Parameter", min=0.0, max=100.0)
+        param = CompareParameter(parameter_name="test_param", label="Test Parameter", min=0.0, max=100.0, step=1.0)
         assert param.parameter_name == "test_param"
         assert param.label == "Test Parameter"
         assert param.min == 0.0
         assert param.max == 100.0
+        assert param.step == 1.0
 
 
 class TestCompareParametersResponse:
     def test_compare_parameters_response_creation(self):
         baseline_params = [
-            CompareParameter(parameter_name="param1", label="Parameter 1", min=0.0, max=50.0),
-            CompareParameter(parameter_name="param2", label="Parameter 2", min=10.0, max=60.0),
+            CompareParameter(parameter_name="param1", label="Parameter 1", min=0.0, max=50.0, step=1.0),
+            CompareParameter(parameter_name="param2", label="Parameter 2", min=10.0, max=60.0, step=1.0),
         ]
         intervention_params = [
             InterventionCompareParameter(
@@ -257,9 +258,10 @@ class TestCompareParametersResponse:
                 label="Parameter 3",
                 min=20.0,
                 max=70.0,
+                step=1.0,
                 linked_costs=[
-                    InterventionCompareCost(cost_name="cost3", cost_label="Cost 3"),
-                    InterventionCompareCost(cost_name="cost4", cost_label="Cost 4"),
+                    InterventionCompareCost(cost_name="cost3", cost_label="Cost 3", step=1.0),
+                    InterventionCompareCost(cost_name="cost4", cost_label="Cost 4", step=1.0),
                 ],
             ),
         ]
@@ -271,7 +273,9 @@ class TestCompareParametersResponse:
         assert len(response.intervention_parameters) == 1
         assert response.baseline_parameters[0].parameter_name == "param1"
         assert response.intervention_parameters[0].label == "Parameter 3"
-        assert {(cost.cost_name, cost.cost_label) for cost in response.intervention_parameters[0].linked_costs} == {
-            ("cost3", "Cost 3"),
-            ("cost4", "Cost 4"),
+        assert {
+            (cost.cost_name, cost.cost_label, cost.step) for cost in response.intervention_parameters[0].linked_costs
+        } == {
+            ("cost3", "Cost 3", 1.0),
+            ("cost4", "Cost 4", 1.0),
         }

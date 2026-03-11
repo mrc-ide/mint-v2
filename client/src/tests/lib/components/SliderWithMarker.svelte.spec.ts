@@ -2,7 +2,7 @@ import SliderWithMarker from '$lib/components/SliderWithMarker.svelte';
 import { render } from 'vitest-browser-svelte';
 
 describe('SliderWithMarker component', () => {
-	it('should render slider with marker and change value', async () => {
+	it('should render slider with marker, value and change value', async () => {
 		const value = $state(10);
 		const screen = render(SliderWithMarker, {
 			type: 'single',

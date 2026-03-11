@@ -2,38 +2,52 @@ import { MOCK_CASES_DATA, MOCK_FORM_VALUES, MOCK_PREVALENCE_DATA } from '$mocks/
 import ComparePlots from '$routes/projects/[project]/regions/[region]/compare/_components/CompareResults.svelte';
 import { render } from 'vitest-browser-svelte';
 
-describe('Compare CompareResults component', () => {
-	it('should render graphs & table with present and long term results', async () => {
-		const screen = render(ComparePlots, {
-			props: {
-				chartTheme: 'highcharts-dark',
-				results: {
-					present: {
-						cases: MOCK_CASES_DATA,
-						prevalence: MOCK_PREVALENCE_DATA,
-						eirValid: true
-					},
-					fullLongTerm: {
-						cases: MOCK_CASES_DATA,
-						prevalence: MOCK_PREVALENCE_DATA,
-						eirValid: true
-					},
-					baselineLongTerm: {
-						cases: MOCK_CASES_DATA,
-						prevalence: MOCK_PREVALENCE_DATA,
-						eirValid: true
-					}
+vi.mock('$routes/projects/[project]/regions/[region]/compare/utils', () => ({
+	getScenariosFromTotals: vi.fn(() => ['no_intervention', 'irs_only'])
+}));
+
+const renderComponent = (props: any = {}) =>
+	render(ComparePlots, {
+		props: {
+			chartTheme: 'highcharts-dark',
+			results: {
+				present: {
+					cases: MOCK_CASES_DATA,
+					prevalence: MOCK_PREVALENCE_DATA,
+					eirValid: true
 				},
-				formValues: {
-					presentFormValues: MOCK_FORM_VALUES,
-					longTermFormValues: MOCK_FORM_VALUES
+				fullLongTerm: {
+					cases: MOCK_CASES_DATA,
+					prevalence: MOCK_PREVALENCE_DATA,
+					eirValid: true
+				},
+				baselineLongTerm: {
+					cases: MOCK_CASES_DATA,
+					prevalence: MOCK_PREVALENCE_DATA,
+					eirValid: true
 				}
-			}
-		} as any);
+			},
+			formValues: {
+				presentFormValues: MOCK_FORM_VALUES,
+				longTermFormValues: MOCK_FORM_VALUES
+			},
+			isLoading: false,
+			...props
+		}
+	} as any);
+
+describe('Compare CompareResults component', () => {
+	it('should render loading state when isLoading is true', async () => {
+		const screen = renderComponent({ isLoading: true });
+
+		await expect.element(screen.getByText('Loading...')).toBeVisible();
+	});
+
+	it('should render cases and prevalence graphs by default', async () => {
+		const screen = renderComponent();
 
 		await expect.element(screen.getByRole('region', { name: 'prevalence compare graph' })).toBeVisible();
 		await expect.element(screen.getByRole('region', { name: 'cases compare graph' })).toBeVisible();
-		await expect.element(screen.getByRole('table')).toBeVisible();
 
 		const presentLegendLabels = screen.getByRole('button', { name: 'Show Present' }).all();
 		const baselineLongTermLegendLabels = screen.getByRole('button', { name: 'Show Long Term (baseline only)' }).all();
@@ -46,5 +60,34 @@ describe('Compare CompareResults component', () => {
 			await expect.element(baselineLongTermLegendLabels[i]).toBeVisible();
 			await expect.element(fullLongTermLegendLabels[i]).toBeVisible();
 		}
+	});
+
+	it("should show table view when 'Table' tab is selected", async () => {
+		const screen = renderComponent();
+
+		await screen.getByRole('tab', { name: 'Table' }).click();
+
+		await expect.element(screen.getByRole('columnheader', { name: 'Intervention' })).toBeVisible();
+		await expect.element(screen.getByRole('columnheader', { name: 'Present' })).toBeVisible();
+		await expect.element(screen.getByRole('columnheader', { name: 'Long term (baseline only)' })).toBeVisible();
+		await expect
+			.element(screen.getByRole('columnheader', { name: 'Long term (baseline + control strategy)' }))
+			.toBeVisible();
+	});
+
+	it('should show prevalence graph for specific intervention when selected in radio group', async () => {
+		const screen = renderComponent();
+
+		await expect
+			.element(
+				screen.getByRole('region', { name: 'prevalence compare graph' }).getByText('No Intervention', { exact: true })
+			)
+			.toBeVisible();
+
+		await screen.getByRole('radio', { name: 'IRS Only' }).click();
+
+		await expect
+			.element(screen.getByRole('region', { name: 'prevalence compare graph' }).getByText('IRS Only', { exact: true }))
+			.toBeVisible();
 	});
 });

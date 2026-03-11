@@ -1,60 +1,57 @@
-import { renderComponent } from '$lib/components/ui/data-table';
+import { ScenarioToLabel } from '$lib/charts/baseChart';
+import { renderComponent, renderSnippet } from '$lib/components/ui/data-table';
 import {
 	buildCompareCasesTableData,
+	casesCellSnippet,
 	compareCasesTableColumns,
 	getCasesCell,
 	getCasesHeader,
-	getCostsHeader,
-	getScenarioKeys
+	getCostsHeader
 } from '$lib/tables/compareCasesTable';
-
-vi.mock('$lib/charts/baseChart', () => ({
-	ScenarioToLabel: {
-		baseline: 'Baseline',
-		intervention: 'Intervention'
-	}
-}));
-
+import type { Scenario } from '$lib/types/userState';
 vi.mock('$lib/components/data-table/DataTableSortHeader.svelte', () => ({
 	default: 'DataTableSortHeader'
 }));
 
 vi.mock('$lib/components/ui/data-table', () => ({
-	renderComponent: vi.fn(() => 'rendered-header')
+	renderComponent: vi.fn(() => 'rendered-header'),
+	renderSnippet: vi.fn(() => 'rendered-cell')
 }));
+
+// const hoisted = vi.hoisted(() => ({
+// 	rawSnippetRef: { render: () => '<span />' }
+// }));
+
+// vi.mock('svelte', () => ({
+// 	createRawSnippet: vi.fn(() => hoisted.rawSnippetRef)
+// }));
 
 describe('compareCasesTable', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 	});
-
-	it('getScenarioKeys returns unique scenarios preserving first-seen order', () => {
-		const keys = getScenarioKeys(
-			{ baseline: { totalCost: 1, totalCases: 2 } } as any,
-			{ intervention: { totalCost: 3, totalCases: 4 }, baseline: { totalCost: 5, totalCases: 6 } } as any,
-			{ intervention: { totalCost: 7, totalCases: 8 } } as any
-		);
-
-		expect(keys).toEqual(['baseline', 'intervention']);
-	});
+	const scenarios = ['no_intervention', 'lsm_only'] as Scenario[];
 
 	it('buildCompareCasesTableData merges totals across all timeframes', () => {
-		const data = buildCompareCasesTableData({
-			presentTotals: {
-				baseline: { totalCost: 100, totalCases: 10 }
-			},
-			baselineLongTermTotals: {
-				baseline: { totalCost: 200, totalCases: 20 },
-				intervention: { totalCost: 300, totalCases: 30 }
-			},
-			fullLongTermTotals: {
-				intervention: { totalCost: 400, totalCases: 40 }
-			}
-		} as any);
+		const data = buildCompareCasesTableData(
+			{
+				presentTotals: {
+					no_intervention: { totalCost: 100, totalCases: 10 }
+				},
+				baselineLongTermTotals: {
+					no_intervention: { totalCost: 200, totalCases: 20 },
+					lsm_only: { totalCost: 300, totalCases: 30 }
+				},
+				fullLongTermTotals: {
+					lsm_only: { totalCost: 400, totalCases: 40 }
+				}
+			} as any,
+			scenarios
+		);
 
 		expect(data).toEqual([
 			{
-				intervention: 'Baseline',
+				intervention: ScenarioToLabel['no_intervention'],
 				presentCost: 100,
 				presentCases: 10,
 				longTermBaselineCost: 200,
@@ -63,7 +60,7 @@ describe('compareCasesTable', () => {
 				fullLongTermCases: undefined
 			},
 			{
-				intervention: 'Intervention',
+				intervention: ScenarioToLabel['lsm_only'],
 				presentCost: undefined,
 				presentCases: undefined,
 				longTermBaselineCost: 300,
@@ -74,10 +71,35 @@ describe('compareCasesTable', () => {
 		]);
 	});
 
-	it('getCasesCell formats numeric values and handles undefined', () => {
-		const cell = getCasesCell().cell;
-		expect(cell({ getValue: () => 1200 } as any)).toBe('1,200');
-		expect(cell({ getValue: () => undefined } as any)).toBe('-');
+	describe('getCasesCell', () => {
+		it('getCasesCell handles undefined', () => {
+			const cell = getCasesCell().cell;
+			expect(cell({ getValue: () => undefined } as any)).toBe('-');
+		});
+		it('should handle presentCases with no percentage', () => {
+			const cell = getCasesCell().cell;
+			const result = cell({ getValue: () => 1000, column: { id: 'presentCases' } } as any);
+
+			expect(vi.mocked(renderSnippet)).toHaveBeenCalledWith(casesCellSnippet, {
+				value: 1000,
+				percentageChange: 0
+			});
+			expect(result).toBe('rendered-cell');
+		});
+		it('should handle not presentCases with percentage', () => {
+			const cell = getCasesCell().cell;
+			const result = cell({
+				getValue: () => 1000,
+				column: { id: 'longTermBaselineCases' },
+				row: { getValue: () => 800 }
+			} as any);
+
+			expect(vi.mocked(renderSnippet)).toHaveBeenCalledWith(casesCellSnippet, {
+				value: 1000,
+				percentageChange: 25
+			});
+			expect(result).toBe('rendered-cell');
+		});
 	});
 
 	it('getCasesHeader uses sortable header renderer with Cases label', () => {
