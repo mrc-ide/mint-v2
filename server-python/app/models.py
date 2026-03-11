@@ -123,7 +123,7 @@ class InterventionCompareCost(BaseModel):
     cost_name: str = Field(serialization_alias="costName")
     cost_label: str = Field(serialization_alias="costLabel")
     step: float
-
+    cost_decreases_with_increase: bool = Field(serialization_alias="costDecreasesWithIncrease")
 
 class InterventionCompareParameter(CompareParameter):
     linked_costs: list[InterventionCompareCost] = Field(serialization_alias="linkedCosts")

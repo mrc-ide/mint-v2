@@ -31,23 +31,28 @@ def get_dynamic_form_options() -> dict:
 
 def get_compare_parameters() -> CompareParametersResponse:
     form_options = get_dynamic_form_options()
-    baseline_param_names = [
-        ("current_malaria_prevalence", "Baseline prevalence"),
-        ("mosquito_delta", "Change in human biting rate"),
+    baseline_param_options = [
+        {"name": "current_malaria_prevalence", "label": "Prevalence (0-5 year olds)"},
+        {"name": "mosquito_delta", "label": "Human Biting Rate (all ages)"},
     ]
-    intervention_param_names = [
-        (
-            "itn_future",
-            "ITN usage",
-            ["people_per_bednet", "mass_distribution_cost", "continuous_itn_distribution_cost"],
-        ),
-        ("irs_future", "IRS coverage", ["irs_household_annual_cost_product", "irs_household_annual_cost_deployment"]),
-        ("lsm", "LSM coverage", ["lsm_cost"]),
+    intervention_param_options = [
+        {
+            "name": "itn_future",
+            "linked_costs": [("people_per_bednet", True), ("mass_distribution_cost", False), ("continuous_itn_distribution_cost", False)]
+        },
+        {
+            "name": "irs_future",
+            "linked_costs": [("irs_household_annual_cost_product", False), ("irs_household_annual_cost_deployment", False)]
+        },
+        {
+            "name": "lsm",
+            "linked_costs": [("lsm_cost", False)]
+        },
     ]
 
-    baseline_parameters = [create_compare_parameter(param_name, form_options) for param_name in baseline_param_names]
+    baseline_parameters = [create_compare_parameter(param, form_options) for param in baseline_param_options]
     intervention_parameters = [
-        create_intervention_compare_parameter(param_name, form_options) for param_name in intervention_param_names
+        create_intervention_compare_parameter(param, form_options) for param in intervention_param_options
     ]
 
     return CompareParametersResponse(
@@ -57,32 +62,35 @@ def get_compare_parameters() -> CompareParametersResponse:
 
 
 def create_intervention_compare_parameter(
-    param: Annotated[tuple[str, str, list[str]], "parameter name, label, linked cost names"],
+    param: Annotated[dict[str, str | list[tuple[str, bool]]], "name, linked costs [(linked cost name, cost_decreases_with_increase)]"],
     form_options: dict,
 ) -> InterventionCompareParameter:
-    param_name, label, linked_cost_names = param
-    cost_fields = [get_form_field(cost_name, form_options) for cost_name in linked_cost_names]
+    name, linked_costs_config = param["name"], param["linked_costs"]
+    intervention_field = get_form_field(name, form_options)
+    cost_fields = [(get_form_field(cost_name, form_options), cost_decreases_with_increase) for cost_name, cost_decreases_with_increase in linked_costs_config]
     linked_costs = [
         InterventionCompareCost(
             cost_name=cost_field["id"],
             cost_label=cost_field.get("label", cost_field["id"]),
             step=cost_field.get("step", 1.0),
+            cost_decreases_with_increase=cost_decreases_with_increase,
         )
-        for cost_field in cost_fields
+        for cost_field, cost_decreases_with_increase in cost_fields
     ]
+
     return InterventionCompareParameter(
-        **create_compare_parameter((param_name, label), form_options).model_dump(),
+        **create_compare_parameter({"name": name, "label": intervention_field.get("label", name)}, form_options).model_dump(),
         linked_costs=linked_costs,
     )
 
 
 def create_compare_parameter(
-    param: Annotated[tuple[str, str], "parameter name, label"], form_options: dict
+    param: Annotated[dict[str, str], "parameter name, label"], form_options: dict
 ) -> CompareParameter:
-    param_name, label = param
-    field = get_form_field(param_name, form_options)
+    name, label = param["name"], param["label"]
+    field = get_form_field(name, form_options)
     return CompareParameter(
-        parameter_name=param_name,
+        parameter_name=name,
         label=label,
         min=field.get("min", 0.0),
         max=field.get("max", 100.0),

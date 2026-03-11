@@ -96,7 +96,7 @@ export const compareCasesTableColumns: ColumnDef<ComparisonTimeFramesData>[] = [
 	},
 	{
 		accessorKey: 'present',
-		header: 'Present',
+		header: 'Present (current control strategy)',
 		columns: [
 			{
 				accessorKey: 'presentCases',
@@ -112,7 +112,7 @@ export const compareCasesTableColumns: ColumnDef<ComparisonTimeFramesData>[] = [
 	},
 	{
 		accessorKey: 'longTermBaseline',
-		header: 'Long term (baseline only)',
+		header: 'Long-term (current control strategy)',
 		columns: [
 			{
 				accessorKey: 'longTermBaselineCases',
@@ -128,7 +128,7 @@ export const compareCasesTableColumns: ColumnDef<ComparisonTimeFramesData>[] = [
 	},
 	{
 		accessorKey: 'fullLongTerm',
-		header: 'Long term (baseline + control strategy)',
+		header: 'Long-term (adjusted control strategy)',
 		columns: [
 			{
 				accessorKey: 'fullLongTermCases',

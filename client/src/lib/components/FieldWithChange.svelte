@@ -10,6 +10,7 @@
 		postfixUnit?: string;
 		fractionalDigits?: number;
 		displayChangeAsPercentage?: boolean;
+		invertSign?: boolean;
 	}
 	let {
 		children,
@@ -18,15 +19,21 @@
 		prefixUnit,
 		postfixUnit,
 		fractionalDigits = 1,
-		displayChangeAsPercentage = false
+		displayChangeAsPercentage = false,
+		invertSign = false
 	}: Props = $props();
 	const change = $derived(displayChangeAsPercentage ? ((value - baseline) / baseline) * 100 : value - baseline);
+	const sign = $derived.by(() => {
+		if (change === 0) return '';
+		if (invertSign) return change > 0 ? '-' : '+';
+		return change > 0 ? '+' : '-';
+	});
 </script>
 
 <div class="flex flex-row items-center gap-2">
 	{@render children()}
 	<span class="min-w-10 text-right text-sm font-medium tabular-nums">
-		{#if change >= 0}+{:else}-{/if}
+		{sign}
 		{prefixUnit}{convertToLocaleString(Math.abs(change), fractionalDigits)}{postfixUnit}</span
 	>
 </div>

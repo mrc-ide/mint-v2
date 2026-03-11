@@ -13,6 +13,7 @@ export interface InterventionCompareCost {
 	costName: string;
 	costLabel: string;
 	step: number;
+	costDecreasesWithIncrease: boolean;
 }
 export interface InterventionCompareParameter extends CompareParameter {
 	linkedCosts: InterventionCompareCost[];
