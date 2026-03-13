@@ -15,7 +15,7 @@ export const runCompareEmulator = async (
 	fullLongTermResData: EmulatorResults;
 	baselineLongTermResData: EmulatorResults;
 }> => {
-	const fullLongTermPromise = triggerEmulator(project, region, longTermFormValues);
+	const fullLongTermPromise = triggerEmulator(project, region, longTermFormValues, true);
 	const baselineLongTermPromise = triggerEmulator(project, region, {
 		...presentFormValues,
 		[selectedBaselineParameter.parameterName]: longTermFormValues[selectedBaselineParameter.parameterName]
@@ -31,16 +31,32 @@ export const runCompareEmulator = async (
 	};
 };
 
-const triggerEmulator = async (
+export const saveFormValues = async (
 	project: string,
 	region: string,
 	formValues: Record<string, FormValue>
+): Promise<void> => {
+	await apiFetch({
+		url: regionCompareUrl(project, region),
+		method: 'PATCH',
+		body: {
+			formValues
+		}
+	});
+};
+
+const triggerEmulator = async (
+	project: string,
+	region: string,
+	formValues: Record<string, FormValue>,
+	shouldSave = false
 ): Promise<ResponseBodySuccess<EmulatorResults>> =>
 	apiFetch<EmulatorResults>({
 		url: regionCompareUrl(project, region),
 		method: 'POST',
 		body: {
-			formValues
+			formValues,
+			shouldSave
 		}
 	});
 

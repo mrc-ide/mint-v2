@@ -7,6 +7,7 @@
 	import FieldWithChange from '$lib/components/FieldWithChange.svelte';
 	import ChevronRight from '@lucide/svelte/icons/chevron-right';
 	import { slide } from 'svelte/transition';
+	import type debounce from 'debounce';
 
 	interface Props {
 		interventionParameters: InterventionCompareParameter[];
@@ -14,6 +15,7 @@
 		onSliderChange: (value: number, parameterName: string) => void;
 		presentFormValues: Record<string, FormValue>;
 		longTermFormValues: Record<string, FormValue>;
+		debounceSaveLongTermFormValues: debounce.DebouncedFunction<() => Promise<void>>;
 	}
 
 	let {
@@ -21,7 +23,8 @@
 		isLoading,
 		presentFormValues,
 		longTermFormValues = $bindable(),
-		onSliderChange
+		onSliderChange,
+		debounceSaveLongTermFormValues
 	}: Props = $props();
 
 	let isInterventionCollapsed = $state<Record<string, boolean>>(
@@ -88,7 +91,10 @@
 								step={cost.step}
 								disabled={isLoading}
 								value={String(longTermFormValues[cost.costName])}
-								oninput={(e) => (longTermFormValues[cost.costName] = Number(e.currentTarget.value))}
+								oninput={(e) => {
+									longTermFormValues[cost.costName] = Number(e.currentTarget.value);
+									debounceSaveLongTermFormValues();
+								}}
 								class="flex-1"
 							/>
 						</FieldWithChange>

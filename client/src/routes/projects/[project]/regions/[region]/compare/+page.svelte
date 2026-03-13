@@ -4,6 +4,7 @@
 	import type { PageProps } from './$types';
 	import Compare from './_components/Compare.svelte';
 	import { getChartTheme } from '$lib/charts/baseChart';
+	import Loader from '$lib/components/Loader.svelte';
 
 	let { data, params }: PageProps = $props();
 	let chartTheme = $derived(getChartTheme());
@@ -18,13 +19,25 @@
 		</p>
 	</div>
 	{#if data.region.hasRunBaseline && data.region.results}
-		<Compare
-			{params}
-			{chartTheme}
-			presentFormValues={data.region.formValues}
-			compareParameters={data.compareParameters}
-			presentResults={data.region.results}
-		/>
+		{#await data.longTermResults}
+			<div class="flex items-center justify-center">
+				<Loader />
+			</div>
+		{:then longTermResults}
+			<Compare
+				{params}
+				{chartTheme}
+				presentFormValues={data.region.formValues}
+				compareParameters={data.compareParameters}
+				presentResults={data.region.results}
+				{longTermResults}
+				savedLongTermFormValues={data.region.longTermFormValues}
+			/>
+		{:catch _e}
+			<div class="flex flex-col items-center justify-center gap-2 p-8">
+				<div class="text-destructive">Failed to load long term results.</div>
+			</div>
+		{/await}
 	{:else}
 		<Alert.Root variant="warning">
 			<CircleAlert />

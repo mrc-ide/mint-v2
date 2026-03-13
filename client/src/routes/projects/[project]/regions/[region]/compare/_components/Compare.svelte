@@ -9,7 +9,7 @@
 	import debounce from 'debounce';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
-	import { runCompareEmulator } from '../utils';
+	import { runCompareEmulator, saveFormValues } from '../utils';
 	import CompareResults from './CompareResults.svelte';
 	import InterventionFields from './InterventionFields.svelte';
 
@@ -19,14 +19,29 @@
 		presentFormValues: Record<string, FormValue>;
 		chartTheme: string;
 		params: { project: string; region: string };
+		longTermResults?: {
+			fullLongTerm: EmulatorResults;
+			baselineLongTerm: EmulatorResults;
+		};
+		savedLongTermFormValues?: Record<string, FormValue>;
 	}
 
-	let { presentResults, compareParameters, presentFormValues, chartTheme, params }: Props = $props();
+	let {
+		presentResults,
+		compareParameters,
+		presentFormValues,
+		chartTheme,
+		params,
+		longTermResults,
+		savedLongTermFormValues
+	}: Props = $props();
 	let selectedBaselineParameter = $state(compareParameters.baselineParameters[0]);
-	let fullLongTermResults = $state<EmulatorResults>(presentResults);
-	let baselineLongTermResults = $state<EmulatorResults>(presentResults);
+	let fullLongTermResults = $state<EmulatorResults>(longTermResults ? longTermResults.fullLongTerm : presentResults);
+	let baselineLongTermResults = $state<EmulatorResults>(
+		longTermResults ? longTermResults.baselineLongTerm : presentResults
+	);
 	let isLoading = $state(true);
-	let longTermFormValues = $state({ ...presentFormValues });
+	let longTermFormValues = $state(savedLongTermFormValues ?? { ...presentFormValues });
 
 	const updateBaselineParam = (paramName: string) => {
 		longTermFormValues[selectedBaselineParameter.parameterName] =
@@ -55,6 +70,14 @@
 			isLoading = false;
 		}
 	};
+	const saveLongTermFormValues = async () => {
+		try {
+			await saveFormValues(params.project, params.region, longTermFormValues);
+		} catch (_err) {
+			toast.error('Failed to save long term scenario planning form values');
+		}
+	};
+	const debounceSaveLongTermFormValues = debounce(saveLongTermFormValues, DEBOUNCE_DELAY_MS);
 	const debounceRunEmulator = debounce(runEmulator, DEBOUNCE_DELAY_MS);
 
 	const onSliderChange = async (value: number, paramName: string) => {
@@ -110,6 +133,7 @@
 			{presentFormValues}
 			bind:longTermFormValues
 			{onSliderChange}
+			{debounceSaveLongTermFormValues}
 		/>
 	</div>
 	<CompareResults

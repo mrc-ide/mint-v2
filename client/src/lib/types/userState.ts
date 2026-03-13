@@ -40,6 +40,8 @@ export interface Region {
 	hasRunBaseline: boolean;
 	formValues: Record<string, FormValue>;
 	results?: EmulatorResults;
+	longTermFormValues?: Record<string, FormValue>;
+	fullLongTermCases?: CasesData[];
 }
 export interface StrategiseIntervention {
 	region: string;
@@ -59,6 +61,7 @@ export interface Project {
 	name: string;
 	regions: Region[];
 	strategy?: Strategy;
+	fullLongTermStrategy?: Strategy;
 }
 
 export interface UserState {
