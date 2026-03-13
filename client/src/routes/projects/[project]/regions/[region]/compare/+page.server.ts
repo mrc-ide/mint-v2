@@ -5,8 +5,10 @@ import { getRegionFromUserState } from '$lib/server/region';
 import type { CompareParameters } from '$lib/types/compare';
 import type { EmulatorResults } from '$lib/types/userState';
 import { runEmulatorUrl } from '$lib/url';
+import { error } from '@sveltejs/kit';
 import type { RequestEvent } from '../$types';
 import type { PageServerLoad } from './$types';
+import { ApiError } from '$lib/fetch';
 
 export const load: PageServerLoad = async ({ params, locals, fetch }) => {
 	const { project, region } = params;
@@ -67,9 +69,8 @@ const fetchLongTermResults = async (
 			fullLongTerm,
 			baselineLongTerm
 		};
-	} catch (e) {
-		// This promise cannot throw as its during page load & will cause app to crash. Thus return null for data
-		console.error(e);
+	} catch (err) {
+		const errorStatus = err instanceof ApiError ? err.status : 500;
+		error(errorStatus, 'Failed to fetch long term results. Please try again later.');
 	}
-	return undefined;
 };

@@ -33,9 +33,12 @@
 				{longTermResults}
 				savedLongTermFormValues={data.region.longTermFormValues}
 			/>
-		{:catch _e}
+		{:catch err}
 			<div class="flex flex-col items-center justify-center gap-2 p-8">
-				<div class="text-destructive">Failed to load long term results.</div>
+				<div class="text-destructive">Failed to load results.</div>
+				{#if err}
+					<div class="text-sm text-destructive">{err.message}</div>
+				{/if}
 			</div>
 		{/await}
 	{:else}
