@@ -1,4 +1,4 @@
-import type { StrategiseResult, StrategiseResults } from '$lib/types/userState';
+import type { CompareStrategiseResult, StrategiseResult, StrategiseResults } from '$lib/types/userState';
 import { ScenarioToLabel } from './baseChart';
 
 export const BUDGET_PLOTLINE_ID = 'explored-budget';
@@ -141,4 +141,126 @@ export const getStrategyConfig = (
 		}
 	},
 	series: getStrategiseSeries(strategiseResults)
+});
+
+export const getCompareStrategiseSeries = (data: CompareStrategiseResult): Highcharts.SeriesAreaOptions[] => {
+	const seriesMap = new Map<string, Highcharts.SeriesAreaOptions>();
+
+	data.forEach(({ costThreshold, interventions }) => {
+		interventions.forEach(({ cases, region, intervention }) => {
+			// if (region !== 'world') return;
+			if (!seriesMap.has(region)) {
+				seriesMap.set(region, {
+					name: region,
+					data: [],
+					type: 'area'
+				});
+			}
+			seriesMap.get(region)!.data!.push({
+				x: costThreshold,
+				y: cases,
+				custom: {
+					intervention: ScenarioToLabel[intervention]
+				}
+			});
+		});
+	});
+	console.log('Compare series map:', Array.from(seriesMap.values()));
+	return Array.from(seriesMap.values());
+};
+
+export const getCompareStrategyConfig = (
+	compareResult: CompareStrategiseResult,
+	name: 'Present (current controls)' | 'Long-term (adjusted controls)'
+): Highcharts.Options => ({
+	chart: {
+		type: 'area',
+		height: 450,
+		zooming: {
+			type: 'x'
+		},
+		events: {
+			// click: function (event) {
+			// 	const xValue = Math.round((event as Highcharts.ChartClickEventObject).xAxis[0].value);
+			// 	addBudgetPlotLine(this, xValue);
+			// 	setStrategy(findClosestStrategiseResult(strategiseResults, xValue));
+			// }
+		}
+	},
+	title: {
+		text: `Cost of Strategy and Total Clinical Cases Averted - ${name}`
+	},
+	subtitle: {
+		text:
+			'<b>Click anywhere on the chart to explore the optimal intervention strategy at the selected budget level.</b><br>' +
+			'The chart displays strategies from the minimum cost option to the defined maximum available budget.',
+		verticalAlign: 'bottom',
+		align: 'left'
+	},
+	xAxis: {
+		title: {
+			text: 'Total cases'
+		},
+
+		labels: {
+			format: '{value:,.0f}'
+		}
+		// plotLines: [
+		// 	{
+		// 		value: strategiseResults[0]?.costThreshold ?? 0,
+		// 		dashStyle: 'Dash',
+		// 		zIndex: 5,
+		// 		label: {
+		// 			text: 'Minimum budget',
+		// 			style: { color: 'var(--muted-foreground)' }
+		// 		}
+		// 	},
+		// 	getBudgetPlotLine(strategiseResults[strategiseResults.length - 1].costThreshold)
+		// ]
+	},
+	yAxis: {
+		title: {
+			text: 'Total cost ($USD)'
+		},
+		labels: {
+			format: '${value:,.0f}'
+		}
+	},
+	tooltip: {
+		shared: true,
+		shadow: true,
+		useHTML: true,
+		headerFormat:
+			'<div class="font-bold  pb-1 border-b">Cases: {point.key:,.0f} | Budget: ${point.stackTotal:,.1f}</div>',
+		pointFormat: `<div class="flex items-center">
+			    <span style="color:{point.color}" class="mr-1">●</span>
+			    <span class="font-medium">{series.name}:</span>
+			    <span class="ml-0.5">$\{point.y:,.1f}
+			        <span class="text-muted-foreground">
+			            {point.custom.intervention}
+			        </span>
+			    </span>
+			</div>`
+	},
+	plotOptions: {
+		area: {
+			stacking: 'normal',
+			marker: {
+				enabled: false
+			}
+			// events: {
+			// 	click: function (event) {
+			// 		addBudgetPlotLine(this.chart, event.point.x);
+			// 		setStrategy(findClosestStrategiseResult(strategiseResults, event.point.x));
+			// 	}
+			// }
+		}
+	},
+	legend: {
+		enabled: true,
+		events: {
+			itemClick: () => false
+		}
+	},
+	series: getCompareStrategiseSeries(compareResult)
 });

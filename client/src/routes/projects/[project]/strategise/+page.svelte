@@ -11,9 +11,11 @@
 	import { strategiseSchema } from './schema';
 	import { strategiseAsync } from './utils';
 	import * as Tabs from '$lib/components/ui/tabs/index.js';
+	import CompareStrategiseResults from './_components/CompareStrategiseResults.svelte';
 
 	let { data }: PageProps = $props();
 	let loading = $state(false);
+	let longTerm = $state(null);
 
 	const form = superForm(data.form, {
 		validators: zod4Client(strategiseSchema),
@@ -26,12 +28,14 @@
 			}
 			loading = true;
 
-			$formData.strategiseResults = await strategiseAsync(
+			const { currentAverted, longTerm } = await strategiseAsync(
 				$formData.minCost,
 				$formData.budget,
 				data.regionalStrategies,
 				data.longTermRegionalStrategies
 			);
+			$formData.strategiseResults = currentAverted;
+			$formData.compareStrategiseResults = longTerm;
 		},
 		onUpdated() {
 			loading = false;
@@ -40,8 +44,6 @@
 	const { form: formData, enhance, allErrors } = form;
 	let populationsOfRegion = $derived(mapRegionsToPopulation(data.project.regions));
 	let selectedTab = $state<'present' | 'longTerm'>('present');
-	$inspect('longTerm', data.longTermRegionalStrategies);
-	$inspect(data.project.strategy?.results);
 </script>
 
 <div class="mx-auto px-15 py-8">
@@ -85,7 +87,11 @@
 					</Tabs.Content>
 					<Tabs.Content value="longTerm">
 						<div class="flex items-center justify-center p-8">
-							<div class="text-muted-foreground">Long term results are not yet available for this tool.</div>
+							{#if data.project.compareStrategy?.results}
+								<CompareStrategiseResults results={data.project.compareStrategy.results} />
+							{:else}
+								<div class="text-muted-foreground">Long term results are not yet available for this tool.</div>
+							{/if}
 						</div>
 					</Tabs.Content>
 				</Tabs.Root>

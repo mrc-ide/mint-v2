@@ -1,14 +1,14 @@
 import type { Scenario } from '$lib/types/userState';
 import { z } from 'zod';
 
-const strategiseResultsSchema = z
+export const strategiseResultsSchema = z
 	.object({
 		costThreshold: z.number().min(0, 'Cost threshold must be 0 or greater'),
 		interventions: z
 			.object({
 				intervention: z.custom<Scenario>(),
 				cost: z.number().min(0, 'Cost must be 0 or greater'),
-				casesAverted: z.number(),
+				cases: z.number(),
 				region: z.string()
 			})
 			.array()
@@ -57,7 +57,7 @@ interface StrategiseRegion {
 }
 export type StrategiseRegions = StrategiseRegion[];
 
-interface CompareStrategiseRegion {
+export interface CompareStrategiseRegion {
 	region: string;
 	interventions: {
 		intervention: Scenario;

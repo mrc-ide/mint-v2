@@ -47,6 +47,12 @@ export const actions: Actions = {
 			budget: form.data.budget,
 			results: form.data.strategiseResults
 		};
+		if (form.data.compareStrategiseResults) {
+			projectData.compareStrategy = {
+				budget: form.data.budget,
+				results: form.data.compareStrategiseResults
+			};
+		}
 
 		return { form };
 	}

@@ -1,4 +1,5 @@
 import type { FormValue } from '$lib/components/dynamic-region-form/types';
+import { createLinearSpace } from '$lib/number';
 import { combineCostsAndCasesAverted, getTotalCostsPerScenario } from '$lib/process-results/costs';
 import {
 	collectPostInterventionCases,
@@ -9,6 +10,8 @@ import {
 } from '$lib/process-results/processCases';
 import type {
 	CasesData,
+	CompareStrategiseIntervention,
+	CompareStrategiseResults,
 	Region,
 	Scenario,
 	StrategiseIntervention,
@@ -17,7 +20,6 @@ import type {
 } from '$lib/types/userState';
 import { equalTo, lessEq, solve, type Constraint, type Model } from 'yalps';
 import type { CompareStrategiseRegions, StrategiseRegions } from './schema';
-import { createLinearSpace } from '$lib/number';
 
 export const getCasesAndCostsForCompareStrategise = (regions: Region[]): CompareStrategiseRegions => {
 	const filteredRegions = regions.filter((region) => region.results?.cases && region.fullLongTermCases);
@@ -170,7 +172,10 @@ export const strategiseAsync = (
 	maxCost: number,
 	regionalStrategies: StrategiseRegions,
 	longTermRegionalStrategies: CompareStrategiseRegions
-): Promise<StrategiseResults> => {
+): Promise<{
+	currentAverted: StrategiseResults;
+	longTerm: CompareStrategiseResults;
+}> => {
 	return new Promise((resolve) => {
 		setTimeout(() => {
 			resolve(strategise(minCost, maxCost, regionalStrategies, longTermRegionalStrategies));
@@ -193,7 +198,10 @@ export const strategise = (
 	maxCost: number,
 	regionalStrategies: StrategiseRegions,
 	longTermRegionalStrategies: CompareStrategiseRegions
-): StrategiseResults => {
+): {
+	currentAverted: StrategiseResults;
+	longTerm: CompareStrategiseResults;
+} => {
 	const costRange = createLinearSpace(minCost, maxCost);
 	const NO_INTERVENTION = { intervention: 'no_intervention', casesAverted: 0, cost: 0 } as const;
 	const strategiesIncludingNoIntervention: StrategiseRegions = regionalStrategies.map((region) => ({
@@ -202,14 +210,102 @@ export const strategise = (
 	}));
 
 	const { constraints, variables } = setupOptimisationModel(strategiesIncludingNoIntervention);
+	const { present, longTerm } = setupOptimisationModelForCompare(longTermRegionalStrategies);
 
-	return costRange.map((costThreshold) => ({
-		costThreshold,
-		interventions: optimiseForMaxCasesAverted(costThreshold, constraints, variables)
-	}));
+	// TODO: just loop costrange once and just update interventions
+	return {
+		currentAverted: costRange.map((costThreshold) => ({
+			costThreshold,
+			interventions: optimiseForMaxCasesAverted(costThreshold, constraints, variables)
+		})),
+		longTerm: {
+			present: costRange.map((costThreshold) => ({
+				costThreshold,
+				interventions: optimiseForMinCases(costThreshold, present)
+			})),
+			longTerm: costRange.map((costThreshold) => ({
+				costThreshold,
+				interventions: optimiseForMinCases(costThreshold, longTerm)
+			}))
+		}
+	};
 };
 
-const setupOptimisationModelForCompare = (regions: CompareStrategiseRegions) => {};
+export const optimiseForMinCases = (
+	cost: number,
+	{ constraints, variables }: { constraints: Record<string, Constraint>; variables: CompareOptimizationVariables }
+): CompareStrategiseIntervention[] => {
+	const optimizationModel: Model = {
+		direction: 'minimize',
+		objective: 'cases',
+		constraints: { ...constraints, cost: lessEq(cost) },
+		variables: variables,
+		binaries: true
+	};
+
+	const solution = solve(optimizationModel);
+	if (solution.status !== 'optimal') {
+		console.warn(`No optimal solution found for cost: ${cost}`);
+		return [];
+	}
+
+	return solution.variables
+		.filter(([_, isSelected]) => isSelected === 1)
+		.map(([variableName]) => {
+			const [region, intervention] = variableName.split('--');
+			const { cost, cases } = variables[variableName];
+			return {
+				region,
+				intervention: intervention as Scenario,
+				cost,
+				cases
+			};
+		});
+};
+type CompareOptimizationVariables = Record<
+	string,
+	{
+		cost: number;
+		cases: number;
+		[region: string]: number;
+	}
+>;
+const setupOptimisationModelForCompare = (regions: CompareStrategiseRegions) => {
+	const presentConstraints: Record<string, Constraint> = {};
+	const longTermConstraints: Record<string, Constraint> = {};
+	const presentVariables: CompareOptimizationVariables = {};
+	const longTermVariables: CompareOptimizationVariables = {};
+
+	regions.present.forEach(({ region, interventions }) => {
+		presentConstraints[region] = equalTo(1);
+
+		for (const { intervention, cost, cases } of interventions) {
+			const variableName = `${region}--${intervention}`;
+			presentVariables[variableName] = {
+				cost,
+				cases,
+				[region]: 1
+			};
+		}
+	});
+	regions.longTerm.forEach(({ region, interventions }) => {
+		longTermConstraints[region] = equalTo(1);
+
+		for (const { intervention, cost, cases } of interventions) {
+			const variableName = `${region}--${intervention}`;
+			longTermVariables[variableName] = {
+				cost,
+				cases,
+				[region]: 1
+			};
+		}
+	});
+
+	return {
+		present: { constraints: presentConstraints, variables: presentVariables },
+		longTerm: { constraints: longTermConstraints, variables: longTermVariables }
+	};
+};
 /**
  * Sets up optimization constraints and variables for linear programming.
  */
