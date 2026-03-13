@@ -1,6 +1,6 @@
 import { ApiError, apiFetch } from '$lib/fetch';
 import {
-	invalidateLongTermStrategyForProject,
+	invalidateCompareStrategyForProject,
 	saveLongTermFormState,
 	saveLongTermRegionCompare
 } from '$lib/server/region';
@@ -21,7 +21,7 @@ export const POST: RequestHandler = async ({ request, fetch, locals, params }) =
 		});
 
 		if (shouldSave) {
-			invalidateLongTermStrategyForProject(locals.userState, project);
+			invalidateCompareStrategyForProject(locals.userState, project);
 			await saveLongTermRegionCompare(locals.userState, project, region, formValues, res.data.cases);
 		}
 
@@ -36,7 +36,7 @@ export const PATCH: RequestHandler = async ({ request, locals, params }) => {
 	const { formValues } = await request.json();
 	const { project, region } = params;
 
-	invalidateLongTermStrategyForProject(locals.userState, project);
+	invalidateCompareStrategyForProject(locals.userState, project);
 	await saveLongTermFormState(locals.userState, project, region, formValues);
 	return new Response(null, { status: 204 });
 };

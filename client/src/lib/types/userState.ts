@@ -57,11 +57,15 @@ export interface Strategy {
 	budget: number;
 	results: StrategiseResults;
 }
+export interface CompareStrategy {
+	budget: number;
+	results: z.infer<typeof strategiseSchema>['compareStrategiseResults'];
+}
 export interface Project {
 	name: string;
 	regions: Region[];
 	strategy?: Strategy;
-	fullLongTermStrategy?: Strategy;
+	compareStrategy?: CompareStrategy;
 }
 
 export interface UserState {

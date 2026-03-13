@@ -10,6 +10,7 @@
 	import StrategiseResults from './_components/StrategiseResults.svelte';
 	import { strategiseSchema } from './schema';
 	import { strategiseAsync } from './utils';
+	import * as Tabs from '$lib/components/ui/tabs/index.js';
 
 	let { data }: PageProps = $props();
 	let loading = $state(false);
@@ -25,7 +26,12 @@
 			}
 			loading = true;
 
-			$formData.strategiseResults = await strategiseAsync($formData.minCost, $formData.budget, data.regionalStrategies);
+			$formData.strategiseResults = await strategiseAsync(
+				$formData.minCost,
+				$formData.budget,
+				data.regionalStrategies,
+				data.longTermRegionalStrategies
+			);
 		},
 		onUpdated() {
 			loading = false;
@@ -33,6 +39,9 @@
 	});
 	const { form: formData, enhance, allErrors } = form;
 	let populationsOfRegion = $derived(mapRegionsToPopulation(data.project.regions));
+	let selectedTab = $state<'present' | 'longTerm'>('present');
+	$inspect('longTerm', data.longTermRegionalStrategies);
+	$inspect(data.project.strategy?.results);
 </script>
 
 <div class="mx-auto px-15 py-8">
@@ -63,7 +72,26 @@
 		{#if loading}
 			<Loader />
 		{:else if data.project.strategy?.results?.length}
-			<StrategiseResults strategiseResults={data.project.strategy.results} populations={populationsOfRegion} />
+			{#if data.userData.compareEnabled}
+				<Tabs.Root bind:value={selectedTab}>
+					<div class="flex gap-2">
+						<Tabs.List class="w-full">
+							<Tabs.Trigger value="present">Present</Tabs.Trigger>
+							<Tabs.Trigger value="longTerm">Long-term</Tabs.Trigger>
+						</Tabs.List>
+					</div>
+					<Tabs.Content value="present">
+						<StrategiseResults strategiseResults={data.project.strategy.results} populations={populationsOfRegion} />
+					</Tabs.Content>
+					<Tabs.Content value="longTerm">
+						<div class="flex items-center justify-center p-8">
+							<div class="text-muted-foreground">Long term results are not yet available for this tool.</div>
+						</div>
+					</Tabs.Content>
+				</Tabs.Root>
+			{:else}
+				<StrategiseResults strategiseResults={data.project.strategy.results} populations={populationsOfRegion} />
+			{/if}
 		{/if}
 	{:else}
 		<Alert.Root variant="warning">

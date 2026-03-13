@@ -1,7 +1,7 @@
 import type { DynamicFormSchema, FormValue } from '$lib/components/dynamic-region-form/types';
 import { ApiError, apiFetch } from '$lib/fetch';
 import { saveUserState } from '$lib/server/redis';
-import type { CasesData, EmulatorResults, Project, Region, UserState } from '$lib/types/userState';
+import type { CasesData, EmulatorResults, Region, UserState } from '$lib/types/userState';
 import { regionFormUrl } from '$lib/url';
 import { error } from '@sveltejs/kit';
 import type { RequestEvent } from '../../routes/projects/[project]/regions/[region]/$types';
@@ -86,12 +86,12 @@ export const getProjectFromUserState = (userState: UserState, projectName?: stri
 export const invalidateStrategyForProject = (userState: UserState, projectName: string) => {
 	const projectData = getProjectFromUserState(userState, projectName);
 	projectData.strategy = undefined;
-	invalidateLongTermStrategyForProject(userState, projectName);
+	invalidateCompareStrategyForProject(userState, projectName);
 };
 
-export const invalidateLongTermStrategyForProject = (userState: UserState, projectName: string) => {
+export const invalidateCompareStrategyForProject = (userState: UserState, projectName: string) => {
 	const projectData = getProjectFromUserState(userState, projectName);
-	projectData.fullLongTermStrategy = undefined;
+	projectData.compareStrategy = undefined;
 };
 
 export const invalidateLongTerm = (userState: UserState, projectName: string, regionName: string) => {
@@ -99,5 +99,5 @@ export const invalidateLongTerm = (userState: UserState, projectName: string, re
 
 	regionData.longTermFormValues = undefined;
 	regionData.fullLongTermCases = undefined;
-	invalidateLongTermStrategyForProject(userState, projectName);
+	invalidateCompareStrategyForProject(userState, projectName);
 };

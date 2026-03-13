@@ -4,6 +4,7 @@ import {
 	collectPostInterventionCases,
 	convertPer1000ToTotal,
 	getAvertedCasesData,
+	getTotalCasesAndCostsPerScenario,
 	type CasesAverted
 } from '$lib/process-results/processCases';
 import type {
@@ -15,8 +16,44 @@ import type {
 	StrategiseResults
 } from '$lib/types/userState';
 import { equalTo, lessEq, solve, type Constraint, type Model } from 'yalps';
-import type { StrategiseRegions } from './schema';
+import type { CompareStrategiseRegions, StrategiseRegions } from './schema';
 import { createLinearSpace } from '$lib/number';
+
+export const getCasesAndCostsForCompareStrategise = (regions: Region[]): CompareStrategiseRegions => {
+	const filteredRegions = regions.filter((region) => region.results?.cases && region.fullLongTermCases);
+
+	const present = filteredRegions.map((region) => {
+		const presentCostsAndCases = getTotalCasesAndCostsPerScenario(region.results!.cases, region.formValues);
+		return {
+			region: region.name,
+			interventions: Object.entries(presentCostsAndCases).map(([scenario, { totalCost, totalCases }]) => ({
+				intervention: scenario as Scenario,
+				cost: totalCost,
+				cases: totalCases
+			}))
+		};
+	});
+
+	const longTerm = filteredRegions.map((region) => {
+		const longTermCostsAndCases = getTotalCasesAndCostsPerScenario(
+			region.fullLongTermCases!,
+			region.longTermFormValues!
+		);
+		return {
+			region: region.name,
+			interventions: Object.entries(longTermCostsAndCases).map(([scenario, { totalCost, totalCases }]) => ({
+				intervention: scenario as Scenario,
+				cost: totalCost,
+				cases: totalCases
+			}))
+		};
+	});
+
+	return {
+		present,
+		longTerm
+	};
+};
 
 /**
  * Calculates the minimum cost across all interventions in all regions for strategy optimization.
@@ -38,6 +75,7 @@ export const getMinimumCostForStrategise = (strategiseRegions: StrategiseRegions
  * @param strategiseRegions - Array of regions with their intervention data
  * @returns The sum of the highest intervention costs from each region
  */
+// TODO: min & max needs to be updated to fit in long-term costs as well
 export const getMaximumCostForStrategise = (strategiseRegions: StrategiseRegions): number => {
 	const maxCostsPerRegion = strategiseRegions.map((region) =>
 		Math.max(...region.interventions.map((intervention) => intervention.cost))
@@ -130,11 +168,12 @@ type OptimizationVariables = Record<string, OptimizationVariable>;
 export const strategiseAsync = (
 	minCost: number,
 	maxCost: number,
-	regionalStrategies: StrategiseRegions
+	regionalStrategies: StrategiseRegions,
+	longTermRegionalStrategies: CompareStrategiseRegions
 ): Promise<StrategiseResults> => {
 	return new Promise((resolve) => {
 		setTimeout(() => {
-			resolve(strategise(minCost, maxCost, regionalStrategies));
+			resolve(strategise(minCost, maxCost, regionalStrategies, longTermRegionalStrategies));
 		}, 0);
 	});
 };
@@ -146,12 +185,14 @@ export const strategiseAsync = (
  * @param minCost - The minimum cost threshold for the analysis
  * @param maxCost - The maximum cost threshold for the analysis
  * @param regionalStrategies - Array of regions with their intervention data
+ * @param longTermRegionalStrategies - Array of regions with their long-term intervention data for comparison
  * @returns Array of strategise results, each containing a cost threshold and selected interventions
  */
 export const strategise = (
 	minCost: number,
 	maxCost: number,
-	regionalStrategies: StrategiseRegions
+	regionalStrategies: StrategiseRegions,
+	longTermRegionalStrategies: CompareStrategiseRegions
 ): StrategiseResults => {
 	const costRange = createLinearSpace(minCost, maxCost);
 	const NO_INTERVENTION = { intervention: 'no_intervention', casesAverted: 0, cost: 0 } as const;
@@ -168,6 +209,7 @@ export const strategise = (
 	}));
 };
 
+const setupOptimisationModelForCompare = (regions: CompareStrategiseRegions) => {};
 /**
  * Sets up optimization constraints and variables for linear programming.
  */
