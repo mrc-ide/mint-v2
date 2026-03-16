@@ -15,7 +15,6 @@
 
 	let { data }: PageProps = $props();
 	let loading = $state(false);
-	let longTerm = $state(null);
 
 	const form = superForm(data.form, {
 		validators: zod4Client(strategiseSchema),

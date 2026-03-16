@@ -175,7 +175,7 @@ export const getCompareStrategyConfig = (
 ): Highcharts.Options => ({
 	chart: {
 		type: 'area',
-		height: 450,
+		height: 400,
 		zooming: {
 			type: 'x'
 		},
@@ -199,11 +199,11 @@ export const getCompareStrategyConfig = (
 	},
 	xAxis: {
 		title: {
-			text: 'Total cases'
+			text: 'Total cost ($USD)'
 		},
 
 		labels: {
-			format: '{value:,.0f}'
+			format: '${value:,.0f}'
 		}
 		// plotLines: [
 		// 	{
@@ -220,10 +220,10 @@ export const getCompareStrategyConfig = (
 	},
 	yAxis: {
 		title: {
-			text: 'Total cost ($USD)'
+			text: 'Total cases'
 		},
 		labels: {
-			format: '${value:,.0f}'
+			format: '{value:,.1f}'
 		}
 	},
 	tooltip: {
@@ -231,11 +231,11 @@ export const getCompareStrategyConfig = (
 		shadow: true,
 		useHTML: true,
 		headerFormat:
-			'<div class="font-bold  pb-1 border-b">Cases: {point.key:,.0f} | Budget: ${point.stackTotal:,.1f}</div>',
+			'<div class="font-bold  pb-1 border-b">Budget: ${point.key:,.0f} | Cases: {point.stackTotal:,.1f}</div>',
 		pointFormat: `<div class="flex items-center">
 			    <span style="color:{point.color}" class="mr-1">●</span>
 			    <span class="font-medium">{series.name}:</span>
-			    <span class="ml-0.5">$\{point.y:,.1f}
+			    <span class="ml-0.5">{point.y:,.1f} cases
 			        <span class="text-muted-foreground">
 			            {point.custom.intervention}
 			        </span>
