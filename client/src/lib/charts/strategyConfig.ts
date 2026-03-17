@@ -222,7 +222,7 @@ export const getCompareStrategyConfig = (
 		}
 	},
 	title: {
-		text: `Cost of Strategy and Total Clinical Cases Averted - ${name}`
+		text: name
 	},
 
 	xAxis: {
