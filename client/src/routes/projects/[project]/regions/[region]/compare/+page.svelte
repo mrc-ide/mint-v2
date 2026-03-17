@@ -13,8 +13,8 @@
 	<div class="mb-4">
 		<h1 class="text-xl font-bold">Long term Scenario planning</h1>
 		<p class="mb-1 text-muted-foreground">
-			Compare the impact of present interventions versus long-term scenarios. Adjust parameters and modify intervention
-			coverage percentages to see how cases and prevalence change across different budget levels.
+			Compare the impact of control strategies now and in the future following a change to the local epidemiology.
+			Explore how this impacts disease burden and the cost of maintaining control.
 		</p>
 	</div>
 	{#if data.region.hasRunBaseline && data.region.results}

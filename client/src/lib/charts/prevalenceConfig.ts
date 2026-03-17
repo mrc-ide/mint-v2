@@ -93,7 +93,7 @@ export const getPrevalenceConfig = (prevalence: PrevalenceData[]): Highcharts.Op
 		height: 450
 	},
 	title: {
-		text: 'Projected prevalence in under 5 year olds'
+		text: 'Prevalence (0-5 years)'
 	},
 
 	series: createPrevalenceSeries(prevalence)
@@ -118,9 +118,9 @@ export const getPrevalenceConfigCompare = (
 	selectedIntervention: ScenarioLabel
 ): Highcharts.Options => {
 	const series: Highcharts.SeriesSplineOptions[] = [
-		{ data: present.prevalence, name: 'Present' },
-		{ data: baselineLongTerm.prevalence, name: 'Long term (baseline only)' },
-		{ data: fullLongTerm.prevalence, name: 'Long term (baseline + control strategy)' }
+		{ data: present.prevalence, name: 'Present (current control strategies)' },
+		{ data: baselineLongTerm.prevalence, name: 'Long-term (current control strategies)' },
+		{ data: fullLongTerm.prevalence, name: 'Long-term (adjusted control strategies)' }
 	].flatMap(({ data, name }) => createComparisonSeries(data, selectedIntervention, name));
 
 	return {
@@ -130,7 +130,7 @@ export const getPrevalenceConfigCompare = (
 			height: 500
 		},
 		title: {
-			text: `Prevalence in under 5 year olds - <em>${selectedIntervention}</em>`
+			text: `Prevalence (0-5 years) - <em>${selectedIntervention}</em>`
 		},
 
 		tooltip: {

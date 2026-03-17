@@ -264,8 +264,12 @@ class TestCompareParametersResponse:
                 max=70.0,
                 step=1.0,
                 linked_costs=[
-                    InterventionCompareCost(cost_name="cost3", cost_label="Cost 3", step=1.0),
-                    InterventionCompareCost(cost_name="cost4", cost_label="Cost 4", step=1.0),
+                    InterventionCompareCost(
+                        cost_name="cost3", cost_label="Cost 3", step=1.0, cost_decreases_with_increase=True
+                    ),
+                    InterventionCompareCost(
+                        cost_name="cost4", cost_label="Cost 4", step=1.0, cost_decreases_with_increase=False
+                    ),
                 ],
             ),
         ]
@@ -278,8 +282,9 @@ class TestCompareParametersResponse:
         assert response.baseline_parameters[0].parameter_name == "param1"
         assert response.intervention_parameters[0].label == "Parameter 3"
         assert {
-            (cost.cost_name, cost.cost_label, cost.step) for cost in response.intervention_parameters[0].linked_costs
+            (cost.cost_name, cost.cost_label, cost.step, cost.cost_decreases_with_increase)
+            for cost in response.intervention_parameters[0].linked_costs
         } == {
-            ("cost3", "Cost 3", 1.0),
-            ("cost4", "Cost 4", 1.0),
+            ("cost3", "Cost 3", 1.0, True),
+            ("cost4", "Cost 4", 1.0, False),
         }

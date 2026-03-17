@@ -17,7 +17,7 @@ test.describe('Region page', () => {
 		await page.getByRole('button', { name: 'Run baseline' }).click();
 
 		await expect(
-			page.getByLabel('Interactive chart', { exact: true }).getByText('Projected prevalence in under')
+			page.getByLabel('Interactive chart', { exact: true }).getByText('Prevalence (0-5 years)')
 		).toBeVisible();
 		await expect(page.getByRole('button', { name: 'Intervention Options' })).toBeVisible();
 		await expect(page.getByRole('button', { name: 'Cost Options' })).toBeVisible();

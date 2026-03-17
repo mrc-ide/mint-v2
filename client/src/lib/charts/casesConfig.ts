@@ -115,7 +115,10 @@ export const createCasesCompareDataPoints = (
 
 export const createCasesCompareSeries = (
 	totalCasesAndCosts: Partial<Record<Scenario, ScenarioTotals>>,
-	name: 'Present' | 'Long term (baseline + control strategy)' | 'Long term (baseline only)'
+	name:
+		| 'Present (current control strategies)'
+		| 'Long-term (adjusted control strategies)'
+		| 'Long-term (current control strategies)'
 ): SeriesLineOptions => ({
 	name,
 	type: 'line',
@@ -187,9 +190,12 @@ export const getCasesCompareConfig = ({
 	baselineLongTermTotals,
 	fullLongTermTotals
 }: CompareTotals): Options => {
-	const presentSeries = createCasesCompareSeries(presentTotals, 'Present');
-	const baselineLongTermSeries = createCasesCompareSeries(baselineLongTermTotals, 'Long term (baseline only)');
-	const fullLongTermSeries = createCasesCompareSeries(fullLongTermTotals, 'Long term (baseline + control strategy)');
+	const presentSeries = createCasesCompareSeries(presentTotals, 'Present (current control strategies)');
+	const baselineLongTermSeries = createCasesCompareSeries(
+		baselineLongTermTotals,
+		'Long-term (current control strategies)'
+	);
+	const fullLongTermSeries = createCasesCompareSeries(fullLongTermTotals, 'Long-term (adjusted control strategies)');
 	const presentData = presentSeries.data as PointOptionsObject[];
 	const fullLongTermData = fullLongTermSeries.data as PointOptionsObject[];
 
@@ -199,16 +205,16 @@ export const getCasesCompareConfig = ({
 			height: 450
 		},
 		title: {
-			text: 'Present vs Long term - Total Cases vs Total Cost'
+			text: 'Total Clinical Cases and Cost of Strategy'
 		},
 		subtitle: {
-			text: 'Step lines indicate changes in intervention strategy as budget increases.',
+			text: 'Step lines show the most cost-effective intervention at each cost level',
 			style: {
 				color: 'var(--muted-foreground)'
 			}
 		},
 		caption: {
-			text: 'Suboptimal interventions are not plotted; view the table to see them.',
+			text: 'Only the most cost-effective interventions are plotted, see Table tab for all options',
 			align: 'left',
 			verticalAlign: 'bottom',
 			style: {
@@ -216,13 +222,13 @@ export const getCasesCompareConfig = ({
 			}
 		},
 		xAxis: {
-			title: { text: 'Total Cost ($USD)' },
+			title: { text: 'Total cost ($USD)' },
 			labels: { format: '${value:,.0f}' },
 			min: 0,
 			breaks: createBreakToMinimizeEmptySpace(presentData, fullLongTermData)
 		},
 		yAxis: {
-			title: { text: 'Total Cases' },
+			title: { text: 'Total cases' },
 			labels: { format: '{value:,.0f}' }
 		},
 		tooltip: {

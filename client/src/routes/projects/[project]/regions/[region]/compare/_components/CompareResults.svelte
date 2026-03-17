@@ -69,7 +69,7 @@
 		</Tabs.Root>
 		<!-- Prevalence -->
 		<div class="flex flex-col gap-2">
-			<Label>Select intervention to compare prevalence across timeframes:</Label>
+			<Label>Select intervention to compare malaria prevalence for present and long-term scenarios</Label>
 			<RadioGroup.Root class="flex flex-wrap items-center" bind:value={selectedIntervention}>
 				{#each scenarios as scenario (scenario)}
 					<div>

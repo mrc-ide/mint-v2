@@ -309,7 +309,7 @@
               "type": "number",
               "required": true,
               "default": 1.8,
-              "step": 0.1
+              "step": 0.01
             },
             {
               "id": "people_per_household",
@@ -348,7 +348,7 @@
               "type": "number",
               "required": true,
               "default": 1.85,
-              "step": 0.1
+              "step": 0.01
             },
             {
               "id": "py_pbo_cost",
@@ -356,7 +356,7 @@
               "type": "number",
               "required": true,
               "default": 2.14,
-              "step": 0.1
+              "step": 0.01
             },
             {
               "id": "py_pyrrole_cost",
@@ -364,7 +364,7 @@
               "type": "number",
               "required": true,
               "default": 2.56,
-              "step": 0.1
+              "step": 0.01
             },
             {
               "id": "py_ppf_cost",
@@ -372,7 +372,7 @@
               "type": "number",
               "required": true,
               "default": 2.86,
-              "step": 0.1
+              "step": 0.01
             },
             {
               "id": "mass_distribution_cost",
@@ -381,7 +381,7 @@
               "type": "number",
               "required": true,
               "default": 2.75,
-              "step": 0.1
+              "step": 0.01
             },
             {
               "id": "continuous_itn_distribution_cost",
@@ -390,7 +390,7 @@
               "type": "number",
               "required": true,
               "default": 2.75,
-              "step": 0.1
+              "step": 0.01
             },
             {
               "id": "irs_household_annual_cost_product",
@@ -398,7 +398,8 @@
               "helpText": "This is the cost of the IRS products needed to spray an average sized household structure (as defined by the user in the Procurement and Distribution Options section above).",
               "type": "number",
               "required": true,
-              "default": 12
+              "default": 12,
+              "step": 0.01
             },
             {
               "id": "irs_household_annual_cost_deployment",
@@ -406,7 +407,8 @@
               "helpText": "This is the logistics costs involved with spraying an average sized household structure (as defined by the user in the Procurement and Distribution Options section above).",
               "type": "number",
               "required": true,
-              "default": 12
+              "default": 12,
+              "step": 0.01
             },
             {
               "id": "lsm_cost",
@@ -414,7 +416,8 @@
               "helpText": "This is the estimated total cost to conduct an LSM programme that will achieve the reduction in mosquito density defined in the Intervention Options section above, divided by the population size for this region.",
               "type": "number",
               "required": true,
-              "default": 10
+              "default": 10,
+              "step": 0.01
             }
           ]
         }
