@@ -2,7 +2,6 @@ import { roundNumber } from '$lib/number';
 import type {
 	CompareStrategiseResult,
 	CompareStrategiseResults,
-	CumulativeCompareStrategiseResult,
 	StrategiseResult,
 	StrategiseResults
 } from '$lib/types/userState';
@@ -225,11 +224,7 @@ export const getCompareStrategyConfig = (
 	title: {
 		text: `Cost of Strategy and Total Clinical Cases Averted - ${name}`
 	},
-	subtitle: {
-		text: '<b>Click anywhere on the chart to explore the optimal intervention strategy at the selected budget level.</b><br>',
-		verticalAlign: 'bottom',
-		align: 'left'
-	},
+
 	xAxis: {
 		title: {
 			text: 'Total cost ($USD)'
@@ -329,7 +324,7 @@ export const getCompareStrategyConfigs = (
 				) ?? null;
 
 			selectedStrategies.presentStrategy =
-				longTerm.find(
+				present.find(
 					(strategy) =>
 						roundNumber(strategy.interventions.reduce((sum, intervention) => sum + intervention.cases, 0)) <=
 						roundNumber(cases)
