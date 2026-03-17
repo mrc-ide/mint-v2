@@ -86,11 +86,6 @@ export const getProjectFromUserState = (userState: UserState, projectName?: stri
 export const invalidateStrategyForProject = (userState: UserState, projectName: string) => {
 	const projectData = getProjectFromUserState(userState, projectName);
 	projectData.strategy = undefined;
-	invalidateCompareStrategyForProject(userState, projectName);
-};
-
-export const invalidateCompareStrategyForProject = (userState: UserState, projectName: string) => {
-	const projectData = getProjectFromUserState(userState, projectName);
 	projectData.compareStrategy = undefined;
 };
 
@@ -99,5 +94,4 @@ export const invalidateLongTerm = (userState: UserState, projectName: string, re
 
 	regionData.longTermFormValues = undefined;
 	regionData.fullLongTermCases = undefined;
-	invalidateCompareStrategyForProject(userState, projectName);
 };

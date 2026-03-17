@@ -1,9 +1,5 @@
 import { ApiError, apiFetch } from '$lib/fetch';
-import {
-	invalidateCompareStrategyForProject,
-	saveLongTermFormState,
-	saveLongTermRegionCompare
-} from '$lib/server/region';
+import { invalidateStrategyForProject, saveLongTermFormState, saveLongTermRegionCompare } from '$lib/server/region';
 import type { EmulatorResults } from '$lib/types/userState';
 import { runEmulatorUrl } from '$lib/url';
 import { error, json } from '@sveltejs/kit';
@@ -21,7 +17,7 @@ export const POST: RequestHandler = async ({ request, fetch, locals, params }) =
 		});
 
 		if (shouldSave) {
-			invalidateCompareStrategyForProject(locals.userState, project);
+			invalidateStrategyForProject(locals.userState, project);
 			await saveLongTermRegionCompare(locals.userState, project, region, formValues, res.data.cases);
 		}
 
@@ -36,7 +32,7 @@ export const PATCH: RequestHandler = async ({ request, locals, params }) => {
 	const { formValues } = await request.json();
 	const { project, region } = params;
 
-	invalidateCompareStrategyForProject(locals.userState, project);
+	invalidateStrategyForProject(locals.userState, project);
 	await saveLongTermFormState(locals.userState, project, region, formValues);
 	return new Response(null, { status: 204 });
 };

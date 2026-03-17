@@ -1,4 +1,11 @@
-import type { CompareStrategiseResult, StrategiseResult, StrategiseResults } from '$lib/types/userState';
+import { roundNumber } from '$lib/number';
+import type {
+	CompareStrategiseResult,
+	CompareStrategiseResults,
+	CumulativeCompareStrategiseResult,
+	StrategiseResult,
+	StrategiseResults
+} from '$lib/types/userState';
 import { ScenarioToLabel } from './baseChart';
 
 export const BUDGET_PLOTLINE_ID = 'explored-budget';
@@ -14,10 +21,27 @@ export const getBudgetPlotLine = (budget: number): Highcharts.AxisPlotLinesOptio
 		style: { color: 'var(--foreground)', fontWeight: '600' }
 	}
 });
+export const CASES_PLOT_LINE_ID = 'explored-cases';
+export const getCasesPlotLine = (cases: number): Highcharts.AxisPlotLinesOptions => ({
+	id: CASES_PLOT_LINE_ID,
+	value: cases,
+	color: 'var(--foreground)',
+	dashStyle: 'ShortDot',
+	width: 2,
+	zIndex: 5,
+	label: {
+		text: 'Explored cases',
+		style: { color: 'var(--foreground)', fontWeight: '600' }
+	}
+});
 
 export const addBudgetPlotLine = (chart: Highcharts.Chart, budget: number) => {
 	chart.xAxis[0].removePlotLine(BUDGET_PLOTLINE_ID);
 	chart.xAxis[0].addPlotLine(getBudgetPlotLine(budget));
+};
+export const addCasesPlotLine = (chart: Highcharts.Chart, cases: number) => {
+	chart.yAxis[0].removePlotLine(CASES_PLOT_LINE_ID);
+	chart.yAxis[0].addPlotLine(getCasesPlotLine(cases));
 };
 
 export const findClosestStrategiseResult = (strategiseResults: StrategiseResults, xValue: number) =>
@@ -148,7 +172,6 @@ export const getCompareStrategiseSeries = (data: CompareStrategiseResult): Highc
 
 	data.forEach(({ costThreshold, interventions }) => {
 		interventions.forEach(({ cases, region, intervention }) => {
-			// if (region !== 'world') return;
 			if (!seriesMap.has(region)) {
 				seriesMap.set(region, {
 					name: region,
@@ -165,35 +188,45 @@ export const getCompareStrategiseSeries = (data: CompareStrategiseResult): Highc
 			});
 		});
 	});
-	console.log('Compare series map:', Array.from(seriesMap.values()));
 	return Array.from(seriesMap.values());
 };
 
+export const getClosestPoint = (cost: number, allSeries: Highcharts.Series[]): Highcharts.Point | null =>
+	allSeries
+		.flatMap((series) => series.data)
+		.reduce<Highcharts.Point | null>((closest, point) => {
+			if (closest === null) return point;
+			return Math.abs((point.x as number) - cost) < Math.abs((closest.x as number) - cost) ? point : closest;
+		}, null);
+
 export const getCompareStrategyConfig = (
 	compareResult: CompareStrategiseResult,
-	name: 'Present (current controls)' | 'Long-term (adjusted controls)'
+	name: 'Present (current controls)' | 'Long-term (adjusted controls)',
+	maxCases: number,
+	onCasesPlotLineAdded: (cases: number) => void
 ): Highcharts.Options => ({
 	chart: {
 		type: 'area',
-		height: 400,
+		height: 500,
 		zooming: {
 			type: 'x'
 		},
 		events: {
-			// click: function (event) {
-			// 	const xValue = Math.round((event as Highcharts.ChartClickEventObject).xAxis[0].value);
-			// 	addBudgetPlotLine(this, xValue);
-			// 	setStrategy(findClosestStrategiseResult(strategiseResults, xValue));
-			// }
+			click: function (event) {
+				const xValue = Math.round((event as Highcharts.ChartClickEventObject).xAxis[0].value);
+				const closestPoint = getClosestPoint(xValue, this.series);
+				if (closestPoint) {
+					addCasesPlotLine(this, closestPoint.total!);
+					onCasesPlotLineAdded(closestPoint.total!);
+				}
+			}
 		}
 	},
 	title: {
 		text: `Cost of Strategy and Total Clinical Cases Averted - ${name}`
 	},
 	subtitle: {
-		text:
-			'<b>Click anywhere on the chart to explore the optimal intervention strategy at the selected budget level.</b><br>' +
-			'The chart displays strategies from the minimum cost option to the defined maximum available budget.',
+		text: '<b>Click anywhere on the chart to explore the optimal intervention strategy at the selected budget level.</b><br>',
 		verticalAlign: 'bottom',
 		align: 'left'
 	},
@@ -205,18 +238,6 @@ export const getCompareStrategyConfig = (
 		labels: {
 			format: '${value:,.0f}'
 		}
-		// plotLines: [
-		// 	{
-		// 		value: strategiseResults[0]?.costThreshold ?? 0,
-		// 		dashStyle: 'Dash',
-		// 		zIndex: 5,
-		// 		label: {
-		// 			text: 'Minimum budget',
-		// 			style: { color: 'var(--muted-foreground)' }
-		// 		}
-		// 	},
-		// 	getBudgetPlotLine(strategiseResults[strategiseResults.length - 1].costThreshold)
-		// ]
 	},
 	yAxis: {
 		title: {
@@ -224,7 +245,8 @@ export const getCompareStrategyConfig = (
 		},
 		labels: {
 			format: '{value:,.1f}'
-		}
+		},
+		max: maxCases * 1.1 // add 10% padding to max cases for better visualization of plot line
 	},
 	tooltip: {
 		shared: true,
@@ -247,13 +269,13 @@ export const getCompareStrategyConfig = (
 			stacking: 'normal',
 			marker: {
 				enabled: false
+			},
+			events: {
+				click: function (event) {
+					addCasesPlotLine(this.chart, event.point.total!);
+					onCasesPlotLineAdded(event.point.total!);
+				}
 			}
-			// events: {
-			// 	click: function (event) {
-			// 		addBudgetPlotLine(this.chart, event.point.x);
-			// 		setStrategy(findClosestStrategiseResult(strategiseResults, event.point.x));
-			// 	}
-			// }
 		}
 	},
 	legend: {
@@ -264,3 +286,56 @@ export const getCompareStrategyConfig = (
 	},
 	series: getCompareStrategiseSeries(compareResult)
 });
+
+const calculateTotalCases = (data: CompareStrategiseResult): number =>
+	data[0]?.interventions.reduce((sum, intervention) => sum + intervention.cases, 0) ?? 0;
+
+export const getCompareStrategyConfigs = (
+	{ present, longTerm }: NonNullable<CompareStrategiseResults>,
+	getCharts: () => { presentChart: Highcharts.Chart | null; longTermChart: Highcharts.Chart | null },
+	selectedStrategies: {
+		presentStrategy: null | CompareStrategiseResult[number];
+		longTermStrategy: null | CompareStrategiseResult[number];
+	}
+) => {
+	const maxCases = Math.max(calculateTotalCases(present), calculateTotalCases(longTerm));
+	return {
+		presentConfig: getCompareStrategyConfig(present, 'Present (current controls)', maxCases, (cases) => {
+			const { longTermChart } = getCharts();
+			selectedStrategies.presentStrategy =
+				present.find(
+					(strategy) =>
+						roundNumber(strategy.interventions.reduce((sum, intervention) => sum + intervention.cases, 0)) ===
+						roundNumber(cases)
+				) ?? null;
+
+			selectedStrategies.longTermStrategy =
+				longTerm.find(
+					(strategy) =>
+						roundNumber(strategy.interventions.reduce((sum, intervention) => sum + intervention.cases, 0)) <=
+						roundNumber(cases)
+				) ?? null;
+
+			if (longTermChart) addCasesPlotLine(longTermChart, cases);
+		}),
+		longTermConfig: getCompareStrategyConfig(longTerm, 'Long-term (adjusted controls)', maxCases, (cases) => {
+			const { presentChart } = getCharts();
+
+			selectedStrategies.longTermStrategy =
+				longTerm.find(
+					(strategy) =>
+						roundNumber(strategy.interventions.reduce((sum, intervention) => sum + intervention.cases, 0)) ===
+						roundNumber(cases)
+				) ?? null;
+
+			selectedStrategies.presentStrategy =
+				longTerm.find(
+					(strategy) =>
+						roundNumber(strategy.interventions.reduce((sum, intervention) => sum + intervention.cases, 0)) <=
+						roundNumber(cases)
+				) ?? null;
+
+			if (presentChart) addCasesPlotLine(presentChart, cases);
+		})
+	};
+};

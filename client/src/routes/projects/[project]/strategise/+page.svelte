@@ -31,7 +31,7 @@
 				$formData.minCost,
 				$formData.budget,
 				data.regionalStrategies,
-				data.longTermRegionalStrategies
+				data.compareRegionalStrategies
 			);
 			$formData.strategiseResults = currentAverted;
 			$formData.compareStrategiseResults = longTerm;
@@ -85,7 +85,7 @@
 						<StrategiseResults strategiseResults={data.project.strategy.results} populations={populationsOfRegion} />
 					</Tabs.Content>
 					<Tabs.Content value="longTerm">
-						<div class="flex items-center justify-center p-8">
+						<div class="flex items-center justify-center">
 							{#if data.project.compareStrategy?.results}
 								<CompareStrategiseResults results={data.project.compareStrategy.results} />
 							{:else}

@@ -16,13 +16,13 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 	const projectData = getProjectFromUserState(locals.userState, project);
 	const regionalStrategies = getCasesAvertedAndCostsForStrategise(projectData.regions);
-	const longTermRegionalStrategies = getCasesAndCostsForCompareStrategise(projectData.regions);
+	const compareRegionalStrategies = getCasesAndCostsForCompareStrategise(projectData.regions);
 	const maximumCost = ROUNDING_METHODS['ceil'](getMaximumCostForStrategise(regionalStrategies));
 
 	return {
 		project: projectData,
 		regionalStrategies,
-		longTermRegionalStrategies,
+		compareRegionalStrategies,
 		form: await superValidate(
 			{
 				minCost: getMinimumCostForStrategise(regionalStrategies),
