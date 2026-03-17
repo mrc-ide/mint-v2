@@ -21,8 +21,9 @@ import type {
 import { equalTo, lessEq, solve, type Constraint, type Model } from 'yalps';
 import type { CompareStrategiseRegion, CompareStrategiseRegions, StrategiseRegions } from './schema';
 
-export const getCasesAndCostsForCompareStrategise = (regions: Region[]): CompareStrategiseRegions => {
+export const getCasesAndCostsForCompareStrategise = (regions: Region[]): CompareStrategiseRegions | null => {
 	const filteredRegions = regions.filter((region) => region.results?.cases && region.fullLongTermCases);
+	if (filteredRegions.length < 2) return null; // Need at least 2 regions with valid data to perform comparison
 
 	const present = filteredRegions.map((region) => {
 		const presentCostsAndCases = getTotalCasesAndCostsPerScenario(region.results!.cases, region.formValues);
@@ -173,19 +174,57 @@ type OptimizationVariables = Record<string, OptimizationVariable>;
 export const strategiseAsync = (
 	minCost: number,
 	maxCost: number,
-	regionalStrategies: StrategiseRegions,
-	compareRegionalStrategies: CompareStrategiseRegions
-): Promise<{
-	currentAverted: StrategiseResults;
-	longTerm: CompareStrategiseResults;
-}> => {
+	regionalStrategies: StrategiseRegions
+): Promise<StrategiseResults> => {
 	return new Promise((resolve) => {
 		setTimeout(() => {
-			resolve(strategise(minCost, maxCost, regionalStrategies, compareRegionalStrategies));
+			resolve(strategise(minCost, maxCost, regionalStrategies));
 		}, 0);
 	});
 };
 
+export const strategiseCompareAsync = (
+	presentMinCost: number,
+	compareRegionalStrategies: CompareStrategiseRegions
+): Promise<CompareStrategiseResults> => {
+	return new Promise((resolve) => {
+		setTimeout(() => {
+			resolve(strategiseCompare(presentMinCost, compareRegionalStrategies));
+		}, 0);
+	});
+};
+
+export const strategiseCompare = (
+	presentMinCost: number,
+	compareRegionalStrategies: CompareStrategiseRegions
+): CompareStrategiseResults => {
+	const presentCostRange = createLinearSpace(
+		presentMinCost,
+		getMaximumCostForStrategise(compareRegionalStrategies.present)
+	);
+	const longTermWithoutNoIntervention: CompareStrategiseRegion[] = compareRegionalStrategies.longTerm.map((region) => ({
+		...region,
+		interventions: region.interventions.filter((intervention) => intervention.intervention !== 'no_intervention')
+	}));
+
+	const longTermCostRange = createLinearSpace(
+		getMinimumCostForStrategise(longTermWithoutNoIntervention),
+		getMaximumCostForStrategise(compareRegionalStrategies.longTerm)
+	);
+
+	const { present, longTerm } = setupOptimisationModelForCompare(compareRegionalStrategies);
+
+	return {
+		present: presentCostRange.map((costThreshold) => ({
+			costThreshold,
+			interventions: optimiseForMinCases(costThreshold, present)
+		})),
+		longTerm: longTermCostRange.map((costThreshold) => ({
+			costThreshold,
+			interventions: optimiseForMinCases(costThreshold, longTerm)
+		}))
+	};
+};
 /**
  * Performs strategise analysis over a range of costs to generate intervention strategies.
  * For each cost threshold, it optimizes intervention selection to maximize cases averted.
@@ -193,28 +232,15 @@ export const strategiseAsync = (
  * @param minCost - The minimum cost threshold for the analysis
  * @param maxCost - The maximum cost threshold for the analysis
  * @param regionalStrategies - Array of regions with their intervention data
- * @param compareRegionalStrategies - Array of regions with their comparison intervention data
  * @returns Array of strategise results, each containing a cost threshold and selected interventions
  */
 export const strategise = (
 	minCost: number,
 	maxCost: number,
-	regionalStrategies: StrategiseRegions,
-	compareRegionalStrategies: CompareStrategiseRegions
-): {
-	currentAverted: StrategiseResults;
-	longTerm: CompareStrategiseResults;
-} => {
-	const presentCostRange = createLinearSpace(minCost, maxCost);
-	const longTermWithoutNoIntervention: CompareStrategiseRegion[] = compareRegionalStrategies.longTerm.map((region) => ({
-		...region,
-		interventions: region.interventions.filter((intervention) => intervention.intervention !== 'no_intervention')
-	}));
-	// TODO: maybe show no intervention as option as well?
-	const longTermCostRange = createLinearSpace(
-		getMinimumCostForStrategise(longTermWithoutNoIntervention),
-		getMaximumCostForStrategise(longTermWithoutNoIntervention)
-	);
+	regionalStrategies: StrategiseRegions
+): StrategiseResults => {
+	const costRange = createLinearSpace(minCost, maxCost);
+
 	const NO_INTERVENTION = { intervention: 'no_intervention', casesAverted: 0, cost: 0 } as const;
 	const strategiesIncludingNoIntervention: StrategiseRegions = regionalStrategies.map((region) => ({
 		...region,
@@ -222,25 +248,11 @@ export const strategise = (
 	}));
 
 	const { constraints, variables } = setupOptimisationModel(strategiesIncludingNoIntervention);
-	const { present, longTerm } = setupOptimisationModelForCompare(compareRegionalStrategies);
 
-	// TODO: just loop costrange once and just update interventions
-	return {
-		currentAverted: presentCostRange.map((costThreshold) => ({
-			costThreshold,
-			interventions: optimiseForMaxCasesAverted(costThreshold, constraints, variables)
-		})),
-		longTerm: {
-			present: presentCostRange.map((costThreshold) => ({
-				costThreshold,
-				interventions: optimiseForMinCases(costThreshold, present)
-			})),
-			longTerm: longTermCostRange.map((costThreshold) => ({
-				costThreshold,
-				interventions: optimiseForMinCases(costThreshold, longTerm)
-			}))
-		}
-	};
+	return costRange.map((costThreshold) => ({
+		costThreshold,
+		interventions: optimiseForMaxCasesAverted(costThreshold, constraints, variables)
+	}));
 };
 
 export const optimiseForMinCases = (

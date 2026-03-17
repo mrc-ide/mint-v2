@@ -9,7 +9,7 @@
 	import BudgetInput from './_components/BudgetInput.svelte';
 	import StrategiseResults from './_components/StrategiseResults.svelte';
 	import { strategiseSchema } from './schema';
-	import { strategiseAsync } from './utils';
+	import { strategiseAsync, strategiseCompareAsync } from './utils';
 	import * as Tabs from '$lib/components/ui/tabs/index.js';
 	import CompareStrategiseResults from './_components/CompareStrategiseResults.svelte';
 
@@ -27,14 +27,16 @@
 			}
 			loading = true;
 
-			const { currentAverted, longTerm } = await strategiseAsync(
-				$formData.minCost,
-				$formData.budget,
-				data.regionalStrategies,
-				data.compareRegionalStrategies
-			);
-			$formData.strategiseResults = currentAverted;
-			$formData.compareStrategiseResults = longTerm;
+			const strategiseResults = await strategiseAsync($formData.minCost, $formData.budget, data.regionalStrategies);
+			$formData.strategiseResults = strategiseResults;
+
+			if (data.userData.compareEnabled && data.compareRegionalStrategies) {
+				const compareStrategiseResults = await strategiseCompareAsync(
+					$formData.minCost,
+					data.compareRegionalStrategies
+				);
+				$formData.compareStrategiseResults = compareStrategiseResults;
+			}
 		},
 		onUpdated() {
 			loading = false;
@@ -89,7 +91,9 @@
 							{#if data.project.compareStrategy?.results}
 								<CompareStrategiseResults results={data.project.compareStrategy.results} />
 							{:else}
-								<div class="text-muted-foreground">Long term results are not yet available for this tool.</div>
+								<div class="text-muted-foreground">
+									You must run long-term planning for at least two regions to see long-term strategies.
+								</div>
 							{/if}
 						</div>
 					</Tabs.Content>
