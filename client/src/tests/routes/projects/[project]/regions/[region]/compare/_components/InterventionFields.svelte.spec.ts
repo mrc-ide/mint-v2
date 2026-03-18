@@ -3,6 +3,7 @@ import InterventionFields from '$routes/projects/[project]/regions/[region]/comp
 import { render } from 'vitest-browser-svelte';
 import { userEvent } from 'vitest/browser';
 
+const debounceSaveLongTermFormValues = vi.fn();
 const renderComponent = (props: Record<string, any> = {}) => {
 	const testFormValues = $state(structuredClone(MOCK_FORM_VALUES));
 	return render(InterventionFields, {
@@ -11,10 +12,14 @@ const renderComponent = (props: Record<string, any> = {}) => {
 		longTermFormValues: testFormValues,
 		interventionParameters: MOCK_COMPARE_PARAMETERS.interventionParameters,
 		onSliderChange: vi.fn(),
+		debounceSaveLongTermFormValues,
 		...props
 	} as any);
 };
 describe('Compare InterventionFields component', () => {
+	beforeEach(() => {
+		vi.resetAllMocks();
+	});
 	it('should render intervention fields', async () => {
 		const screen = renderComponent();
 
@@ -36,6 +41,15 @@ describe('Compare InterventionFields component', () => {
 		for (const param of MOCK_COMPARE_PARAMETERS.interventionParameters) {
 			await expect.element(screen.getByLabelText(param.linkedCosts[0].costLabel)).toBeDisabled();
 		}
+	});
+
+	it('should call debounceSaveLongTermFormValues when changing number field', async () => {
+		const screen = renderComponent();
+
+		const testParam = MOCK_COMPARE_PARAMETERS.interventionParameters[0];
+		const input = screen.getByLabelText(testParam.linkedCosts[0].costLabel);
+		await userEvent.fill(input, '123');
+		expect(debounceSaveLongTermFormValues).toHaveBeenCalledTimes(1);
 	});
 
 	it('should calculate correct cost delta as % and display with appropriate sign', async () => {
