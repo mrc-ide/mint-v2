@@ -47,7 +47,7 @@ export const strategiseSchema = z
 
 export type StrategiseForm = z.infer<typeof strategiseSchema>;
 
-type MetricKey = 'cases' | 'casesAverted';
+export type MetricKey = 'cases' | 'casesAverted';
 
 type StrategiseIntervention<K extends MetricKey> = {
 	intervention: Scenario;
@@ -58,8 +58,11 @@ export type StrategiseRegionByMetric<TMetric extends MetricKey> = {
 	region: string;
 	interventions: StrategiseIntervention<TMetric>[];
 };
-
 export interface CompareStrategiseRegions {
 	present: StrategiseRegionByMetric<'cases'>[];
 	longTerm: StrategiseRegionByMetric<'cases'>[];
 }
+
+export type StrategiseResultIntervention<K extends MetricKey> = StrategiseIntervention<K> & {
+	region: string;
+};

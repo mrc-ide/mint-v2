@@ -10,16 +10,19 @@ import {
 } from '$lib/process-results/processCases';
 import type {
 	CasesData,
-	CompareStrategiseIntervention,
 	CompareStrategiseResults,
 	Region,
 	Scenario,
-	StrategiseIntervention,
 	StrategiseResult,
 	StrategiseResults
 } from '$lib/types/userState';
 import { equalTo, lessEq, solve, type Constraint, type Model } from 'yalps';
-import type { CompareStrategiseRegions, StrategiseRegionByMetric } from './schema';
+import type {
+	CompareStrategiseRegions,
+	MetricKey,
+	StrategiseRegionByMetric,
+	StrategiseResultIntervention
+} from './schema';
 
 const mapTotalsToInterventions = (
 	totals: ReturnType<typeof getTotalCasesAndCostsPerScenario>
@@ -160,23 +163,31 @@ export const buildInterventions = (
 };
 
 /**** Optimisation Helpers ****/
-type OptimizationVariables = Record<
+type OptimizationVariables<K extends MetricKey> = Record<
 	string,
 	{
 		cost: number;
-		casesAverted: number;
-		[regionName: string]: number;
-	}
+	} & Record<K, number> &
+		Record<string, number>
 >;
 
-type CompareOptimizationVariables = Record<
-	string,
-	{
-		cost: number;
-		cases: number;
-		[region: string]: number;
-	}
->;
+// type OptimizationVariables = Record<
+// 	string,
+// 	{
+// 		cost: number;
+// 		casesAverted: number;
+// 		[regionName: string]: number;
+// 	}
+// >;
+
+// type CompareOptimizationVariables = Record<
+// 	string,
+// 	{
+// 		cost: number;
+// 		cases: number;
+// 		[region: string]: number;
+// 	}
+// >;
 
 type OptimisationDirection = 'maximize' | 'minimize';
 
@@ -261,8 +272,8 @@ export const strategiseCompare = (
 		getMaximumCostForStrategise(compareRegionalStrategies.longTerm)
 	);
 
-	const presentModel = setupOptimisationModelForCompare(compareRegionalStrategies.present);
-	const longTermModel = setupOptimisationModelForCompare(compareRegionalStrategies.longTerm);
+	const presentModel = setupOptimisationModel(compareRegionalStrategies.present, 'cases');
+	const longTermModel = setupOptimisationModel(compareRegionalStrategies.longTerm, 'cases');
 
 	return {
 		present: presentCostRange.map((costThreshold) => ({
@@ -300,12 +311,12 @@ export const strategise = (
 		})
 	);
 
-	const { constraints, variables } = setupOptimisationModel(strategiesIncludingNoIntervention);
+	const { constraints, variables } = setupOptimisationModel(strategiesIncludingNoIntervention, 'casesAverted');
 
 	return costRange.map((costThreshold) => ({
 		costThreshold,
 		interventions: runOptimisation(costThreshold, 'maximize', 'casesAverted', constraints, variables, (variableName) =>
-			parseOptimisationResult(variableName, variables)
+			parseOptimisationResult(variableName, variables, 'casesAverted')
 		)
 	}));
 };
@@ -315,52 +326,29 @@ export const strategise = (
  */
 export const optimiseForMinCases = (
 	cost: number,
-	{ constraints, variables }: ReturnType<typeof setupOptimisationModelForCompare>
-): CompareStrategiseIntervention[] => {
+	{ constraints, variables }: ReturnType<typeof setupOptimisationModel<'cases'>>
+): StrategiseResultIntervention<'cases'>[] => {
 	return runOptimisation(cost, 'minimize', 'cases', constraints, variables, (variableName) =>
-		parseCompareOptimisationResult(variableName, variables)
+		parseOptimisationResult(variableName, variables, 'cases')
 	);
 };
 
 /*** Sets up optimization constraints and variables for linear programming.  ***/
-
-const setupOptimisationModelForCompare = (regions: StrategiseRegionByMetric<'cases'>[]) => {
+const setupOptimisationModel = <K extends MetricKey>(regions: StrategiseRegionByMetric<K>[], metric: K) => {
 	const constraints: Record<string, Constraint> = {};
-	const variables: CompareOptimizationVariables = {};
-
-	for (const { region, interventions } of regions) {
-		constraints[region] = equalTo(1);
-
-		for (const { intervention, cost, cases } of interventions) {
-			const variableName = `${region}--${intervention}`;
-			variables[variableName] = {
-				cost,
-				cases,
-				[region]: 1
-			};
-		}
-	}
-
-	return {
-		constraints,
-		variables
-	};
-};
-const setupOptimisationModel = (regions: StrategiseRegionByMetric<'casesAverted'>[]) => {
-	const constraints: Record<string, Constraint> = {};
-	const variables: OptimizationVariables = {};
+	const variables: OptimizationVariables<K> = {};
 
 	for (const { region, interventions } of regions) {
 		// Ensure exactly one intervention per region
 		constraints[region] = equalTo(1);
 
-		for (const { intervention, cost, casesAverted } of interventions) {
-			const variableName = `${region}--${intervention}`;
+		for (const interventionData of interventions) {
+			const variableName = `${region}--${interventionData.intervention}`;
 			variables[variableName] = {
-				cost,
-				casesAverted,
+				cost: interventionData.cost,
+				[metric]: interventionData[metric],
 				[region]: 1 // Links variable to its region constraint
-			};
+			} as OptimizationVariables<K>[string];
 		}
 	}
 
@@ -369,34 +357,22 @@ const setupOptimisationModel = (regions: StrategiseRegionByMetric<'casesAverted'
 
 /*** Parses optimization result variable name back to intervention data. ***/
 
-export const parseOptimisationResult = (
+export const parseOptimisationResult = <K extends MetricKey>(
 	variableName: string,
-	variables: OptimizationVariables
-): StrategiseIntervention => {
+	variables: OptimizationVariables<K>,
+	metric: K
+): StrategiseResultIntervention<K> => {
 	const [region, intervention] = variableName.split('--');
-	const { cost, casesAverted } = variables[variableName];
+	const { cost, [metric]: value } = variables[variableName];
 
 	return {
 		region,
 		intervention: intervention as Scenario,
 		cost,
-		casesAverted
-	};
+		[metric]: value
+	} as StrategiseResultIntervention<K>;
 };
-export const parseCompareOptimisationResult = (
-	variableName: string,
-	variables: CompareOptimizationVariables
-): CompareStrategiseIntervention => {
-	const [region, intervention] = variableName.split('--');
-	const { cost, cases } = variables[variableName];
 
-	return {
-		region,
-		intervention: intervention as Scenario,
-		cost,
-		cases
-	};
-};
 /**
  * Constructs detailed regional metrics used for display for a given strategy.
  */

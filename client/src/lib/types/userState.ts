@@ -43,18 +43,6 @@ export interface Region {
 	longTermFormValues?: Record<string, FormValue>;
 	fullLongTermCases?: CasesData[];
 }
-export interface StrategiseIntervention {
-	region: string;
-	intervention: Scenario;
-	cost: number;
-	casesAverted: number;
-}
-export interface CompareStrategiseIntervention {
-	region: string;
-	intervention: Scenario;
-	cost: number;
-	cases: number;
-}
 
 export type StrategiseResults = z.infer<typeof strategiseSchema>['strategiseResults'];
 export type StrategiseResult = StrategiseResults[number];
