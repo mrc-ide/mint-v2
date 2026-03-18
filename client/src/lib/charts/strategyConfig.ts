@@ -166,6 +166,8 @@ export const getStrategyConfig = (
 	series: getStrategiseSeries(strategiseResults)
 });
 
+/******* Compare Strategise Config  *******************/
+
 export const getCompareStrategiseSeries = (data: CompareStrategiseResult): Highcharts.SeriesAreaOptions[] => {
 	const seriesMap = new Map<string, Highcharts.SeriesAreaOptions>();
 
@@ -282,8 +284,17 @@ export const getCompareStrategyConfig = (
 	series: getCompareStrategiseSeries(compareResult)
 });
 
-const calculateTotalCases = (data: CompareStrategiseResult): number =>
+const calculateTotalCasesMinCost = (data: CompareStrategiseResult): number =>
 	data[0]?.interventions.reduce((sum, intervention) => sum + intervention.cases, 0) ?? 0;
+
+const calculateTotalRoundedCases = (strategy: CompareStrategiseResult[number]) =>
+	roundNumber(strategy.interventions.reduce((sum, intervention) => sum + intervention.cases, 0));
+
+const findExactCaseMatch = (strategies: CompareStrategiseResult, cases: number) =>
+	strategies.find((strategy) => calculateTotalRoundedCases(strategy) === roundNumber(cases)) ?? null;
+
+const findLessThanOrEqualCaseMatch = (strategies: CompareStrategiseResult, cases: number) =>
+	strategies.find((strategy) => calculateTotalRoundedCases(strategy) <= roundNumber(cases)) ?? null;
 
 export const getCompareStrategyConfigs = (
 	{ present, longTerm }: NonNullable<CompareStrategiseResults>,
@@ -293,42 +304,20 @@ export const getCompareStrategyConfigs = (
 		longTermStrategy: null | CompareStrategiseResult[number];
 	}
 ) => {
-	const maxCases = Math.max(calculateTotalCases(present), calculateTotalCases(longTerm));
+	const maxCases = Math.max(calculateTotalCasesMinCost(present), calculateTotalCasesMinCost(longTerm));
 	return {
 		presentConfig: getCompareStrategyConfig(present, 'Present (current controls)', maxCases, (cases) => {
 			const { longTermChart } = getCharts();
-			selectedStrategies.presentStrategy =
-				present.find(
-					(strategy) =>
-						roundNumber(strategy.interventions.reduce((sum, intervention) => sum + intervention.cases, 0)) ===
-						roundNumber(cases)
-				) ?? null;
-
-			selectedStrategies.longTermStrategy =
-				longTerm.find(
-					(strategy) =>
-						roundNumber(strategy.interventions.reduce((sum, intervention) => sum + intervention.cases, 0)) <=
-						roundNumber(cases)
-				) ?? null;
+			selectedStrategies.presentStrategy = findExactCaseMatch(present, cases);
+			selectedStrategies.longTermStrategy = findLessThanOrEqualCaseMatch(longTerm, cases);
 
 			if (longTermChart) addCasesPlotLine(longTermChart, cases);
 		}),
 		longTermConfig: getCompareStrategyConfig(longTerm, 'Long-term (adjusted controls)', maxCases, (cases) => {
 			const { presentChart } = getCharts();
 
-			selectedStrategies.longTermStrategy =
-				longTerm.find(
-					(strategy) =>
-						roundNumber(strategy.interventions.reduce((sum, intervention) => sum + intervention.cases, 0)) ===
-						roundNumber(cases)
-				) ?? null;
-
-			selectedStrategies.presentStrategy =
-				present.find(
-					(strategy) =>
-						roundNumber(strategy.interventions.reduce((sum, intervention) => sum + intervention.cases, 0)) <=
-						roundNumber(cases)
-				) ?? null;
+			selectedStrategies.longTermStrategy = findExactCaseMatch(longTerm, cases);
+			selectedStrategies.presentStrategy = findLessThanOrEqualCaseMatch(present, cases);
 
 			if (presentChart) addCasesPlotLine(presentChart, cases);
 		})
