@@ -10,6 +10,7 @@ describe('compare server functions', () => {
 	describe('fetchCompareParameters', () => {
 		beforeEach(() => {
 			vi.spyOn(Urls, 'getCompareParametersUrl').mockReturnValue('/compare-parameters');
+			vi.spyOn(Urls, 'runEmulatorUrl').mockReturnValue('http://localhost:8000/emulator/run');
 		});
 
 		it('should fetch compare parameters successfully', async () => {
