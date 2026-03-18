@@ -1,5 +1,5 @@
 import type { FormValue } from '$lib/components/dynamic-region-form/types';
-import type { strategiseResultsSchema, strategiseSchema } from '$routes/projects/[project]/strategise/schema';
+import type { compareStrategiseResultSchema, strategiseSchema } from '$routes/projects/[project]/strategise/schema';
 import { z } from 'zod';
 
 export const SCENARIOS = [
@@ -68,7 +68,7 @@ export interface CompareStrategy {
 	results: CompareStrategiseResults;
 }
 export type CompareStrategiseResults = z.infer<typeof strategiseSchema>['compareStrategiseResults'];
-export type CompareStrategiseResult = z.infer<typeof strategiseResultsSchema>;
+export type CompareStrategiseResult = z.infer<typeof compareStrategiseResultSchema>;
 
 export interface Project {
 	name: string;

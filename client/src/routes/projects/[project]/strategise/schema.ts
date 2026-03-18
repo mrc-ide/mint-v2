@@ -1,7 +1,7 @@
 import type { Scenario } from '$lib/types/userState';
 import { z } from 'zod';
 
-export const strategiseResultsSchema = z
+export const compareStrategiseResultSchema = z
 	.object({
 		costThreshold: z.number().min(0, 'Cost threshold must be 0 or greater'),
 		interventions: z
@@ -35,8 +35,8 @@ export const strategiseSchema = z
 			.array(),
 		compareStrategiseResults: z
 			.object({
-				present: strategiseResultsSchema,
-				longTerm: strategiseResultsSchema
+				present: compareStrategiseResultSchema,
+				longTerm: compareStrategiseResultSchema
 			})
 			.optional()
 	})
