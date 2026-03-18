@@ -49,7 +49,6 @@ export const actions: Actions = {
 		};
 		if (form.data.compareStrategiseResults) {
 			projectData.compareStrategy = {
-				budget: form.data.budget,
 				results: form.data.compareStrategiseResults
 			};
 		}

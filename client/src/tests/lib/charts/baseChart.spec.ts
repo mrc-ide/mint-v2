@@ -126,14 +126,16 @@ describe('createHighchart', () => {
 		expect(Highcharts.chart).toHaveBeenCalledWith(element, config);
 	});
 
-	it('should call onLoad callback if provided', () => {
+	it('should call onLoad with chart as argument callback if provided', () => {
 		const onLoad = vi.fn();
+		const mockHighchartsChart = { chart: 'instance' };
+		vi.mocked(Highcharts.chart).mockReturnValue(mockHighchartsChart as any);
 		const element = 'hello';
 		const attachment = createHighchart({}, onLoad);
 
 		attachment(element as any);
 
-		expect(onLoad).toHaveBeenCalledTimes(1);
+		expect(onLoad).toHaveBeenCalledWith(mockHighchartsChart);
 	});
 
 	it('should return cleanup function that destroys chart', () => {

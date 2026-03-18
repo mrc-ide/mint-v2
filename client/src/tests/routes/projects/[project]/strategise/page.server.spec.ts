@@ -29,10 +29,12 @@ describe('load', () => {
 		];
 		const maxCost = 839.34323;
 		const minimumCost = 123.123;
+		const mockCompareRegionalStrategies = [] as any;
 		vi.spyOn(regionModule, 'getProjectFromUserState').mockReturnValue(projectData as any);
 		vi.spyOn(utilsModule, 'getCasesAvertedAndCostsForStrategise').mockReturnValue(regionalStrategies as any);
 		vi.spyOn(utilsModule, 'getMaximumCostForStrategise').mockReturnValue(maxCost);
 		vi.spyOn(utilsModule, 'getMinimumCostForStrategise').mockReturnValue(minimumCost);
+		vi.spyOn(utilsModule, 'getCasesAndCostsForCompareStrategise').mockReturnValue(mockCompareRegionalStrategies);
 
 		const params = { project: 'test-project' };
 		const locals = {
@@ -48,17 +50,19 @@ describe('load', () => {
 		expect(result.form.data.minCost).toBe(minimumCost);
 		expect(result.form.data.maxCost).toBe(Math.ceil(maxCost));
 		expect(result.form.data.budget).toBe(Math.ceil(maxCost));
+		expect(result.compareRegionalStrategies).toBe(mockCompareRegionalStrategies);
 	});
 });
 
 describe('actions', () => {
-	it('should save strategy on form submission', async () => {
+	it('should save strategy & compare strategy on form submission', async () => {
 		const locals = {
 			userState: {
 				projects: [
 					{
 						name: 'test-project',
-						strategy: null
+						strategy: null,
+						compareStrategy: null
 					}
 				]
 			}
@@ -70,15 +74,20 @@ describe('actions', () => {
 				budget: 1000,
 				minCost: 100,
 				maxCost: 2000,
-				strategiseResults: [{ costThreshold: 500, interventions: [] }]
+				strategiseResults: [{ costThreshold: 500, interventions: [] }],
+				compareStrategiseResults: [{ costThreshold: 500, interventions: [] }]
 			}
 		} as any;
 		vi.spyOn(superValidate, 'superValidate').mockResolvedValueOnce(mockForm);
+
 		const result = (await actions.default({ request: {}, locals, params } as any)) as any;
 
 		expect(locals.userState.projects[0].strategy).toEqual({
 			budget: mockForm.data.budget,
 			results: mockForm.data.strategiseResults
+		});
+		expect(locals.userState.projects[0].compareStrategy).toEqual({
+			results: mockForm.data.compareStrategiseResults
 		});
 		expect(result.form).toBe(mockForm);
 	});

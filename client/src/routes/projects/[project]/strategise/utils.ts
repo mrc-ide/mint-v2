@@ -170,25 +170,6 @@ type OptimizationVariables<K extends MetricKey> = Record<
 	} & Record<K, number> &
 		Record<string, number>
 >;
-
-// type OptimizationVariables = Record<
-// 	string,
-// 	{
-// 		cost: number;
-// 		casesAverted: number;
-// 		[regionName: string]: number;
-// 	}
-// >;
-
-// type CompareOptimizationVariables = Record<
-// 	string,
-// 	{
-// 		cost: number;
-// 		cases: number;
-// 		[region: string]: number;
-// 	}
-// >;
-
 type OptimisationDirection = 'maximize' | 'minimize';
 
 /**
@@ -197,7 +178,7 @@ type OptimisationDirection = 'maximize' | 'minimize';
 const runOptimisation = <TResult, TVariables extends Record<string, Record<string, number>>>(
 	cost: number,
 	direction: OptimisationDirection,
-	objective: string,
+	objective: MetricKey,
 	constraints: Record<string, Constraint>,
 	variables: TVariables,
 	mapResult: (variableName: string) => TResult

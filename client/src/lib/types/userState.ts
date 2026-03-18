@@ -52,7 +52,6 @@ export interface Strategy {
 	results: StrategiseResults;
 }
 export interface CompareStrategy {
-	budget: number;
 	results: CompareStrategiseResults;
 }
 export type CompareStrategiseResults = z.infer<typeof strategiseSchema>['compareStrategiseResults'];

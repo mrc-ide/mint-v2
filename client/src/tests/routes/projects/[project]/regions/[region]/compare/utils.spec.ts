@@ -1,4 +1,8 @@
-import { getScenariosFromTotals, runCompareEmulator } from '$routes/projects/[project]/regions/[region]/compare/utils';
+import {
+	getScenariosFromTotals,
+	runCompareEmulator,
+	saveFormValues
+} from '$routes/projects/[project]/regions/[region]/compare/utils';
 import { regionCompareUrl } from '$lib/url';
 import { apiFetch } from '$lib/fetch';
 
@@ -41,7 +45,8 @@ describe('utils', () => {
 				url: mockRegionCompareUrl,
 				method: 'POST',
 				body: {
-					formValues: mockLongTermFormValues
+					formValues: mockLongTermFormValues,
+					shouldSave: true
 				}
 			});
 			expect(apiFetch).toHaveBeenCalledWith({
@@ -52,7 +57,8 @@ describe('utils', () => {
 						...mockPresentFormValues,
 						[mockSelectedBaselineParameter.parameterName]:
 							mockLongTermFormValues[mockSelectedBaselineParameter.parameterName]
-					}
+					},
+					shouldSave: false
 				}
 			});
 			expect(result).toEqual({
@@ -86,6 +92,24 @@ describe('utils', () => {
 			);
 
 			expect(keys).toEqual(['baseline', 'intervention']);
+		});
+	});
+
+	describe('saveFormValues', () => {
+		it('should call apiFetch with correct parameters to save form values', async () => {
+			const mockFormValues = { param1: 'value1', param2: 'value2' };
+			vi.mocked(apiFetch).mockResolvedValue({} as any);
+			vi.mocked(regionCompareUrl).mockReturnValue('http://test-region-compare-url');
+
+			await saveFormValues('mockProject', 'mockRegion', mockFormValues);
+
+			expect(apiFetch).toHaveBeenCalledWith({
+				url: 'http://test-region-compare-url',
+				method: 'PATCH',
+				body: {
+					formValues: mockFormValues
+				}
+			});
 		});
 	});
 });

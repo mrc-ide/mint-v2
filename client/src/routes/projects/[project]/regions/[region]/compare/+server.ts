@@ -15,7 +15,6 @@ export const POST: RequestHandler = async ({ request, fetch, locals, params }) =
 			body: formValues,
 			fetcher: fetch
 		});
-
 		if (shouldSave) {
 			invalidateStrategyForProject(locals.userState, project);
 			await saveLongTermRegionCompare(locals.userState, project, region, formValues, res.data.cases);
