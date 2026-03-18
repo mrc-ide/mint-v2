@@ -397,7 +397,7 @@ describe('invalidateStrategyForProject', () => {
 					name: 'Project A',
 					regions: [],
 					strategy: { budget: 1000, results: [] },
-					compareStrategy: { budget: 1000, results: [] as any }
+					compareStrategy: { results: [] as any }
 				}
 			]
 		};
