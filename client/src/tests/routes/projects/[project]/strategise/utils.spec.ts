@@ -3,7 +3,7 @@ import * as costsModule from '$lib/process-results/costs';
 import type { CasesAverted } from '$lib/process-results/processCases';
 import * as processCasesModule from '$lib/process-results/processCases';
 import type { Region, Scenario, StrategiseResult } from '$lib/types/userState';
-import type { StrategiseRegions } from '$routes/projects/[project]/strategise/schema';
+import type { StrategiseRegionByMetric } from '$routes/projects/[project]/strategise/schema';
 import {
 	buildInterventions,
 	constructRegionalMetrics,
@@ -21,7 +21,7 @@ beforeEach(() => {
 
 describe('getMinimumCostForStrategise', () => {
 	it('should return the minimum cost across all interventions', () => {
-		const regions: StrategiseRegions = [
+		const regions: StrategiseRegionByMetric<'casesAverted'>[] = [
 			{
 				region: 'Region A',
 				interventions: [
@@ -42,7 +42,7 @@ describe('getMinimumCostForStrategise', () => {
 	});
 
 	it('should handle single region with single intervention', () => {
-		const regions: StrategiseRegions = [
+		const regions: StrategiseRegionByMetric<'casesAverted'>[] = [
 			{
 				region: 'Region A',
 				interventions: [{ intervention: 'irs_only', cost: 100, casesAverted: 50 }]
@@ -55,7 +55,7 @@ describe('getMinimumCostForStrategise', () => {
 
 describe('getMaximumCostForStrategise', () => {
 	it('should return sum of maximum costs from each region', () => {
-		const regions: StrategiseRegions = [
+		const regions: StrategiseRegionByMetric<'casesAverted'>[] = [
 			{
 				region: 'Region A',
 				interventions: [
@@ -76,7 +76,7 @@ describe('getMaximumCostForStrategise', () => {
 	});
 
 	it('should handle empty interventions array', () => {
-		const regions: StrategiseRegions = [
+		const regions: StrategiseRegionByMetric<'casesAverted'>[] = [
 			{
 				region: 'Region A',
 				interventions: []
@@ -209,7 +209,7 @@ describe('strategise', () => {
 		const costThresholds = [50, 100, 300, 400];
 		vi.spyOn(numberModule, 'createLinearSpace').mockReturnValue(costThresholds);
 
-		const regions: StrategiseRegions = [
+		const regions: StrategiseRegionByMetric<'casesAverted'>[] = [
 			{
 				region: 'Region A',
 				interventions: [
@@ -242,7 +242,7 @@ describe('strategise', () => {
 	it('should include no_intervention option for each region', () => {
 		vi.spyOn(numberModule, 'createLinearSpace').mockReturnValue([0]);
 
-		const regions: StrategiseRegions = [
+		const regions: StrategiseRegionByMetric<'casesAverted'>[] = [
 			{
 				region: 'Region A',
 				interventions: [{ intervention: 'irs_only' as Scenario, cost: 1000, casesAverted: 50 }]
@@ -259,7 +259,7 @@ describe('strategiseAsync', () => {
 	it('should resolve with strategise results asynchronously', async () => {
 		vi.spyOn(numberModule, 'createLinearSpace').mockReturnValue([100]);
 
-		const regions: StrategiseRegions = [
+		const regions: StrategiseRegionByMetric<'casesAverted'>[] = [
 			{
 				region: 'Region A',
 				interventions: [{ intervention: 'irs_only' as Scenario, cost: 100, casesAverted: 50 }]
@@ -276,7 +276,7 @@ describe('strategiseAsync', () => {
 		vi.spyOn(numberModule, 'createLinearSpace').mockReturnValue([100]);
 		vi.spyOn(global, 'setTimeout');
 
-		const regions: StrategiseRegions = [
+		const regions: StrategiseRegionByMetric<'casesAverted'>[] = [
 			{
 				region: 'Region A',
 				interventions: [{ intervention: 'irs_only' as Scenario, cost: 100, casesAverted: 50 }]

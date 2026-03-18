@@ -14,7 +14,7 @@ export const compareStrategiseResultSchema = z
 			.array()
 	})
 	.array();
-// TODO: can make schema same just change casesAverted to cases and then transform in utils
+
 export const strategiseSchema = z
 	.object({
 		minCost: z.number().min(1, 'Minimum cost must be greater than 0'),
@@ -47,25 +47,19 @@ export const strategiseSchema = z
 
 export type StrategiseForm = z.infer<typeof strategiseSchema>;
 
-interface StrategiseRegion {
-	region: string;
-	interventions: {
-		intervention: Scenario;
-		cost: number;
-		casesAverted: number;
-	}[];
-}
-export type StrategiseRegions = StrategiseRegion[];
+type MetricKey = 'cases' | 'casesAverted';
 
-export interface CompareStrategiseRegion {
+type StrategiseIntervention<K extends MetricKey> = {
+	intervention: Scenario;
+	cost: number;
+} & Record<K, number>;
+
+export type StrategiseRegionByMetric<TMetric extends MetricKey> = {
 	region: string;
-	interventions: {
-		intervention: Scenario;
-		cost: number;
-		cases: number;
-	}[];
-}
+	interventions: StrategiseIntervention<TMetric>[];
+};
+
 export interface CompareStrategiseRegions {
-	present: CompareStrategiseRegion[];
-	longTerm: CompareStrategiseRegion[];
+	present: StrategiseRegionByMetric<'cases'>[];
+	longTerm: StrategiseRegionByMetric<'cases'>[];
 }
