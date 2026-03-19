@@ -1,12 +1,10 @@
-import * as urlModule from '$lib/url';
-import { MOCK_FORM_VALUES } from '$mocks/mocks';
-import { server } from '$mocks/server';
-import { POST, PATCH } from '$routes/projects/[project]/regions/[region]/compare/+server';
-import { isHttpError, type HttpError } from '@sveltejs/kit';
-import { http, HttpResponse } from 'msw';
+import * as compareModule from '$lib/server/compare';
 import * as regionModule from '$lib/server/region';
 import type { UserState } from '$lib/types/userState';
-import * as compareModule from '$lib/server/compare';
+import * as urlModule from '$lib/url';
+import { MOCK_FORM_VALUES } from '$mocks/mocks';
+import { PATCH, POST } from '$routes/projects/[project]/regions/[region]/compare/+server';
+import { isHttpError, type HttpError } from '@sveltejs/kit';
 
 beforeEach(() => {
 	vi.resetAllMocks();
