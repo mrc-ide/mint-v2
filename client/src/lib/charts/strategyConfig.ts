@@ -243,7 +243,7 @@ export const getCompareStrategyConfig = (
 		labels: {
 			format: '{value:,.1f}'
 		},
-		max: maxCases * 1.1 // add 10% padding to max cases for better visualization of plot line
+		max: maxCases
 	},
 	tooltip: {
 		shared: true,
@@ -305,6 +305,7 @@ export const getCompareStrategyConfigs = (
 	}
 ) => {
 	const maxCases = Math.max(calculateTotalCasesMinCost(present), calculateTotalCasesMinCost(longTerm));
+	console.log('Max cases for chart scaling:', maxCases);
 	return {
 		presentConfig: getCompareStrategyConfig(present, 'Present (current controls)', maxCases, (cases) => {
 			const { longTermChart } = getCharts();

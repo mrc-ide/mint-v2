@@ -345,7 +345,7 @@ describe('Strategise compare', () => {
 		});
 
 		describe('getCompareStrategyConfig', () => {
-			it('should return expected chart options including y-axis max padding', () => {
+			it('should return expected chart options', () => {
 				const mockData: CompareStrategiseResult = [
 					{
 						costThreshold: 1000,
@@ -359,7 +359,7 @@ describe('Strategise compare', () => {
 				expect(config.chart?.type).toBe('area');
 				expect(config.chart?.height).toBe(500);
 				expect(config.title?.text).toBe('Present (current controls)');
-				expect((config.yAxis as Highcharts.YAxisOptions).max).toBeCloseTo(220);
+				expect((config.yAxis as Highcharts.YAxisOptions).max).toBe(200);
 			});
 
 			it('should update cases plot line and call callback when chart click is triggered', () => {
@@ -498,8 +498,8 @@ describe('Strategise compare', () => {
 					selectedStrategies
 				);
 
-				expect((presentConfig.yAxis as Highcharts.YAxisOptions).max).toBe(132);
-				expect((longTermConfig.yAxis as Highcharts.YAxisOptions).max).toBe(132);
+				expect((presentConfig.yAxis as Highcharts.YAxisOptions).max).toBe(120);
+				expect((longTermConfig.yAxis as Highcharts.YAxisOptions).max).toBe(120);
 
 				const presentSeriesContext = {
 					chart: {
