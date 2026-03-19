@@ -305,7 +305,6 @@ export const getCompareStrategyConfigs = (
 	}
 ) => {
 	const maxCases = Math.max(calculateTotalCasesMinCost(present), calculateTotalCasesMinCost(longTerm));
-	console.log('Max cases for chart scaling:', maxCases);
 	return {
 		presentConfig: getCompareStrategyConfig(present, 'Present (current controls)', maxCases, (cases) => {
 			const { longTermChart } = getCharts();
