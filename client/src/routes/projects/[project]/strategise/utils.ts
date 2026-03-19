@@ -247,12 +247,12 @@ export const strategiseCompare = (
 			interventions: region.interventions.filter((intervention) => intervention.intervention !== 'no_intervention')
 		})
 	);
-
-	const longTermCostRange = createLinearSpace(
-		getMinimumCostForStrategise(longTermWithoutNoIntervention),
-		getMaximumCostForStrategise(compareRegionalStrategies.longTerm)
-	);
-
+	const longTermMinCost = getMinimumCostForStrategise(longTermWithoutNoIntervention);
+	const longTermMaxCost = getMaximumCostForStrategise(compareRegionalStrategies.longTerm);
+	const longTermCostRange =
+		Number.isFinite(longTermMinCost) && Number.isFinite(longTermMaxCost)
+			? createLinearSpace(longTermMinCost, longTermMaxCost)
+			: [];
 	const presentModel = setupOptimisationModel(compareRegionalStrategies.present, 'cases');
 	const longTermModel = setupOptimisationModel(compareRegionalStrategies.longTerm, 'cases');
 
