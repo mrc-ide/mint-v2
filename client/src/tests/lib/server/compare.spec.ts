@@ -6,13 +6,10 @@ import { MOCK_COMPARE_PARAMETERS, MOCK_FORM_VALUES } from '$mocks/mocks';
 describe('compare server functions', () => {
 	beforeEach(() => {
 		vi.resetAllMocks();
+		vi.spyOn(Urls, 'getCompareParametersUrl').mockReturnValue('/compare-parameters');
+		vi.spyOn(Urls, 'runEmulatorUrl').mockReturnValue('http://localhost:8000/emulator/run');
 	});
 	describe('fetchCompareParameters', () => {
-		beforeEach(() => {
-			vi.spyOn(Urls, 'getCompareParametersUrl').mockReturnValue('/compare-parameters');
-			vi.spyOn(Urls, 'runEmulatorUrl').mockReturnValue('http://localhost:8000/emulator/run');
-		});
-
 		it('should fetch compare parameters successfully', async () => {
 			vi.spyOn(ApiFetch, 'apiFetch').mockResolvedValue({ data: MOCK_COMPARE_PARAMETERS } as any);
 			const mockFetch = vi.fn();
@@ -50,9 +47,6 @@ describe('compare server functions', () => {
 	});
 
 	describe('fetchLongTermResults', () => {
-		beforeEach(() => {
-			vi.spyOn(Urls, 'runEmulatorUrl').mockReturnValue('http://localhost:8000/emulator/run');
-		});
 		it('should return undefined if no longTermFormValues are provided', async () => {
 			const result = await fetchLongTermResults({}, undefined, MOCK_COMPARE_PARAMETERS, vi.fn());
 

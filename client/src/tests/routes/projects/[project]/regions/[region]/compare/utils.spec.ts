@@ -30,8 +30,9 @@ describe('utils', () => {
 			const mockFullLongTermResData = { result: 'full-long-term-result' };
 			const mockBaselineLongTermResData = { result: 'baseline-long-term-result' };
 			vi.mocked(regionCompareUrl).mockReturnValue(mockRegionCompareUrl);
-			vi.mocked(apiFetch).mockResolvedValueOnce({ data: mockFullLongTermResData });
-			vi.mocked(apiFetch).mockResolvedValueOnce({ data: mockBaselineLongTermResData });
+			vi.mocked(apiFetch).mockResolvedValue({
+				data: { fullLongTerm: mockFullLongTermResData, baselineLongTerm: mockBaselineLongTermResData }
+			});
 
 			const result = await runCompareEmulator(
 				mockProject,
@@ -45,25 +46,17 @@ describe('utils', () => {
 				url: mockRegionCompareUrl,
 				method: 'POST',
 				body: {
-					formValues: mockLongTermFormValues,
-					shouldSave: true
-				}
-			});
-			expect(apiFetch).toHaveBeenCalledWith({
-				url: mockRegionCompareUrl,
-				method: 'POST',
-				body: {
-					formValues: {
+					baselineLongTermFormValues: {
 						...mockPresentFormValues,
 						[mockSelectedBaselineParameter.parameterName]:
 							mockLongTermFormValues[mockSelectedBaselineParameter.parameterName]
 					},
-					shouldSave: false
+					fullLongTermFormValues: mockLongTermFormValues
 				}
 			});
 			expect(result).toEqual({
-				fullLongTermResData: mockFullLongTermResData,
-				baselineLongTermResData: mockBaselineLongTermResData
+				fullLongTerm: mockFullLongTermResData,
+				baselineLongTerm: mockBaselineLongTermResData
 			});
 		});
 

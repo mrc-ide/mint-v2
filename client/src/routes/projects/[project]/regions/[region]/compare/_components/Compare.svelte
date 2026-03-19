@@ -55,15 +55,15 @@
 	const runEmulator = async () => {
 		isLoading = true;
 		try {
-			const { baselineLongTermResData, fullLongTermResData } = await runCompareEmulator(
+			const { baselineLongTerm, fullLongTerm } = await runCompareEmulator(
 				params.project,
 				params.region,
 				longTermFormValues,
 				presentFormValues,
 				selectedBaselineParameter
 			);
-			fullLongTermResults = fullLongTermResData;
-			baselineLongTermResults = baselineLongTermResData;
+			fullLongTermResults = fullLongTerm;
+			baselineLongTermResults = baselineLongTerm;
 		} catch (_err) {
 			toast.error('Failed to run long term scenario planning emulator');
 		} finally {

@@ -6,6 +6,7 @@ import { isHttpError, type HttpError } from '@sveltejs/kit';
 import { http, HttpResponse } from 'msw';
 import * as regionModule from '$lib/server/region';
 import type { UserState } from '$lib/types/userState';
+import * as compareModule from '$lib/server/compare';
 
 beforeEach(() => {
 	vi.resetAllMocks();
@@ -18,79 +19,48 @@ describe('POST', () => {
 
 	it('should run emulator for comparing region and return results', async () => {
 		const expectedResponse = {
-			status: 'success',
-			errors: null,
-			data: {
-				cases: [],
-				prevalence: []
-			}
-		};
-		vi.spyOn(urlModule, 'runEmulatorUrl').mockReturnValue(mockUrl);
-		server.use(
-			http.post(mockUrl, async ({ request }) => {
-				const body = await request.clone().json();
-				expect(body).toEqual(MOCK_FORM_VALUES);
+			fullLongTerm: { cases: [], prevalence: [] },
+			baselineLongTerm: { cases: [], prevalence: [] }
+		} as any;
+		const runEmulatorsForCompareSpy = vi
+			.spyOn(compareModule, 'runEmulatorsForCompare')
+			.mockResolvedValue(expectedResponse);
+		const invalidateStrategyForProjectSpy = vi
+			.spyOn(regionModule, 'invalidateStrategyForProject')
+			.mockReturnValue(undefined);
+		const saveLongTermRegionCompareSpy = vi
+			.spyOn(regionModule, 'saveLongTermRegionCompare')
+			.mockResolvedValue(undefined);
+		const mockFetch = vi.fn();
 
-				return HttpResponse.json(expectedResponse);
-			})
-		);
 		const request = new Request(new URL(mockUrl), {
 			method: 'POST',
-			body: JSON.stringify({ formValues: MOCK_FORM_VALUES, shouldSave: false })
+			body: JSON.stringify({ fullLongTermFormValues: MOCK_FORM_VALUES, baselineLongTermFormValues: MOCK_FORM_VALUES })
 		});
-
-		const response = POST({ request, fetch: fetch.bind(globalThis), params, locals } as any);
+		const response = POST({ request, fetch: mockFetch, params, locals } as any);
 
 		const json = await (await response).json();
-		expect(json).toEqual(expectedResponse);
-	});
-
-	it("should run emulator and save results when 'shouldSave' is true", async () => {
-		const expectedResponse = {
-			status: 'success',
-			errors: null,
-			data: {
-				cases: [],
-				prevalence: []
-			}
-		};
-		vi.spyOn(urlModule, 'runEmulatorUrl').mockReturnValue(mockUrl);
-		const invalidateSpy = vi.spyOn(regionModule, 'invalidateStrategyForProject').mockReturnValue(undefined);
-		const saveLongTermSpy = vi.spyOn(regionModule, 'saveLongTermRegionCompare').mockResolvedValue(undefined);
-
-		const request = new Request(new URL(mockUrl), {
-			method: 'POST',
-			body: JSON.stringify({ formValues: MOCK_FORM_VALUES, shouldSave: true })
-		});
-		server.use(http.post(mockUrl, async () => HttpResponse.json(expectedResponse)));
-
-		const response = await POST({ request, fetch: fetch.bind(globalThis), params, locals } as any);
-		await response.json();
-
-		expect(invalidateSpy).toHaveBeenCalledWith(expect.anything(), 'test-project');
-		expect(saveLongTermSpy).toHaveBeenCalledWith(
-			expect.anything(),
+		expect(json).toEqual({ data: expectedResponse });
+		expect(runEmulatorsForCompareSpy).toHaveBeenCalledWith(MOCK_FORM_VALUES, MOCK_FORM_VALUES, mockFetch);
+		expect(invalidateStrategyForProjectSpy).toHaveBeenCalledWith(expect.anything(), 'test-project');
+		expect(saveLongTermRegionCompareSpy).toHaveBeenCalledWith(
+			locals.userState,
 			'test-project',
 			'test-region',
 			MOCK_FORM_VALUES,
-			expectedResponse.data.cases
+			expectedResponse.fullLongTerm.cases
 		);
 	});
 
-	it('should throw error on network request failure', async () => {
+	it('should throw error on runEmulatorsForCompare failure', async () => {
 		vi.spyOn(urlModule, 'runEmulatorUrl').mockReturnValue(mockUrl);
-		server.use(
-			http.post(mockUrl, () => {
-				return HttpResponse.error();
-			})
-		);
-
 		const request = new Request(new URL(mockUrl), {
 			method: 'POST',
-			body: JSON.stringify({ formValues: MOCK_FORM_VALUES })
+			body: JSON.stringify({ fullLongTermFormValues: MOCK_FORM_VALUES, baselineLongTermFormValues: MOCK_FORM_VALUES })
 		});
+
 		try {
-			await POST({ request, fetch: fetch.bind(globalThis), params, locals } as any);
+			await POST({ request, fetch: vi.fn(), params, locals } as any);
 		} catch (error) {
 			expect(isHttpError(error)).toBe(true);
 			expect((error as HttpError).status).toBe(500);

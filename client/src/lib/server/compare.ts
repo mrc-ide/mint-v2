@@ -30,7 +30,24 @@ export const fetchLongTermResults = async (
 		},
 		{} as Record<string, FormValue>
 	);
+	const baselineLongTermFormValues = {
+		...presentFormValues,
+		...compareParamsAsNewFormValues
+	};
 
+	try {
+		return await runEmulatorsForCompare(baselineLongTermFormValues, longTermFormValues, fetch);
+	} catch (err) {
+		const errorStatus = err instanceof ApiError ? err.status : 500;
+		error(errorStatus, 'Failed to fetch long term results. Please try again later.');
+	}
+};
+
+export const runEmulatorsForCompare = async (
+	baselineLongTermFormValues: Record<string, FormValue>,
+	longTermFormValues: Record<string, FormValue>,
+	fetch: RequestEvent['fetch']
+) => {
 	const fullLongTermPromise = apiFetch<EmulatorResults>({
 		url: runEmulatorUrl(),
 		fetcher: fetch,
@@ -41,23 +58,16 @@ export const fetchLongTermResults = async (
 		url: runEmulatorUrl(),
 		fetcher: fetch,
 		method: 'POST',
-		body: {
-			...presentFormValues,
-			...compareParamsAsNewFormValues
-		}
+		body: baselineLongTermFormValues
 	});
 
-	try {
-		const [{ data: fullLongTerm }, { data: baselineLongTerm }] = await Promise.all([
-			fullLongTermPromise,
-			baselineLongTermPromise
-		]);
-		return {
-			fullLongTerm,
-			baselineLongTerm
-		};
-	} catch (err) {
-		const errorStatus = err instanceof ApiError ? err.status : 500;
-		error(errorStatus, 'Failed to fetch long term results. Please try again later.');
-	}
+	const [{ data: fullLongTerm }, { data: baselineLongTerm }] = await Promise.all([
+		fullLongTermPromise,
+		baselineLongTermPromise
+	]);
+
+	return {
+		fullLongTerm,
+		baselineLongTerm
+	};
 };
