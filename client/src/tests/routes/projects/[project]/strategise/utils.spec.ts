@@ -508,6 +508,32 @@ describe('strategiseCompareAsync', () => {
 			present: [
 				{
 					region: 'Region A',
+					interventions: [{ intervention: 'irs_only' as Scenario, cost: 0, cases: 100 }]
+				}
+			],
+			longTerm: [
+				{
+					region: 'Region A',
+					interventions: [{ intervention: 'irs_only' as Scenario, cost: 0, cases: 100 }]
+				}
+			]
+		} as any;
+
+		const result = await strategiseCompareAsync(0, compareRegionalStrategies);
+
+		expect(result!.present).toHaveLength(1);
+		expect(result!.longTerm).toHaveLength(1);
+		expect(result!.present[0].costThreshold).toBe(0);
+		expect(result!.longTerm[0].costThreshold).toBe(0);
+	});
+
+	it('should return empty if only no intervention in long term', async () => {
+		vi.spyOn(numberModule, 'createLinearSpace').mockReturnValue([0]);
+
+		const compareRegionalStrategies = {
+			present: [
+				{
+					region: 'Region A',
 					interventions: [{ intervention: 'no_intervention' as Scenario, cost: 0, cases: 100 }]
 				}
 			],
@@ -522,9 +548,8 @@ describe('strategiseCompareAsync', () => {
 		const result = await strategiseCompareAsync(0, compareRegionalStrategies);
 
 		expect(result!.present).toHaveLength(1);
-		expect(result!.longTerm).toHaveLength(1);
 		expect(result!.present[0].costThreshold).toBe(0);
-		expect(result!.longTerm[0].costThreshold).toBe(0);
+		expect(result!.longTerm).toHaveLength(0);
 	});
 
 	it('should call setTimeout with correct arguments', async () => {
