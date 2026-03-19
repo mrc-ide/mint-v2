@@ -50,6 +50,9 @@ describe('compare server functions', () => {
 	});
 
 	describe('fetchLongTermResults', () => {
+		beforeEach(() => {
+			vi.spyOn(Urls, 'runEmulatorUrl').mockReturnValue('http://localhost:8000/emulator/run');
+		});
 		it('should return undefined if no longTermFormValues are provided', async () => {
 			const result = await fetchLongTermResults({}, undefined, MOCK_COMPARE_PARAMETERS, vi.fn());
 
