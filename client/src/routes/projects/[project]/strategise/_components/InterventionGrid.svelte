@@ -115,6 +115,7 @@
 	});
 
 	function formatBudget(value: number): string {
+		if (value >= 1_000_000_000) return `$${(value / 1_000_000_000).toFixed(1)}B`;
 		if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`;
 		if (value >= 1_000) return `$${(value / 1_000).toFixed(0)}K`;
 		return `$${convertToLocaleString(value)}`;
@@ -122,7 +123,7 @@
 </script>
 
 <div class="mt-4 rounded-xl border bg-card p-6 shadow-sm">
-	<h3 class="mb-6 text-center text-lg font-semibold tracking-tight">Intervention Allocation by Budget Level</h3>
+	<h3 class="mb-6 text-center text-lg font-semibold tracking-tight">Intervention Allocation by Cost of Strategy</h3>
 
 	<div class="flex items-end gap-3">
 		<!-- Region labels -->
