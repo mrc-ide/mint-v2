@@ -3,6 +3,7 @@
 	import type { Scenario, StrategiseResults } from '$lib/types/userState';
 	import { convertToLocaleString } from '$lib/number';
 	import { SvelteSet } from 'svelte/reactivity';
+	import * as Tooltip from '$lib/components/ui/tooltip';
 
 	interface Props {
 		strategiseResults: StrategiseResults;
@@ -20,6 +21,7 @@
 		blocks: Block[];
 	}
 
+	let triggerId = $state<string | null>(null);
 	let minCost = $derived(strategiseResults[0]?.costThreshold ?? 0);
 	let maxCost = $derived(strategiseResults[strategiseResults.length - 1]?.costThreshold ?? 0);
 	let costRange = $derived(maxCost - minCost);
@@ -85,9 +87,8 @@
 		return ((block.startCost - minCost) / costRange) * 100;
 	}
 
-	// Matches the diagonal stripe direction of the SVG path in getColumnFill in baseChart.ts.
 	const LSM_STRIPE =
-		'repeating-linear-gradient(45deg, transparent, transparent 4px, var(--background) 4px, var(--background) 8px)';
+		'repeating-linear-gradient(45deg, transparent, transparent 4px, var(--background) 7px, var(--background) 8px)';
 
 	function getFillStyle(scenario: Scenario): string {
 		const color = ScenarioToColor[scenario];
@@ -105,7 +106,11 @@
 		return `left: ${left}%; width: ${width}%; ${style}`;
 	}
 
-	const TICK_COUNT = 10;
+	function getBlockId(region: string, block: Block): string {
+		return `${region}::${block.startCost}::${block.endCost}::${block.intervention}`;
+	}
+
+	const TICK_COUNT = 8;
 	let ticks = $derived.by(() => {
 		const result: number[] = [];
 		for (let i = 0; i <= TICK_COUNT; i++) {
@@ -113,13 +118,6 @@
 		}
 		return result;
 	});
-
-	function formatBudget(value: number): string {
-		if (value >= 1_000_000_000) return `$${(value / 1_000_000_000).toFixed(1)}B`;
-		if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`;
-		if (value >= 1_000) return `$${(value / 1_000).toFixed(0)}K`;
-		return `$${convertToLocaleString(value)}`;
-	}
 </script>
 
 <div class="mt-4 rounded-xl border bg-card p-6 shadow-sm">
@@ -140,25 +138,42 @@
 		<!-- Grid + axis -->
 		<div class="min-w-0 flex-1">
 			<!-- Rows -->
-			<div class="flex flex-col gap-1.5">
-				{#each rows as row (row.region)}
-					<!-- overflow-hidden clips blocks to the rounded container -->
-					<div class="relative h-8 overflow-hidden rounded-md">
-						{#each row.blocks as block (block.startCost)}
-							<div
-								class="absolute inset-y-0"
-								style={getBlockStyle(block)}
-								title="{ScenarioToLabel[block.intervention]}: {formatBudget(block.startCost)} - {formatBudget(
-									block.endCost
-								)}"
-							></div>
-						{/each}
-					</div>
-				{/each}
-			</div>
+			<Tooltip.Provider delayDuration={200}>
+				<div class="flex flex-col gap-1.5">
+					{#each rows as row (row.region)}
+						<!-- overflow-hidden clips blocks to the rounded container -->
+						<div class="relative h-8 overflow-hidden rounded-md">
+							{#each row.blocks as block (block.startCost)}
+								{@const blockId = getBlockId(row.region, block)}
+								<Tooltip.Root
+									open={triggerId === blockId}
+									onOpenChange={(open) => {
+										triggerId = open ? blockId : triggerId === blockId ? null : triggerId;
+									}}
+								>
+									<Tooltip.Trigger class="absolute inset-y-0 cursor-pointer" style={getBlockStyle(block)} />
+									<Tooltip.Content
+										class="rounded-md bg-background/90 text-foreground/90 shadow-lg"
+										arrowClasses="bg-background/90"
+									>
+										<div class="flex flex-col gap-1">
+											<span class="font-medium">
+												{ScenarioToLabel[block.intervention]}
+											</span>
+											<span class="text-muted-foreground">
+												${convertToLocaleString(block.startCost, 0)} - ${convertToLocaleString(block.endCost, 0)}
+											</span>
+										</div>
+									</Tooltip.Content>
+								</Tooltip.Root>
+							{/each}
+						</div>
+					{/each}
+				</div>
+			</Tooltip.Provider>
 
 			<!-- X-axis ticks -->
-			<div class="relative mt-2 h-7 border-t border-border/60">
+			<div class="relative mt-1 h-7 border-t border-border/60">
 				{#each ticks as tick, i (tick)}
 					{@const percentage = costRange === 0 ? 0 : ((tick - minCost) / costRange) * 100}
 					<div
@@ -169,7 +184,7 @@
 								? '0%'
 								: '-50%'});"
 					>
-						{formatBudget(tick)}
+						${convertToLocaleString(tick, 0)}
 					</div>
 				{/each}
 			</div>
