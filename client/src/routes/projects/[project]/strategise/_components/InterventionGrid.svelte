@@ -106,10 +106,6 @@
 		return `left: ${left}%; width: ${width}%; ${style}`;
 	}
 
-	function getBlockId(region: string, block: Block): string {
-		return `${region}::${block.startCost}::${block.endCost}::${block.intervention}`;
-	}
-
 	const TICK_COUNT = 8;
 	let ticks = $derived.by(() => {
 		const result: number[] = [];
@@ -138,19 +134,13 @@
 		<!-- Grid + axis -->
 		<div class="min-w-0 flex-1">
 			<!-- Rows -->
-			<Tooltip.Provider delayDuration={200}>
+			<Tooltip.Provider delayDuration={100}>
 				<div class="flex flex-col gap-1.5">
 					{#each rows as row (row.region)}
 						<!-- overflow-hidden clips blocks to the rounded container -->
 						<div class="relative h-8 overflow-hidden rounded-md">
 							{#each row.blocks as block (block.startCost)}
-								{@const blockId = getBlockId(row.region, block)}
-								<Tooltip.Root
-									open={triggerId === blockId}
-									onOpenChange={(open) => {
-										triggerId = open ? blockId : triggerId === blockId ? null : triggerId;
-									}}
-								>
+								<Tooltip.Root>
 									<Tooltip.Trigger class="absolute inset-y-0 cursor-pointer" style={getBlockStyle(block)} />
 									<Tooltip.Content
 										class="rounded-md bg-background/90 text-foreground/90 shadow-lg"
