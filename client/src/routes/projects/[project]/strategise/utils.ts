@@ -18,11 +18,14 @@ import type {
 } from '$lib/types/userState';
 import { equalTo, lessEq, solve, type Constraint, type Model } from 'yalps';
 import type {
+	Block,
 	CompareStrategiseRegions,
 	MetricKey,
+	RegionRow,
 	StrategiseRegionByMetric,
 	StrategiseResultIntervention
 } from './schema';
+import { ScenarioToColor } from '$lib/charts/baseChart';
 
 const mapTotalsToInterventions = (
 	totals: ReturnType<typeof getTotalCasesAndCostsPerScenario>
@@ -373,3 +376,83 @@ export const constructRegionalMetrics = (strategy: StrategiseResult, populations
 			];
 		})
 	);
+
+/*** Intervention grid utilities ***/
+const LSM_STRIPE =
+	'repeating-linear-gradient(45deg, transparent, transparent 4px, var(--background) 7px, var(--background) 8px)';
+export const getFillStyle = (scenario: Scenario): string => {
+	const color = ScenarioToColor[scenario];
+	let style = `background-color: ${color};`;
+	if (scenario.includes('lsm')) {
+		style += ` background-image: ${LSM_STRIPE};`;
+	}
+	return style;
+};
+
+type RegionState = {
+	currentIntervention: Scenario | null;
+	blockStart: number;
+	blocks: Block[];
+};
+
+const pushClosedBlock = (state: RegionState, endCost: number) => {
+	if (state.currentIntervention === null) return;
+
+	state.blocks.push({
+		intervention: state.currentIntervention,
+		startCost: state.blockStart,
+		endCost
+	});
+};
+
+const updateRegionState = (state: RegionState, intervention: Scenario, threshold: number) => {
+	if (intervention === state.currentIntervention) return;
+
+	pushClosedBlock(state, threshold);
+	state.currentIntervention = intervention;
+	state.blockStart = threshold;
+};
+
+const buildRegionStates = (
+	strategiseResults: StrategiseResults,
+	allowedRegions: Set<string>
+): Map<string, RegionState> => {
+	const states = new Map<string, RegionState>();
+
+	for (const result of strategiseResults) {
+		const threshold = result.costThreshold;
+
+		for (const { region, intervention } of result.interventions) {
+			if (!allowedRegions.has(region)) continue;
+
+			let state = states.get(region);
+			if (!state) {
+				state = { currentIntervention: null, blockStart: 0, blocks: [] };
+				states.set(region, state);
+			}
+
+			updateRegionState(state, intervention, threshold);
+		}
+	}
+
+	return states;
+};
+
+const finalizeRegionRows = (regions: string[], states: Map<string, RegionState>, maxCost: number): RegionRow[] => {
+	return regions.map((region) => {
+		const state = states.get(region);
+		if (!state) return { region, blocks: [] };
+
+		pushClosedBlock(state, maxCost);
+		return { region, blocks: state.blocks };
+	});
+};
+
+export const createGridRows = (strategiseResults: StrategiseResults, maxCost: number): RegionRow[] => {
+	if (strategiseResults.length === 0) return [];
+
+	const regions = strategiseResults[0].interventions.map((i) => i.region);
+
+	const states = buildRegionStates(strategiseResults, new Set(regions));
+	return finalizeRegionRows(regions, states, maxCost);
+};

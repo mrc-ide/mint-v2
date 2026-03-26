@@ -10,8 +10,10 @@
 	interface Props {
 		strategiseResults: StrategiseResults;
 		populations: Record<string, number>;
+		minCost: number;
+		maxCost: number;
 	}
-	let { strategiseResults, populations }: Props = $props();
+	let { strategiseResults, populations, minCost, maxCost }: Props = $props();
 	let isChartLoading = $state(true);
 	let selectedStrategy = $state<StrategiseResult>(strategiseResults[strategiseResults.length - 1]);
 	let config = $derived(getStrategyConfig(strategiseResults, (strategy) => (selectedStrategy = strategy)));
@@ -32,7 +34,7 @@
 			{/if}
 		</Tabs.Content>
 		<Tabs.Content value="grid">
-			<InterventionGrid {strategiseResults} />
+			<InterventionGrid {strategiseResults} {minCost} {maxCost} />
 		</Tabs.Content>
 	</Tabs.Root>
 </div>

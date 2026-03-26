@@ -1,109 +1,40 @@
 <script lang="ts">
-	import { ScenarioToColor, ScenarioToLabel } from '$lib/charts/baseChart';
+	import { ScenarioToLabel } from '$lib/charts/baseChart';
 	import type { Scenario, StrategiseResults } from '$lib/types/userState';
 	import { convertToLocaleString } from '$lib/number';
 	import { SvelteSet } from 'svelte/reactivity';
 	import * as Tooltip from '$lib/components/ui/tooltip';
+	import type { Block } from '../schema';
+	import { getFillStyle, createGridRows } from '../utils';
 
 	interface Props {
 		strategiseResults: StrategiseResults;
+		minCost: number;
+		maxCost: number;
 	}
-	let { strategiseResults }: Props = $props();
+	let { strategiseResults, minCost, maxCost }: Props = $props();
 
-	interface Block {
-		intervention: Scenario;
-		startCost: number;
-		endCost: number;
-	}
-
-	interface RegionRow {
-		region: string;
-		blocks: Block[];
-	}
 	let regionTether = Tooltip.createTether();
-	let minCost = $derived(strategiseResults[0]?.costThreshold ?? 0);
-	let maxCost = $derived(strategiseResults[strategiseResults.length - 1]?.costThreshold ?? 0);
 	let costRange = $derived(maxCost - minCost);
-
-	let regions = $derived.by(() => {
-		if (strategiseResults.length === 0) return [];
-		return strategiseResults[0].interventions.map((i) => i.region);
-	});
-
-	let rows = $derived.by((): RegionRow[] => {
-		return regions.map((region) => {
-			const blocks: Block[] = [];
-			let currentIntervention: Scenario | null = null;
-			let blockStart = 0;
-
-			for (let i = 0; i < strategiseResults.length; i++) {
-				const result = strategiseResults[i];
-				const intervention = result.interventions.find((inv) => inv.region === region);
-				if (!intervention) continue;
-
-				if (intervention.intervention !== currentIntervention) {
-					if (currentIntervention !== null) {
-						blocks.push({
-							intervention: currentIntervention,
-							startCost: blockStart,
-							endCost: result.costThreshold
-						});
-					}
-					currentIntervention = intervention.intervention;
-					blockStart = result.costThreshold;
-				}
-			}
-
-			if (currentIntervention !== null) {
-				blocks.push({
-					intervention: currentIntervention,
-					startCost: blockStart,
-					endCost: maxCost
-				});
-			}
-
-			return { region, blocks };
-		});
-	});
+	let rows = $derived(createGridRows(strategiseResults, maxCost));
 
 	let legendItems = $derived.by(() => {
 		const seen = new SvelteSet<Scenario>();
 		for (const result of strategiseResults) {
-			for (const inv of result.interventions) {
-				seen.add(inv.intervention);
+			for (const intervention of result.interventions) {
+				seen.add(intervention.intervention);
 			}
 		}
 		return seen;
 	});
 
-	function getWidthPercent(block: Block): number {
-		if (costRange === 0) return 100;
-		return ((block.endCost - block.startCost) / costRange) * 100;
-	}
-
-	function getLeftPercent(block: Block): number {
-		if (costRange === 0) return 0;
-		return ((block.startCost - minCost) / costRange) * 100;
-	}
-
-	const LSM_STRIPE =
-		'repeating-linear-gradient(45deg, transparent, transparent 4px, var(--background) 7px, var(--background) 8px)';
-
-	function getFillStyle(scenario: Scenario): string {
-		const color = ScenarioToColor[scenario];
-		let style = `background-color: ${color};`;
-		if (scenario.includes('lsm')) {
-			style += ` background-image: ${LSM_STRIPE};`;
-		}
-		return style;
-	}
-
-	function getBlockStyle(block: Block): string {
-		const left = getLeftPercent(block);
-		const width = getWidthPercent(block);
-		const style = getFillStyle(block.intervention);
-		return `left: ${left}%; width: ${width}%; ${style}`;
-	}
+	const getBlockStyle = (block: Block): string => {
+		if (costRange === 0) return '';
+		const fillStyle = getFillStyle(block.intervention);
+		const left = ((block.startCost - minCost) / costRange) * 100;
+		const width = ((block.endCost - block.startCost) / costRange) * 100;
+		return `left: ${left}%; width: ${width}%; ${fillStyle}`;
+	};
 
 	const TICK_COUNT = 8;
 	let ticks = $derived.by(() => {
@@ -120,7 +51,7 @@
 
 	<div class="flex items-end gap-3">
 		<!-- Region labels -->
-		<div class="flex shrink-0 flex-col gap-2">
+		<div class="flex shrink-0 flex-col gap-1.5">
 			{#each rows as row (row.region)}
 				<div class="flex h-8 items-center justify-end text-right text-sm font-medium text-muted-foreground">
 					{row.region}
@@ -140,11 +71,7 @@
 						<div class="relative h-8 overflow-hidden rounded-md">
 							<Tooltip.Root tether={regionTether}>
 								{#each row.blocks as block (block.startCost)}
-									<Tooltip.Trigger
-										class="absolute inset-y-0 cursor-pointer"
-										style={getBlockStyle(block)}
-										tether={regionTether}
-									/>
+									<Tooltip.Trigger class="absolute inset-y-0 " style={getBlockStyle(block)} tether={regionTether} />
 									<Tooltip.Content
 										class="rounded-md bg-background/90 text-foreground/90 "
 										arrowClasses="bg-background/90"
