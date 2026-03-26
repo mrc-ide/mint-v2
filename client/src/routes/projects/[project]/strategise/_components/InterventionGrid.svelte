@@ -20,8 +20,7 @@
 		region: string;
 		blocks: Block[];
 	}
-
-	let triggerId = $state<string | null>(null);
+	let regionTether = Tooltip.createTether();
 	let minCost = $derived(strategiseResults[0]?.costThreshold ?? 0);
 	let maxCost = $derived(strategiseResults[strategiseResults.length - 1]?.costThreshold ?? 0);
 	let costRange = $derived(maxCost - minCost);
@@ -139,11 +138,15 @@
 					{#each rows as row (row.region)}
 						<!-- overflow-hidden clips blocks to the rounded container -->
 						<div class="relative h-8 overflow-hidden rounded-md">
-							{#each row.blocks as block (block.startCost)}
-								<Tooltip.Root>
-									<Tooltip.Trigger class="absolute inset-y-0 cursor-pointer" style={getBlockStyle(block)} />
+							<Tooltip.Root tether={regionTether}>
+								{#each row.blocks as block (block.startCost)}
+									<Tooltip.Trigger
+										class="absolute inset-y-0 cursor-pointer"
+										style={getBlockStyle(block)}
+										tether={regionTether}
+									/>
 									<Tooltip.Content
-										class="rounded-md bg-background/90 text-foreground/90 shadow-lg"
+										class="rounded-md bg-background/90 text-foreground/90 "
 										arrowClasses="bg-background/90"
 									>
 										<div class="flex flex-col gap-1">
@@ -155,8 +158,8 @@
 											</span>
 										</div>
 									</Tooltip.Content>
-								</Tooltip.Root>
-							{/each}
+								{/each}
+							</Tooltip.Root>
 						</div>
 					{/each}
 				</div>

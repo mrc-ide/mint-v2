@@ -5,6 +5,7 @@ import Content from './tooltip-content.svelte';
 const Root = TooltipPrimitive.Root;
 const Provider = TooltipPrimitive.Provider;
 const Portal = TooltipPrimitive.Portal;
+const createTether = TooltipPrimitive.createTether;
 
 export {
 	Root,
@@ -17,5 +18,6 @@ export {
 	Content as TooltipContent,
 	Trigger as TooltipTrigger,
 	Provider as TooltipProvider,
-	Portal as TooltipPortal
+	Portal as TooltipPortal,
+	createTether
 };
