@@ -34,7 +34,7 @@
 			{/if}
 		</Tabs.Content>
 		<Tabs.Content value="grid">
-			<InterventionGrid {strategiseResults} {minCost} {maxCost} />
+			<InterventionGrid {strategiseResults} {minCost} {maxCost} {populations} />
 		</Tabs.Content>
 	</Tabs.Root>
 </div>
