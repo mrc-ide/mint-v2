@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { ScenarioToLabel } from '$lib/charts/baseChart';
-	import type { Scenario, StrategiseResults } from '$lib/types/userState';
-	import { convertToLocaleString } from '$lib/number';
-	import { SvelteSet } from 'svelte/reactivity';
 	import * as Tooltip from '$lib/components/ui/tooltip';
+	import { convertToLocaleString } from '$lib/number';
+	import type { Scenario, StrategiseResults } from '$lib/types/userState';
+	import { SvelteSet } from 'svelte/reactivity';
 	import type { Block } from '../schema';
-	import { getFillStyle, createGridRows } from '../utils';
+	import { createGridRows, getFillStyle } from '../utils';
 
 	interface Props {
 		strategiseResults: StrategiseResults;
@@ -14,7 +14,7 @@
 	}
 	let { strategiseResults, minCost, maxCost }: Props = $props();
 
-	let regionTether = Tooltip.createTether();
+	let regionTether = Tooltip.createTether<Block>();
 	let costRange = $derived(maxCost - minCost);
 	let rows = $derived(createGridRows(strategiseResults, maxCost));
 
@@ -70,22 +70,32 @@
 						<!-- overflow-hidden clips blocks to the rounded container -->
 						<div class="relative h-8 overflow-hidden rounded-md">
 							<Tooltip.Root tether={regionTether}>
-								{#each row.blocks as block (block.startCost)}
-									<Tooltip.Trigger class="absolute inset-y-0 " style={getBlockStyle(block)} tether={regionTether} />
-									<Tooltip.Content
-										class="rounded-md bg-background/90 text-foreground/90 "
-										arrowClasses="bg-background/90"
-									>
-										<div class="flex flex-col gap-1">
-											<span class="font-medium">
-												{ScenarioToLabel[block.intervention]}
-											</span>
-											<span class="text-muted-foreground">
-												${convertToLocaleString(block.startCost, 0)} - ${convertToLocaleString(block.endCost, 0)}
-											</span>
-										</div>
-									</Tooltip.Content>
-								{/each}
+								{#snippet children({ payload })}
+									{#each row.blocks as block (block.startCost)}
+										<Tooltip.Trigger
+											class="absolute inset-y-0 "
+											style={getBlockStyle(block)}
+											tether={regionTether}
+											payload={block}
+										/>
+										<Tooltip.Content
+											class="rounded-md bg-background/90 text-foreground/90 "
+											arrowClasses="bg-background/90"
+										>
+											<div class="flex flex-col gap-1">
+												<span class="font-medium">
+													{ScenarioToLabel[payload!.intervention]}
+												</span>
+												<span class="text-muted-foreground">
+													${convertToLocaleString(payload!.startCost, 0)} - ${convertToLocaleString(
+														payload!.endCost,
+														0
+													)}
+												</span>
+											</div>
+										</Tooltip.Content>
+									{/each}
+								{/snippet}
 							</Tooltip.Root>
 						</div>
 					{/each}
