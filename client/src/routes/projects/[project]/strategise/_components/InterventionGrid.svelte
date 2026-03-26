@@ -83,8 +83,8 @@
 		<div class="min-w-0 flex-1">
 			<!-- Rows -->
 			<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-			<div class="relative cursor-crosshair" onclick={handleGridClick} tabindex="0" role="button">
-				<Tooltip.Provider delayDuration={200}>
+			<div class="relative" onclick={handleGridClick} tabindex="0" role="button">
+				<Tooltip.Provider delayDuration={100}>
 					<div class="flex flex-col gap-1.5">
 						{#each rows as row (row.region)}
 							<div class="relative h-8 overflow-hidden rounded-md">
@@ -92,7 +92,7 @@
 									{#snippet children({ payload })}
 										{#each row.blocks as block (block.startCost)}
 											<Tooltip.Trigger
-												class="absolute inset-y-0 cursor-crosshair"
+												class="absolute inset-y-0 "
 												style={getBlockStyle(block)}
 												tether={regionTether}
 												payload={block}
