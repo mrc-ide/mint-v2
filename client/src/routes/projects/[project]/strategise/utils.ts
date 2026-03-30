@@ -26,6 +26,7 @@ import type {
 	StrategiseResultIntervention
 } from './schema';
 import { ScenarioToColor } from '$lib/charts/baseChart';
+import { SvelteSet } from 'svelte/reactivity';
 
 const mapTotalsToInterventions = (
 	totals: ReturnType<typeof getTotalCasesAndCostsPerScenario>
@@ -455,4 +456,23 @@ export const createGridRows = (strategiseResults: StrategiseResults, maxCost: nu
 
 	const states = buildRegionStates(strategiseResults, new Set(regions));
 	return finalizeRegionRows(regions, states, maxCost);
+};
+
+export const getGridTicks = (minCost: number, costRange: number) => {
+	const TICK_COUNT = 8;
+	const result: number[] = [];
+	for (let i = 0; i <= TICK_COUNT; i++) {
+		result.push(minCost + (costRange * i) / TICK_COUNT);
+	}
+	return result;
+};
+
+export const getGridLegendItems = (rows: RegionRow[]) => {
+	const uniqueScenarios = new SvelteSet<Scenario>();
+	for (const row of rows) {
+		for (const block of row.blocks) {
+			uniqueScenarios.add(block.intervention);
+		}
+	}
+	return uniqueScenarios;
 };

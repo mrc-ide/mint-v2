@@ -37,3 +37,8 @@ export const createLinearSpace = (min: number, max: number, count = 200): number
 
 	return result;
 };
+
+export const calculateRangePercent = (value: number, range: number): number => {
+	if (range === 0) return 0; // Avoid division by zero
+	return (value / range) * 100;
+};
