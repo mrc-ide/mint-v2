@@ -254,7 +254,7 @@
                 "fields": ["itn_future"],
                 "operator": "falsy"
               },
-              "default": false
+              "default": true
             },
             {
               "id": "irs_future",
