@@ -52,8 +52,6 @@ describe('CompareStrategiseResults component', () => {
 			.toBeVisible();
 		await expect.element(screen.getByRole('heading', { name: 'Present (current controls)' })).toBeVisible();
 		await expect.element(screen.getByRole('heading', { name: 'Long-term (adjusted controls)' })).toBeVisible();
-		await expect
-			.element(screen.getByText('Click either chart to compare the selected present and long-term strategies.'))
-			.toBeVisible();
+		await expect.element(screen.getByText('How to compare strategies')).toBeVisible();
 	});
 });

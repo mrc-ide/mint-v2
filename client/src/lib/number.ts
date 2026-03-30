@@ -42,3 +42,19 @@ export const calculateRangePercent = (value: number, range: number): number => {
 	if (range === 0) return 0; // Avoid division by zero
 	return (value / range) * 100;
 };
+type NumericKeyOf<T> = {
+	[Key in keyof T]: T[Key] extends number ? Key : never;
+}[keyof T];
+/**
+ * Sums the values of a specified numeric key across an array of objects.
+ *
+ * @template T - The type of objects in the array
+ * @template K - The key of the numeric property to sum
+ * @param items - The array of objects to sum over
+ * @param key - The key of the numeric property to sum
+ * @returns The total sum of the specified numeric key across all objects in the array
+ * @throws Will throw an error if the specified key is not numeric in any of the objects
+ */
+export function sumByKey<T extends Record<string, unknown>, K extends NumericKeyOf<T>>(items: T[], key: K): number {
+	return items.reduce((total, item) => total + (item[key] as number), 0);
+}

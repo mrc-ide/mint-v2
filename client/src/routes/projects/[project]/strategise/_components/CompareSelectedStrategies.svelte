@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { convertToLocaleString } from '$lib/number';
+	import { convertToLocaleString, sumByKey } from '$lib/number';
 	import type { CompareStrategiseResult } from '$lib/types/userState';
 	import CompareStrategyCard from './CompareStrategyCard.svelte';
 	import OverviewMetric from './OverviewMetric.svelte';
@@ -14,8 +14,8 @@
 	const getStrategySummary = (strategy: CompareStrategiseResult[number] | null) => {
 		if (!strategy) return null;
 
-		const totalCost = strategy.interventions.reduce((sum, intervention) => sum + intervention.cost, 0);
-		const totalCases = strategy.interventions.reduce((sum, intervention) => sum + intervention.cases, 0);
+		const totalCost = sumByKey(strategy.interventions, 'cost');
+		const totalCases = sumByKey(strategy.interventions, 'cases');
 
 		return {
 			totalCost,

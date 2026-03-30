@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { convertToLocaleString } from '$lib/number';
+	import { convertToLocaleString, sumByKey } from '$lib/number';
 	import type { StrategiseResult } from '$lib/types/userState';
 	import OverviewMetric from './OverviewMetric.svelte';
 	import SelectedStrategyRegionCards from './SelectedStrategyRegionCards.svelte';
@@ -10,8 +10,8 @@
 	}
 	let { selectedStrategy, populations }: Props = $props();
 	let { cost, casesAverted, costPerCasesAverted } = $derived.by(() => {
-		const cost = selectedStrategy.interventions.reduce((acc, cur) => acc + cur.cost, 0);
-		const casesAverted = selectedStrategy.interventions.reduce((acc, cur) => acc + cur.casesAverted, 0);
+		const cost = sumByKey(selectedStrategy.interventions, 'cost');
+		const casesAverted = sumByKey(selectedStrategy.interventions, 'casesAverted');
 		const costPerCasesAverted = cost / casesAverted;
 		return {
 			cost: cost,

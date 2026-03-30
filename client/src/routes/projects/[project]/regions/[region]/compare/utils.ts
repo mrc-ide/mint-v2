@@ -4,19 +4,20 @@ import type { ScenarioTotals } from '$lib/process-results/processCases';
 import type { EmulatorResults, Scenario } from '$lib/types/userState';
 import { regionCompareUrl } from '$lib/url';
 
+interface RunCompareEmulatorResponse {
+	baselineLongTerm: EmulatorResults;
+	fullLongTerm: EmulatorResults;
+}
 export const runCompareEmulator = async (
 	project: string,
 	region: string,
 	longTermFormValues: Record<string, FormValue>,
 	presentFormValues: Record<string, FormValue>,
 	selectedBaselineParameter: { parameterName: string }
-): Promise<{
-	fullLongTerm: EmulatorResults;
-	baselineLongTerm: EmulatorResults;
-}> => {
+): Promise<RunCompareEmulatorResponse> => {
 	const {
 		data: { baselineLongTerm, fullLongTerm }
-	} = await apiFetch<{ baselineLongTerm: EmulatorResults; fullLongTerm: EmulatorResults }>({
+	} = await apiFetch<RunCompareEmulatorResponse>({
 		url: regionCompareUrl(project, region),
 		method: 'POST',
 		body: {

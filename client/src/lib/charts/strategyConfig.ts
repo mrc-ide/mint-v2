@@ -1,4 +1,4 @@
-import { roundNumber } from '$lib/number';
+import { roundNumber, sumByKey } from '$lib/number';
 import type {
 	CompareStrategiseResult,
 	CompareStrategiseResults,
@@ -284,11 +284,13 @@ export const getCompareStrategyConfig = (
 	series: getCompareStrategiseSeries(compareResult)
 });
 
-const calculateTotalCasesMinCost = (data: CompareStrategiseResult): number =>
-	data[0]?.interventions.reduce((sum, intervention) => sum + intervention.cases, 0) ?? 0;
+const calculateTotalCasesMinCost = (data: CompareStrategiseResult): number => {
+	if (data.length === 0) return 0;
+	return sumByKey(data[0].interventions, 'cases');
+};
 
 const calculateTotalRoundedCases = (strategy: CompareStrategiseResult[number]) =>
-	roundNumber(strategy.interventions.reduce((sum, intervention) => sum + intervention.cases, 0));
+	roundNumber(sumByKey(strategy.interventions, 'cases'));
 
 const findExactCaseMatch = (strategies: CompareStrategiseResult, cases: number) =>
 	strategies.find((strategy) => calculateTotalRoundedCases(strategy) === roundNumber(cases)) ?? null;

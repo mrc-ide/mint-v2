@@ -3,7 +3,8 @@ import {
 	convertToLocaleString,
 	createLinearSpace,
 	ROUNDING_METHODS,
-	roundNumber
+	roundNumber,
+	sumByKey
 } from '$lib/number';
 
 describe('roundNumber', () => {
@@ -152,5 +153,47 @@ describe('calculateRangePercent', () => {
 
 	it('should handle division by zero', () => {
 		expect(calculateRangePercent(50, 0)).toBe(0);
+		expect(calculateRangePercent(0, 0)).toBe(0);
+	});
+});
+
+describe('sumByKey', () => {
+	it('should sum values for a numeric key', () => {
+		const data = [
+			{ name: 'A', value: 10 },
+			{ name: 'B', value: 20 },
+			{ name: 'C', value: 30 }
+		];
+
+		expect(sumByKey(data, 'value')).toBe(60);
+	});
+
+	it('should return 0 for an empty array', () => {
+		const data: Array<{ value: number }> = [];
+
+		expect(sumByKey(data, 'value')).toBe(0);
+	});
+
+	it('should handle negative and decimal values', () => {
+		const data = [{ amount: 1.25 }, { amount: -0.5 }, { amount: 2.75 }, { amount: -1 }];
+
+		expect(sumByKey(data, 'amount')).toBeCloseTo(2.5);
+	});
+
+	it('should sum only the selected numeric key when multiple numeric keys exist', () => {
+		const data = [
+			{ count: 1, total: 10 },
+			{ count: 2, total: 20 },
+			{ count: 3, total: 30 }
+		];
+
+		expect(sumByKey(data, 'count')).toBe(6);
+		expect(sumByKey(data, 'total')).toBe(60);
+	});
+
+	it('should handle zero values', () => {
+		const data = [{ value: 0 }, { value: 0 }, { value: 0 }];
+
+		expect(sumByKey(data, 'value')).toBe(0);
 	});
 });
