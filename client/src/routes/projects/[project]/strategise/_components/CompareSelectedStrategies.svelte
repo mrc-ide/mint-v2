@@ -28,9 +28,6 @@
 	let presentSummary = $derived(getStrategySummary(presentStrategy));
 	let longTermSummary = $derived(getStrategySummary(longTermStrategy));
 
-	let casesDelta = $derived(
-		presentSummary && longTermSummary ? longTermSummary.totalCases - presentSummary.totalCases : null
-	);
 	let costDelta = $derived(
 		presentSummary && longTermSummary ? longTermSummary.totalCost - presentSummary.totalCost : null
 	);
@@ -38,11 +35,7 @@
 
 {#if presentSummary || longTermSummary}
 	<div class="space-y-3">
-		<div class="grid grid-cols-2 gap-4">
-			<OverviewMetric
-				title="Difference in total cases"
-				value={casesDelta === null ? 'N/A' : convertToLocaleString(casesDelta, 0)}
-			/>
+		<div>
 			<OverviewMetric
 				title="Difference in total cost"
 				value={costDelta === null ? 'N/A' : `$${convertToLocaleString(costDelta, 0)}`}
@@ -60,6 +53,8 @@
 	</div>
 {:else}
 	<div class="rounded-lg border border-border/50 bg-card/80 p-4 text-sm text-muted-foreground shadow-sm">
-		Click either chart to compare the selected present and long-term strategies.
+		<span class="font-medium">How to compare strategies:</span> Click on any point in the charts to explore cases across
+		both present and long-term strategies. The corresponding strategy on clicked chart will be compared with the closest
+		strategy on the other chart where cases are less than or equal to the selected value.
 	</div>
 {/if}
