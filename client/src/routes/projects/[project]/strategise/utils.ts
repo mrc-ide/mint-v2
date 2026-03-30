@@ -1,3 +1,4 @@
+import { ScenarioToColor } from '$lib/charts/baseChart';
 import type { FormValue } from '$lib/components/dynamic-region-form/types';
 import { createLinearSpace } from '$lib/number';
 import { combineCostsAndCasesAverted, getTotalCostsPerScenario } from '$lib/process-results/costs';
@@ -25,8 +26,6 @@ import type {
 	StrategiseRegionByMetric,
 	StrategiseResultIntervention
 } from './schema';
-import { ScenarioToColor } from '$lib/charts/baseChart';
-import { SvelteSet } from 'svelte/reactivity';
 
 const mapTotalsToInterventions = (
 	totals: ReturnType<typeof getTotalCasesAndCostsPerScenario>
@@ -468,7 +467,7 @@ export const getGridTicks = (minCost: number, costRange: number) => {
 };
 
 export const getGridLegendItems = (rows: RegionRow[]) => {
-	const uniqueScenarios = new SvelteSet<Scenario>();
+	const uniqueScenarios = new Set<Scenario>();
 	for (const row of rows) {
 		for (const block of row.blocks) {
 			uniqueScenarios.add(block.intervention);

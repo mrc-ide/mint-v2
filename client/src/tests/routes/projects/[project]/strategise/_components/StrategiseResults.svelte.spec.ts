@@ -51,7 +51,7 @@ describe('StrategiseResults', () => {
 				strategiseResults,
 				populations,
 				minCost,
-				maxCost
+				budget: maxCost
 			}
 		} as any);
 
@@ -67,7 +67,7 @@ describe('StrategiseResults', () => {
 				strategiseResults,
 				populations,
 				minCost,
-				maxCost
+				budget: maxCost
 			}
 		} as any);
 

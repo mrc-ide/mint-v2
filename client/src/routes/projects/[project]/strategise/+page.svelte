@@ -88,7 +88,7 @@
 							strategiseResults={data.project.strategy.results}
 							populations={populationsOfRegion}
 							minCost={$formData.minCost}
-							maxCost={$formData.maxCost}
+							budget={$formData.budget}
 						/>
 					</Tabs.Content>
 					<Tabs.Content value="longTerm">
@@ -108,7 +108,7 @@
 					strategiseResults={data.project.strategy.results}
 					populations={populationsOfRegion}
 					minCost={$formData.minCost}
-					maxCost={$formData.maxCost}
+					budget={$formData.budget}
 				/>
 			{/if}
 		{/if}

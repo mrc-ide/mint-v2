@@ -34,7 +34,7 @@ const populations = {
 describe('InterventionGrid', () => {
 	it('should render the heading', async () => {
 		const screen = render(InterventionGrid, {
-			props: { strategiseResults, minCost: 100, maxCost: 300, selectedStrategy, selectStrategy: vi.fn(), populations }
+			props: { strategiseResults, minCost: 100, budget: 300, selectedStrategy, selectStrategy: vi.fn(), populations }
 		} as any);
 
 		await expect
@@ -44,7 +44,7 @@ describe('InterventionGrid', () => {
 
 	it('should render region labels', async () => {
 		const screen = render(InterventionGrid, {
-			props: { strategiseResults, minCost: 100, maxCost: 300, selectedStrategy, selectStrategy: vi.fn(), populations }
+			props: { strategiseResults, minCost: 100, budget: 300, selectedStrategy, selectStrategy: vi.fn(), populations }
 		} as any);
 
 		await expect.element(screen.getByText('Region A').first()).toBeVisible();
@@ -53,7 +53,7 @@ describe('InterventionGrid', () => {
 
 	it('should render legend items for each unique intervention', async () => {
 		const screen = render(InterventionGrid, {
-			props: { strategiseResults, minCost: 100, maxCost: 300, selectedStrategy, selectStrategy: vi.fn(), populations }
+			props: { strategiseResults, minCost: 100, budget: 300, selectedStrategy, selectStrategy: vi.fn(), populations }
 		} as any);
 
 		await expect.element(screen.getByText(ScenarioToLabel['irs_only']).first()).toBeVisible();
@@ -63,15 +63,15 @@ describe('InterventionGrid', () => {
 
 	it('should render x-axis label', async () => {
 		const screen = render(InterventionGrid, {
-			props: { strategiseResults, minCost: 100, maxCost: 300, selectedStrategy, selectStrategy: vi.fn(), populations }
+			props: { strategiseResults, minCost: 100, budget: 300, selectedStrategy, selectStrategy: vi.fn(), populations }
 		} as any);
 
 		await expect.element(screen.getByText('Total cost ($USD)').first()).toBeVisible();
 	});
 
-	it('should render x-axis tick for minCost and maxCost', async () => {
+	it('should render x-axis tick for minCost and budget', async () => {
 		const screen = render(InterventionGrid, {
-			props: { strategiseResults, minCost: 100, maxCost: 300, selectedStrategy, selectStrategy: vi.fn(), populations }
+			props: { strategiseResults, minCost: 100, budget: 300, selectedStrategy, selectStrategy: vi.fn(), populations }
 		} as any);
 
 		await expect.element(screen.getByText('$100').first()).toBeVisible();
@@ -94,7 +94,7 @@ describe('InterventionGrid', () => {
 			props: {
 				strategiseResults: singleRegionResults,
 				minCost: 0,
-				maxCost: 500,
+				budget: 500,
 				selectedStrategy,
 				selectStrategy: vi.fn(),
 				populations
@@ -111,13 +111,13 @@ describe('InterventionGrid', () => {
 		const screen = render(InterventionGrid, {
 			strategiseResults,
 			minCost: 0,
-			maxCost: 1000,
+			budget: 1000,
 			populations,
 			selectedStrategy,
 			selectStrategy
 		} as any);
 
-		await screen.getByRole('radiogroup').click();
+		await screen.getByRole('button', { name: 'click to select strategy based on budget' }).click();
 
 		await expect.element(screen.getByText('Explored budget')).toBeVisible();
 		await expect.element(screen.getByRole('heading', { name: 'Optimal strategy for selected budget' })).toBeVisible();

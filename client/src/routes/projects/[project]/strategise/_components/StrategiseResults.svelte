@@ -11,9 +11,9 @@
 		strategiseResults: StrategiseResults;
 		populations: Record<string, number>;
 		minCost: number;
-		maxCost: number;
+		budget: number;
 	}
-	let { strategiseResults, populations, minCost, maxCost }: Props = $props();
+	let { strategiseResults, populations, minCost, budget }: Props = $props();
 	let isChartLoading = $state(true);
 	let strategiseChart = $state<Highcharts.Chart | null>(null);
 	let selectedStrategy = $state<StrategiseResult>(strategiseResults[strategiseResults.length - 1]);
@@ -53,7 +53,7 @@
 			<InterventionGrid
 				{strategiseResults}
 				{minCost}
-				{maxCost}
+				{budget}
 				{populations}
 				{selectedStrategy}
 				selectStrategy={updateStrategyAndPlotLine}

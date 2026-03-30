@@ -11,16 +11,16 @@
 	interface Props {
 		strategiseResults: StrategiseResults;
 		minCost: number;
-		maxCost: number;
+		budget: number;
 		populations: Record<string, number>;
 		selectedStrategy: StrategiseResult;
 		selectStrategy: (strategy: StrategiseResult) => void;
 	}
-	let { strategiseResults, minCost, maxCost, populations, selectedStrategy, selectStrategy }: Props = $props();
+	let { strategiseResults, minCost, budget, populations, selectedStrategy, selectStrategy }: Props = $props();
 
 	let regionTether = Tooltip.createTether<Block>();
-	let costRange = $derived(maxCost - minCost);
-	let rows = $derived(createGridRows(strategiseResults, maxCost));
+	let costRange = $derived(budget - minCost);
+	let rows = $derived(createGridRows(strategiseResults, budget));
 	let selectedPercent = $derived<number>(calculateRangePercent(selectedStrategy.costThreshold - minCost, costRange));
 	let ticks = $derived(getGridTicks(minCost, costRange));
 	let legendItems = $derived(getGridLegendItems(rows));
@@ -64,7 +64,14 @@
 		<!-- Grid + axis -->
 		<div class="min-w-0 flex-1">
 			<!-- Rows -->
-			<div class="relative" onclick={handleGridClick} role="radiogroup" tabindex={0} onkeydown={() => {}}>
+			<div
+				class="relative"
+				onclick={handleGridClick}
+				role="button"
+				tabindex={0}
+				onkeydown={() => {}}
+				aria-label="click to select strategy based on budget"
+			>
 				<Tooltip.Provider delayDuration={100}>
 					<div class="flex flex-col gap-1.5">
 						{#each rows as row (row.region)}
@@ -78,23 +85,23 @@
 												tether={regionTether}
 												payload={block}
 											/>
-											<Tooltip.Content
-												class="rounded-md bg-background/90 text-foreground/90 "
-												arrowClasses="bg-background/90"
-											>
-												<div class="flex flex-col gap-1">
-													<span class="font-medium">
-														{ScenarioToLabel[payload!.intervention]}
-													</span>
-													<span class="text-muted-foreground">
-														${convertToLocaleString(payload!.startCost, 0)} - ${convertToLocaleString(
-															payload!.endCost,
-															0
-														)}
-													</span>
-												</div>
-											</Tooltip.Content>
 										{/each}
+										<Tooltip.Content
+											class="rounded-md bg-background/90 text-foreground/90 "
+											arrowClasses="bg-background/90"
+										>
+											<div class="flex flex-col gap-1">
+												<span class="font-medium">
+													{ScenarioToLabel[payload!.intervention]}
+												</span>
+												<span class="text-muted-foreground">
+													${convertToLocaleString(payload!.startCost, 0)} - ${convertToLocaleString(
+														payload!.endCost,
+														0
+													)}
+												</span>
+											</div>
+										</Tooltip.Content>
 									{/snippet}
 								</Tooltip.Root>
 							</div>
