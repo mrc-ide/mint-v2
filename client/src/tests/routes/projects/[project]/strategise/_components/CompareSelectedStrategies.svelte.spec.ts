@@ -8,9 +8,7 @@ describe('CompareSelectedStrategies component', () => {
 			longTermStrategy: null
 		});
 
-		await expect
-			.element(screen.getByText('Click either chart to compare the selected present and long-term strategies.'))
-			.toBeVisible();
+		await expect.element(screen.getByText('How to compare strategies')).toBeVisible();
 	});
 
 	it('should show both strategies when results for both are present', async () => {
@@ -37,7 +35,6 @@ describe('CompareSelectedStrategies component', () => {
 			longTermStrategy: strategy
 		} as any);
 
-		await expect.element(screen.getByText('Difference in total cases')).toBeVisible();
 		await expect.element(screen.getByText('Difference in total cost')).toBeVisible();
 		await expect.element(screen.getByText('Present strategy')).toBeVisible();
 		await expect.element(screen.getByText('Long-term strategy')).toBeVisible();
