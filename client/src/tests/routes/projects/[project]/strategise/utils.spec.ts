@@ -10,6 +10,8 @@ import {
 	createGridRows,
 	getCasesAndCostsForCompareStrategise,
 	getCasesAvertedAndCostsForStrategise,
+	getGridLegendItems,
+	getGridTicks,
 	getMaximumCostForStrategise,
 	getMinimumCostForStrategise,
 	optimiseForMinCases,
@@ -737,5 +739,80 @@ describe('createGridRows', () => {
 				]
 			}
 		]);
+	});
+});
+
+describe('getGridTicks', () => {
+	it('should return 9 evenly spaced ticks from minCost to minCost + costRange', () => {
+		const ticks = getGridTicks(0, 800);
+
+		expect(ticks).toHaveLength(9);
+		expect(ticks[0]).toBe(0);
+		expect(ticks[8]).toBe(800);
+		expect(ticks[4]).toBe(400);
+	});
+
+	it('should offset all ticks by minCost', () => {
+		const ticks = getGridTicks(100, 400);
+
+		expect(ticks[0]).toBe(100);
+		expect(ticks[8]).toBe(500);
+	});
+
+	it('should return 9 identical values when costRange is 0', () => {
+		const ticks = getGridTicks(50, 0);
+
+		expect(ticks).toHaveLength(9);
+		expect(ticks.every((t) => t === 50)).toBe(true);
+	});
+});
+
+describe('getGridLegendItems', () => {
+	it('should return unique scenarios across all rows and blocks', () => {
+		const rows = [
+			{
+				region: 'Region A',
+				blocks: [
+					{ intervention: 'no_intervention' as const, startCost: 0, endCost: 100 },
+					{ intervention: 'irs_only' as const, startCost: 100, endCost: 200 }
+				]
+			},
+			{
+				region: 'Region B',
+				blocks: [
+					{ intervention: 'irs_only' as const, startCost: 0, endCost: 150 },
+					{ intervention: 'lsm_only' as const, startCost: 150, endCost: 200 }
+				]
+			}
+		];
+
+		const result = getGridLegendItems(rows);
+
+		expect([...result]).toEqual(['no_intervention', 'irs_only', 'lsm_only']);
+	});
+
+	it('should deduplicate scenarios appearing in multiple regions', () => {
+		const rows = [
+			{
+				region: 'Region A',
+				blocks: [{ intervention: 'irs_only' as const, startCost: 0, endCost: 100 }]
+			},
+			{
+				region: 'Region B',
+				blocks: [{ intervention: 'irs_only' as const, startCost: 0, endCost: 100 }]
+			}
+		];
+
+		const result = getGridLegendItems(rows);
+
+		expect([...result]).toEqual(['irs_only']);
+	});
+
+	it('should return an empty set for rows with no blocks', () => {
+		const rows = [{ region: 'Region A', blocks: [] }];
+
+		const result = getGridLegendItems(rows);
+
+		expect([...result]).toEqual([]);
 	});
 });
