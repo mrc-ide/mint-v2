@@ -42,9 +42,9 @@ export const calculateRangePercent = (value: number, range: number): number => {
 	if (range === 0) return 0; // Avoid division by zero
 	return (value / range) * 100;
 };
-type NumericKeyOf<T> = {
-	[Key in keyof T]: T[Key] extends number ? Key : never;
-}[keyof T];
+type NumericKeyOf<T> = keyof {
+	[K in keyof T as T[K] extends number ? K : never]: T[K];
+};
 /**
  * Sums the values of a specified numeric key across an array of objects.
  *
