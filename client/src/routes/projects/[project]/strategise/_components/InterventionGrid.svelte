@@ -33,8 +33,6 @@
 		const cost = minCost + costRange * clampedPercent;
 		const strategy = findClosestStrategiseResult(strategiseResults, cost);
 		selectStrategy(strategy);
-		const snappedPercent = calculateRangePercent(strategy.costThreshold - minCost, costRange);
-		selectedPercent = snappedPercent;
 	};
 
 	const getBlockStyle = (block: Block): string => {
@@ -108,13 +106,11 @@
 						{/each}
 					</div>
 				</Tooltip.Provider>
-				{#if selectedPercent !== null}
-					<div class="pointer-events-none absolute inset-y-0 -translate-x-1/2" style="left: {selectedPercent}%;">
-						<div class="h-full border border-dashed border-foreground"></div>
+				<div class="pointer-events-none absolute inset-y-0 -translate-x-1/2" style="left: {selectedPercent}%;">
+					<div class="h-full border border-dashed border-foreground"></div>
 
-						<span class="absolute -top-2 -translate-1/2 text-xs font-medium text-nowrap"> Explored budget </span>
-					</div>
-				{/if}
+					<span class="absolute -top-2 -translate-1/2 text-xs font-medium text-nowrap"> Explored budget </span>
+				</div>
 			</div>
 
 			<!-- X-axis ticks -->
