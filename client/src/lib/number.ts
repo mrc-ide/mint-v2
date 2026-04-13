@@ -49,7 +49,6 @@ type NumericKeyOf<T> = {
  * @param items - The array of objects to sum over
  * @param key - The key of the numeric property to sum
  * @returns The total sum of the specified numeric key across all objects in the array
- * @throws Will throw an error if the specified key is not numeric in any of the objects
  */
 export function sumByKey<T extends Record<string, unknown>, K extends NumericKeyOf<T>>(items: T[], key: K): number {
 	return items.reduce((total, item) => total + (item[key] as number), 0);
