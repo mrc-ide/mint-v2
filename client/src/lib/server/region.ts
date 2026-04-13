@@ -1,7 +1,7 @@
 import type { DynamicFormSchema, FormValue } from '$lib/components/dynamic-region-form/types';
 import { ApiError, apiFetch } from '$lib/fetch';
 import { saveUserState } from '$lib/server/redis';
-import type { EmulatorResults, Region, UserState } from '$lib/types/userState';
+import type { CasesData, EmulatorResults, Region, UserState } from '$lib/types/userState';
 import { regionFormUrl } from '$lib/url';
 import { error } from '@sveltejs/kit';
 import type { RequestEvent } from '../../routes/projects/[project]/regions/[region]/$types';
@@ -45,6 +45,30 @@ export const saveRegionFormState = async (
 	await saveUserState(userState);
 };
 
+export const saveLongTermRegionCompare = async (
+	userState: UserState,
+	projectName: string,
+	regionName: string,
+	formValues: Record<string, FormValue>,
+	cases: CasesData[]
+) => {
+	const regionData = getRegionFromUserState(userState, projectName, regionName);
+	regionData.longTermFormValues = formValues;
+	regionData.fullLongTermCases = cases;
+	await saveUserState(userState);
+};
+
+export const saveLongTermFormState = async (
+	userState: UserState,
+	projectName: string,
+	regionName: string,
+	formValues: Record<string, FormValue>
+) => {
+	const regionData = getRegionFromUserState(userState, projectName, regionName);
+	regionData.longTermFormValues = formValues;
+	await saveUserState(userState);
+};
+
 export const getRegionFromUserState = (userState: UserState, projectName: string, regionName: string): Region => {
 	const projectData = getProjectFromUserState(userState, projectName);
 
@@ -62,4 +86,12 @@ export const getProjectFromUserState = (userState: UserState, projectName?: stri
 export const invalidateStrategyForProject = (userState: UserState, projectName: string) => {
 	const projectData = getProjectFromUserState(userState, projectName);
 	projectData.strategy = undefined;
+	projectData.compareStrategy = undefined;
+};
+
+export const invalidateLongTerm = (userState: UserState, projectName: string, regionName: string) => {
+	const regionData = getRegionFromUserState(userState, projectName, regionName);
+
+	regionData.longTermFormValues = undefined;
+	regionData.fullLongTermCases = undefined;
 };

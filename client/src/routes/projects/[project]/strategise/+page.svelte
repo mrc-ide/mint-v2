@@ -9,7 +9,9 @@
 	import BudgetInput from './_components/BudgetInput.svelte';
 	import StrategiseResults from './_components/StrategiseResults.svelte';
 	import { strategiseSchema } from './schema';
-	import { strategiseAsync } from './utils';
+	import { strategiseAsync, strategiseCompareAsync } from './utils';
+	import * as Tabs from '$lib/components/ui/tabs/index.js';
+	import CompareStrategiseResults from './_components/CompareStrategiseResults.svelte';
 
 	let { data }: PageProps = $props();
 	let loading = $state(false);
@@ -25,7 +27,16 @@
 			}
 			loading = true;
 
-			$formData.strategiseResults = await strategiseAsync($formData.minCost, $formData.budget, data.regionalStrategies);
+			const strategiseResults = await strategiseAsync($formData.minCost, $formData.budget, data.regionalStrategies);
+			$formData.strategiseResults = strategiseResults;
+
+			if (data.userData.compareEnabled && data.compareRegionalStrategies) {
+				const compareStrategiseResults = await strategiseCompareAsync(
+					$formData.minCost,
+					data.compareRegionalStrategies
+				);
+				$formData.compareStrategiseResults = compareStrategiseResults;
+			}
 		},
 		onUpdated() {
 			loading = false;
@@ -33,6 +44,7 @@
 	});
 	const { form: formData, enhance, allErrors } = form;
 	let populationsOfRegion = $derived(mapRegionsToPopulation(data.project.regions));
+	let selectedTab = $state<'present' | 'longTerm'>('present');
 </script>
 
 <div class="mx-auto px-15 py-8">
@@ -63,7 +75,32 @@
 		{#if loading}
 			<Loader />
 		{:else if data.project.strategy?.results?.length}
-			<StrategiseResults strategiseResults={data.project.strategy.results} populations={populationsOfRegion} />
+			{#if data.userData.compareEnabled}
+				<Tabs.Root bind:value={selectedTab}>
+					<div class="flex gap-2">
+						<Tabs.List class="w-full">
+							<Tabs.Trigger value="present">Present</Tabs.Trigger>
+							<Tabs.Trigger value="longTerm">Long-term</Tabs.Trigger>
+						</Tabs.List>
+					</div>
+					<Tabs.Content value="present">
+						<StrategiseResults strategiseResults={data.project.strategy.results} populations={populationsOfRegion} />
+					</Tabs.Content>
+					<Tabs.Content value="longTerm">
+						<div class="flex items-center justify-center">
+							{#if data.project.compareStrategy?.results}
+								<CompareStrategiseResults results={data.project.compareStrategy.results} />
+							{:else}
+								<div class="text-muted-foreground">
+									You must run long-term planning for at least two regions to see long-term strategies.
+								</div>
+							{/if}
+						</div>
+					</Tabs.Content>
+				</Tabs.Root>
+			{:else}
+				<StrategiseResults strategiseResults={data.project.strategy.results} populations={populationsOfRegion} />
+			{/if}
 		{/if}
 	{:else}
 		<Alert.Root variant="warning">

@@ -87,4 +87,29 @@ test.describe('E2E Compare Page', () => {
 		const allCasesColumns = await page.getByRole('columnheader', { name: /cases/i }).all();
 		expect(allCasesColumns.length).toBe(3);
 	});
+
+	test('should be able able to strategise long term', async ({ page }) => {
+		// first region
+		await runRegionWithItn(page);
+		await page.getByRole('link', { name: 'Long term planning' }).click();
+		await changeSlider(page, 'baseline-parameter-slider', 0.5);
+		await page.waitForTimeout(5000); // wait for debounce and emulator to run and store results
+
+		// second region
+		await page.getByRole('button', { name: `${projectName} - nz` }).click();
+		await page.getByRole('link', { name: 'australia' }).click();
+		await runRegionWithItn(page);
+		await page.getByRole('link', { name: 'Long term planning' }).click();
+		await changeSlider(page, 'baseline-parameter-slider', 0.5);
+		await page.waitForTimeout(5000); // wait for debounce and emulator to run and store results
+
+		// check strategise
+		await page.getByRole('link', { name: 'Sub-national tailoring' }).click();
+		await page.getByRole('button', { name: 'Explore defined budget range' }).click();
+		await page.getByRole('tab', { name: 'Long-term' }).click();
+		// check that long term strategies are shown
+		await expect(page.getByRole('heading', { name: 'Total Clinical Cases and Cost' })).toBeVisible();
+		await expect(page.getByRole('heading', { name: 'Present (current controls)' })).toBeVisible();
+		await expect(page.getByRole('heading', { name: 'Long-term (adjusted controls)' })).toBeVisible();
+	});
 });

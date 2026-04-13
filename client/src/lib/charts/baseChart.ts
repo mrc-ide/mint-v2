@@ -168,10 +168,10 @@ export const configureHighcharts = () => {
 		}
 	});
 };
-export const createHighchart = (config: Highcharts.Options, onLoad?: () => void): Attachment => {
+export const createHighchart = (config: Highcharts.Options, onLoad?: (chart: Highcharts.Chart) => void): Attachment => {
 	return (element) => {
 		const chart = Highcharts.chart(element as HTMLElement, config);
-		onLoad?.();
+		onLoad?.(chart);
 
 		return () => {
 			chart.destroy();

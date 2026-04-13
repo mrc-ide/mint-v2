@@ -54,4 +54,5 @@ export const runRegionWithItn = async (page: Page) => {
 	await page.waitForTimeout(500); // wait for chart to fully render
 	await changeSlider(page, 'itn_future', 0.8);
 	await page.getByRole('checkbox', { name: 'Pyrethroid-only ITNs' }).click();
+	await expect(page.getByRole('button', { name: 'Show Pyrethroid ITN (Only)' })).toBeVisible();
 };

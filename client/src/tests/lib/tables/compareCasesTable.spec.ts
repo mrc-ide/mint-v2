@@ -18,14 +18,6 @@ vi.mock('$lib/components/ui/data-table', () => ({
 	renderSnippet: vi.fn(() => 'rendered-cell')
 }));
 
-// const hoisted = vi.hoisted(() => ({
-// 	rawSnippetRef: { render: () => '<span />' }
-// }));
-
-// vi.mock('svelte', () => ({
-// 	createRawSnippet: vi.fn(() => hoisted.rawSnippetRef)
-// }));
-
 describe('compareCasesTable', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();

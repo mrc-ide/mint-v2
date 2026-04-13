@@ -42,4 +42,20 @@ describe('Compare page', () => {
 			.element(screen.getByText('Run the region baseline to enable long term scenario planning.'))
 			.toBeVisible();
 	});
+
+	it('should show error message if longTermResults fail streaming in', async () => {
+		const screen = render(Page, {
+			data: {
+				region: {
+					hasRunBaseline: true,
+					results: { hi: 123 }
+				},
+				compareParameters: MOCK_COMPARE_PARAMETERS,
+				longTermResults: Promise.reject(new Error('Failed to fetch long term results'))
+			}
+		} as any);
+
+		await expect.element(screen.getByText('Failed to fetch long term results')).toBeVisible();
+		await expect.element(screen.getByText('Failed to load results.')).toBeVisible();
+	});
 });
