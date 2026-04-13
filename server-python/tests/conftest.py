@@ -21,4 +21,5 @@ def emulator_request():
         routine_coverage=1.0,
         irs_future=15.0,
         lsm=15.0,
+        mosquito_delta=50,
     )

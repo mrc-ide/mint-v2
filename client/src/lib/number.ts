@@ -37,3 +37,19 @@ export const createLinearSpace = (min: number, max: number, count = 200): number
 
 	return result;
 };
+
+type NumericKeyOf<T> = {
+	[Key in keyof T]: T[Key] extends number ? Key : never;
+}[keyof T];
+/**
+ * Sums the values of a specified numeric key across an array of objects.
+ *
+ * @template T - The type of objects in the array
+ * @template K - The key of the numeric property to sum
+ * @param items - The array of objects to sum over
+ * @param key - The key of the numeric property to sum
+ * @returns The total sum of the specified numeric key across all objects in the array
+ */
+export function sumByKey<T extends Record<string, unknown>, K extends NumericKeyOf<T>>(items: T[], key: K): number {
+	return items.reduce((total, item) => total + (item[key] as number), 0);
+}

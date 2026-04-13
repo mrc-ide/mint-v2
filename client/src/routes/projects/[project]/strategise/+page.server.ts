@@ -4,6 +4,7 @@ import { zod4 } from 'sveltekit-superforms/adapters';
 import type { Actions, PageServerLoad } from './$types';
 import { strategiseSchema } from './schema';
 import {
+	getCasesAndCostsForCompareStrategise,
 	getCasesAvertedAndCostsForStrategise,
 	getMaximumCostForStrategise,
 	getMinimumCostForStrategise
@@ -15,11 +16,13 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 	const projectData = getProjectFromUserState(locals.userState, project);
 	const regionalStrategies = getCasesAvertedAndCostsForStrategise(projectData.regions);
+	const compareRegionalStrategies = getCasesAndCostsForCompareStrategise(projectData.regions);
 	const maximumCost = ROUNDING_METHODS['ceil'](getMaximumCostForStrategise(regionalStrategies));
 
 	return {
 		project: projectData,
 		regionalStrategies,
+		compareRegionalStrategies,
 		form: await superValidate(
 			{
 				minCost: getMinimumCostForStrategise(regionalStrategies),
@@ -44,6 +47,11 @@ export const actions: Actions = {
 			budget: form.data.budget,
 			results: form.data.strategiseResults
 		};
+		if (form.data.compareStrategiseResults) {
+			projectData.compareStrategy = {
+				results: form.data.compareStrategiseResults
+			};
+		}
 
 		return { form };
 	}

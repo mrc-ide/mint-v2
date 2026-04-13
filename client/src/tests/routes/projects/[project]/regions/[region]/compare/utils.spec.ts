@@ -1,4 +1,8 @@
-import { runCompareEmulator } from '$routes/projects/[project]/regions/[region]/compare/utils';
+import {
+	getScenariosFromTotals,
+	runCompareEmulator,
+	saveFormValues
+} from '$routes/projects/[project]/regions/[region]/compare/utils';
 import { regionCompareUrl } from '$lib/url';
 import { apiFetch } from '$lib/fetch';
 
@@ -26,8 +30,9 @@ describe('utils', () => {
 			const mockFullLongTermResData = { result: 'full-long-term-result' };
 			const mockBaselineLongTermResData = { result: 'baseline-long-term-result' };
 			vi.mocked(regionCompareUrl).mockReturnValue(mockRegionCompareUrl);
-			vi.mocked(apiFetch).mockResolvedValueOnce({ data: mockFullLongTermResData });
-			vi.mocked(apiFetch).mockResolvedValueOnce({ data: mockBaselineLongTermResData });
+			vi.mocked(apiFetch).mockResolvedValue({
+				data: { fullLongTerm: mockFullLongTermResData, baselineLongTerm: mockBaselineLongTermResData }
+			});
 
 			const result = await runCompareEmulator(
 				mockProject,
@@ -41,23 +46,17 @@ describe('utils', () => {
 				url: mockRegionCompareUrl,
 				method: 'POST',
 				body: {
-					formValues: mockLongTermFormValues
-				}
-			});
-			expect(apiFetch).toHaveBeenCalledWith({
-				url: mockRegionCompareUrl,
-				method: 'POST',
-				body: {
-					formValues: {
+					baselineLongTermFormValues: {
 						...mockPresentFormValues,
 						[mockSelectedBaselineParameter.parameterName]:
 							mockLongTermFormValues[mockSelectedBaselineParameter.parameterName]
-					}
+					},
+					fullLongTermFormValues: mockLongTermFormValues
 				}
 			});
 			expect(result).toEqual({
-				fullLongTermResData: mockFullLongTermResData,
-				baselineLongTermResData: mockBaselineLongTermResData
+				fullLongTerm: mockFullLongTermResData,
+				baselineLongTerm: mockBaselineLongTermResData
 			});
 		});
 
@@ -76,6 +75,34 @@ describe('utils', () => {
 					mockSelectedBaselineParameter
 				)
 			).rejects.toThrow(new Error('API fetch failed'));
+		});
+
+		it('getScenariosFromTotals returns unique scenarios preserving first-seen order', () => {
+			const keys = getScenariosFromTotals(
+				{ baseline: { totalCost: 1, totalCases: 2 } } as any,
+				{ intervention: { totalCost: 3, totalCases: 4 }, baseline: { totalCost: 5, totalCases: 6 } } as any,
+				{ intervention: { totalCost: 7, totalCases: 8 } } as any
+			);
+
+			expect(keys).toEqual(['baseline', 'intervention']);
+		});
+	});
+
+	describe('saveFormValues', () => {
+		it('should call apiFetch with correct parameters to save form values', async () => {
+			const mockFormValues = { param1: 'value1', param2: 'value2' };
+			vi.mocked(apiFetch).mockResolvedValue({} as any);
+			vi.mocked(regionCompareUrl).mockReturnValue('http://test-region-compare-url');
+
+			await saveFormValues('mockProject', 'mockRegion', mockFormValues);
+
+			expect(apiFetch).toHaveBeenCalledWith({
+				url: 'http://test-region-compare-url',
+				method: 'PATCH',
+				body: {
+					formValues: mockFormValues
+				}
+			});
 		});
 	});
 });

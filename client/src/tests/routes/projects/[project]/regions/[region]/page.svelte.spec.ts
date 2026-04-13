@@ -95,7 +95,7 @@ describe('page.svelte', () => {
 			}
 		} as any);
 
-		await expect.element(screen.getByRole('heading', { name: 'Projected prevalence in under' })).toBeVisible();
+		await expect.element(screen.getByRole('heading', { name: 'Prevalence (0-5 years)' })).toBeVisible();
 		await expect.element(screen.getByRole('heading', { name: 'Clinical cases averted per' })).toBeVisible();
 	});
 

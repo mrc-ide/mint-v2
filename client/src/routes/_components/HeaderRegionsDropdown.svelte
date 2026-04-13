@@ -45,7 +45,7 @@
 			>
 		{/snippet}
 	</DropdownMenu.Trigger>
-	<DropdownMenu.Content class="max-w-64">
+	<DropdownMenu.Content class="max-w-64" preventScroll={false}>
 		{#each project.regions as region, index (index)}
 			<DropdownMenu.Item>
 				<a class="flex-1" href={`/projects/${project.name}/regions/${region.name}`}>{region.name}</a>

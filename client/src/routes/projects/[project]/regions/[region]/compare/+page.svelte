@@ -4,6 +4,7 @@
 	import type { PageProps } from './$types';
 	import Compare from './_components/Compare.svelte';
 	import { getChartTheme } from '$lib/charts/baseChart';
+	import Loader from '$lib/components/Loader.svelte';
 
 	let { data, params }: PageProps = $props();
 	let chartTheme = $derived(getChartTheme());
@@ -13,18 +14,33 @@
 	<div class="mb-4">
 		<h1 class="text-xl font-bold">Long term Scenario planning</h1>
 		<p class="mb-1 text-muted-foreground">
-			Compare the impact of present interventions versus long-term scenarios. Adjust parameters and modify intervention
-			coverage percentages to see how cases and prevalence change across different budget levels.
+			Compare the impact of control strategies now and in the future following a change to the local epidemiology.
+			Explore how this impacts disease burden and the cost of maintaining control.
 		</p>
 	</div>
 	{#if data.region.hasRunBaseline && data.region.results}
-		<Compare
-			{params}
-			{chartTheme}
-			presentFormValues={data.region.formValues}
-			compareParameters={data.compareParameters}
-			presentResults={data.region.results}
-		/>
+		{#await data.longTermResults}
+			<div class="flex items-center justify-center">
+				<Loader />
+			</div>
+		{:then longTermResults}
+			<Compare
+				{params}
+				{chartTheme}
+				presentFormValues={data.region.formValues}
+				compareParameters={data.compareParameters}
+				presentResults={data.region.results}
+				{longTermResults}
+				savedLongTermFormValues={data.region.longTermFormValues}
+			/>
+		{:catch err}
+			<div class="flex flex-col items-center justify-center gap-2 p-8">
+				<div class="text-destructive">Failed to load results.</div>
+				{#if err}
+					<div class="text-sm text-destructive">{err.message}</div>
+				{/if}
+			</div>
+		{/await}
 	{:else}
 		<Alert.Root variant="warning">
 			<CircleAlert />

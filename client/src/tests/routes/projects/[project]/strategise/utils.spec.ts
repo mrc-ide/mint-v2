@@ -3,17 +3,23 @@ import * as costsModule from '$lib/process-results/costs';
 import type { CasesAverted } from '$lib/process-results/processCases';
 import * as processCasesModule from '$lib/process-results/processCases';
 import type { Region, Scenario, StrategiseResult } from '$lib/types/userState';
-import type { StrategiseRegions } from '$routes/projects/[project]/strategise/schema';
+import type { StrategiseRegionByMetric } from '$routes/projects/[project]/strategise/schema';
 import {
 	buildInterventions,
 	constructRegionalMetrics,
+	getCasesAndCostsForCompareStrategise,
 	getCasesAvertedAndCostsForStrategise,
 	getMaximumCostForStrategise,
 	getMinimumCostForStrategise,
+	optimiseForMinCases,
+	parseOptimisationResult,
 	processRegionData,
 	strategise,
-	strategiseAsync
+	strategiseAsync,
+	strategiseCompare,
+	strategiseCompareAsync
 } from '$routes/projects/[project]/strategise/utils';
+import { equalTo } from 'yalps';
 
 beforeEach(() => {
 	vi.resetAllMocks();
@@ -21,7 +27,7 @@ beforeEach(() => {
 
 describe('getMinimumCostForStrategise', () => {
 	it('should return the minimum cost across all interventions', () => {
-		const regions: StrategiseRegions = [
+		const regions: StrategiseRegionByMetric<'casesAverted'>[] = [
 			{
 				region: 'Region A',
 				interventions: [
@@ -42,7 +48,7 @@ describe('getMinimumCostForStrategise', () => {
 	});
 
 	it('should handle single region with single intervention', () => {
-		const regions: StrategiseRegions = [
+		const regions: StrategiseRegionByMetric<'casesAverted'>[] = [
 			{
 				region: 'Region A',
 				interventions: [{ intervention: 'irs_only', cost: 100, casesAverted: 50 }]
@@ -55,7 +61,7 @@ describe('getMinimumCostForStrategise', () => {
 
 describe('getMaximumCostForStrategise', () => {
 	it('should return sum of maximum costs from each region', () => {
-		const regions: StrategiseRegions = [
+		const regions: StrategiseRegionByMetric<'casesAverted'>[] = [
 			{
 				region: 'Region A',
 				interventions: [
@@ -76,7 +82,7 @@ describe('getMaximumCostForStrategise', () => {
 	});
 
 	it('should handle empty interventions array', () => {
-		const regions: StrategiseRegions = [
+		const regions: StrategiseRegionByMetric<'casesAverted'>[] = [
 			{
 				region: 'Region A',
 				interventions: []
@@ -209,7 +215,7 @@ describe('strategise', () => {
 		const costThresholds = [50, 100, 300, 400];
 		vi.spyOn(numberModule, 'createLinearSpace').mockReturnValue(costThresholds);
 
-		const regions: StrategiseRegions = [
+		const regions: StrategiseRegionByMetric<'casesAverted'>[] = [
 			{
 				region: 'Region A',
 				interventions: [
@@ -242,7 +248,7 @@ describe('strategise', () => {
 	it('should include no_intervention option for each region', () => {
 		vi.spyOn(numberModule, 'createLinearSpace').mockReturnValue([0]);
 
-		const regions: StrategiseRegions = [
+		const regions: StrategiseRegionByMetric<'casesAverted'>[] = [
 			{
 				region: 'Region A',
 				interventions: [{ intervention: 'irs_only' as Scenario, cost: 1000, casesAverted: 50 }]
@@ -259,7 +265,7 @@ describe('strategiseAsync', () => {
 	it('should resolve with strategise results asynchronously', async () => {
 		vi.spyOn(numberModule, 'createLinearSpace').mockReturnValue([100]);
 
-		const regions: StrategiseRegions = [
+		const regions: StrategiseRegionByMetric<'casesAverted'>[] = [
 			{
 				region: 'Region A',
 				interventions: [{ intervention: 'irs_only' as Scenario, cost: 100, casesAverted: 50 }]
@@ -276,7 +282,7 @@ describe('strategiseAsync', () => {
 		vi.spyOn(numberModule, 'createLinearSpace').mockReturnValue([100]);
 		vi.spyOn(global, 'setTimeout');
 
-		const regions: StrategiseRegions = [
+		const regions: StrategiseRegionByMetric<'casesAverted'>[] = [
 			{
 				region: 'Region A',
 				interventions: [{ intervention: 'irs_only' as Scenario, cost: 100, casesAverted: 50 }]
@@ -343,5 +349,274 @@ describe('constructRegionalMetrics', () => {
 		expect(metrics['Region A'].costPerPerson).toBe(0);
 		expect(metrics['Region A'].costPerCaseAverted).toBe(4);
 		expect(metrics['Region A'].casesAvertedPerPerson).toBe(0);
+	});
+});
+
+describe('getCasesAndCostsForCompareStrategise', () => {
+	it('should return null when fewer than 2 regions have both present and long-term data', () => {
+		const regions = [
+			{
+				name: 'Region A',
+				hasRunBaseline: true,
+				formValues: { population: 1000 },
+				results: {
+					eirValid: true,
+					cases: [{ scenario: 'irs_only', year: 1, casesPer1000: 10 }],
+					prevalence: []
+				}
+			},
+			{
+				name: 'Region B',
+				hasRunBaseline: true,
+				formValues: { population: 1000 }
+			}
+		] as unknown as Region[];
+
+		expect(getCasesAndCostsForCompareStrategise(regions)).toBeNull();
+	});
+
+	it('should build present and long-term compare structures for valid regions', () => {
+		vi.spyOn(processCasesModule, 'getTotalCasesAndCostsPerScenario').mockImplementation(
+			(cases: any, formValues: any) =>
+				({
+					irs_only: {
+						totalCost: Number(formValues.population),
+						totalCases: cases[0].casesPer1000
+					}
+				}) as any
+		);
+
+		const regions = [
+			{
+				name: 'Region A',
+				hasRunBaseline: true,
+				formValues: { population: 1000 },
+				longTermFormValues: { population: 1100 },
+				results: {
+					eirValid: true,
+					cases: [{ scenario: 'irs_only', year: 1, casesPer1000: 10 }],
+					prevalence: []
+				},
+				fullLongTermCases: [{ scenario: 'irs_only', year: 2, casesPer1000: 8 }]
+			},
+			{
+				name: 'Region B',
+				hasRunBaseline: true,
+				formValues: { population: 2000 },
+				longTermFormValues: { population: 2100 },
+				results: {
+					eirValid: true,
+					cases: [{ scenario: 'irs_only', year: 1, casesPer1000: 20 }],
+					prevalence: []
+				},
+				fullLongTermCases: [{ scenario: 'irs_only', year: 2, casesPer1000: 15 }]
+			},
+			{
+				name: 'Region C',
+				hasRunBaseline: true,
+				formValues: { population: 3000 },
+				results: {
+					eirValid: true,
+					cases: [{ scenario: 'irs_only', year: 1, casesPer1000: 30 }],
+					prevalence: []
+				}
+			}
+		] as unknown as Region[];
+
+		const result = getCasesAndCostsForCompareStrategise(regions);
+
+		expect(result).not.toBeNull();
+		expect(result?.present).toEqual([
+			{
+				region: 'Region A',
+				interventions: [{ intervention: 'irs_only', cost: 1000, cases: 10 }]
+			},
+			{
+				region: 'Region B',
+				interventions: [{ intervention: 'irs_only', cost: 2000, cases: 20 }]
+			}
+		]);
+		expect(result?.longTerm).toEqual([
+			{
+				region: 'Region A',
+				interventions: [{ intervention: 'irs_only', cost: 1100, cases: 8 }]
+			},
+			{
+				region: 'Region B',
+				interventions: [{ intervention: 'irs_only', cost: 2100, cases: 15 }]
+			}
+		]);
+		expect(processCasesModule.getTotalCasesAndCostsPerScenario).toHaveBeenCalledTimes(4);
+	});
+});
+
+describe('strategiseCompare', () => {
+	it('should build compare strategies for both present and long-term cost ranges', () => {
+		vi.spyOn(numberModule, 'createLinearSpace').mockReturnValueOnce([0, 100]).mockReturnValueOnce([50, 150]);
+
+		const compareRegionalStrategies = {
+			present: [
+				{
+					region: 'Region A',
+					interventions: [
+						{ intervention: 'no_intervention' as Scenario, cost: 0, cases: 100 },
+						{ intervention: 'irs_only' as Scenario, cost: 50, cases: 60 }
+					]
+				},
+				{
+					region: 'Region B',
+					interventions: [
+						{ intervention: 'no_intervention' as Scenario, cost: 0, cases: 80 },
+						{ intervention: 'irs_only' as Scenario, cost: 50, cases: 40 }
+					]
+				}
+			],
+			longTerm: [
+				{
+					region: 'Region A',
+					interventions: [
+						{ intervention: 'no_intervention' as Scenario, cost: 0, cases: 90 },
+						{ intervention: 'irs_only' as Scenario, cost: 50, cases: 50 }
+					]
+				},
+				{
+					region: 'Region B',
+					interventions: [
+						{ intervention: 'no_intervention' as Scenario, cost: 0, cases: 70 },
+						{ intervention: 'irs_only' as Scenario, cost: 100, cases: 30 }
+					]
+				}
+			]
+		} as any;
+
+		const result = strategiseCompare(0, compareRegionalStrategies);
+
+		expect(numberModule.createLinearSpace).toHaveBeenNthCalledWith(1, 0, 100);
+		expect(numberModule.createLinearSpace).toHaveBeenNthCalledWith(2, 50, 150);
+		expect(result!.present.map((s) => s.costThreshold)).toEqual([0, 100]);
+		expect(result!.longTerm.map((s) => s.costThreshold)).toEqual([50, 150]);
+		expect(result!.present.every((s) => new Set(s.interventions.map((i) => i.region)).size === 2)).toBe(true);
+		expect(result!.longTerm.every((s) => new Set(s.interventions.map((i) => i.region)).size === 2)).toBe(true);
+	});
+});
+
+describe('strategiseCompareAsync', () => {
+	it('should resolve with strategiseCompare results asynchronously', async () => {
+		vi.spyOn(numberModule, 'createLinearSpace').mockReturnValue([0]);
+
+		const compareRegionalStrategies = {
+			present: [
+				{
+					region: 'Region A',
+					interventions: [{ intervention: 'irs_only' as Scenario, cost: 0, cases: 100 }]
+				}
+			],
+			longTerm: [
+				{
+					region: 'Region A',
+					interventions: [{ intervention: 'irs_only' as Scenario, cost: 0, cases: 100 }]
+				}
+			]
+		} as any;
+
+		const result = await strategiseCompareAsync(0, compareRegionalStrategies);
+
+		expect(result!.present).toHaveLength(1);
+		expect(result!.longTerm).toHaveLength(1);
+		expect(result!.present[0].costThreshold).toBe(0);
+		expect(result!.longTerm[0].costThreshold).toBe(0);
+	});
+
+	it('should return empty if only no intervention in long term', async () => {
+		vi.spyOn(numberModule, 'createLinearSpace').mockReturnValue([0]);
+
+		const compareRegionalStrategies = {
+			present: [
+				{
+					region: 'Region A',
+					interventions: [{ intervention: 'no_intervention' as Scenario, cost: 0, cases: 100 }]
+				}
+			],
+			longTerm: [
+				{
+					region: 'Region A',
+					interventions: [{ intervention: 'no_intervention' as Scenario, cost: 0, cases: 100 }]
+				}
+			]
+		} as any;
+
+		const result = await strategiseCompareAsync(0, compareRegionalStrategies);
+
+		expect(result!.present).toHaveLength(1);
+		expect(result!.present[0].costThreshold).toBe(0);
+		expect(result!.longTerm).toHaveLength(0);
+	});
+
+	it('should call setTimeout with correct arguments', async () => {
+		vi.spyOn(numberModule, 'createLinearSpace').mockReturnValue([0]);
+		vi.spyOn(global, 'setTimeout');
+
+		const compareRegionalStrategies = {
+			present: [
+				{
+					region: 'Region A',
+					interventions: [{ intervention: 'no_intervention' as Scenario, cost: 0, cases: 100 }]
+				}
+			],
+			longTerm: [
+				{
+					region: 'Region A',
+					interventions: [{ intervention: 'no_intervention' as Scenario, cost: 0, cases: 100 }]
+				}
+			]
+		} as any;
+
+		await strategiseCompareAsync(0, compareRegionalStrategies);
+
+		expect(setTimeout).toHaveBeenCalledWith(expect.any(Function), 0);
+	});
+});
+
+describe('optimiseForMinCases', () => {
+	it('should select interventions that minimize cases within the budget', () => {
+		const model = {
+			constraints: {
+				'Region A': equalTo(1),
+				'Region B': equalTo(1)
+			},
+			variables: {
+				'Region A--no_intervention': { cost: 0, cases: 100, 'Region A': 1 },
+				'Region A--irs_only': { cost: 50, cases: 90, 'Region A': 1 },
+				'Region B--no_intervention': { cost: 0, cases: 80, 'Region B': 1 },
+				'Region B--irs_only': { cost: 50, cases: 40, 'Region B': 1 }
+			}
+		} as any;
+
+		const result = optimiseForMinCases(50, model);
+
+		expect(result).toHaveLength(2);
+		expect(result).toContainEqual({ region: 'Region A', intervention: 'no_intervention', cost: 0, cases: 100 });
+		expect(result).toContainEqual({ region: 'Region B', intervention: 'irs_only', cost: 50, cases: 40 });
+	});
+});
+
+describe('parseOptimisationResult', () => {
+	it('should parse variable name and metric value correctly', () => {
+		const variables = {
+			'Region X--lsm_only': {
+				cost: 250,
+				cases: 120,
+				'Region X': 1
+			}
+		} as any;
+
+		const result = parseOptimisationResult('Region X--lsm_only', variables, 'cases');
+
+		expect(result).toEqual({
+			region: 'Region X',
+			intervention: 'lsm_only',
+			cost: 250,
+			cases: 120
+		});
 	});
 });

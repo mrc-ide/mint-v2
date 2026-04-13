@@ -1,5 +1,5 @@
-import { test, expect } from 'playwright/test';
-import { changeSlider, createProject, goto, randomProjectName } from './utils';
+import { expect, test } from 'playwright/test';
+import { changeSlider, createProject, goto, randomProjectName, runRegionWithItn } from './utils';
 
 test.describe('E2E Compare Page', () => {
 	const projectName = randomProjectName();
@@ -39,11 +39,7 @@ test.describe('E2E Compare Page', () => {
 	});
 
 	test('should compare prevalence & cases when sliders + inputs are adjusted', async ({ page }) => {
-		await changeSlider(page, 'current_malaria_prevalence', 0.2);
-		await page.getByRole('button', { name: 'Run baseline' }).click();
-		await page.waitForTimeout(500); // wait for chart to fully render
-		await changeSlider(page, 'itn_future', 0.8);
-		await page.getByRole('checkbox', { name: 'Pyrethroid-only ITNs' }).click();
+		await runRegionWithItn(page);
 		await page.getByRole('link', { name: 'Long term planning' }).click();
 
 		// adjust sliders
@@ -57,11 +53,63 @@ test.describe('E2E Compare Page', () => {
 		await page.getByLabel(/estimated cost of lsm/i).fill('25');
 
 		// prevalence plot
-		await expect(page.getByRole('button', { name: 'Show No Intervention Long term' })).toBeVisible();
-		await expect(page.getByRole('button', { name: 'Show No Intervention Present' })).toBeVisible();
+		const prevalencePlot = page.getByRole('region', { name: 'prevalence compare graph' });
+		await expect(prevalencePlot).toBeVisible();
+		await expect(
+			prevalencePlot.getByRole('button', { name: 'Show Long-term (current control strategies)' })
+		).toBeVisible();
+		await expect(
+			prevalencePlot.getByRole('button', { name: 'Show Long-term (current control strategies)' })
+		).toBeVisible();
+		await expect(prevalencePlot.getByRole('button', { name: 'Show Present' })).toBeVisible();
 		// cases plot
-		await expect(page.getByRole('button', { name: 'Show Long term (baseline only)' })).toBeVisible();
-		await expect(page.getByRole('button', { name: 'Show Long term (baseline + control strategy)' })).toBeVisible();
-		await expect(page.getByRole('button', { name: 'Show Present' })).toBeVisible();
+		const casesPlot = page.getByRole('region', { name: 'cases compare graph' });
+		await expect(casesPlot).toBeVisible();
+		await expect(casesPlot.getByRole('button', { name: 'Show Long-term (current control strategies)' })).toBeVisible();
+		await expect(casesPlot.getByRole('button', { name: 'Show Long-term (adjusted control strategies)' })).toBeVisible();
+		await expect(casesPlot.getByRole('button', { name: 'Show Present' })).toBeVisible();
+	});
+
+	test('should render table with cost and cases for time frames', async ({ page }) => {
+		await runRegionWithItn(page);
+		await page.getByRole('link', { name: 'Long term planning' }).click();
+
+		await page.getByRole('tab', { name: 'Table' }).click();
+		await expect(page.getByRole('table')).toBeVisible();
+		await expect(page.getByRole('columnheader', { name: 'Intervention' })).toBeVisible();
+		await expect(page.getByRole('columnheader', { name: 'Long-term (current control strategies)' })).toBeVisible();
+		await expect(page.getByRole('columnheader', { name: 'Present (current control strategies)' })).toBeVisible();
+		await expect(page.getByRole('columnheader', { name: 'Long-term (adjusted control strategies)' })).toBeVisible();
+
+		const allCostColumns = await page.getByRole('columnheader', { name: /cost/i }).all();
+		expect(allCostColumns.length).toBe(3);
+
+		const allCasesColumns = await page.getByRole('columnheader', { name: /cases/i }).all();
+		expect(allCasesColumns.length).toBe(3);
+	});
+
+	test('should be able able to strategise long term', async ({ page }) => {
+		// first region
+		await runRegionWithItn(page);
+		await page.getByRole('link', { name: 'Long term planning' }).click();
+		await changeSlider(page, 'baseline-parameter-slider', 0.5);
+		await page.waitForTimeout(5000); // wait for debounce and emulator to run and store results
+
+		// second region
+		await page.getByRole('button', { name: `${projectName} - nz` }).click();
+		await page.getByRole('link', { name: 'australia' }).click();
+		await runRegionWithItn(page);
+		await page.getByRole('link', { name: 'Long term planning' }).click();
+		await changeSlider(page, 'baseline-parameter-slider', 0.5);
+		await page.waitForTimeout(5000); // wait for debounce and emulator to run and store results
+
+		// check strategise
+		await page.getByRole('link', { name: 'Sub-national tailoring' }).click();
+		await page.getByRole('button', { name: 'Explore defined budget range' }).click();
+		await page.getByRole('tab', { name: 'Long-term' }).click();
+		// check that long term strategies are shown
+		await expect(page.getByRole('heading', { name: 'Total Clinical Cases and Cost' })).toBeVisible();
+		await expect(page.getByRole('heading', { name: 'Present (current controls)' })).toBeVisible();
+		await expect(page.getByRole('heading', { name: 'Long-term (adjusted controls)' })).toBeVisible();
 	});
 });

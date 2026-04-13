@@ -3,6 +3,7 @@ import InterventionFields from '$routes/projects/[project]/regions/[region]/comp
 import { render } from 'vitest-browser-svelte';
 import { userEvent } from 'vitest/browser';
 
+const debounceSaveLongTermFormValues = vi.fn();
 const renderComponent = (props: Record<string, any> = {}) => {
 	const testFormValues = $state(structuredClone(MOCK_FORM_VALUES));
 	return render(InterventionFields, {
@@ -11,10 +12,14 @@ const renderComponent = (props: Record<string, any> = {}) => {
 		longTermFormValues: testFormValues,
 		interventionParameters: MOCK_COMPARE_PARAMETERS.interventionParameters,
 		onSliderChange: vi.fn(),
+		debounceSaveLongTermFormValues,
 		...props
 	} as any);
 };
 describe('Compare InterventionFields component', () => {
+	beforeEach(() => {
+		vi.resetAllMocks();
+	});
 	it('should render intervention fields', async () => {
 		const screen = renderComponent();
 
@@ -38,16 +43,25 @@ describe('Compare InterventionFields component', () => {
 		}
 	});
 
-	it('should calculate correct cost delta and display with appropriate sign', async () => {
+	it('should call debounceSaveLongTermFormValues when changing number field', async () => {
+		const screen = renderComponent();
+
+		const testParam = MOCK_COMPARE_PARAMETERS.interventionParameters[0];
+		const input = screen.getByLabelText(testParam.linkedCosts[0].costLabel);
+		await userEvent.fill(input, '123');
+		expect(debounceSaveLongTermFormValues).toHaveBeenCalledTimes(1);
+	});
+
+	it('should calculate correct cost delta as % and display with appropriate sign', async () => {
 		const param = MOCK_COMPARE_PARAMETERS.interventionParameters[0];
 		const presentCost = MOCK_FORM_VALUES[param.linkedCosts[0].costName as keyof typeof MOCK_FORM_VALUES] as number;
 
 		const screen = renderComponent();
 
 		const input = screen.getByLabelText(param.linkedCosts[0].costLabel);
-		await userEvent.fill(input, String(presentCost + 10));
+		await userEvent.fill(input, String(presentCost * 1.5)); // increase by 50%
 
-		await expect.element(screen.getByText(`10`, { exact: false })).toBeVisible();
+		await expect.element(screen.getByText('+ 50%', { exact: false })).toBeVisible();
 	});
 
 	it('should be able to collapse cost fields', async () => {

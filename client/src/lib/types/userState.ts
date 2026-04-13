@@ -1,5 +1,5 @@
 import type { FormValue } from '$lib/components/dynamic-region-form/types';
-import type { strategiseSchema } from '$routes/projects/[project]/strategise/schema';
+import type { compareStrategiseResultSchema, strategiseSchema } from '$routes/projects/[project]/strategise/schema';
 import { z } from 'zod';
 
 export const SCENARIOS = [
@@ -40,12 +40,8 @@ export interface Region {
 	hasRunBaseline: boolean;
 	formValues: Record<string, FormValue>;
 	results?: EmulatorResults;
-}
-export interface StrategiseIntervention {
-	region: string;
-	intervention: Scenario;
-	cost: number;
-	casesAverted: number;
+	longTermFormValues?: Record<string, FormValue>;
+	fullLongTermCases?: CasesData[];
 }
 
 export type StrategiseResults = z.infer<typeof strategiseSchema>['strategiseResults'];
@@ -55,10 +51,17 @@ export interface Strategy {
 	budget: number;
 	results: StrategiseResults;
 }
+export interface CompareStrategy {
+	results: CompareStrategiseResults;
+}
+export type CompareStrategiseResults = z.infer<typeof strategiseSchema>['compareStrategiseResults'];
+export type CompareStrategiseResult = z.infer<typeof compareStrategiseResultSchema>;
+
 export interface Project {
 	name: string;
 	regions: Region[];
 	strategy?: Strategy;
+	compareStrategy?: CompareStrategy;
 }
 
 export interface UserState {

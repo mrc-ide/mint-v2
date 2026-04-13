@@ -4,7 +4,9 @@ import {
 	getProjectFromUserState,
 	getRegionFormSchema,
 	getRegionFromUserState,
+	invalidateLongTerm,
 	invalidateStrategyForProject,
+	saveLongTermRegionCompare,
 	saveRegionFormState,
 	saveRegionRun
 } from '$lib/server/region';
@@ -386,7 +388,7 @@ describe('getProjectFromUserState', () => {
 });
 
 describe('invalidateStrategyForProject', () => {
-	it('should set strategy to undefined', () => {
+	it('should set strategy & compare strategy to undefined', () => {
 		const userState: UserState = {
 			userId: 'user-1',
 			createdAt: '2024-01-01T00:00:00.000Z',
@@ -394,7 +396,8 @@ describe('invalidateStrategyForProject', () => {
 				{
 					name: 'Project A',
 					regions: [],
-					strategy: { budget: 1000, results: [] }
+					strategy: { budget: 1000, results: [] },
+					compareStrategy: { results: [] as any }
 				}
 			]
 		};
@@ -402,6 +405,7 @@ describe('invalidateStrategyForProject', () => {
 		invalidateStrategyForProject(userState, 'Project A');
 
 		expect(userState.projects[0].strategy).toBeUndefined();
+		expect(userState.projects[0].compareStrategy).toBeUndefined();
 	});
 
 	it('should work when strategy is already undefined', () => {
@@ -430,5 +434,113 @@ describe('invalidateStrategyForProject', () => {
 		};
 
 		expect(() => invalidateStrategyForProject(userState, 'Nonexistent')).toThrow();
+	});
+});
+
+const createLongTermUserState = (): UserState =>
+	({
+		userId: 'user-1',
+		createdAt: '2024-01-01T00:00:00.000Z',
+		projects: [
+			{
+				name: 'Project A',
+				regions: [
+					{
+						name: 'Region 1',
+						hasRunBaseline: true,
+						formValues: { population: '10000' },
+						results: {
+							eirValid: true,
+							cases: [{ year: 1, scenario: 'no_intervention', casesPer1000: 150 }],
+							prevalence: [{ days: 14, scenario: 'no_intervention', prevalence: 0.24 }]
+						},
+						longTermFormValues: { years: '10' },
+						fullLongTermCases: [{ year: 1, casesPer1000: 120 }]
+					}
+				],
+				strategy: { budget: 1000, results: [] },
+				compareStrategy: { budget: 2000, results: [] }
+			}
+		]
+	}) as unknown as UserState;
+
+describe('saveLongTermRegionCompare', () => {
+	beforeEach(() => {
+		vi.resetAllMocks();
+	});
+
+	it('should save long-term form values and full long-term cases', async () => {
+		const userState = createLongTermUserState();
+		const formValues = { years: '15', discount_rate: '0.03' };
+		const cases = [
+			{ year: 1, casesPer1000: 110 },
+			{ year: 2, casesPer1000: 95 }
+		] as any;
+
+		vi.mocked(saveUserState).mockResolvedValue(undefined);
+
+		await saveLongTermRegionCompare(userState, 'Project A', 'Region 1', formValues, cases);
+
+		const region = userState.projects[0].regions[0] as any;
+		expect(region.longTermFormValues).toEqual(formValues);
+		expect(region.fullLongTermCases).toEqual(cases);
+		expect(saveUserState).toHaveBeenCalledWith(userState);
+	});
+});
+
+describe('saveLongTermFormState', () => {
+	beforeEach(() => {
+		vi.resetAllMocks();
+	});
+
+	it('should save long-term form values only', async () => {
+		const { saveLongTermFormState } = await import('$lib/server/region');
+		const userState = createLongTermUserState();
+		const existingCases = (userState.projects[0].regions[0] as any).fullLongTermCases;
+		const formValues = { years: '12', baseline: '0.2' };
+
+		vi.mocked(saveUserState).mockResolvedValue(undefined);
+
+		await saveLongTermFormState(userState, 'Project A', 'Region 1', formValues);
+
+		const region = userState.projects[0].regions[0] as any;
+		expect(region.longTermFormValues).toEqual(formValues);
+		expect(region.fullLongTermCases).toEqual(existingCases);
+		expect(saveUserState).toHaveBeenCalledWith(userState);
+	});
+});
+
+describe('invalidateLongTerm', () => {
+	it('should clear long-term fields for a region', async () => {
+		const userState = createLongTermUserState();
+
+		invalidateLongTerm(userState, 'Project A', 'Region 1');
+
+		const region = userState.projects[0].regions[0] as any;
+		expect(region.longTermFormValues).toBeUndefined();
+		expect(region.fullLongTermCases).toBeUndefined();
+	});
+
+	it('should not modify baseline fields when clearing long-term fields', async () => {
+		const userState = createLongTermUserState();
+
+		invalidateLongTerm(userState, 'Project A', 'Region 1');
+
+		const region = userState.projects[0].regions[0];
+		expect(region.hasRunBaseline).toBe(true);
+		expect(region.formValues).toEqual({ population: '10000' });
+		expect(region.results).toBeDefined();
+	});
+});
+
+describe('invalidateStrategyForProject (compare strategy behavior)', () => {
+	it('should also clear compareStrategy', () => {
+		const userState = createLongTermUserState();
+
+		invalidateStrategyForProject(userState, 'Project A');
+
+		const project = userState.projects[0] as any;
+		expect(project.strategy).toBeUndefined();
+		expect(project.compareStrategy).toBeUndefined();
 	});
 });

@@ -6,6 +6,9 @@ import { playwright } from '@vitest/browser-playwright';
 
 export default defineConfig({
 	plugins: [tailwindcss(), sveltekit(), devtoolsJson()],
+	optimizeDeps: {
+		include: ['highcharts']
+	},
 	test: {
 		expect: { requireAssertions: true },
 		coverage: {

@@ -39,6 +39,7 @@ class EmulatorRequest(BaseModel):
     routine: float = Field(alias="routine_coverage")
     irs_future: float = Field(ge=0, le=100)
     lsm: float = Field(ge=0, le=100)
+    mosquito_delta: float = Field(gt=-100, le=100, default=0.0)
 
     @field_validator(
         "prev",
@@ -53,6 +54,7 @@ class EmulatorRequest(BaseModel):
         "itn_future",
         "irs_future",
         "lsm",
+        "mosquito_delta",
         mode="after",
     )
     @classmethod
@@ -82,6 +84,7 @@ class EmulatorScenario(BaseModel):
     irs_future: float = 0.0
     routine: float = 0.0
     lsm: float = 0.0
+    mosquito_delta: float = 0.0
 
 
 class Prevalence(BaseModel):
@@ -113,11 +116,14 @@ class CompareParameter(BaseModel):
     label: str
     min: float
     max: float
+    step: float
 
 
 class InterventionCompareCost(BaseModel):
     cost_name: str = Field(serialization_alias="costName")
     cost_label: str = Field(serialization_alias="costLabel")
+    step: float
+    cost_decreases_with_increase: bool = Field(serialization_alias="costDecreasesWithIncrease")
 
 
 class InterventionCompareParameter(CompareParameter):
@@ -127,3 +133,13 @@ class InterventionCompareParameter(CompareParameter):
 class CompareParametersResponse(BaseModel):
     baseline_parameters: list[CompareParameter] = Field(serialization_alias="baselineParameters")
     intervention_parameters: list[InterventionCompareParameter] = Field(serialization_alias="interventionParameters")
+
+
+class BaselineParameterOption(BaseModel):
+    name: str
+    label: str
+
+
+class InterventionParameterOption(BaseModel):
+    name: str
+    linked_costs: list[tuple[str, bool]]

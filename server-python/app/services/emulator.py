@@ -88,7 +88,19 @@ def build_base_scenario(emulator_request: EmulatorRequest) -> EmulatorScenario:
     """Build the base scenario from the emulator request."""
     return EmulatorScenario(
         **emulator_request.model_dump(
-            include={"res_use", "py_only", "py_pbo", "py_pyrrole", "py_ppf", "prev", "Q0", "phi", "season", "irs"}
+            include={
+                "res_use",
+                "py_only",
+                "py_pbo",
+                "py_pyrrole",
+                "py_ppf",
+                "prev",
+                "Q0",
+                "phi",
+                "season",
+                "irs",
+                "mosquito_delta",
+            }
         )
     )
 

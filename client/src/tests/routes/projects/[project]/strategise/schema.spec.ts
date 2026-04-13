@@ -309,4 +309,45 @@ describe('strategise schema', () => {
 		const result = strategiseSchema.safeParse(validData);
 		expect(result.success).toBe(true);
 	});
+
+	it('should allow compareStrategiseResults ', () => {
+		const compareResult = [
+			{
+				costThreshold: 100,
+				interventions: [
+					{
+						intervention: 'scenario1' as Scenario,
+						cost: 50,
+						cases: 10,
+						region: 'Region A'
+					}
+				]
+			}
+		];
+		const validData = {
+			minCost: 100,
+			maxCost: 1000,
+			budget: 500,
+			strategiseResults: [
+				{
+					costThreshold: 100,
+					interventions: [
+						{
+							intervention: 'scenario1' as Scenario,
+							cost: 50,
+							casesAverted: -10,
+							region: 'Region A'
+						}
+					]
+				}
+			],
+			compareStrategiseResults: {
+				present: compareResult,
+				longTerm: compareResult
+			}
+		};
+
+		const result = strategiseSchema.safeParse(validData);
+		expect(result.success).toBe(true);
+	});
 });

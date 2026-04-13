@@ -1,15 +1,9 @@
-import type { FormValue } from '$lib/components/dynamic-region-form/types';
-import { getTotalCostsPerScenario } from '$lib/process-results/costs';
-import {
-	collectPostInterventionCases,
-	convertPer1000ToTotal,
-	getTotalCasesPer1000,
-	type CasesAverted
-} from '$lib/process-results/processCases';
-import type { CasesData, Scenario } from '$lib/types/userState';
-import type { Options, PointOptionsObject, SeriesColumnOptions, SeriesLineOptions } from 'highcharts';
-import { getColumnFill, ScenarioToLabel } from './baseChart';
 import { convertToLocaleString } from '$lib/number';
+import { type CasesAverted, type ScenarioTotals } from '$lib/process-results/processCases';
+import type { CompareTotals } from '$lib/types/compare';
+import type { Scenario } from '$lib/types/userState';
+import { type Options, type PointOptionsObject, type SeriesColumnOptions, type SeriesLineOptions } from 'highcharts';
+import { getColumnFill, ScenarioToLabel } from './baseChart';
 
 const getCasesSeriesData = (
 	casesAverted: Partial<Record<Scenario, CasesAverted>>
@@ -97,36 +91,38 @@ interface CasesCompareDataPoint {
 	totalCases: number;
 	totalCost: number;
 }
+export const filterInefficientStrategies = (dataPoints: CasesCompareDataPoint[]): CasesCompareDataPoint[] => {
+	const sortedByCost = [...dataPoints].sort((a, b) => a.totalCost - b.totalCost);
+	return sortedByCost.reduce<CasesCompareDataPoint[]>((acc, current) => {
+		const previous = acc[acc.length - 1];
+		if (!previous || current.totalCases < previous.totalCases) {
+			acc.push(current);
+		}
+		return acc;
+	}, []);
+};
 export const createCasesCompareDataPoints = (
-	cases: CasesData[],
-	formValues: Record<string, FormValue>
+	totalCasesAndCosts: Partial<Record<Scenario, ScenarioTotals>>
 ): CasesCompareDataPoint[] => {
-	const postInterventionCases = collectPostInterventionCases(cases);
-	const scenarios = Object.entries(postInterventionCases)
-		.filter(([_, scenarioCases]) => scenarioCases.length > 0)
-		.map(([scenario]) => scenario as Scenario);
-	const scenarioCosts = getTotalCostsPerScenario(scenarios, formValues);
+	const totalCasesAndCostsArray = Object.entries(totalCasesAndCosts).map(([scenario, { totalCases, totalCost }]) => ({
+		scenario: scenario as Scenario,
+		totalCases,
+		totalCost: totalCost
+	}));
 
-	return scenarios
-		.map((scenario) => {
-			const totalCasesPer1000 = getTotalCasesPer1000(postInterventionCases[scenario]);
-			return {
-				scenario,
-				totalCases: convertPer1000ToTotal(totalCasesPer1000, Number(formValues['population'])),
-				totalCost: scenarioCosts[scenario]!
-			};
-		})
-		.sort((a, b) => a.totalCost - b.totalCost);
+	return filterInefficientStrategies(totalCasesAndCostsArray);
 };
 
 export const createCasesCompareSeries = (
-	cases: CasesData[],
-	formValues: Record<string, FormValue>,
-	name: 'Present' | 'Long term (baseline + control strategy)' | 'Long term (baseline only)'
+	totalCasesAndCosts: Partial<Record<Scenario, ScenarioTotals>>,
+	name:
+		| 'Present (current control strategies)'
+		| 'Long-term (adjusted control strategies)'
+		| 'Long-term (current control strategies)'
 ): SeriesLineOptions => ({
 	name,
 	type: 'line',
-	data: createCasesCompareDataPoints(cases, formValues).map(({ totalCases, totalCost, scenario }) => ({
+	data: createCasesCompareDataPoints(totalCasesAndCosts).map(({ totalCases, totalCost, scenario }) => ({
 		x: totalCost,
 		y: totalCases,
 		custom: {
@@ -181,45 +177,58 @@ export const createCompareTooltipHtml = function (this: Highcharts.Point): strin
 	return tooltipLines.join('');
 };
 
-export const getCasesCompareConfig = (
-	presentCases: CasesData[],
-	fullLongTermCases: CasesData[],
-	baselineLongTermCases: CasesData[],
-	presentFormValues: Record<string, FormValue>,
-	longTermFormValues: Record<string, FormValue>
-): Options => {
-	const presentSeries = createCasesCompareSeries(presentCases, presentFormValues, 'Present');
+export const getClosestPoint = (cost: number, allSeries: Highcharts.Series[]): Highcharts.Point | null =>
+	allSeries
+		.flatMap((series) => series.data)
+		.reduce<Highcharts.Point | null>((closest, point) => {
+			if (closest === null) return point;
+			return Math.abs((point.x as number) - cost) < Math.abs((closest.x as number) - cost) ? point : closest;
+		}, null);
+
+export const getCasesCompareConfig = ({
+	presentTotals,
+	baselineLongTermTotals,
+	fullLongTermTotals
+}: CompareTotals): Options => {
+	const presentSeries = createCasesCompareSeries(presentTotals, 'Present (current control strategies)');
 	const baselineLongTermSeries = createCasesCompareSeries(
-		baselineLongTermCases,
-		presentFormValues,
-		'Long term (baseline only)'
+		baselineLongTermTotals,
+		'Long-term (current control strategies)'
 	);
-	const fullLongTermSeries = createCasesCompareSeries(
-		fullLongTermCases,
-		longTermFormValues,
-		'Long term (baseline + control strategy)'
-	);
+	const fullLongTermSeries = createCasesCompareSeries(fullLongTermTotals, 'Long-term (adjusted control strategies)');
 	const presentData = presentSeries.data as PointOptionsObject[];
 	const fullLongTermData = fullLongTermSeries.data as PointOptionsObject[];
+
 	return {
 		chart: {
 			type: 'line',
 			height: 450
 		},
 		title: {
-			text: 'Present vs Long term - Total Cases vs Total Cost'
+			text: 'Total Clinical Cases and Cost of Strategy'
 		},
 		subtitle: {
-			text: 'Step lines indicate changes in intervention strategy as budget increases.'
+			text: 'Step lines show the most cost-effective intervention at each cost level',
+			style: {
+				color: 'var(--muted-foreground)'
+			}
+		},
+		caption: {
+			text: 'Only the most cost-effective interventions are plotted, see Table tab for all options',
+			align: 'left',
+			verticalAlign: 'bottom',
+			style: {
+				color: 'var(--muted-foreground)'
+			}
 		},
 		xAxis: {
-			title: { text: 'Total Cost ($USD)' },
+			title: { text: 'Total cost ($USD)' },
 			labels: { format: '${value:,.0f}' },
 			min: 0,
 			breaks: createBreakToMinimizeEmptySpace(presentData, fullLongTermData)
 		},
 		yAxis: {
-			title: { text: 'Total Cases' },
+			title: { text: 'Total cases' },
 			labels: { format: '{value:,.0f}' }
 		},
 		tooltip: {

@@ -46,6 +46,7 @@ class TestScenariosToDict:
             "irs_future",
             "routine",
             "lsm",
+            "mosquito_delta",
         ]
         expected = {
             "scenario_tag": ["test1", "test2", "test3"],
@@ -69,6 +70,7 @@ class TestBuildBaseScenario:
             phi=0.79,
             season=1.0,
             irs=0.1,
+            mosquito_delta=0.5,
             # Default values
             scenario_tag="no_intervention",
             irs_future=0,

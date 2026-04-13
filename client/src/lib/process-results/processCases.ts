@@ -1,5 +1,7 @@
+import type { FormValue } from '$lib/components/dynamic-region-form/types';
 import { roundNumber } from '$lib/number';
 import { PRE_INTERVENTION_YEAR, SCENARIOS, type CasesData, type Scenario } from '$lib/types/userState';
+import { getTotalCostsPerScenario } from './costs';
 
 export interface CasesAverted {
 	casesAvertedYear1Per1000: number;
@@ -73,6 +75,35 @@ export const getAvertedCasesData = (
 	}
 
 	return casesAverted;
+};
+
+export interface ScenarioTotals {
+	totalCost: number;
+	totalCases: number;
+}
+
+export const getTotalCasesAndCostsPerScenario = (
+	cases: CasesData[],
+	formValues: Record<string, FormValue>
+): Partial<Record<Scenario, ScenarioTotals>> => {
+	const postInterventionCases = collectPostInterventionCases(cases);
+	const scenarios = Object.entries(postInterventionCases)
+		.filter(([_, scenarioCases]) => scenarioCases.length > 0)
+		.map(([scenario]) => scenario as Scenario);
+	const scenarioCosts = getTotalCostsPerScenario(scenarios, formValues);
+
+	const totalsByScenario = {} as Partial<Record<Scenario, ScenarioTotals>>;
+	const population = Number(formValues['population']);
+	for (const scenario of scenarios) {
+		const totalCasesPer1000 = getTotalCasesPer1000(postInterventionCases[scenario]);
+
+		totalsByScenario[scenario as Scenario] = {
+			totalCost: scenarioCosts[scenario]!,
+			totalCases: convertPer1000ToTotal(totalCasesPer1000, population)
+		};
+	}
+
+	return totalsByScenario;
 };
 
 export const convertPer1000ToTotal = (per1000: number, population: number) => (per1000 / 1000) * population;

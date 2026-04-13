@@ -26,6 +26,25 @@ describe('DynamicForm component', () => {
 
 		await expect.element(screen.getByRole('button', { name: 'Submit Text' })).toBeVisible();
 	});
+	it('should not show field with hidden=true in the schema', async () => {
+		const schema = structuredClone(MOCK_FORM_SCHEMA);
+		const fieldToHide = schema.groups[0].subGroups[0].fields[0] as any;
+		fieldToHide.hidden = true;
+
+		const screen = render(DynamicForm, {
+			props: {
+				schema,
+				initialValues: {},
+				hasRunBaseline: false,
+				run: vi.fn(),
+				process: vi.fn(),
+				submitText: 'Submit Text',
+				isInputsDisabled: false
+			}
+		} as any);
+
+		await expect.element(screen.getByLabelText(fieldToHide.label, { exact: true })).not.toBeInTheDocument();
+	});
 
 	it('should set hasRunBaseline to false when run fails', async () => {
 		const run = vi.fn().mockRejectedValue(new Error('Run failed'));

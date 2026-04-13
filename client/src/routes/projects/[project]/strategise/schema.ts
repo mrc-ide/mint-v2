@@ -1,5 +1,20 @@
 import type { Scenario } from '$lib/types/userState';
 import { z } from 'zod';
+
+export const compareStrategiseResultSchema = z
+	.object({
+		costThreshold: z.number().min(0, 'Cost threshold must be 0 or greater'),
+		interventions: z
+			.object({
+				intervention: z.custom<Scenario>(),
+				cost: z.number().min(0, 'Cost must be 0 or greater'),
+				cases: z.number(),
+				region: z.string()
+			})
+			.array()
+	})
+	.array();
+
 export const strategiseSchema = z
 	.object({
 		minCost: z.number().min(1, 'Minimum cost must be greater than 0'),
@@ -17,7 +32,13 @@ export const strategiseSchema = z
 					})
 					.array()
 			})
-			.array()
+			.array(),
+		compareStrategiseResults: z
+			.object({
+				present: compareStrategiseResultSchema,
+				longTerm: compareStrategiseResultSchema
+			})
+			.optional()
 	})
 	.refine((data) => data.budget > data.minCost && data.budget <= data.maxCost, {
 		message: 'Budget must be between minimum and maximum cost',
@@ -26,12 +47,22 @@ export const strategiseSchema = z
 
 export type StrategiseForm = z.infer<typeof strategiseSchema>;
 
-interface StrategiseRegion {
+export type MetricKey = 'cases' | 'casesAverted';
+
+type StrategiseIntervention<K extends MetricKey> = {
+	intervention: Scenario;
+	cost: number;
+} & Record<K, number>;
+
+export type StrategiseRegionByMetric<TMetric extends MetricKey> = {
 	region: string;
-	interventions: {
-		intervention: Scenario;
-		cost: number;
-		casesAverted: number;
-	}[];
+	interventions: StrategiseIntervention<TMetric>[];
+};
+export interface CompareStrategiseRegions {
+	present: StrategiseRegionByMetric<'cases'>[];
+	longTerm: StrategiseRegionByMetric<'cases'>[];
 }
-export type StrategiseRegions = StrategiseRegion[];
+
+export type StrategiseResultIntervention<K extends MetricKey> = StrategiseIntervention<K> & {
+	region: string;
+};

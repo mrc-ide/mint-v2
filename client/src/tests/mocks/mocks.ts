@@ -564,13 +564,15 @@ export const MOCK_COMPARE_PARAMETERS: Readonly<CompareParameters> = Object.freez
 			parameterName: 'current_malaria_prevalence',
 			label: 'Prevalence',
 			min: 2,
-			max: 70
+			max: 70,
+			step: 1
 		},
 		{
 			parameterName: 'preference_for_biting_in_bed',
 			label: 'Preference for Biting in Bed',
 			min: 40,
-			max: 90
+			max: 90,
+			step: 1
 		}
 	],
 	interventionParameters: [
@@ -579,10 +581,13 @@ export const MOCK_COMPARE_PARAMETERS: Readonly<CompareParameters> = Object.freez
 			label: 'IRS coverage',
 			min: 0,
 			max: 100,
+			step: 1,
 			linkedCosts: [
 				{
 					costName: 'irs_household_annual_cost_deployment',
-					costLabel: 'IRS annual household cost deployment'
+					costLabel: 'IRS annual household cost deployment',
+					step: 0.1,
+					costDecreasesWithIncrease: false
 				}
 			]
 		},
@@ -591,14 +596,23 @@ export const MOCK_COMPARE_PARAMETERS: Readonly<CompareParameters> = Object.freez
 			label: 'ITN usage',
 			min: 0,
 			max: 100,
-			linkedCosts: [{ costName: 'mass_distribution_cost', costLabel: 'Mass distribution cost' }]
+			step: 1,
+			linkedCosts: [
+				{
+					costName: 'mass_distribution_cost',
+					costLabel: 'Mass distribution cost',
+					step: 0.1,
+					costDecreasesWithIncrease: false
+				}
+			]
 		},
 		{
 			parameterName: 'lsm',
 			label: 'LSM coverage',
 			min: 0,
 			max: 90,
-			linkedCosts: [{ costName: 'lsm_cost', costLabel: 'LSM annual cost' }]
+			step: 1,
+			linkedCosts: [{ costName: 'lsm_cost', costLabel: 'LSM annual cost', step: 0.1, costDecreasesWithIncrease: false }]
 		}
 	]
 });

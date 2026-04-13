@@ -1,5 +1,5 @@
 import { worker } from './src/tests/mocks/worker';
-import { test } from 'vitest';
+import { it } from 'vitest';
 
 /**
  * Use this for vitest browser mode when you need to mock network requests.
@@ -8,7 +8,7 @@ interface TestWithWorker {
 	worker: typeof worker;
 }
 
-export const testWithWorker = test.extend<TestWithWorker>({
+export const testWithWorker = it.extend<TestWithWorker>({
 	worker: [
 		async ({ _local }, use) => {
 			// Start the worker before the test.
