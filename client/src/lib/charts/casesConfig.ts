@@ -86,168 +86,79 @@ export const getCasesConfig = (casesAverted: Partial<Record<Scenario, CasesAvert
 	};
 };
 
-interface CasesCompareDataPoint {
-	scenario: Scenario;
-	totalCases: number;
-	totalCost: number;
-}
-export const filterInefficientStrategies = (dataPoints: CasesCompareDataPoint[]): CasesCompareDataPoint[] => {
-	const sortedByCost = [...dataPoints].sort((a, b) => a.totalCost - b.totalCost);
-	return sortedByCost.reduce<CasesCompareDataPoint[]>((acc, current) => {
-		const previous = acc[acc.length - 1];
-		if (!previous || current.totalCases < previous.totalCases) {
-			acc.push(current);
-		}
-		return acc;
-	}, []);
-};
-export const createCasesCompareDataPoints = (
-	totalCasesAndCosts: Partial<Record<Scenario, ScenarioTotals>>
-): CasesCompareDataPoint[] => {
-	const totalCasesAndCostsArray = Object.entries(totalCasesAndCosts).map(([scenario, { totalCases, totalCost }]) => ({
-		scenario: scenario as Scenario,
-		totalCases,
-		totalCost: totalCost
-	}));
-
-	return filterInefficientStrategies(totalCasesAndCostsArray);
-};
-
 export const createCasesCompareSeries = (
 	totalCasesAndCosts: Partial<Record<Scenario, ScenarioTotals>>,
 	name:
 		| 'Present (current control strategies)'
 		| 'Long-term (adjusted control strategies)'
 		| 'Long-term (current control strategies)'
-): SeriesLineOptions => ({
+): SeriesColumnOptions => ({
 	name,
-	type: 'line',
-	data: createCasesCompareDataPoints(totalCasesAndCosts).map(({ totalCases, totalCost, scenario }) => ({
-		x: totalCost,
+	type: 'column',
+	data: Object.entries(totalCasesAndCosts).map(([scenario, { totalCases, totalCost }]) => ({
+		name: ScenarioToLabel[scenario as Scenario],
 		y: totalCases,
-		custom: {
-			intervention: ScenarioToLabel[scenario as Scenario]
+		dataLabels: {
+			enabled: true,
+			rotation: -90,
+			inside: true,
+			crop: false,
+			format: `$${convertToLocaleString(totalCost, 0)}`
 		}
-	})),
-	step: 'left'
+	}))
 });
 
-/**
- * The function creates an x-axis break to minimize the empty space between the first and second data points.
- * This is because the first point is always at x=0 (no intervention), and the second point can be far away, leading to a large empty space on the chart.
- */
-export const createBreakToMinimizeEmptySpace = (
-	data1: PointOptionsObject[],
-	data2: PointOptionsObject[]
-): Highcharts.XAxisBreaksOptions[] | undefined => {
-	const getSecondPoint = (data: PointOptionsObject[]): number => (data.length > 1 ? (data[1].x as number) : Infinity);
-
-	const data1Breakpoint = getSecondPoint(data1);
-	const data2Breakpoint = getSecondPoint(data2);
-
-	const breakPoint = Math.min(data1Breakpoint, data2Breakpoint) * 0.9; // set break point at 90%
-	const breakSize = breakPoint * 0.2; // add a 20% buffer to ensure the break is visible
-
-	return breakPoint !== Infinity ? [{ from: 0, to: breakPoint, breakSize }] : undefined;
-};
-
-const resetSeriesPointStates = (seriesList: Highcharts.Series[]) => {
-	seriesList.forEach((s) => s.points.forEach((p) => p.setState('')));
-};
-export const createCompareTooltipHtml = function (this: Highcharts.Point): string {
-	const currentIntervention: string = this.options.custom!.intervention;
-	const tooltipLines: string[] = [`<div class="mb-1"><span class="font-semibold ">${currentIntervention}</span></div>`];
-
-	for (const series of this.series.chart.series) {
-		resetSeriesPointStates([series]);
-
-		const point = series.points.find((p) => p.options.custom!.intervention === currentIntervention);
-		if (!point) continue;
-
-		point.setState('hover');
-		tooltipLines.push(`
-			<div class="flex items-center">
-				<span style="color:${series.color};" class="mr-1">●</span>
-				<span class="text-muted-foreground">${series.name}:</span>
-				<span class="ml-0.5">${convertToLocaleString(point.y as number, 1)} cases • $${convertToLocaleString(point.x, 0)}</span>
-			</div>
-		`);
-	}
-
-	return tooltipLines.join('');
-};
-
-export const getClosestPoint = (cost: number, allSeries: Highcharts.Series[]): Highcharts.Point | null =>
-	allSeries
-		.flatMap((series) => series.data)
-		.reduce<Highcharts.Point | null>((closest, point) => {
-			if (closest === null) return point;
-			return Math.abs((point.x as number) - cost) < Math.abs((closest.x as number) - cost) ? point : closest;
-		}, null);
-
-export const getCasesCompareConfig = ({
-	presentTotals,
-	baselineLongTermTotals,
-	fullLongTermTotals
-}: CompareTotals): Options => {
+export const getCasesCompareConfig = (
+	{ presentTotals, baselineLongTermTotals, fullLongTermTotals }: CompareTotals,
+	scenarios: Scenario[]
+): Options => {
 	const presentSeries = createCasesCompareSeries(presentTotals, 'Present (current control strategies)');
 	const baselineLongTermSeries = createCasesCompareSeries(
 		baselineLongTermTotals,
 		'Long-term (current control strategies)'
 	);
 	const fullLongTermSeries = createCasesCompareSeries(fullLongTermTotals, 'Long-term (adjusted control strategies)');
-	const presentData = presentSeries.data as PointOptionsObject[];
 	const fullLongTermData = fullLongTermSeries.data as PointOptionsObject[];
 
 	return {
 		chart: {
-			type: 'line',
+			type: 'column',
 			height: 450
 		},
 		title: {
 			text: 'Total Clinical Cases and Cost of Strategy'
 		},
-		subtitle: {
-			text: 'Step lines show the most cost-effective intervention at each cost level',
-			style: {
-				color: 'var(--muted-foreground)'
+		xAxis: {
+			type: 'category',
+			categories: scenarios.map((scenario) => ScenarioToLabel[scenario]),
+			crosshair: true,
+			accessibility: {
+				description: 'Intervention types'
 			}
 		},
-		caption: {
-			text: 'Only the most cost-effective interventions are plotted, see Table tab for all options',
+		subtitle: {
+			text: 'The number of cases is shown on the y-axis, and the cost of the strategy is shown in the data labels.',
 			align: 'left',
 			verticalAlign: 'bottom',
 			style: {
 				color: 'var(--muted-foreground)'
 			}
 		},
-		xAxis: {
-			title: { text: 'Total cost ($USD)' },
-			labels: { format: '${value:,.0f}' },
-			min: 0,
-			breaks: createBreakToMinimizeEmptySpace(presentData, fullLongTermData)
-		},
 		yAxis: {
 			title: { text: 'Total cases' },
 			labels: { format: '{value:,.0f}' }
 		},
 		tooltip: {
-			shadow: true,
-			useHTML: true,
-			formatter: createCompareTooltipHtml
+			shared: true,
+			valueDecimals: 1,
+			style: {
+				opacity: 0.8
+			},
+			headerFormat: '<span style="font-size: 10px; font-weight: bold;">Total Cases</span><br/>'
 		},
 		plotOptions: {
-			line: {
-				states: {
-					inactive: {
-						enabled: false
-					}
-				},
-				events: {
-					mouseOut: function () {
-						resetSeriesPointStates(this.chart.series);
-					}
-				}
+			column: {
+				groupPadding: 0.15
 			}
 		},
 		legend: { enabled: true },

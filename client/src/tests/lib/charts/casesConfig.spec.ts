@@ -1,17 +1,7 @@
-import {
-	createBreakToMinimizeEmptySpace,
-	createCasesCompareDataPoints,
-	createCasesCompareSeries,
-	createCompareTooltipHtml,
-	filterInefficientStrategies,
-	getCasesCompareConfig,
-	getCasesConfig,
-	getClosestPoint
-} from '$lib/charts/casesConfig';
+import { createCasesCompareSeries, getCasesCompareConfig, getCasesConfig } from '$lib/charts/casesConfig';
 import * as processCases from '$lib/process-results/processCases';
 import type { CompareTotals } from '$lib/types/compare';
 import type { Scenario } from '$lib/types/userState';
-import type { PointOptionsObject } from 'highcharts';
 import { describe, expect, it } from 'vitest';
 describe('getCasesConfig', () => {
 	const mockCasesAverted: Partial<Record<Scenario, processCases.CasesAverted>> = {
@@ -210,296 +200,58 @@ describe('cases compare config', () => {
 			totalCases: 300
 		}
 	};
+	const scenarios = Object.keys(totals) as Scenario[];
 	const compareTotals: CompareTotals = {
 		presentTotals: totals,
 		baselineLongTermTotals: totals,
 		fullLongTermTotals: totals
 	};
 
-	describe('getClosesPoint', () => {
-		it('getClosestPoint should return null for empty series data', () => {
-			const result = getClosestPoint(1000, [] as any[]);
-			expect(result).toBeNull();
-		});
-
-		it('getClosestPoint should return nearest point across all series', () => {
-			const p1 = { x: 1000, options: { custom: { intervention: 'A' } } };
-			const p2 = { x: 2600, options: { custom: { intervention: 'B' } } };
-			const p3 = { x: 1800, options: { custom: { intervention: 'C' } } };
-
-			const allSeries = [{ data: [p1, p2] }, { data: [p3] }] as any[];
-
-			const result = getClosestPoint(2000, allSeries);
-
-			expect(result).toBe(p3);
-		});
-
-		it('getClosestPoint should keep first encountered point on distance tie', () => {
-			const left = { x: 100, options: { custom: { intervention: 'Left' } } };
-			const right = { x: 300, options: { custom: { intervention: 'Right' } } };
-			const allSeries = [{ data: [left, right] }] as any[];
-
-			const result = getClosestPoint(200, allSeries);
-
-			expect(result).toBe(left);
-		});
-	});
-	describe('filterInefficientStrategies', () => {
-		it('filterInefficientStrategies should sort by cost and keep only strictly improving strategies', () => {
-			const input = [
-				{ scenario: 'irs_only', totalCost: 5000, totalCases: 1000 },
-				{ scenario: 'py_only_only', totalCost: 2000, totalCases: 1200 },
-				{ scenario: 'py_only_with_lsm', totalCost: 3000, totalCases: 1100 },
-				{ scenario: 'irs_only', totalCost: 4000, totalCases: 1150 }
-			] as any[];
-
-			const result = filterInefficientStrategies(input);
-
-			expect(result).toEqual([
-				{ scenario: 'py_only_only', totalCost: 2000, totalCases: 1200 },
-				{ scenario: 'py_only_with_lsm', totalCost: 3000, totalCases: 1100 },
-				{ scenario: 'irs_only', totalCost: 5000, totalCases: 1000 }
-			]);
-		});
-
-		it('filterInefficientStrategies should drop equal-cases higher-cost points', () => {
-			const input = [
-				{ scenario: 'irs_only', totalCost: 1000, totalCases: 1000 },
-				{ scenario: 'py_only_only', totalCost: 2000, totalCases: 1000 }
-			] as any[];
-
-			const result = filterInefficientStrategies(input);
-
-			expect(result).toHaveLength(1);
-			expect(result[0]).toEqual({ scenario: 'irs_only', totalCost: 1000, totalCases: 1000 });
-		});
-	});
-	describe('createCasesCompareDataPoints', () => {
-		it('should return data points filtering out inefficient strategies', () => {
-			const result = createCasesCompareDataPoints(totals);
-
-			expect(result).toEqual([
-				{ scenario: 'py_only_only', totalCases: 500, totalCost: 1000 },
-				{ scenario: 'lsm_only', totalCases: 300, totalCost: 1200 }
-			]);
-		});
-
-		it('should handle empty object', () => {
-			const result = createCasesCompareDataPoints({});
-			expect(result).toEqual([]);
-		});
-	});
-
 	describe('createCasesCompareSeries', () => {
 		it('should create a series with correct name and data points', () => {
 			const series = createCasesCompareSeries(totals, 'Present (current control strategies)');
 
 			expect(series.name).toBe('Present (current control strategies)');
-			expect(series.type).toBe('line');
-			expect(series.step).toBe('left');
+			expect(series.type).toBe('column');
 
-			expect(series.data).toHaveLength(2);
+			expect(series.data).toHaveLength(3);
 			expect(series.data![0]).toEqual({
-				x: 1000,
+				name: 'Pyrethroid ITN (Only)',
 				y: 500,
-				custom: { intervention: 'Pyrethroid ITN (Only)' }
+				dataLabels: expect.objectContaining({
+					format: '$1,000'
+				})
 			});
 			expect(series.data![1]).toEqual({
-				x: 1200,
-				y: 300,
-				custom: { intervention: 'LSM Only' }
+				name: 'IRS Only',
+				y: 600,
+				dataLabels: expect.objectContaining({
+					format: '$1,100'
+				})
 			});
-		});
-	});
-
-	describe('createBreakToMinimizeEmptySpace', () => {
-		it('should return undefined when both datasets have only one point', () => {
-			const data1: PointOptionsObject[] = [{ x: 1000, y: 500 }];
-			const data2: PointOptionsObject[] = [{ x: 2000, y: 600 }];
-
-			const result = createBreakToMinimizeEmptySpace(data1, data2);
-
-			expect(result).toBeUndefined();
-		});
-
-		it('should calculate break point based on the smaller second x value', () => {
-			const data1: PointOptionsObject[] = [
-				{ x: 0, y: 100 },
-				{ x: 5000, y: 200 }
-			];
-			const data2: PointOptionsObject[] = [
-				{ x: 0, y: 150 },
-				{ x: 3000, y: 250 }
-			];
-
-			const result = createBreakToMinimizeEmptySpace(data1, data2);
-
-			expect(result).toHaveLength(1);
-			expect(result![0].from).toBe(0);
-			expect(result![0].to).toBe(3000 * 0.9);
-		});
-
-		it('should set break size to 20% of the break point', () => {
-			const data1: PointOptionsObject[] = [
-				{ x: 0, y: 100 },
-				{ x: 10000, y: 200 }
-			];
-			const data2: PointOptionsObject[] = [
-				{ x: 0, y: 150 },
-				{ x: 5000, y: 250 }
-			];
-
-			const result = createBreakToMinimizeEmptySpace(data1, data2);
-
-			expect(result).toHaveLength(1);
-			expect(result![0].breakSize).toBe(5000 * 0.9 * 0.2);
-		});
-	});
-
-	describe('createCompareTooltipHtml', () => {
-		it('should include data from all series with matching intervention', () => {
-			const mockPoint1 = {
-				setState: vi.fn(),
-				options: { custom: { intervention: 'IRS Only' } },
-				y: 1500,
-				x: 5000
-			};
-			const mockPoint2 = {
-				setState: vi.fn(),
-				options: { custom: { intervention: 'Pyrethroid ITN (Only)' } },
-				y: 2000,
-				x: 3000
-			};
-			const mockPoint3 = {
-				setState: vi.fn(),
-				options: { custom: { intervention: 'IRS Only' } },
-				y: 1800,
-				x: 6000
-			};
-
-			const mockSeries1 = {
-				name: 'Present',
-				color: '#ff0000',
-				points: [mockPoint1, mockPoint2]
-			};
-			const mockSeries2 = {
-				name: 'Long term',
-				color: '#00ff00',
-				points: [mockPoint3]
-			};
-
-			const mockThis = {
-				options: {
-					custom: { intervention: 'IRS Only' }
-				},
-				series: {
-					chart: {
-						series: [mockSeries1, mockSeries2]
-					}
-				}
-			} as any;
-
-			const result = createCompareTooltipHtml.call(mockThis);
-
-			expect(result).toContain('<div class="mb-1"><span class="font-semibold ">IRS Only</span></div>');
-			expect(result).toContain('Present');
-			expect(result).toContain('Long term');
-			expect(result).toContain('1,500.0 cases');
-			expect(result).toContain('$5,000');
-			expect(result).toContain('1,800.0 cases');
-			expect(result).toContain('$6,000');
-			expect(result).not.toContain('2,000.0 cases');
-		});
-
-		it('should set hover state on matching points', () => {
-			const mockPoint1 = {
-				setState: vi.fn(),
-				options: { custom: { intervention: 'IRS Only' } },
-				y: 1500,
-				x: 5000
-			};
-			const mockPoint2 = {
-				setState: vi.fn(),
-				options: { custom: { intervention: 'IRS Only' } },
-				y: 1800,
-				x: 6000
-			};
-
-			const mockSeries1 = {
-				name: 'Present',
-				color: '#ff0000',
-				points: [mockPoint1]
-			};
-			const mockSeries2 = {
-				name: 'Long term',
-				color: '#00ff00',
-				points: [mockPoint2]
-			};
-
-			const mockThis = {
-				options: {
-					custom: { intervention: 'IRS Only' }
-				},
-				series: {
-					chart: {
-						series: [mockSeries1, mockSeries2]
-					}
-				}
-			} as any;
-
-			createCompareTooltipHtml.call(mockThis);
-
-			expect(mockPoint1.setState).toHaveBeenCalledWith('');
-			expect(mockPoint1.setState).toHaveBeenCalledWith('hover');
-			expect(mockPoint2.setState).toHaveBeenCalledWith('');
-			expect(mockPoint2.setState).toHaveBeenCalledWith('hover');
-		});
-
-		it('should format large numbers with locale string', () => {
-			const mockPoint = {
-				setState: vi.fn(),
-				options: { custom: { intervention: 'IRS Only' } },
-				y: 1234567.89,
-				x: 9876543.21
-			};
-
-			const mockSeries = {
-				name: 'Present',
-				color: '#ff0000',
-				points: [mockPoint]
-			};
-
-			const mockThis = {
-				options: {
-					custom: { intervention: 'IRS Only' }
-				},
-				series: {
-					chart: {
-						series: [mockSeries]
-					}
-				}
-			} as any;
-
-			const result = createCompareTooltipHtml.call(mockThis);
-
-			expect(result).toContain('1,234,567.9 cases');
-			expect(result).toContain('$9,876,543');
+			expect(series.data![2]).toEqual({
+				name: 'LSM Only',
+				y: 300,
+				dataLabels: expect.objectContaining({
+					format: '$1,200'
+				})
+			});
 		});
 	});
 
 	describe('getCasesCompareConfig integration', () => {
 		it('should return a valid Highcharts Options object', () => {
-			const config = getCasesCompareConfig(compareTotals);
+			const config = getCasesCompareConfig(compareTotals, scenarios);
 
 			expect(config).toBeDefined();
-			expect(config.chart?.type).toBe('line');
+			expect(config.chart?.type).toBe('column');
 			expect(config.chart?.height).toBe(450);
 			expect(config.title?.text).toBe('Total Clinical Cases and Cost of Strategy');
-			expect(config.subtitle?.text).toBe('Step lines show the most cost-effective intervention at each cost level');
+			expect((config.xAxis as any).type).toBe('category');
 		});
 
 		it('should include both Present and Long term series when newCases has data', () => {
-			const config = getCasesCompareConfig(compareTotals);
+			const config = getCasesCompareConfig(compareTotals, scenarios);
 
 			expect(config.series).toHaveLength(3);
 			expect((config.series as any)[0].name).toBe('Present (current control strategies)');
@@ -510,26 +262,17 @@ describe('cases compare config', () => {
 		it('should include only Present series when newCases is empty', () => {
 			vi.spyOn(processCases, 'collectPostInterventionCases').mockReturnValue({} as any);
 
-			const config = getCasesCompareConfig({
-				presentTotals: totals,
-				baselineLongTermTotals: {},
-				fullLongTermTotals: {}
-			});
+			const config = getCasesCompareConfig(
+				{
+					presentTotals: totals,
+					baselineLongTermTotals: {},
+					fullLongTermTotals: {}
+				},
+				scenarios
+			);
 
 			expect(config.series).toHaveLength(1);
 			expect((config.series as any)[0].name).toBe('Present (current control strategies)');
-		});
-
-		it('should apply breaks to xAxis when data points exist', () => {
-			const config = getCasesCompareConfig(compareTotals);
-
-			expect((config.xAxis as any).breaks).toBeDefined();
-		});
-
-		it('should set tooltip formatter to createCompareTooltipHtml', () => {
-			const config = getCasesCompareConfig(compareTotals);
-
-			expect(config.tooltip?.formatter).toBe(createCompareTooltipHtml);
 		});
 	});
 });
