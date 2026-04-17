@@ -1,4 +1,11 @@
-import { convertToLocaleString, createLinearSpace, ROUNDING_METHODS, roundNumber, sumByKey } from '$lib/number';
+import {
+	calculateRangePercent,
+	convertToLocaleString,
+	createLinearSpace,
+	ROUNDING_METHODS,
+	roundNumber,
+	sumByKey
+} from '$lib/number';
 
 describe('roundNumber', () => {
 	it('should round number with default 2 decimal places', () => {
@@ -134,6 +141,19 @@ describe('ROUNDING_METHODS', () => {
 		expect(ROUNDING_METHODS.ceil).toBe(Math.ceil);
 		expect(ROUNDING_METHODS.floor).toBe(Math.floor);
 		expect(ROUNDING_METHODS.round).toBe(Math.round);
+	});
+});
+
+describe('calculateRangePercent', () => {
+	it('should calculate percentage correctly', () => {
+		expect(calculateRangePercent(50, 200)).toBe(25);
+		expect(calculateRangePercent(0, 100)).toBe(0);
+		expect(calculateRangePercent(100, 100)).toBe(100);
+	});
+
+	it('should handle division by zero', () => {
+		expect(calculateRangePercent(50, 0)).toBe(0);
+		expect(calculateRangePercent(0, 0)).toBe(0);
 	});
 });
 

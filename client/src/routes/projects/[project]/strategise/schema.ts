@@ -66,3 +66,14 @@ export interface CompareStrategiseRegions {
 export type StrategiseResultIntervention<K extends MetricKey> = StrategiseIntervention<K> & {
 	region: string;
 };
+
+export interface Block {
+	intervention: Scenario;
+	startCost: number;
+	endCost: number;
+}
+
+export interface RegionRow {
+	region: string;
+	blocks: Block[];
+}

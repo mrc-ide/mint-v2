@@ -48,8 +48,26 @@ test.describe('Strategise page', () => {
 		).toBeVisible();
 
 		// individual region cards
-		await expect(page.getByText('Pop: 20,000 nz LSM Only Cost')).toBeVisible();
-		await expect(page.getByText('Pop: 20,000 australia LSM Only Cost')).toBeVisible();
+		await expect(page.getByLabel('Cases Averted Chart').getByText('Pop: 20,000 nz LSM Only Cost')).toBeVisible();
+		await expect(page.getByLabel('Cases Averted Chart').getByText('Pop: 20,000 australia LSM Only Cost')).toBeVisible();
+	});
+
+	test('should be able to see strategise grid allocation view', async ({ page }) => {
+		await goto(page, `/projects/${projectName}/regions/nz`);
+		await runRegionWithLSM(page);
+
+		await goto(page, `/projects/${projectName}/regions/australia`);
+		await runRegionWithLSM(page);
+
+		await page.getByRole('link', { name: 'Sub-national tailoring' }).click();
+
+		await page.getByRole('button', { name: 'Explore defined budget range' }).click();
+
+		await page.getByRole('tab', { name: 'Allocation Grid' }).click();
+		await expect(page.getByRole('heading', { name: 'Intervention Allocation by' })).toBeVisible();
+		// individual region cards
+		await expect(page.getByLabel('Allocation Grid').getByText('Pop: 20,000 nz LSM Only Cost')).toBeVisible();
+		await expect(page.getByLabel('Allocation Grid').getByText('Pop: 20,000 australia LSM Only Cost')).toBeVisible();
 	});
 
 	test("should wipe strategise data when a region's interventions are re-run", async ({ page }) => {

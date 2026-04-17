@@ -7,8 +7,11 @@ import type { StrategiseRegionByMetric } from '$routes/projects/[project]/strate
 import {
 	buildInterventions,
 	constructRegionalMetrics,
+	createGridRows,
 	getCasesAndCostsForCompareStrategise,
 	getCasesAvertedAndCostsForStrategise,
+	getGridLegendItems,
+	getGridTicks,
 	getMaximumCostForStrategise,
 	getMinimumCostForStrategise,
 	optimiseForMinCases,
@@ -618,5 +621,198 @@ describe('parseOptimisationResult', () => {
 			cost: 250,
 			cases: 120
 		});
+	});
+});
+describe('createGridRows', () => {
+	it('should return an empty array when strategise results are empty', async () => {
+		const { createGridRows } = await import('$routes/projects/[project]/strategise/utils');
+
+		expect(createGridRows([], 100)).toEqual([]);
+	});
+
+	it('should create merged blocks across thresholds and close final block at maxCost', async () => {
+		const { createGridRows } = await import('$routes/projects/[project]/strategise/utils');
+
+		const strategiseResults = [
+			{
+				costThreshold: 0,
+				interventions: [{ region: 'Region A', intervention: 'no_intervention', cost: 0, casesAverted: 0 }]
+			},
+			{
+				costThreshold: 100,
+				interventions: [{ region: 'Region A', intervention: 'irs_only', cost: 100, casesAverted: 10 }]
+			},
+			{
+				costThreshold: 200,
+				interventions: [{ region: 'Region A', intervention: 'irs_only', cost: 100, casesAverted: 10 }]
+			},
+			{
+				costThreshold: 300,
+				interventions: [{ region: 'Region A', intervention: 'lsm_only', cost: 200, casesAverted: 20 }]
+			}
+		] as any;
+
+		const result = createGridRows(strategiseResults, 400);
+
+		expect(result).toEqual([
+			{
+				region: 'Region A',
+				blocks: [
+					{ intervention: 'no_intervention', startCost: 0, endCost: 100 },
+					{ intervention: 'irs_only', startCost: 100, endCost: 300 },
+					{ intervention: 'lsm_only', startCost: 300, endCost: 400 }
+				]
+			}
+		]);
+	});
+
+	it('should create blocks per region independently and preserve region order from first threshold', async () => {
+		const strategiseResults = [
+			{
+				costThreshold: 10,
+				interventions: [
+					{ region: 'Region A', intervention: 'no_intervention', cost: 0, casesAverted: 0 },
+					{ region: 'Region B', intervention: 'irs_only', cost: 50, casesAverted: 5 }
+				]
+			},
+			{
+				costThreshold: 20,
+				interventions: [
+					{ region: 'Region A', intervention: 'irs_only', cost: 50, casesAverted: 5 },
+					{ region: 'Region B', intervention: 'irs_only', cost: 50, casesAverted: 5 }
+				]
+			},
+			{
+				costThreshold: 30,
+				interventions: [
+					{ region: 'Region A', intervention: 'irs_only', cost: 50, casesAverted: 5 },
+					{ region: 'Region B', intervention: 'lsm_only', cost: 100, casesAverted: 10 }
+				]
+			}
+		] as any;
+
+		const result = createGridRows(strategiseResults, 40);
+
+		expect(result).toEqual([
+			{
+				region: 'Region A',
+				blocks: [
+					{ intervention: 'no_intervention', startCost: 10, endCost: 20 },
+					{ intervention: 'irs_only', startCost: 20, endCost: 40 }
+				]
+			},
+			{
+				region: 'Region B',
+				blocks: [
+					{ intervention: 'irs_only', startCost: 10, endCost: 30 },
+					{ intervention: 'lsm_only', startCost: 30, endCost: 40 }
+				]
+			}
+		]);
+	});
+
+	it('should ignore regions not present in the first strategise result', async () => {
+		const { createGridRows } = await import('$routes/projects/[project]/strategise/utils');
+
+		const strategiseResults = [
+			{
+				costThreshold: 0,
+				interventions: [{ region: 'Region A', intervention: 'no_intervention', cost: 0, casesAverted: 0 }]
+			},
+			{
+				costThreshold: 50,
+				interventions: [
+					{ region: 'Region A', intervention: 'irs_only', cost: 50, casesAverted: 5 },
+					{ region: 'Region C', intervention: 'lsm_only', cost: 100, casesAverted: 10 }
+				]
+			}
+		] as any;
+
+		const result = createGridRows(strategiseResults, 100);
+
+		expect(result).toEqual([
+			{
+				region: 'Region A',
+				blocks: [
+					{ intervention: 'no_intervention', startCost: 0, endCost: 50 },
+					{ intervention: 'irs_only', startCost: 50, endCost: 100 }
+				]
+			}
+		]);
+	});
+});
+
+describe('getGridTicks', () => {
+	it('should return 9 evenly spaced ticks from minCost to minCost + costRange', () => {
+		const ticks = getGridTicks(0, 800);
+
+		expect(ticks).toHaveLength(9);
+		expect(ticks[0]).toBe(0);
+		expect(ticks[8]).toBe(800);
+		expect(ticks[4]).toBe(400);
+	});
+
+	it('should offset all ticks by minCost', () => {
+		const ticks = getGridTicks(100, 400);
+
+		expect(ticks[0]).toBe(100);
+		expect(ticks[8]).toBe(500);
+	});
+
+	it('should return 9 identical values when costRange is 0', () => {
+		const ticks = getGridTicks(50, 0);
+
+		expect(ticks).toHaveLength(9);
+		expect(ticks.every((t) => t === 50)).toBe(true);
+	});
+});
+
+describe('getGridLegendItems', () => {
+	it('should return unique scenarios across all rows and blocks', () => {
+		const rows = [
+			{
+				region: 'Region A',
+				blocks: [
+					{ intervention: 'no_intervention' as const, startCost: 0, endCost: 100 },
+					{ intervention: 'irs_only' as const, startCost: 100, endCost: 200 }
+				]
+			},
+			{
+				region: 'Region B',
+				blocks: [
+					{ intervention: 'irs_only' as const, startCost: 0, endCost: 150 },
+					{ intervention: 'lsm_only' as const, startCost: 150, endCost: 200 }
+				]
+			}
+		];
+
+		const result = getGridLegendItems(rows);
+
+		expect([...result]).toEqual(['no_intervention', 'irs_only', 'lsm_only']);
+	});
+
+	it('should deduplicate scenarios appearing in multiple regions', () => {
+		const rows = [
+			{
+				region: 'Region A',
+				blocks: [{ intervention: 'irs_only' as const, startCost: 0, endCost: 100 }]
+			},
+			{
+				region: 'Region B',
+				blocks: [{ intervention: 'irs_only' as const, startCost: 0, endCost: 100 }]
+			}
+		];
+
+		const result = getGridLegendItems(rows);
+
+		expect([...result]).toEqual(['irs_only']);
+	});
+
+	it('should return an empty set for rows with no blocks', () => {
+		const rows = [{ region: 'Region A', blocks: [] }];
+
+		const result = getGridLegendItems(rows);
+
+		expect([...result]).toEqual([]);
 	});
 });

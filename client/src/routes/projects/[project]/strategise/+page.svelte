@@ -84,7 +84,12 @@
 						</Tabs.List>
 					</div>
 					<Tabs.Content value="present">
-						<StrategiseResults strategiseResults={data.project.strategy.results} populations={populationsOfRegion} />
+						<StrategiseResults
+							strategiseResults={data.project.strategy.results}
+							populations={populationsOfRegion}
+							minCost={$formData.minCost}
+							budget={$formData.budget}
+						/>
 					</Tabs.Content>
 					<Tabs.Content value="longTerm">
 						<div class="flex items-center justify-center">
@@ -99,7 +104,12 @@
 					</Tabs.Content>
 				</Tabs.Root>
 			{:else}
-				<StrategiseResults strategiseResults={data.project.strategy.results} populations={populationsOfRegion} />
+				<StrategiseResults
+					strategiseResults={data.project.strategy.results}
+					populations={populationsOfRegion}
+					minCost={$formData.minCost}
+					budget={$formData.budget}
+				/>
 			{/if}
 		{/if}
 	{:else}
