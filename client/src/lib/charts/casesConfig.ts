@@ -98,13 +98,16 @@ export const createCasesCompareSeries = (
 	data: Object.entries(totalCasesAndCosts).map(([scenario, { totalCases, totalCost }]) => ({
 		name: ScenarioToLabel[scenario as Scenario],
 		y: totalCases,
-		dataLabels: {
-			enabled: true,
-			rotation: -90,
-			inside: true,
-			crop: false,
-			format: `$${convertToLocaleString(totalCost, 0)}`
-		}
+		...(name !== 'Long-term (current control strategies)' && {
+			dataLabels: {
+				enabled: true,
+				rotation: -90,
+				inside: true,
+				allowOverlap: true,
+				crop: false,
+				format: `$${convertToLocaleString(totalCost, 0)}`
+			}
+		})
 	}))
 });
 

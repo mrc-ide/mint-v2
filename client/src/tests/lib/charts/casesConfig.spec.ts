@@ -237,6 +237,13 @@ describe('cases compare config', () => {
 				})
 			});
 		});
+		it('should not include data labels for Long-term (current control strategies)', () => {
+			const series = createCasesCompareSeries(totals, 'Long-term (current control strategies)');
+
+			series.data!.forEach((point) => {
+				expect((point as any).dataLabels).toBeUndefined();
+			});
+		});
 	});
 
 	describe('getCasesCompareConfig integration', () => {
