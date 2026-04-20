@@ -150,7 +150,7 @@ export const getCasesCompareConfig = (
 		},
 		tooltip: {
 			shared: true,
-			valueDecimals: 1,
+			valueDecimals: 0,
 			style: {
 				opacity: 0.8
 			},
