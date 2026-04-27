@@ -281,5 +281,35 @@ describe('cases compare config', () => {
 			expect(config.series).toHaveLength(1);
 			expect((config.series as any)[0].name).toBe('Present (current control strategies)');
 		});
+
+		it('should add plot line on column click', () => {
+			const mockSeries = {
+				chart: {
+					yAxis: [
+						{
+							removePlotLine: vi.fn(),
+							addPlotLine: vi.fn()
+						}
+					]
+				}
+			} as unknown as Highcharts.Series;
+			const mockEvent = {
+				point: {
+					y: 500
+				}
+			} as unknown as Highcharts.SeriesClickEventObject;
+
+			const config = getCasesCompareConfig(compareTotals, scenarios);
+
+			config.plotOptions!.column!.events!.click!.call(mockSeries, mockEvent);
+
+			expect(mockSeries.chart.yAxis[0].removePlotLine).toHaveBeenCalledWith('cases-compare-plotline');
+			expect(mockSeries.chart.yAxis[0].addPlotLine).toHaveBeenCalledWith(
+				expect.objectContaining({
+					id: 'cases-compare-plotline',
+					value: 500
+				})
+			);
+		});
 	});
 });

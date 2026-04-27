@@ -111,6 +111,23 @@ export const createCasesCompareSeries = (
 	}))
 });
 
+const CASES_COMPARE_PLOTLINE_ID = 'cases-compare-plotline';
+const addCasesComparePlotLine = (chart: Highcharts.Chart, value: number) => {
+	chart.yAxis[0].removePlotLine(CASES_COMPARE_PLOTLINE_ID);
+	chart.yAxis[0].addPlotLine({
+		id: CASES_COMPARE_PLOTLINE_ID,
+		value,
+		color: 'var(--foreground)',
+		dashStyle: 'ShortDot',
+		width: 2,
+		zIndex: 5,
+		label: {
+			text: `Selected scenario`,
+			style: { color: 'var(--foreground)', fontWeight: '550' }
+		}
+	});
+};
+
 export const getCasesCompareConfig = (
 	{ presentTotals, baselineLongTermTotals, fullLongTermTotals }: CompareTotals,
 	scenarios: Scenario[]
@@ -140,7 +157,7 @@ export const getCasesCompareConfig = (
 			}
 		},
 		subtitle: {
-			text: 'The number of cases is shown on the y-axis, and the cost of the strategy is shown in the data labels.',
+			text: 'The number of cases is shown on the y-axis, and the cost of the strategy is shown in the data labels.<br/>Click on a column to compare the number of cases with the other strategies.',
 			align: 'left',
 			verticalAlign: 'bottom',
 			style: {
@@ -161,7 +178,12 @@ export const getCasesCompareConfig = (
 		},
 		plotOptions: {
 			column: {
-				groupPadding: 0.15
+				groupPadding: 0.15,
+				events: {
+					click: function (event) {
+						addCasesComparePlotLine(this.chart, event.point.y!);
+					}
+				}
 			}
 		},
 		legend: { enabled: true },
