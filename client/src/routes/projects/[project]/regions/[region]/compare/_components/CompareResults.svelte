@@ -34,11 +34,11 @@
 	});
 
 	let selectedIntervention = $state<ScenarioLabel>('No Intervention');
-	let casesConfig = $derived(getCasesCompareConfig(totals));
 
 	let scenarios = $derived(
 		getScenariosFromTotals(totals.presentTotals, totals.baselineLongTermTotals, totals.fullLongTermTotals)
 	);
+	let casesConfig = $derived(getCasesCompareConfig(totals, scenarios));
 	let selectedTab = $state<'graph' | 'table'>('graph');
 	let tableData = $derived(buildCompareCasesTableData(totals, scenarios));
 	let prevalenceConfig = $derived(getPrevalenceConfigCompare(results, selectedIntervention));
