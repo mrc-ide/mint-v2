@@ -24,9 +24,9 @@ class TestScenariosToDict:
     def test_with_scenarios(self, emulator_request: EmulatorRequest):
         request_dict = emulator_request.model_dump(exclude={"net_type_future"})
         scenarios = [
-            EmulatorScenario(**request_dict, scenario_tag="test1"),
-            EmulatorScenario(**request_dict, scenario_tag="test2", net_type_future="py_only"),
-            EmulatorScenario(**request_dict, scenario_tag="test3", net_type_future="py_pbo"),
+            EmulatorScenario(**request_dict, name="test1"),
+            EmulatorScenario(**request_dict, name="test2", net_type_future="py_only"),
+            EmulatorScenario(**request_dict, name="test3", net_type_future="py_pbo"),
         ]
 
         result = scenarios_to_dict(scenarios)
@@ -72,7 +72,7 @@ class TestBuildBaseScenario:
             irs=0.1,
             mosquito_delta=0.5,
             # Default values
-            scenario_tag="no_intervention",
+            name="no_intervention",
             irs_future=0,
             itn_future=0,
             routine=0,
@@ -90,13 +90,13 @@ class TestBuildNetScenarios:
 
         scenarios = build_net_scenarios(emulator_request, base_scenario)
 
-        tags = {scenario.scenario_tag for scenario in scenarios}
+        tags = {scenario.name for scenario in scenarios}
         assert tags == {"py_only_only", "py_only_with_lsm", "py_pbo_only", "py_pbo_with_lsm"}
         for scenario in scenarios:
             assert scenario.itn_future == emulator_request.itn_future
             assert scenario.routine == emulator_request.routine
             assert ItnFutureType[str(scenario.net_type_future)] in emulator_request.net_type_future
-            if "with_lsm" in scenario.scenario_tag:
+            if "with_lsm" in scenario.name:
                 assert scenario.lsm == emulator_request.lsm
             else:
                 assert scenario.lsm == base_scenario.lsm
@@ -107,7 +107,7 @@ class TestBuildNetScenarios:
 
         scenarios = build_net_scenarios(emulator_request, base_scenario)
 
-        tags = {scenario.scenario_tag for scenario in scenarios}
+        tags = {scenario.name for scenario in scenarios}
         assert tags == {"py_only_only", "py_pbo_only"}
 
 

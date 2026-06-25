@@ -65,7 +65,7 @@ class TestEmulatorRequest:
             "lsm": 5,
         }
         request = EmulatorRequest(**data)
-        assert request.season == 1.0
+        assert request.seasonal == 1.0
         assert request.prev == 0.5
         assert request.phi == 0.75
         assert request.Q0 == 0.8
@@ -156,7 +156,7 @@ class TestEmulatorScenario:
             season=1.0,
             irs=0.3,
         )
-        assert scenario.scenario_tag == "no_intervention"
+        assert scenario.name == "no_intervention"
         assert scenario.itn_future == 0.0
         assert scenario.net_type_future is None
         assert scenario.irs_future == 0.0
@@ -166,7 +166,7 @@ class TestEmulatorScenario:
 
     def test_scenario_creation_with_all_fields(self):
         scenario = EmulatorScenario(
-            scenario_tag="intervention",
+            name="intervention",
             res_use=0.5,
             py_only=0.2,
             py_pbo=0.3,
@@ -183,7 +183,7 @@ class TestEmulatorScenario:
             routine=1.0,
             lsm=0.2,
         )
-        assert scenario.scenario_tag == "intervention"
+        assert scenario.name == "intervention"
         assert scenario.itn_future == 0.5
         assert scenario.net_type_future == "py_only"
 

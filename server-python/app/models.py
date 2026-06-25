@@ -24,7 +24,7 @@ class ItnFutureType(Enum):
 
 
 class EmulatorRequest(BaseModel):
-    season: float = Field(alias="is_seasonal")
+    seasonal: float = Field(alias="is_seasonal")
     prev: float = Field(ge=0, le=100, alias="current_malaria_prevalence")
     phi: float = Field(ge=0, le=100, alias="preference_for_biting_in_bed")
     Q0: float = Field(ge=0, le=100, alias="preference_for_biting")
@@ -61,14 +61,14 @@ class EmulatorRequest(BaseModel):
     def percentage_to_fraction(cls, value: int) -> float:
         return value / 100.0
 
-    @field_validator("season", "routine", mode="after")
+    @field_validator("seasonal", "routine", mode="after")
     @classmethod
     def convert_bool_to_float(cls, value: bool) -> float:
         return float(value)
 
 
 class EmulatorScenario(BaseModel):
-    scenario_tag: str = "no_intervention"
+    name: str = "no_intervention"
     res_use: float
     py_only: float
     py_pbo: float
@@ -76,15 +76,17 @@ class EmulatorScenario(BaseModel):
     py_ppf: float
     prev: float
     Q0: float
-    phi: float
-    season: float
+    phi: float  # TODO change back to phi after estimint is updated
+    seasonal: float
     irs: float
+    value: float  # TODO needs to be baked into estimint
     itn_future: float = 0.0
     net_type_future: str | None = None
     irs_future: float = 0.0
     routine: float = 0.0
     lsm: float = 0.0
     mosquito_delta: float = 0.0
+    input: str = "prevalence"  # TODO: remove after baked into estimint
 
 
 class Prevalence(BaseModel):

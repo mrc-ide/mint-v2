@@ -1,11 +1,9 @@
 import logging
 import time
 
-from estimint import __version__ as estimint_version
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from minte import __version__ as minte_version
 from prometheus_client import Counter, Gauge, Histogram, make_asgi_app
 
 from app import __version__
@@ -62,9 +60,10 @@ async def internal_server_error_handler(_req, exc):
     return JSONResponse(status_code=500, content={"detail": "Internal server error"})
 
 
+# TODO: update versions after this
 @app.get("/version")
 async def get_version() -> Response[Version]:
-    return Response(data=Version(server=__version__, minte=minte_version, estimint=estimint_version))
+    return Response(data=Version(server=__version__, minte="depricated", estimint="1.4.2"))
 
 
 @app.get("/healthz")
