@@ -4,7 +4,7 @@ import pandas as pd
 import pytest
 from fastapi import HTTPException
 from minte import MintwebResults
-
+from estimint import run_scenarios
 from app.models import Cases, EmulatorRequest, EmulatorResponse, EmulatorScenario, ItnFutureType, Prevalence
 from app.services.emulator import (
     build_base_scenario,
@@ -235,3 +235,53 @@ class TestPostProcessResults:
 
         with pytest.raises(KeyError):
             post_process_results(MintwebResults(prevalence=prevalence_df, cases=cases_df, eir_valid=True))
+
+
+def test_full_process():
+    scenarios = [
+        {
+            "name": "no_intervention",
+            "res_use": 0.5,
+            "py_only": 0.0,
+            "py_pbo": 0.0,
+            "py_pyrrole": 0.0,
+            "py_ppf": 0.0,
+            "prev": 0.5,
+            "Q0": 0.87,
+            "phi": 0.82,
+            "seasonal": 0.0,
+            "irs": 0.0,
+            "value": 0.5,
+            "itn_future": 0.0,
+            "net_type_future": None,
+            "irs_future": 0.0,
+            "routine": 0.0,
+            "lsm": 0.0,
+            "mosquito_delta": 0.0,
+            "input": "prevalence",
+        },
+        {
+            "name": "py_only_only",
+            "res_use": 0.5,
+            "py_only": 0.0,
+            "py_pbo": 0.0,
+            "py_pyrrole": 0.0,
+            "py_ppf": 0.0,
+            "prev": 0.5,
+            "Q0": 0.87,
+            "phi": 0.82,
+            "seasonal": 0.0,
+            "irs": 0.0,
+            "value": 0.5,
+            "itn_future": 0.7,
+            "net_type_future": "py_only",
+            "irs_future": 0.0,
+            "routine": 1.0,
+            "lsm": 0.0,
+            "mosquito_delta": 0.0,
+            "input": "prevalence",
+        },
+    ]
+    results = run_scenarios(scenarios)
+
+    print(results.head())

@@ -109,6 +109,18 @@ def build_base_scenario(emulator_request: EmulatorRequest) -> EmulatorScenario:
     )
 
 
+# Model output is aggregated by 14 days, giving ~26 time points per year.
+TIME_POINT_INTERVAL_DAYS = 14
+TIME_POINTS_PER_YEAR = 365 // TIME_POINT_INTERVAL_DAYS
+
+# We only want the last 4 of the 6 years the emulator returns.
+YEARS_TO_EXTRACT = 4
+TIME_POINTS_TO_EXTRACT = TIME_POINTS_PER_YEAR * YEARS_TO_EXTRACT
+
+MIN_VALID_EIR = 0.68
+MAX_VALID_EIR = 350.0
+
+
 def post_process_results(results: pd.DataFrame) -> EmulatorResponse:
     """Process emulator results into response format."""
     if not {"prev_series", "cases_series"}.issubset(results.columns):
@@ -118,37 +130,44 @@ def post_process_results(results: pd.DataFrame) -> EmulatorResponse:
     cases_records = []
 
     for _, row in results.iterrows():
-        # can we do something where we dont hardcode?
-        # we get back 6 years aggregated by 14 days (157 time points), but we only need last 4 years
-        years_to_extract = 4
-        year_time_points = 365 // 14
-        four_years_time_points = year_time_points * years_to_extract
-        prevalence_series = row["prev_series"][-four_years_time_points:]
-        cases_series = row["cases_series"][-four_years_time_points:]
+        prevalence_records.extend(build_prevalence_records(row))
+        cases_records.extend(build_cases_records(row))
 
-        for time_index, prevalence in enumerate(prevalence_series):
-            prevalence_records.append(
-                {
-                    "scenario": row["name"],
-                    "days": time_index * 14,
-                    "prevalence": prevalence,
-                }
-            )
-        for year_index in range(years_to_extract):
-            year_cases = cases_series[year_index * year_time_points : (year_index + 1) * year_time_points].sum()
-            cases_records.append(
-                {
-                    "scenario": row["name"],
-                    "year": year_index + 1,
-                    "casesPer1000": year_cases,
-                }
-            )
     eir_value = results.iloc[0]["eir_final"]
-    min_eir, max_eir = 0.68, 350.0
-    eir_valid = bool((eir_value >= min_eir) & (eir_value <= max_eir))
+    eir_valid = bool(MIN_VALID_EIR <= eir_value <= MAX_VALID_EIR)
 
     return EmulatorResponse(
         prevalence=prevalence_adapter.validate_python(prevalence_records),
         cases=cases_adapter.validate_python(cases_records),
         eirValid=eir_valid,
     )
+
+
+def build_prevalence_records(row: pd.Series) -> list[dict]:
+    """Build per-time-point prevalence records for a single scenario."""
+    prevalence_data = row["prev_series"][-TIME_POINTS_TO_EXTRACT:]
+    return [
+        {
+            "scenario": row["name"],
+            "days": time_index * TIME_POINT_INTERVAL_DAYS,
+            "prevalence": prevalence,
+        }
+        for time_index, prevalence in enumerate(prevalence_data)
+    ]
+
+
+def build_cases_records(row: pd.Series) -> list[dict]:
+    """Build per-year cases records for a single scenario."""
+    cases_data = row["cases_series"][-TIME_POINTS_TO_EXTRACT:]
+    records = []
+    for year_index in range(YEARS_TO_EXTRACT):
+        year_start = year_index * TIME_POINTS_PER_YEAR
+        year_end = year_start + TIME_POINTS_PER_YEAR
+        records.append(
+            {
+                "scenario": row["name"],
+                "year": year_index + 1,
+                "casesPer1000": cases_data[year_start:year_end].sum(),
+            }
+        )
+    return records
