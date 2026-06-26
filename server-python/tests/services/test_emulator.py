@@ -195,23 +195,31 @@ class TestBuildCasesRecords:
 
 
 class TestPostProcessResults:
-    def test_no_results(self):
-        with pytest.raises(HTTPException) as exc_info:
-            post_process_results(pd.DataFrame())
-
-        assert exc_info.value.status_code == 500
-        assert exc_info.value.detail == "Emulator model did not return prevalence or cases results"
-
-    def test_missing_name_column(self):
+    @pytest.mark.parametrize(
+        "missing_column",
+        [
+            "prevalence",
+            "cases",
+            "eir_final",
+            "name",
+        ],
+    )
+    def test_missing_columns(self, missing_column):
         results = pd.DataFrame(
             {
-                "prevalence": [np.array([0.1, 0.2])],
-                "cases": [np.array([10.0, 20.0])],
+                "name": ["scenario1"],
+                "eir_final": [100.0],
+                "prevalence": [np.zeros(TIME_POINTS_TO_EXTRACT)],
+                "cases": [np.zeros(TIME_POINTS_TO_EXTRACT)],
             }
         )
+        results.drop(columns=[missing_column], inplace=True)
 
-        with pytest.raises(KeyError):
+        with pytest.raises(HTTPException) as exc_info:
             post_process_results(results)
+
+        assert exc_info.value.status_code == 500
+        assert exc_info.value.detail == "Emulator results missing required columns."
 
     def test_with_results(self):
         prevalence_values = np.linspace(0.1, 0.5, TIME_POINTS_TO_EXTRACT)

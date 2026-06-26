@@ -110,8 +110,8 @@ MAX_VALID_EIR = 350.0
 
 def post_process_results(results: pd.DataFrame) -> EmulatorResponse:
     """Process emulator results into response format."""
-    if not {"prevalence", "cases"}.issubset(results.columns):
-        raise HTTPException(status_code=500, detail="Emulator model did not return prevalence or cases results")
+    if not {"prevalence", "cases", "eir_final", "name"}.issubset(results.columns):
+        raise HTTPException(status_code=500, detail="Emulator results missing required columns.")
 
     prevalence_records = []
     cases_records = []

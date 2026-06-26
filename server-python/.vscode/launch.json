@@ -10,7 +10,11 @@
       "request": "launch",
       "python": "${workspaceFolder}/.venv/bin/python",
       "module": "pytest",
-      "args": ["tests/services/test_emulator.py", "-k", "test_full_process"],
+      "args": [
+        "tests/services/test_emulator.py",
+        "-k",
+        "test_run_emulator_model_shapes"
+      ],
       "env": {
         // "JAX_DISABLE_JIT": "true",
         // "UV_MANAGED_PYTHON": "true"
