@@ -1,5 +1,6 @@
 import logging
 import time
+from importlib.metadata import version
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
@@ -60,10 +61,9 @@ async def internal_server_error_handler(_req, exc):
     return JSONResponse(status_code=500, content={"detail": "Internal server error"})
 
 
-# TODO: update versions after this
 @app.get("/version")
 async def get_version() -> Response[Version]:
-    return Response(data=Version(server=__version__, minte="depricated", estimint="1.4.2"))
+    return Response(data=Version(server=__version__, statemint=version("mintstate"), estimint=version("estimint")))
 
 
 @app.get("/healthz")

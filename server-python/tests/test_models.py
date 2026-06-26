@@ -7,7 +7,6 @@ from app.models import (
     CompareParametersResponse,
     EmulatorRequest,
     EmulatorResponse,
-    EmulatorScenario,
     InterventionCompareCost,
     InterventionCompareParameter,
     ItnFutureType,
@@ -31,9 +30,9 @@ class TestResponse:
 
 class TestVersion:
     def test_version_creation(self):
-        version = Version(server="1.0.0", minte="2.0.0", estimint="1.2.1")
+        version = Version(server="1.0.0", statemint="2.0.0", estimint="1.2.1")
         assert version.server == "1.0.0"
-        assert version.minte == "2.0.0"
+        assert version.statemint == "2.0.0"
         assert version.estimint == "1.2.1"
 
 
@@ -140,52 +139,6 @@ class TestEmulatorRequest:
         }
         with pytest.raises(ValidationError):
             EmulatorRequest(**data)
-
-
-class TestEmulatorScenario:
-    def test_scenario_creation_with_defaults(self):
-        scenario = EmulatorScenario(
-            res_use=0.5,
-            py_only=0.2,
-            py_pbo=0.3,
-            py_pyrrole=0.4,
-            py_ppf=0.1,
-            prev=0.25,
-            Q0=0.75,
-            phi=0.8,
-            season=1.0,
-            irs=0.3,
-        )
-        assert scenario.name == "no_intervention"
-        assert scenario.itn_future == 0.0
-        assert scenario.net_type_future is None
-        assert scenario.irs_future == 0.0
-        assert scenario.routine == 0.0
-        assert scenario.lsm == 0.0
-        assert scenario.mosquito_delta == 0.0
-
-    def test_scenario_creation_with_all_fields(self):
-        scenario = EmulatorScenario(
-            name="intervention",
-            res_use=0.5,
-            py_only=0.2,
-            py_pbo=0.3,
-            py_pyrrole=0.4,
-            py_ppf=0.1,
-            prev=0.25,
-            Q0=0.75,
-            phi=0.8,
-            season=1.0,
-            irs=0.3,
-            itn_future=0.5,
-            net_type_future="py_only",
-            irs_future=0.4,
-            routine=1.0,
-            lsm=0.2,
-        )
-        assert scenario.name == "intervention"
-        assert scenario.itn_future == 0.5
-        assert scenario.net_type_future == "py_only"
 
 
 class TestPrevalence:

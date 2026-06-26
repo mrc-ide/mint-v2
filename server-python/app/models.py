@@ -12,7 +12,7 @@ class Response(BaseModel, Generic[T]):
 
 class Version(BaseModel):
     server: str
-    minte: str
+    statemint: str
     estimint: str
 
 
@@ -65,28 +65,6 @@ class EmulatorRequest(BaseModel):
     @classmethod
     def convert_bool_to_float(cls, value: bool) -> float:
         return float(value)
-
-
-class EmulatorScenario(BaseModel):
-    name: str = "no_intervention"
-    res_use: float
-    py_only: float
-    py_pbo: float
-    py_pyrrole: float
-    py_ppf: float
-    prev: float
-    Q0: float
-    phi: float  # TODO change back to phi after estimint is updated
-    seasonal: float
-    irs: float
-    value: float  # TODO needs to be baked into estimint
-    itn_future: float = 0.0
-    net_type_future: str | None = None
-    irs_future: float = 0.0
-    routine: float = 0.0
-    lsm: float = 0.0
-    mosquito_delta: float = 0.0
-    input: str = "prevalence"  # TODO: remove after baked into estimint
 
 
 class Prevalence(BaseModel):
