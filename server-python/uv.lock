@@ -141,12 +141,16 @@ wheels = [
 [[package]]
 name = "estimint"
 version = "1.5.4"
-source = { git = "https://github.com/mrc-ide/estiMINT-python.git?rev=fix-latency-issue#9f8ec066dd910a5023a824ccbb71d2438294d770" }
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "numpy" },
     { name = "pandas" },
     { name = "scipy" },
     { name = "xgboost" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/9f/63/ad1c39a360841b1fea5777f29c27e264dc3300a9410cfec4bcfbbbfcecf8/estimint-1.5.4.tar.gz", hash = "sha256:83afa80b17edc4776450395ec6b16f3adad12d04ca6b08073ca64a0a9d646283", size = 15720193, upload-time = "2026-07-01T09:13:12.627Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/0d/3b/5138d8747b4813dd7bb9a1ab538b91ac3b6b472f9a269fe32180e48436d9/estimint-1.5.4-py3-none-any.whl", hash = "sha256:5ae30f592b7f62e1aa8a4c59393d98d45818f6e5d875b3d5141d3de5a26ed550", size = 16015145, upload-time = "2026-07-01T09:13:09.016Z" },
 ]
 
 [package.optional-dependencies]
@@ -1617,7 +1621,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "estimint", extras = ["scenarios"], git = "https://github.com/mrc-ide/estiMINT-python.git?rev=fix-latency-issue" },
+    { name = "estimint", extras = ["scenarios"], specifier = ">=1.5.4" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.128.0" },
     { name = "jsonschema", specifier = ">=4.26.0" },
     { name = "prometheus-client", specifier = ">=0.24.1" },
