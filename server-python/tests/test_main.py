@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from unittest.mock import patch
 
 from fastapi import status
 from fastapi.testclient import TestClient
@@ -8,6 +9,12 @@ from app.main import ACTIVE_REQUESTS, REQUEST_COUNT, REQUEST_LATENCY, app
 from app.models import EmulatorRequest
 
 client = TestClient(app)
+
+
+@patch("app.main.preload_models")
+def test_lifespan_preloads_models(mock_preload):
+    with TestClient(app):
+        mock_preload.assert_called_once()
 
 
 def test_get_version():

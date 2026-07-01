@@ -1,7 +1,9 @@
 import logging
 import time
+from contextlib import asynccontextmanager
 from importlib.metadata import version
 
+from estimint import preload_models
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -20,7 +22,15 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="MINT API", version=__version__)
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    """Preload models on startup."""
+    preload_models()
+    yield
+
+
+app = FastAPI(title="MINT API", version=__version__, lifespan=lifespan)
 
 metrics_app = make_asgi_app()
 app.mount("/metrics", metrics_app)
