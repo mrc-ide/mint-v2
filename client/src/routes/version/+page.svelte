@@ -5,11 +5,11 @@
 <div class="text-center text-sm text-muted-foreground">
 	Powered by <a
 		target="_blank"
-		href="https://github.com/mrc-ide/MINTe-python"
+		href="https://github.com/mrc-ide/stateMINT"
 		class="hover:underline"
 		rel="noopener noreferrer"
 	>
-		MINTe v{data.versionInfo.minte}
+		stateMINT v{data.versionInfo.statemint}
 	</a>
 	<a
 		target="_blank"

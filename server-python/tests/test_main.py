@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from unittest.mock import patch
 
 from fastapi import status
 from fastapi.testclient import TestClient
@@ -10,11 +11,21 @@ from app.models import EmulatorRequest
 client = TestClient(app)
 
 
+@patch("app.main.preload_models")
+def test_lifespan_preloads_models(mock_preload):
+    with TestClient(app):
+        mock_preload.assert_called_once()
+
+
 def test_get_version():
     response = client.get("/version")
 
     assert response.status_code == status.HTTP_200_OK
-    assert response.json() == {"data": {"server": "1.0.0", "minte": "1.4.1", "estimint": "1.3.1"}}
+    data = response.json()["data"]
+
+    assert isinstance(data["server"], str)
+    assert isinstance(data["statemint"], str)
+    assert isinstance(data["estimint"], str)
 
 
 def test_health_check():

@@ -1,11 +1,12 @@
 import logging
 import time
+from contextlib import asynccontextmanager
+from importlib.metadata import version
 
-from estimint import __version__ as estimint_version
+from estimint import preload_models
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from minte import __version__ as minte_version
 from prometheus_client import Counter, Gauge, Histogram, make_asgi_app
 
 from app import __version__
@@ -21,7 +22,15 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="MINT API", version=__version__)
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    """Preload models on startup."""
+    preload_models()
+    yield
+
+
+app = FastAPI(title="MINT API", version=__version__, lifespan=lifespan)
 
 metrics_app = make_asgi_app()
 app.mount("/metrics", metrics_app)
@@ -64,7 +73,7 @@ async def internal_server_error_handler(_req, exc):
 
 @app.get("/version")
 async def get_version() -> Response[Version]:
-    return Response(data=Version(server=__version__, minte=minte_version, estimint=estimint_version))
+    return Response(data=Version(server=__version__, statemint=version("mintstate"), estimint=version("estimint")))
 
 
 @app.get("/healthz")
