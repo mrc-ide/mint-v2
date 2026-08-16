@@ -5,7 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "estimint[scenarios]>=1.5.4",
+    "estimint[scenarios]>=2.1.0",
     "fastapi[standard]>=0.128.0",
     "jsonschema>=4.26.0",
     "prometheus-client>=0.24.1",
