@@ -98,7 +98,7 @@
             {
               "id": "pyrethroid_resistance",
               "label": "Level of pyrethroid resistance",
-              "helpText": "Mosquito survival in 24-hour WHO discriminatory dose bioassays. 0% indicates all mosquitoes die and are susceptible to the pyrethroid insecticide in ITNs. 100% indicates that no mosquitoes die or are susceptible to the pyrethroid insecticide in ITNs.",
+              "helpText": "Mosquito survival in 24-hour WHO discriminatory dose bioassays. 0% indicates all mosquitoes die and are susceptible to the pyrethroid insecticide in ITNs. 100% indicates that no mosquitoes die, i.e. mosquitoes are not susceptible to the pyrethroid insecticide in ITNs.",
               "type": "slider",
               "required": true,
               "default": 0,
@@ -183,7 +183,7 @@
             {
               "id": "irs_coverage",
               "label": "IRS population coverage",
-              "helpText": "Enter the percentage of sleeping structures sprayed in the year of the last survey in this region.",
+              "helpText": "Enter the percentage of the population living in houses that were sprayed in the previous annual campaign.",
               "type": "slider",
               "required": true,
               "default": 0,
