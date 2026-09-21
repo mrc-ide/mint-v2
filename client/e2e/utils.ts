@@ -56,3 +56,12 @@ export const runRegionWithItn = async (page: Page) => {
 	await page.getByRole('checkbox', { name: 'Pyrethroid-only ITNs' }).click();
 	await expect(page.getByRole('button', { name: 'Show Pyrethroid ITN (Only)' })).toBeVisible();
 };
+
+export const uploadProjectCsv = async (page: Page, projectName: string, csv: string) => {
+	await page.getByRole('button', { name: 'Upload CSV' }).click();
+	await page.getByRole('textbox', { name: 'Project Name' }).fill(projectName);
+	await page
+		.getByLabel('CSV File')
+		.setInputFiles({ name: 'regions.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) });
+	await page.getByRole('button', { name: 'Upload', exact: true }).click();
+};

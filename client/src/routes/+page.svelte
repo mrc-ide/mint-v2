@@ -4,6 +4,7 @@
 	import type { PageProps } from './$types';
 	import CreateProject from './_components/CreateProject.svelte';
 	import ProjectsList from './_components/ProjectsList.svelte';
+	import UploadProjectCsv from './_components/UploadProjectCsv.svelte';
 
 	let { data }: PageProps = $props();
 </script>
@@ -34,6 +35,9 @@
 	</p> -->
 	<p class="mb-2 text-xl font-semibold">You have {data.userData.projects.length} projects</p>
 
-	<CreateProject pageForm={data.form} />
+	<div class="flex gap-2">
+		<CreateProject pageForm={data.form} />
+		<UploadProjectCsv pageForm={data.uploadForm} />
+	</div>
 	<ProjectsList projects={data.userData.projects} />
 </div>

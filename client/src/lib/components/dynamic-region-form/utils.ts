@@ -4,7 +4,8 @@ import type {
 	CustomValue,
 	SchemaField,
 	SchemaGroup,
-	SchemaSubGroup
+	SchemaSubGroup,
+	FormValue
 } from './types';
 
 export const forEachGroup = (groups: SchemaGroup[], callback: (g: SchemaGroup) => void) => {
@@ -152,5 +153,16 @@ export const checkCrossFieldValidation = (
 		else if (errors[fid] === rule.message) errors[fid] = null;
 	}
 };
+
+export const initializeFieldValues = (
+	values: Record<string, FormValue>,
+	fields: { field: SchemaField }[]
+): Record<string, FormValue> =>
+	Object.fromEntries(fields.map(({ field }) => [field.id, values[field.id] ?? (coerceDefaults(field) as FormValue)]));
+
+export const mapFieldsById = (fields: { field: SchemaField }[]): Map<string, SchemaField> =>
+	new Map(fields.map(({ field }) => [field.id, field]));
+
+export const hasInputValue = (value: FormValue): boolean => (Array.isArray(value) ? value.length > 0 : Boolean(value));
 
 export const DEBOUNCE_DELAY_MS = 1500;

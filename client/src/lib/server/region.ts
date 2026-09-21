@@ -6,14 +6,18 @@ import { regionFormUrl } from '$lib/url';
 import { error } from '@sveltejs/kit';
 import type { RequestEvent } from '../../routes/projects/[project]/regions/[region]/$types';
 
+export const getFormSchema = async (fetch: RequestEvent['fetch']): Promise<DynamicFormSchema> => {
+	const res = await apiFetch<DynamicFormSchema>({ url: regionFormUrl(), fetcher: fetch });
+	return res.data;
+};
+
 export const getRegionFormSchema = async (
 	projectName: string,
 	regionName: string,
 	fetch: RequestEvent['fetch']
 ): Promise<DynamicFormSchema> => {
 	try {
-		const res = await apiFetch<DynamicFormSchema>({ url: regionFormUrl(), fetcher: fetch });
-		return res.data;
+		return await getFormSchema(fetch);
 	} catch (e) {
 		const errorStatus = e instanceof ApiError ? e.status : 500;
 		error(errorStatus, `Failed to fetch form schema for region "${regionName}" in project "${projectName}"`);

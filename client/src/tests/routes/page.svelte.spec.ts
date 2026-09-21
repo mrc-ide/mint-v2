@@ -1,9 +1,15 @@
-import { createProjectSchema } from '$routes/schema';
+import { createProjectSchema, uploadProjectSchema } from '$routes/schema';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
 import { render } from 'vitest-browser-svelte';
 import Page from '../../routes/+page.svelte';
 import { userEvent } from 'vitest/browser';
+
+// $lib/url reads public env vars, which are not available to browser tests
+vi.mock('$lib/url', () => ({
+	csvTemplateUrl: vi.fn().mockReturnValue('/csv-template'),
+	regionUrl: vi.fn()
+}));
 
 describe('/+page.svelte', () => {
 	it('should render base page with project info', async () => {
@@ -16,7 +22,8 @@ describe('/+page.svelte', () => {
 							{ name: 'Asia', regions: [] }
 						]
 					},
-					form: {}
+					form: {},
+					uploadForm: {}
 				}
 			}
 		} as any);
@@ -25,6 +32,7 @@ describe('/+page.svelte', () => {
 		await expect.element(screen.getByText(/asia/i)).toBeVisible();
 		await expect.element(screen.getByText(/you have 2 projects/i)).toBeVisible();
 		await expect.element(screen.getByRole('button', { name: /create project/i })).toBeVisible();
+		await expect.element(screen.getByRole('button', { name: /upload csv/i })).toBeVisible();
 	});
 
 	it('should be able to delete a project', async () => {
@@ -37,7 +45,8 @@ describe('/+page.svelte', () => {
 							{ name: 'Asia', regions: [] }
 						]
 					},
-					form: {}
+					form: {},
+					uploadForm: {}
 				}
 			}
 		} as any);
@@ -51,13 +60,15 @@ describe('/+page.svelte', () => {
 
 	it('should be able to see create project dialog', async () => {
 		const form = await superValidate(zod4(createProjectSchema));
+		const uploadForm = await superValidate(zod4(uploadProjectSchema));
 		const screen = render(Page, {
 			props: {
 				data: {
 					userData: {
 						projects: []
 					},
-					form
+					form,
+					uploadForm
 				}
 			}
 		} as any);
@@ -78,7 +89,8 @@ describe('/+page.svelte', () => {
 					userData: {
 						projects: [{ name: 'Europe', regions: [{ name: 'RegionA' }, { name: 'RegionB' }] }]
 					},
-					form: {}
+					form: {},
+					uploadForm: {}
 				}
 			}
 		} as any);
