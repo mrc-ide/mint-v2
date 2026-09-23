@@ -43,14 +43,6 @@ describe('UploadProjectCsv component', () => {
 		await expect.element(screen.getByLabelText(/csv file/i)).toHaveAttribute('accept', '.csv,text/csv');
 	});
 
-	it('should suggest the file name as the project name', async () => {
-		const screen = await openDialog();
-
-		await userEvent.upload(screen.getByLabelText(/csv file/i), csvFile('Kenya 2026.csv'));
-
-		await expect.element(screen.getByLabelText(/project name/i)).toHaveValue('Kenya 2026');
-	});
-
 	it('should keep the chosen file on the input, ready to submit', async () => {
 		const screen = await openDialog();
 

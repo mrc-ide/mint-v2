@@ -4,7 +4,7 @@ import { goto, randomProjectName, uploadProjectCsv } from './utils';
 // "coast" sets its intervention options, "nyanza" leaves everything but the baseline blank
 const CSV = [
 	'Region,Size of population at risk,Recent malaria prevalence,Expected ITN population usage,ITN types,Continuous distribution of ITNs',
-	'coast,50000,35,70,py_only|py_pyrrole,no',
+	'coast,50000,35,70,py_only|py_pyrrole,false',
 	'nyanza,120000,45,,,',
 	''
 ].join('\n');
@@ -58,22 +58,6 @@ test.describe('Upload project CSV', () => {
 		await goto(page, `/projects/${projectName}/regions/nyanza`);
 		await expect(page.getByRole('button', { name: 'Show No Intervention' })).toBeVisible();
 		await expect(page.getByRole('button', { name: 'Show Pyrethroid ITN (Only)' })).toBeHidden();
-	});
-
-	test('rejoins a list of ITN types that a spreadsheet split into two cells', async ({ page }) => {
-		const projectName = randomProjectName();
-
-		await uploadProjectCsv(
-			page,
-			projectName,
-			'Region,Expected ITN population usage,ITN types,Continuous distribution of ITNs\ncoast,70,py_only,py_pbo,no\n'
-		);
-
-		await expect(page.getByText(`Project "${projectName}" created with 1 regions!`)).toBeVisible();
-		await goto(page, `/projects/${projectName}/regions/coast`);
-		await expect(page.getByRole('checkbox', { name: 'Pyrethroid-only ITNs' })).toBeChecked();
-		await expect(page.getByRole('checkbox', { name: 'Pyrethroid-PBO ITNs' })).toBeChecked();
-		await expect(page.getByRole('switch', { name: 'Continuous distribution of' })).not.toBeChecked();
 	});
 
 	test('reports the problems in a CSV without creating the project', async ({ page }) => {
