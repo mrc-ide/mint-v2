@@ -11,15 +11,25 @@ import {
 	isDisabled,
 	mapFieldsById
 } from '$lib/components/dynamic-region-form/utils';
-import { serialiseCsv } from '$lib/csv';
+import Papa from 'papaparse';
 import { URL_RESERVED_CHARACTERS_MESSAGE } from '$lib/string';
-import { getCsvFields, labelOf, MULTISELECT_SEPARATOR, REGION_COLUMN_HEADER, type CsvField } from './projectCsv';
+import {
+	describeRequirement,
+	getCsvFields,
+	MULTISELECT_SEPARATOR,
+	REGION_COLUMN_HEADER,
+	type CsvField
+} from './projectCsv';
 
 export const PROJECT_CSV_TEMPLATE_FILENAME = 'mint-project-template.csv';
 
-const exampleOptions = (field: MultiselectField): string[] => field.options.slice(0, 2).map((option) => option.value);
+export const exampleOptions = (field: MultiselectField): string[] =>
+	field.options.slice(0, 2).map((option) => option.value);
 
-const getExampleValues = (fields: CsvField[], fieldsById: Map<string, SchemaField>): Record<string, FormValue> => {
+export const getExampleValues = (
+	fields: CsvField[],
+	fieldsById: Map<string, SchemaField>
+): Record<string, FormValue> => {
 	const values = initializeFieldValues({}, fields);
 
 	for (const { field } of fields) {
@@ -34,7 +44,7 @@ const getExampleValues = (fields: CsvField[], fieldsById: Map<string, SchemaFiel
 	return values;
 };
 
-const exampleSwitchedOnValue = (field: SchemaField): FormValue => {
+export const exampleSwitchedOnValue = (field: SchemaField): FormValue => {
 	switch (field.type) {
 		case 'number':
 		case 'slider': {
@@ -49,12 +59,12 @@ const exampleSwitchedOnValue = (field: SchemaField): FormValue => {
 	}
 };
 
-const describeDefault = (field: SchemaField): string => {
+export const describeDefault = (field: SchemaField): string => {
 	const value = coerceDefaults(field) as FormValue;
 	return Array.isArray(value) ? value.join(MULTISELECT_SEPARATOR) || 'none' : String(value);
 };
 
-const describeAcceptedValues = (field: SchemaField): string => {
+export const describeAcceptedValues = (field: SchemaField): string => {
 	switch (field.type) {
 		case 'number':
 		case 'slider': {
@@ -73,47 +83,13 @@ const describeAcceptedValues = (field: SchemaField): string => {
 			return '';
 	}
 };
-const describeDependency = (id: string, isOn: boolean, fieldsById: Map<string, SchemaField>): string => {
-	const dependency = fieldsById.get(id);
-	const label = dependency ? labelOf(dependency) : `"${id}"`;
-	switch (dependency?.type) {
-		case 'toggle':
-			return `${label} is ${isOn}`;
-		case 'multiselect':
-			return `${label} ${isOn ? 'has a value' : 'is blank'}`;
-		default:
-			return `${label} is ${isOn ? 'above 0' : '0'}`;
-	}
-};
-/**
- * Describe when a disabled field applies, such as `when "Expected ITN population usage" is above 0`, or
- * null for a field that never does.
- */
-const describeRequirement = (field: SchemaField, fieldsById: Map<string, SchemaField>): string | null => {
-	if (typeof field.disabled !== 'object') return null;
-
-	const { fields, operator } = field.disabled;
-	// a field disabled while every dependency is off applies once any is on, and the reverse for "all" and "any"
-	const describe = (isOn: boolean, joiner: string) =>
-		`when ${fields.map((id) => describeDependency(id, isOn, fieldsById)).join(joiner)}`;
-	switch (operator) {
-		case 'falsy':
-			return describe(true, ' or ');
-		case 'all':
-			return describe(false, ' or ');
-		default:
-			return describe(false, ' and ');
-	}
-};
-
-const formatCell = (field: SchemaField, values: Record<string, FormValue>): string => {
+export const formatCell = (field: SchemaField, values: Record<string, FormValue>): string => {
 	if (isDisabled(values, field)) return '';
 	const value = values[field.id];
 	return Array.isArray(value) ? value.join(MULTISELECT_SEPARATOR) : String(value);
 };
 
-/** The help row tells users what each column accepts, so they need not guess from the examples. */
-const describeField = (field: SchemaField, fieldsById: Map<string, SchemaField>): string => {
+export const describeField = (field: SchemaField, fieldsById: Map<string, SchemaField>): string => {
 	const parts = [describeAcceptedValues(field), `Blank = ${describeDefault(field)}`];
 	const requirement = describeRequirement(field, fieldsById);
 	if (requirement) parts.push(`Only applies ${requirement}`);
@@ -140,5 +116,5 @@ export const buildProjectCsvTemplate = (schema: DynamicFormSchema): string => {
 		...fields.map(({ field, isPreRun }) => (isPreRun ? formatCell(field, exampleValues) : ''))
 	];
 
-	return serialiseCsv([header, help, allParameters, baselineOnly]);
+	return Papa.unparse([header, help, allParameters, baselineOnly]);
 };

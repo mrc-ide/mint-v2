@@ -79,7 +79,7 @@ describe('root +page.server.ts', () => {
 			});
 
 			it('creates a project with a region per CSV row', async () => {
-				const request = uploadRequest('CSV Project', 'Region,population\nNorth,50000\nSouth,60000\n');
+				const request = uploadRequest('CSV Project', 'Region,Size of population\nNorth,50000\nSouth,60000\n');
 				const locals = { userState: { projects: [] } as any };
 
 				const data = await (actions.upload({ request, locals, fetch: fetch.bind(globalThis) } as any) as any);
@@ -141,7 +141,7 @@ describe('root +page.server.ts', () => {
 			});
 
 			it('should fail with the problems found in the CSV', async () => {
-				const request = uploadRequest('CSV Project', 'Region,population\nNorth,lots\n');
+				const request = uploadRequest('CSV Project', 'Region,Size of population\nNorth,lots\n');
 				const locals = { userState: { projects: [] } as any };
 
 				const res = (await actions.upload({

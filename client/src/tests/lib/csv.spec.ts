@@ -1,26 +1,4 @@
-import { BYTE_ORDER_MARK, CsvError, decodeCsvBytes, detectCsvDelimiter, parseCsv, serialiseCsv } from '$lib/csv';
-
-describe('detectCsvDelimiter', () => {
-	it.each([
-		['a,b,c', ','],
-		['a;b;c', ';'],
-		['a\tb\tc', '\t']
-	])('should detect the delimiter of "%s"', (line, delimiter) => {
-		expect(detectCsvDelimiter(line)).toBe(delimiter);
-	});
-
-	it('should ignore delimiters inside quoted headings', () => {
-		expect(detectCsvDelimiter('"Price, per ITN";"Region"')).toBe(';');
-	});
-
-	it('should ignore a byte order mark', () => {
-		expect(detectCsvDelimiter(`${BYTE_ORDER_MARK}a;b`)).toBe(';');
-	});
-
-	it('should default to a comma for a single column', () => {
-		expect(detectCsvDelimiter('Region')).toBe(',');
-	});
-});
+import { BYTE_ORDER_MARK, CsvError, decodeCsvBytes, parseCsv } from '$lib/csv';
 
 describe('parseCsv', () => {
 	it('should parse a simple grid', () => {
@@ -34,15 +12,22 @@ describe('parseCsv', () => {
 	it.each([
 		[';', 'a;b\n1;2'],
 		['\t', 'a\tb\n1\t2']
-	] as const)('should split cells on "%s" when given it as the delimiter', (delimiter, text) => {
-		expect(parseCsv(text, delimiter)).toEqual([
+	])('should detect "%s" as the delimiter', (_delimiter, text) => {
+		expect(parseCsv(text)).toEqual([
 			['a', 'b'],
 			['1', '2']
 		]);
 	});
 
-	it('should keep other delimiters as part of a cell', () => {
-		expect(parseCsv('a;b,c', ';')).toEqual([['a', 'b,c']]);
+	it('should detect the delimiter of a file whose cells hold the other ones', () => {
+		expect(parseCsv('a;b\n"1,2";3\n')).toEqual([
+			['a', 'b'],
+			['1,2', '3']
+		]);
+	});
+
+	it('should fall back to a comma for a single column', () => {
+		expect(parseCsv('Region\nNorth')).toEqual([['Region'], ['North']]);
 	});
 
 	it('should handle CRLF line breaks and a trailing line break', () => {
@@ -67,8 +52,9 @@ describe('parseCsv', () => {
 		expect(parseCsv('"a,b","line\nbreak","say ""hi"""')).toEqual([['a,b', 'line\nbreak', 'say "hi"']]);
 	});
 
-	it('should open a quoted cell after leading whitespace', () => {
-		expect(parseCsv('a, "b,c"')).toEqual([['a', 'b,c']]);
+	// no spreadsheet writes a space before a quote, so this is reported as a split row rather than read
+	it('should treat a quote after leading whitespace as a literal character', () => {
+		expect(parseCsv('a, "b,c"')).toEqual([['a', ' "b', 'c"']]);
 	});
 
 	it('should keep a quote in the middle of a cell as a literal character', () => {
@@ -82,8 +68,11 @@ describe('parseCsv', () => {
 		expect(() => parseCsv('a,b\n"c,d\ne,f')).toThrow(new CsvError('Row 2 has a quote (") that is never closed.', 2));
 	});
 
-	it('should keep blank rows so that rows can be reported by number', () => {
-		expect(parseCsv('a,b\n\n1,2')).toEqual([['a', 'b'], [''], ['1', '2']]);
+	it('should leave out blank rows', () => {
+		expect(parseCsv('a,b\n\n1,2')).toEqual([
+			['a', 'b'],
+			['1', '2']
+		]);
 	});
 
 	it('should keep empty cells', () => {
@@ -92,31 +81,6 @@ describe('parseCsv', () => {
 
 	it('should return no rows for empty text', () => {
 		expect(parseCsv('')).toEqual([]);
-	});
-});
-
-describe('serialiseCsv', () => {
-	it('should join cells and rows, ending with a line break', () => {
-		expect(
-			serialiseCsv([
-				['a', 'b'],
-				['1', '2']
-			])
-		).toBe('a,b\r\n1,2\r\n');
-	});
-
-	it('should quote any cell a spreadsheet could split or trim', () => {
-		expect(serialiseCsv([['plain', 'a,b', 'a;b', 'a\tb', 'a"b', 'a\nb', ' padded']])).toBe(
-			'plain,"a,b","a;b","a\tb","a""b","a\nb"," padded"\r\n'
-		);
-	});
-
-	it('should round trip through parseCsv', () => {
-		const rows = [
-			['Region', 'ITN types'],
-			['North, upper; east', 'py_only|py_pbo']
-		];
-		expect(parseCsv(serialiseCsv(rows))).toEqual(rows);
 	});
 });
 

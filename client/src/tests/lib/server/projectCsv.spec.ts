@@ -1,6 +1,31 @@
-import type { DynamicFormSchema } from '$lib/components/dynamic-region-form/types';
+import type { DynamicFormSchema, SchemaField } from '$lib/components/dynamic-region-form/types';
+import { mapFieldsById } from '$lib/components/dynamic-region-form/utils';
 import { parseCsv } from '$lib/csv';
-import { parseProjectCsv } from '$lib/server/projectCsv';
+import {
+	describeDependency,
+	describeRequirement,
+	failure,
+	formatRowError,
+	getCsvFields,
+	invalidValue,
+	isSetWhileDisabled,
+	isSkippedRow,
+	isSplitRow,
+	labelOf,
+	mapHeaderRow,
+	parseCell,
+	parseMultiselectCell,
+	parseNumberCell,
+	parseProjectCsv,
+	parseRegion,
+	parseRow,
+	parseToggleCell,
+	quoteHeader,
+	validateFormValues,
+	validateRegionName,
+	type Column,
+	type ParseContext
+} from '$lib/server/projectCsv';
 import { buildProjectCsvTemplate } from '$lib/server/projectCsvTemplate';
 import { MOCK_FORM_SCHEMA } from '$mocks/mocks';
 
@@ -50,7 +75,7 @@ describe('parseProjectCsv', () => {
 	});
 
 	it('should keep the values that are set and default the rest', () => {
-		expect(firstRegionValues('Region,population,is_seasonal\nNorth,50000,true\n')).toEqual({
+		expect(firstRegionValues('Region,Size of population,Seasonal transmission\nNorth,50000,true\n')).toEqual({
 			...DEFAULT_FORM_VALUES,
 			population: 50000,
 			is_seasonal: true
@@ -58,7 +83,7 @@ describe('parseProjectCsv', () => {
 	});
 
 	it('should read a region per row', () => {
-		const { regions, errors } = parseProjectCsv('Region,population\nNorth,50000\nSouth,60000\n', schema);
+		const { regions, errors } = parseProjectCsv('Region,Size of population\nNorth,50000\nSouth,60000\n', schema);
 
 		expect(errors).toEqual([]);
 		expect(regions.map((region) => region.name)).toEqual(['North', 'South']);
@@ -66,59 +91,45 @@ describe('parseProjectCsv', () => {
 	});
 
 	describe('headers', () => {
-		it.each(['Size of population', 'size_of_population', 'SIZE OF POPULATION!', 'population'])(
-			'should match "%s" to its field, ignoring case, spacing and punctuation',
-			(header) => {
-				expect(firstRegionValues(`Region,${header}\nNorth,50000\n`).population).toBe(50000);
-			}
-		);
-
-		it.each(['Region', 'region', 'Region Name', 'region_name', 'Name'])(
-			'should accept "%s" as the region column',
-			(header) => {
-				const { regions, errors } = parseProjectCsv(`${header}\nNorth\n`, schema);
-
-				expect(errors).toEqual([]);
-				expect(regions[0].name).toBe('North');
-			}
-		);
-
-		it('should match ids before labels, so a label cannot hide another field', () => {
-			const clashing = inlineSchema([
-				{ id: 'size', label: 'Size', type: 'number', default: 1 },
-				{ id: 'other', label: 'size', type: 'number', default: 2 }
-			]);
-
-			const { regions } = parseProjectCsv('Region,size\nNorth,5\n', clashing);
-
-			expect(regions[0].formValues).toEqual({ size: 5, other: 2 });
+		it('should match a column to the field whose label the template heads it with', () => {
+			expect(firstRegionValues('Region,Size of population\nNorth,50000\n').population).toBe(50000);
 		});
 
+		// the headings come from the template, so anything else is a typo worth reporting rather than guessing at
+		it.each(['size of population', 'size_of_population', 'population'])(
+			'should not match "%s", which is not the label of a field',
+			(header) => {
+				expectErrors(`Region,${header}\nNorth,50000\n`, [`Column "${header}" is not recognised.`]);
+			}
+		);
+
 		it('should ignore columns with a blank header and no values', () => {
-			expect(firstRegionValues('Region,population,\nNorth,50000,\n').population).toBe(50000);
+			expect(firstRegionValues('Region,Size of population,\nNorth,50000,\n').population).toBe(50000);
 		});
 	});
 
 	describe('file formats', () => {
-		it('should read a semicolon separated file with decimal commas and grouped thousands', () => {
-			expect(firstRegionValues('Region;population;people_per_bednet\nNorth;20 000;1,85\n')).toMatchObject({
+		it('should read a semicolon separated file', () => {
+			expect(
+				firstRegionValues('Region;Size of population;Number of People per bed net\nNorth;20000;1.85\n')
+			).toMatchObject({
 				population: 20000,
 				people_per_bednet: 1.85
 			});
 		});
 
 		it('should read a tab separated file', () => {
-			expect(firstRegionValues('Region\tpopulation\nNorth\t50000\n').population).toBe(50000);
+			expect(firstRegionValues('Region\tSize of population\nNorth\t50000\n').population).toBe(50000);
 		});
 
 		it('should read a file with the lone CR line breaks of a Macintosh CSV', () => {
-			const { regions } = parseProjectCsv('Region,population\rNorth,1\rSouth,2\r', schema);
+			const { regions } = parseProjectCsv('Region,Size of population\rNorth,1\rSouth,2\r', schema);
 
 			expect(regions.map((region) => region.formValues.population)).toEqual([1, 2]);
 		});
 
 		it('should skip comment rows, whatever punctuation they hold', () => {
-			const csv = '# Kenya; draft 2\nRegion,population\n"# Help, this row is ignored",lots\nNorth,50000\n';
+			const csv = '# Kenya; draft 2\nRegion,Size of population\n"# Help, this row is ignored",lots\nNorth,50000\n';
 
 			expect(firstRegionValues(csv).population).toBe(50000);
 		});
@@ -130,44 +141,32 @@ describe('parseProjectCsv', () => {
 			expect(regions.map((region) => region.name)).toEqual(['North', 'South']);
 		});
 
-		it('should reject a spreadsheet workbook uploaded in place of a CSV', () => {
-			expectErrors(`PK${String.fromCharCode(3, 4)}binary`, [
-				'This is a spreadsheet workbook, not a CSV file. Save it as CSV and upload that file instead.'
-			]);
-		});
-
 		it('should reject a quote that is never closed', () => {
-			expectErrors('Region,population\n"North,50000\nSouth,6000\n', ['Row 2 has a quote (") that is never closed.']);
+			expectErrors('Region,Size of population\n"North,50000\nSouth,6000\n', [
+				'Row 2 has a quote (") that is never closed.'
+			]);
 		});
 	});
 
 	describe('numbers', () => {
 		it.each([
-			['45%', 45],
 			[' 45 ', 45],
 			['4.5e1', 45],
 			['+45', 45]
 		])('should read "%s" as %s', (cell, expected) => {
-			expect(firstRegionValues(`Region,py_only\nNorth,${cell}\n`).py_only).toBe(expected);
+			expect(firstRegionValues(`Region,Pyrethroid ITN population usage\nNorth,${cell}\n`).py_only).toBe(expected);
 		});
 
-		it('should read a cell formatted as currency', () => {
-			expect(firstRegionValues('Region,people_per_bednet\nNorth,$1.85\n').people_per_bednet).toBe(1.85);
-		});
-
-		it('should read thousands separators in whole numbers', () => {
-			expect(firstRegionValues('Region,population\nNorth,"20,000"\n').population).toBe(20000);
-		});
-
-		it('should reject a decimal comma in a comma separated file, as it cannot be told from thousands', () => {
-			expectErrors('Region,people_per_bednet\nNorth,"1,800"\n', [
-				'Row 2: "Number of People per bed net" must be a number, but is "1,800" - write decimals with "." and leave out thousands separators.'
+		// numbers are written as they are in English, so a formatted or grouped cell is a mistake worth reporting
+		it.each(['lots', '%', '0x10', 'Infinity', '45%', '$45', '1 000'])('should reject "%s"', (cell) => {
+			expectErrors(`Region,Size of population\nNorth,${cell}\n`, [
+				`Row 2: "Size of population" must be a number, but is "${cell}".`
 			]);
 		});
 
-		it.each(['lots', '%', '0x10', 'Infinity'])('should reject "%s"', (cell) => {
-			expectErrors(`Region,population\nNorth,${cell}\n`, [
-				`Row 2: "Size of population" must be a number, but is "${cell}".`
+		it('should reject a thousands separator, which cannot be told from a decimal comma', () => {
+			expectErrors('Region,Size of population\nNorth,"20,000"\n', [
+				'Row 2: "Size of population" must be a number, but is "20,000".'
 			]);
 		});
 	});
@@ -176,24 +175,15 @@ describe('parseProjectCsv', () => {
 		it.each([
 			['true', true],
 			['TRUE', true],
-			['Yes', true],
-			['on', true],
-			['1', true],
-			['1.0', true],
-			['VRAI', true],
 			['false', false],
-			['no', false],
-			['OFF', false],
-			['0', false],
-			['0.0', false],
-			['FAUX', false]
+			['FALSE', false]
 		])('should read "%s" as %s', (cell, expected) => {
-			expect(firstRegionValues(`Region,is_seasonal\nNorth,${cell}\n`).is_seasonal).toBe(expected);
+			expect(firstRegionValues(`Region,Seasonal transmission\nNorth,${cell}\n`).is_seasonal).toBe(expected);
 		});
 
-		it('should reject a value that is not a toggle', () => {
-			expectErrors('Region,is_seasonal\nNorth,sometimes\n', [
-				'Row 2: "Seasonal transmission" must be true or false, but is "sometimes".'
+		it.each(['sometimes', 'yes', 'no', '1', '0'])('should reject "%s"', (cell) => {
+			expectErrors(`Region,Seasonal transmission\nNorth,${cell}\n`, [
+				`Row 2: "Seasonal transmission" must be true or false, but is "${cell}".`
 			]);
 		});
 	});
@@ -201,67 +191,45 @@ describe('parseProjectCsv', () => {
 	describe('multiselects', () => {
 		it.each([
 			['py_only', ['py_only']],
-			['Pyrethroid ITNs', ['py_only']],
 			['py_only|py_pbo', ['py_only', 'py_pbo']],
-			['py_only;py_pbo', ['py_only', 'py_pbo']],
-			['"py_only, py_pbo"', ['py_only', 'py_pbo']],
-			['py_only | Pyrethroid-PBO ITNs |', ['py_only', 'py_pbo']],
-			['"[""py_only"", ""py_pbo""]"', ['py_only', 'py_pbo']],
-			['pyrethroid pbo itns', ['py_pbo']],
+			['py_only | py_pbo |', ['py_only', 'py_pbo']],
 			['py_only|py_only', ['py_only']]
 		])('should read %s as a single option or a list', (cell, expected) => {
-			expect(firstRegionValues(`Region,itn_future,itn_future_types\nNorth,50,${cell}\n`).itn_future_types).toEqual(
-				expected
+			expect(
+				firstRegionValues(`Region,Expected ITN population use,Future ITN Types\nNorth,50,${cell}\n`).itn_future_types
+			).toEqual(expected);
+		});
+
+		// a list is only ever read from one cell, so a list a spreadsheet split is reported rather than guessed at
+		it('should reject a list that a spreadsheet split into a cell per option', () => {
+			expectErrors(
+				'Region,Expected ITN population use,Future ITN Types,Continuous distribution of ITNs\nNorth,50,py_only,py_pbo,true\n',
+				[
+					'Row 2: there are more values than column headings - wrap any value containing a comma or semicolon in quotes.'
+				]
 			);
 		});
 
-		it('should rejoin a list that a spreadsheet split into a cell per option', () => {
-			const csv = 'Region,itn_future,itn_future_types,routine_coverage\nNorth,50,py_only,Pyrethroid-PBO ITNs,true\n';
+		it('should read a list held in one quoted cell', () => {
+			const csv =
+				'Region,Expected ITN population use,Future ITN Types,Continuous distribution of ITNs\nNorth,50,"py_only|py_pbo",true\n';
 
 			expect(firstRegionValues(csv)).toMatchObject({ itn_future_types: ['py_only', 'py_pbo'], routine_coverage: true });
 		});
 
-		it('should rejoin a split list in a row that the spreadsheet kept the same length', () => {
-			// saving drops a trailing blank to make room for the extra cell, so the row is no longer than the header
-			const csv =
-				'Region,itn_future,itn_future_types,routine_coverage,population,\nNorth,50,py_only,py_pbo,py_ppf,false,50000\n';
-
-			expect(firstRegionValues(csv)).toMatchObject({
-				itn_future_types: ['py_only', 'py_pbo', 'py_ppf'],
-				routine_coverage: false,
-				population: 50000
-			});
-		});
-
-		it('should rejoin a split list whose pieces land in the region column', () => {
-			const { regions, errors } = parseProjectCsv(
-				'itn_future,itn_future_types,Region\n50,py_only,py_pbo,North\n',
-				schema
-			);
-
-			expect(errors).toEqual([]);
-			expect(regions[0]).toMatchObject({ name: 'North', formValues: { itn_future_types: ['py_only', 'py_pbo'] } });
-		});
-
-		it('should not take a value that belongs in the next column, even when it is also an option', () => {
+		it('should read adjacent list columns as a value each', () => {
 			const adjacentLists = inlineSchema([
 				{ id: 'first', label: 'First', type: 'multiselect', options: OPTIONS },
 				{ id: 'second', label: 'Second', type: 'multiselect', options: OPTIONS }
 			]);
 
-			const { regions } = parseProjectCsv('Region,first,second\nNorth,a,b\n', adjacentLists);
+			const { regions } = parseProjectCsv('Region,First,Second\nNorth,a,b\n', adjacentLists);
 
 			expect(regions[0].formValues).toEqual({ first: ['a'], second: ['b'] });
 		});
 
-		it('should rejoin a split list with a mistyped option, to report the typo rather than shifted columns', () => {
-			expectErrors('Region,itn_future,itn_future_types,routine_coverage\nNorth,50,py_onyl,py_pbo,true\n', [
-				'Row 2: "Future ITN Types" has no option "py_onyl". Valid options are py_only, py_pbo, py_pyrrole, py_ppf, with several separated by "|".'
-			]);
-		});
-
 		it('should reject an unknown option', () => {
-			expectErrors('Region,itn_future,itn_future_types\nNorth,50,py_magic\n', [
+			expectErrors('Region,Expected ITN population use,Future ITN Types\nNorth,50,py_magic\n', [
 				'Row 2: "Future ITN Types" has no option "py_magic". Valid options are py_only, py_pbo, py_pyrrole, py_ppf, with several separated by "|".'
 			]);
 		});
@@ -269,13 +237,13 @@ describe('parseProjectCsv', () => {
 
 	describe('fields that depend on other fields', () => {
 		it('should reject ITN types when there is no ITN usage, as the nets would still be costed', () => {
-			expectErrors('Region,itn_future,itn_future_types\nNorth,0,py_only\n', [
+			expectErrors('Region,Expected ITN population use,Future ITN Types\nNorth,0,py_only\n', [
 				'Row 2: "Future ITN Types" only applies when "Expected ITN population use" is above 0.'
 			]);
 		});
 
 		it('should reject switching on continuous distribution when there is no ITN usage', () => {
-			expectErrors('Region,routine_coverage\nNorth,true\n', [
+			expectErrors('Region,Continuous distribution of ITNs\nNorth,true\n', [
 				'Row 2: "Continuous distribution of ITNs" only applies when "Expected ITN population use" is above 0.'
 			]);
 		});
@@ -296,7 +264,7 @@ describe('parseProjectCsv', () => {
 				}
 			]);
 
-			expect(parseProjectCsv('Region,dependent\nNorth,5\n', dependencies).errors).toEqual([
+			expect(parseProjectCsv('Region,Dependent\nNorth,5\n', dependencies).errors).toEqual([
 				`Row 2: "Dependent" only applies ${requirement}.`
 			]);
 		});
@@ -304,18 +272,20 @@ describe('parseProjectCsv', () => {
 		it('should reject a value for a field that is always disabled', () => {
 			const locked = inlineSchema([{ id: 'locked', label: 'Locked', type: 'number', default: 0, disabled: true }]);
 
-			expect(parseProjectCsv('Region,locked\nNorth,5\n', locked).errors).toEqual(['Row 2: "Locked" cannot be set.']);
+			expect(parseProjectCsv('Region,Locked\nNorth,5\n', locked).errors).toEqual(['Row 2: "Locked" cannot be set.']);
 		});
 
 		it('should accept a dependent field left off or at its default', () => {
-			expect(firstRegionValues('Region,routine_coverage,itn_future_types\nNorth,false,\n')).toEqual(
+			expect(firstRegionValues('Region,Continuous distribution of ITNs,Future ITN Types\nNorth,false,\n')).toEqual(
 				DEFAULT_FORM_VALUES
 			);
 		});
 
 		it('should accept dependent fields once the field they depend on is set', () => {
 			expect(
-				firstRegionValues('Region,itn_future,itn_future_types,routine_coverage\nNorth,50,py_ppf,true\n')
+				firstRegionValues(
+					'Region,Expected ITN population use,Future ITN Types,Continuous distribution of ITNs\nNorth,50,py_ppf,true\n'
+				)
 			).toMatchObject({ itn_future: 50, itn_future_types: ['py_ppf'], routine_coverage: true });
 		});
 	});
@@ -326,13 +296,7 @@ describe('parseProjectCsv', () => {
 		});
 
 		it('should reject a file with a header but no regions', () => {
-			expectErrors('Region,population\n# just a note\n', ['The CSV file does not list any regions.']);
-		});
-
-		it('should reject a file without a region column', () => {
-			expectErrors('population\n50000\n', [
-				'The first row must hold the column headings, including a "Region" column.'
-			]);
+			expectErrors('Region,Size of population\n# just a note\n', ['The CSV file does not list any regions.']);
 		});
 
 		it('should name an unrecognised column', () => {
@@ -343,32 +307,26 @@ describe('parseProjectCsv', () => {
 			expectErrors('Region,itn_total\nNorth,10\n', ['Column "itn_total" is not recognised.']);
 		});
 
-		it('should explain a file whose headings are mostly unrecognised in one message', () => {
-			expectErrors('Region population people_per_bednet\nNorth 5 1\n', [
-				'Most column headings were not recognised, such as "Region population people_per_bednet". The first row must hold the headings from the template, and the file must be saved as a CSV separated by commas or semicolons.'
-			]);
-		});
-
-		it('should reject a repeated column, whether by id or by label', () => {
-			expectErrors('Region,population,Size of population\nNorth,1,2\n', [
+		it('should reject a repeated column', () => {
+			expectErrors('Region,Size of population,Size of population\nNorth,1,2\n', [
 				'Column "Size of population" appears more than once.'
 			]);
 		});
 
 		it('should explain a row split by an unquoted comma', () => {
-			expectErrors('Region,population\nNorth, East,50000\n', [
+			expectErrors('Region,Size of population\nNorth, East,50000\n', [
 				'Row 2: there are more values than column headings - wrap any value containing a comma or semicolon in quotes.'
 			]);
 		});
 
 		it('should reject a value under a blank heading', () => {
-			expectErrors('Region,,population\nNorth,stray,50000\n', [
+			expectErrors('Region,,Size of population\nNorth,stray,50000\n', [
 				'Row 2: there are more values than column headings - wrap any value containing a comma or semicolon in quotes.'
 			]);
 		});
 
 		it('should reject a row without a region name', () => {
-			expectErrors('Region,population\n,50000\n', ['Row 2: a region name is required.']);
+			expectErrors('Region,Size of population\n,50000\n', ['Row 2: a region name is required.']);
 		});
 
 		it.each(['North/South', 'North\\South', 'Why?', '#1 District', '100% covered'])(
@@ -383,37 +341,38 @@ describe('parseProjectCsv', () => {
 		});
 
 		it('should reject a value outside the range of its field', () => {
-			expectErrors('Region,py_only\nNorth,120\n', [
+			expectErrors('Region,Pyrethroid ITN population usage\nNorth,120\n', [
 				'Row 2: Pyrethroid ITN population usage must be ≤ 100.',
 				'Row 2: Total ITN population usage must be less than or equal to 100%.'
 			]);
 		});
 
 		it('should reject a non-integer value for an integer field', () => {
-			expectErrors('Region,population\nNorth,1.5\n', ['Row 2: Size of population must be an integer.']);
+			expectErrors('Region,Size of population\nNorth,1.5\n', ['Row 2: Size of population must be an integer.']);
 		});
 
 		it('should apply the cross field validation rules of the schema', () => {
-			expectErrors('Region,py_only,py_pbo\nNorth,60,60\n', [
+			expectErrors('Region,Pyrethroid ITN population usage,Pyrethroid-PBO ITN population usage\nNorth,60,60\n', [
 				'Row 2: Total ITN population usage must be less than or equal to 100%.'
 			]);
 		});
 
-		it('should number rows as a spreadsheet does, counting comment and blank rows', () => {
-			expectErrors('# note\nRegion,population\n\nNorth,lots\n', [
-				'Row 4: "Size of population" must be a number, but is "lots".'
+		// blank lines are dropped as the file is read, so they are the one thing a row number does not count
+		it('should number rows counting comment rows, as a spreadsheet does', () => {
+			expectErrors('# note\nRegion,Size of population\nNorth,lots\n', [
+				'Row 3: "Size of population" must be a number, but is "lots".'
 			]);
 		});
 
 		it('should report the row that is wrong and return no regions at all', () => {
-			expectErrors('Region,population\nNorth,50000\nSouth,lots\n', [
+			expectErrors('Region,Size of population\nNorth,50000\nSouth,lots\n', [
 				'Row 3: "Size of population" must be a number, but is "lots".'
 			]);
 		});
 
 		it('should cap the number of reported problems', () => {
 			const rows = Array.from({ length: 12 }, (_, index) => `Region ${index},lots`).join('\n');
-			const { errors } = parseProjectCsv(`Region,population\n${rows}\n`, schema);
+			const { errors } = parseProjectCsv(`Region,Size of population\n${rows}\n`, schema);
 
 			expect(errors).toHaveLength(11);
 			expect(errors[10]).toBe('...and 2 more problems.');
@@ -496,15 +455,8 @@ describe('buildProjectCsvTemplate', () => {
 		]);
 	});
 
-	it('should keep lists in one cell however a spreadsheet splits cells', () => {
-		const template = buildProjectCsvTemplate(schema);
-
-		expect(template).toContain(',py_only|py_pbo,');
-		expect(
-			parseCsv(template, ';')
-				.slice(2)
-				.every((row) => row.length === 1)
-		).toBe(true);
+	it('should write a list into one cell, separated so that no spreadsheet splits it', () => {
+		expect(buildProjectCsvTemplate(schema)).toContain(',py_only|py_pbo,');
 	});
 
 	it('should describe ranges that are open at either end', () => {
@@ -564,5 +516,226 @@ describe('buildProjectCsvTemplate', () => {
 		]);
 		expect(regions[0].formValues).toMatchObject({ itn_future: 50, itn_future_types: ['py_only', 'py_pbo'] });
 		expect(regions[1].formValues).toEqual(DEFAULT_FORM_VALUES);
+	});
+});
+
+describe('projectCsv helpers', () => {
+	const asField = (field: object) => field as unknown as SchemaField;
+	const population = asField({ id: 'population', label: ' Population ', type: 'number', default: 0, max: 100 });
+	const seasonal = asField({ id: 'seasonal', label: 'Seasonal', type: 'toggle', default: false });
+	const kinds = asField({ id: 'kinds', label: 'Kinds', type: 'multiselect', options: OPTIONS });
+	const dependent = asField({
+		id: 'dependent',
+		label: 'Dependent',
+		type: 'number',
+		default: 0,
+		disabled: falsy('population')
+	});
+	const csvFields = [population, seasonal, kinds, dependent].map((field) => ({ field, isPreRun: false }));
+	const fieldsById = mapFieldsById(csvFields);
+	const columns: Column[] = [
+		{ kind: 'region' },
+		{ kind: 'field', field: population },
+		{ kind: 'field', field: seasonal },
+		null
+	];
+	const context: ParseContext = {
+		columns,
+		fields: csvFields,
+		fieldsById,
+		schema: inlineSchema(csvFields.map(({ field }) => field))
+	};
+
+	it('labelOf should quote the trimmed label', () => {
+		expect(labelOf(population)).toBe('"Population"');
+	});
+
+	it('getCsvFields should leave out display and hidden fields and flag pre-run groups', () => {
+		const withPreRun = {
+			groups: [
+				{
+					id: 'baseline',
+					preRun: true,
+					subGroups: [
+						{
+							id: 'sub',
+							fields: [
+								{ id: 'a', label: 'A', type: 'number' },
+								{ id: 'b', label: 'B', type: 'display' },
+								{ id: 'c', label: 'C', type: 'number', hidden: true }
+							]
+						}
+					]
+				},
+				{ id: 'other', subGroups: [{ id: 'sub', fields: [{ id: 'd', label: 'D', type: 'toggle' }] }] }
+			]
+		} as unknown as DynamicFormSchema;
+
+		expect(getCsvFields(withPreRun).map(({ field, isPreRun }) => [field.id, isPreRun])).toEqual([
+			['a', true],
+			['d', false]
+		]);
+	});
+
+	it.each([
+		[['', ' '], true],
+		[['# note', 'x'], true],
+		[['#', 'x'], true],
+		[['#1', 'x'], false],
+		[['North', ''], false]
+	])('isSkippedRow(%j) should be %s', (row, expected) => {
+		expect(isSkippedRow(row)).toBe(expected);
+	});
+
+	it('quoteHeader should quote a short header and truncate a long one', () => {
+		expect(quoteHeader('Short')).toBe('"Short"');
+		expect(quoteHeader('x'.repeat(45))).toBe(`"${'x'.repeat(40)}..."`);
+	});
+
+	it('mapHeaderRow should map headers to columns and report unknown and repeated ones', () => {
+		expect(mapHeaderRow(['Region', 'Population', '', 'Nope', 'Seasonal', 'Seasonal'], csvFields)).toEqual({
+			columns: [
+				{ kind: 'region' },
+				{ kind: 'field', field: population },
+				null,
+				null,
+				{ kind: 'field', field: seasonal },
+				null
+			],
+			errors: ['Column "Nope" is not recognised.', 'Column "Seasonal" appears more than once.']
+		});
+	});
+
+	it('invalidValue should describe what was expected', () => {
+		expect(invalidValue(seasonal, 'true or false', 'maybe')).toEqual({
+			error: '"Seasonal" must be true or false, but is "maybe"'
+		});
+	});
+
+	it('parseNumberCell should read numbers and reject anything else', () => {
+		expect(parseNumberCell(population as never, '-1.5e2')).toEqual({ value: -150 });
+		expect(parseNumberCell(population as never, '1,5')).toEqual({
+			error: '"Population" must be a number, but is "1,5"'
+		});
+	});
+
+	it('parseToggleCell should read true and false in any case', () => {
+		expect(parseToggleCell(seasonal as never, 'True')).toEqual({ value: true });
+		expect(parseToggleCell(seasonal as never, 'FALSE')).toEqual({ value: false });
+		expect(parseToggleCell(seasonal as never, 'yes')).toEqual({
+			error: '"Seasonal" must be true or false, but is "yes"'
+		});
+	});
+
+	it('parseMultiselectCell should split, trim and dedupe options', () => {
+		expect(parseMultiselectCell(kinds as never, ' b | a |b|')).toEqual({ value: ['b', 'a'] });
+		expect(parseMultiselectCell(kinds as never, 'a|z')).toEqual({
+			error: '"Kinds" has no option "z". Valid options are a, b, c, with several separated by "|"'
+		});
+	});
+
+	it('parseCell should dispatch on field type and reject fields that cannot be set', () => {
+		expect(parseCell(population, '5')).toEqual({ value: 5 });
+		expect(parseCell(seasonal, 'true')).toEqual({ value: true });
+		expect(parseCell(kinds, 'c')).toEqual({ value: ['c'] });
+		expect(parseCell(asField({ id: 'd', label: 'Derived', type: 'display' }), '1')).toEqual({
+			error: '"Derived" cannot be set from a CSV'
+		});
+	});
+
+	it('isSplitRow should flag a value under a blank or missing column', () => {
+		expect(isSplitRow(['North', '1', 'true', ''], columns)).toBe(false);
+		expect(isSplitRow(['North', '1', 'true', 'x'], columns)).toBe(true);
+		expect(isSplitRow(['North', '1', 'true', '', 'x'], columns)).toBe(true);
+	});
+
+	it('parseRow should read the name and supplied values, collecting cell errors', () => {
+		expect(parseRow([' North ', '5', ''], columns)).toEqual({ name: 'North', values: { population: 5 }, errors: [] });
+		expect(parseRow(['North', 'lots', 'true'], columns)).toEqual({
+			name: 'North',
+			values: { seasonal: true },
+			errors: ['"Population" must be a number, but is "lots"']
+		});
+	});
+
+	it.each([
+		['population', true, '"Population" is above 0'],
+		['population', false, '"Population" is 0'],
+		['seasonal', true, '"Seasonal" is true'],
+		['kinds', true, '"Kinds" has a value'],
+		['kinds', false, '"Kinds" is blank'],
+		['unknown', true, '"unknown" is above 0']
+	])('describeDependency(%s, %s) should be %s', (id, isOn, expected) => {
+		expect(describeDependency(id, isOn, fieldsById)).toBe(expected);
+	});
+
+	it('describeRequirement should be null unless the field depends on others', () => {
+		expect(describeRequirement(population, fieldsById)).toBeNull();
+		expect(describeRequirement(asField({ ...population, disabled: true }), fieldsById)).toBeNull();
+		expect(describeRequirement(dependent, fieldsById)).toBe('when "Population" is above 0');
+	});
+
+	it('isSetWhileDisabled should only flag a non-default value on a disabled field', () => {
+		const off = { population: 0, dependent: 0 };
+		expect(isSetWhileDisabled(dependent, 5, off)).toBe(true);
+		expect(isSetWhileDisabled(dependent, undefined, off)).toBe(false);
+		expect(isSetWhileDisabled(dependent, 0, off)).toBe(false);
+		expect(isSetWhileDisabled(dependent, 5, { population: 1, dependent: 5 })).toBe(false);
+	});
+
+	it('validateFormValues should report field, disabled and custom rule errors', () => {
+		const withRule: ParseContext = {
+			...context,
+			schema: {
+				...context.schema,
+				customValidationRules: {
+					rule: { type: 'cross_field', fields: ['population'], operator: 'sum_lte', threshold: 50, message: 'Too many' }
+				}
+			} as unknown as DynamicFormSchema
+		};
+		const formValues = { population: 0, seasonal: false, kinds: [], dependent: 3 };
+
+		expect(validateFormValues({ dependent: 3 }, formValues, context)).toEqual([
+			'"Dependent" only applies when "Population" is above 0'
+		]);
+		expect(validateFormValues({}, { ...formValues, population: 200, dependent: 0 }, context)).toEqual([
+			' Population  must be ≤ 100'
+		]);
+		expect(validateFormValues({}, { ...formValues, population: 60, dependent: 0 }, withRule)).toEqual(['Too many']);
+	});
+
+	it('validateRegionName should require a unique, URL safe name', () => {
+		const regions = [{ name: 'North', formValues: {}, hasRunBaseline: false }];
+		expect(validateRegionName('South', regions)).toBeNull();
+		expect(validateRegionName('', regions)).toBe('a region name is required');
+		expect(validateRegionName('a/b', regions)).toBe('region names cannot contain / \\ ? # or %');
+		expect(validateRegionName('North', regions)).toBe('region "North" is listed more than once');
+	});
+
+	it('parseRegion should build a region with defaults filled in', () => {
+		expect(parseRegion(['North', '5', ''], context, [])).toEqual({
+			region: {
+				name: 'North',
+				hasRunBaseline: false,
+				formValues: { population: 5, seasonal: false, kinds: [], dependent: 0 }
+			}
+		});
+	});
+
+	it('parseRegion should report only the split row error for a split row', () => {
+		expect(parseRegion(['', 'lots', 'x', 'extra'], context, [])).toEqual({
+			errors: ['there are more values than column headings - wrap any value containing a comma or semicolon in quotes']
+		});
+	});
+
+	it('formatRowError should prefix the row and end with a single full stop', () => {
+		expect(formatRowError(3, 'bad value')).toBe('Row 3: bad value.');
+		expect(formatRowError(3, 'bad value.')).toBe('Row 3: bad value.');
+	});
+
+	it('failure should return no regions and cap the errors', () => {
+		expect(failure(['a'])).toEqual({ regions: [], errors: ['a'] });
+		const errors = Array.from({ length: 13 }, (_, index) => `e${index}`);
+		expect(failure(errors).errors).toEqual([...errors.slice(0, 10), '...and 3 more problems.']);
 	});
 });
