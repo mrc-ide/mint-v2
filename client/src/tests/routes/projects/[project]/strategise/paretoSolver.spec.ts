@@ -1,4 +1,9 @@
-import { solveMultipleChoiceKnapsack, type KnapsackItem } from '$routes/projects/[project]/strategise/paretoSolver';
+import {
+	MAX_FRONTIER_SIZE,
+	solveMultipleChoiceKnapsack,
+	type KnapsackItem,
+	thinFrontier
+} from '$routes/projects/[project]/strategise/paretoSolver';
 import { equalTo, lessEq, solve, type Constraint, type Model } from 'yalps';
 
 // Deterministic PRNG so failures are reproducible
@@ -115,5 +120,54 @@ describe('solveMultipleChoiceKnapsack', () => {
 				expect(totalOf(groups, choices!, 'value')).toBeCloseTo(expected, 4);
 			});
 		}
+	});
+});
+
+describe('thinFrontier', () => {
+	/** Builds a frontier from ascending costs; each state records its own index so kept states can be traced. */
+	const createFrontier = (costs: number[]) => ({
+		costs: Float64Array.from(costs),
+		values: Float64Array.from(costs, (cost) => cost * 2),
+		previousStateIndices: Int32Array.from(costs, (_, i) => i),
+		itemIndices: Int32Array.from(costs, (_, i) => i % 7)
+	});
+
+	it('returns the frontier unchanged when it is within the size cap', () => {
+		const frontier = createFrontier([0, 1, 2, 3]);
+
+		expect(thinFrontier(frontier)).toBe(frontier);
+	});
+
+	it('keeps endpoints and an evenly spaced subset when over the size cap', () => {
+		const size = MAX_FRONTIER_SIZE * 3;
+		const frontier = createFrontier(Array.from({ length: size }, (_, i) => i));
+
+		const thinned = thinFrontier(frontier);
+
+		expect(thinned.costs.length).toBeLessThanOrEqual(MAX_FRONTIER_SIZE + 1);
+		expect(thinned.costs.length).toBeGreaterThan(MAX_FRONTIER_SIZE / 2);
+		expect(thinned.costs[0]).toBe(0);
+		expect(thinned.costs[thinned.costs.length - 1]).toBe(size - 1);
+		const minCostGap = (size - 1) / MAX_FRONTIER_SIZE;
+		for (let i = 1; i < thinned.costs.length - 1; i++) {
+			expect(thinned.costs[i] - thinned.costs[i - 1]).toBeGreaterThanOrEqual(minCostGap);
+		}
+		// Every kept state still carries the data of the original state it came from
+		thinned.previousStateIndices.forEach((originalIndex, i) => {
+			expect(thinned.costs[i]).toBe(frontier.costs[originalIndex]);
+			expect(thinned.values[i]).toBe(frontier.values[originalIndex]);
+			expect(thinned.itemIndices[i]).toBe(frontier.itemIndices[originalIndex]);
+		});
+	});
+
+	it('collapses a dense cluster of costs while keeping sparse states', () => {
+		// Most states are packed near zero; a few are spread far out
+		const dense = Array.from({ length: MAX_FRONTIER_SIZE * 2 }, (_, i) => i * 1e-9);
+		const sparse = [1_000, 2_000, 3_000];
+		const frontier = createFrontier([...dense, ...sparse]);
+
+		const thinned = thinFrontier(frontier);
+
+		expect(Array.from(thinned.costs)).toEqual([0, ...sparse]);
 	});
 });

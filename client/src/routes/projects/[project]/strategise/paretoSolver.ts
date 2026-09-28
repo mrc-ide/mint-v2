@@ -87,7 +87,7 @@ const mergeFrontiers = (left: Frontier, right: Frontier): Frontier => {
 };
 
 /** Keeps roughly MAX_FRONTIER_SIZE states evenly spread across the cost range. Dropping states keeps results feasible. */
-const thinFrontier = (frontier: Frontier): Frontier => {
+export const thinFrontier = (frontier: Frontier): Frontier => {
 	const size = frontier.costs.length;
 	if (size <= MAX_FRONTIER_SIZE) return frontier;
 
