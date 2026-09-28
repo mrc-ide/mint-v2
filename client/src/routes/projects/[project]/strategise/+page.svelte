@@ -27,13 +27,8 @@
 			}
 			loading = true;
 
-			console.log('strats', data.regionalStrategies);
-
-			const startTime = Date.now();
 			const strategiseResults = await strategiseAsync($formData.minCost, $formData.budget, data.regionalStrategies);
-			console.log('time taken', (Date.now() - startTime) / 1000);
 			$formData.strategiseResults = strategiseResults;
-			console.log('strat results', strategiseResults);
 
 			if (data.userData.compareEnabled && data.compareRegionalStrategies) {
 				const compareStrategiseResults = await strategiseCompareAsync(

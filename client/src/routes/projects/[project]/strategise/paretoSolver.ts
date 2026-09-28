@@ -1,13 +1,3 @@
-/**
- * Pareto frontier solver for strategise.
- *
- * Strategise is a multiple-choice knapsack: pick exactly one intervention per region so that total cost stays
- * within a budget while the objective (cases averted, or -cases) is maximised. Instead of solving an integer
- * program for every budget, we build the Pareto frontier of (total cost, total value) once, region by region,
- * keeping only states that no cheaper state beats. The best strategy for any budget is then the most expensive
- * frontier state that fits, so every budget is answered from a single pass.
- */
-
 export interface KnapsackItem {
 	cost: number;
 	value: number;
@@ -39,19 +29,22 @@ const createFrontier = (size: number): Frontier => ({
 	itemIndices: new Int32Array(size)
 });
 
+interface BackPointers {
+	previousStateIndices: Int32Array;
+	itemIndices: Uint8Array;
+}
+
+/** Copies only the reconstruction data into new exact-sized buffers, so the merge buffers can be garbage collected. */
+const toBackPointers = (frontier: Frontier): BackPointers => ({
+	previousStateIndices: frontier.previousStateIndices.slice(),
+	itemIndices: Uint8Array.from(frontier.itemIndices)
+});
+
 const sliceFrontier = (frontier: Frontier, size: number): Frontier => ({
 	costs: frontier.costs.subarray(0, size),
 	values: frontier.values.subarray(0, size),
 	previousStateIndices: frontier.previousStateIndices.subarray(0, size),
 	itemIndices: frontier.itemIndices.subarray(0, size)
-});
-
-/** The frontier before any region is added: a single zero-cost, zero-value state. */
-const createEmptySelectionFrontier = (): Frontier => ({
-	costs: new Float64Array([0]),
-	values: new Float64Array([0]),
-	previousStateIndices: new Int32Array([-1]),
-	itemIndices: new Int32Array([-1])
 });
 
 /** Merges two frontiers into one, dropping any state beaten by a cheaper (or equal cost) state. */
@@ -157,13 +150,13 @@ const findMostExpensiveAffordableIndex = (costs: Float64Array, budget: number): 
 };
 
 /** Walks back through each region's frontier to recover which item was chosen per group. */
-const reconstructSelection = (frontiersByGroup: Frontier[], finalStateIndex: number): number[] => {
-	const selection = new Array<number>(frontiersByGroup.length);
+const reconstructSelection = (backPointersByGroup: BackPointers[], finalStateIndex: number): number[] => {
+	const selection = new Array<number>(backPointersByGroup.length);
 	let stateIndex = finalStateIndex;
-	for (let groupIndex = frontiersByGroup.length - 1; groupIndex >= 0; groupIndex--) {
-		const frontier = frontiersByGroup[groupIndex];
-		selection[groupIndex] = frontier.itemIndices[stateIndex];
-		stateIndex = frontier.previousStateIndices[stateIndex];
+	for (let groupIndex = backPointersByGroup.length - 1; groupIndex >= 0; groupIndex--) {
+		const backPointers = backPointersByGroup[groupIndex];
+		selection[groupIndex] = backPointers.itemIndices[stateIndex];
+		stateIndex = backPointers.previousStateIndices[stateIndex];
 	}
 	return selection;
 };
@@ -195,16 +188,21 @@ const reconstructSelection = (frontiersByGroup: Frontier[], finalStateIndex: num
 export const solveMultipleChoiceKnapsack = (groups: KnapsackItem[][], budgets: number[]): (number[] | null)[] => {
 	if (groups.some((items) => items.length === 0)) return budgets.map(() => null);
 
-	const frontiersByGroup: Frontier[] = [];
-	let frontier = createEmptySelectionFrontier();
+	const backPointersByGroup: BackPointers[] = [];
+	let frontier: Frontier = {
+		costs: new Float64Array([0]),
+		values: new Float64Array([0]),
+		previousStateIndices: new Int32Array([-1]),
+		itemIndices: new Int32Array([-1])
+	};
 	for (const items of groups) {
 		frontier = addRegionToFrontier(frontier, items);
-		frontiersByGroup.push(frontier);
+		backPointersByGroup.push(toBackPointers(frontier));
 	}
 
 	return budgets.map((budget) => {
 		const finalStateIndex = findMostExpensiveAffordableIndex(frontier.costs, budget);
 		if (finalStateIndex === -1) return null;
-		return reconstructSelection(frontiersByGroup, finalStateIndex);
+		return reconstructSelection(backPointersByGroup, finalStateIndex);
 	});
 };

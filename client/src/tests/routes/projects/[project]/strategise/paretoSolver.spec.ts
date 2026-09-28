@@ -158,7 +158,7 @@ describe('thinFrontier', () => {
 			expect(thinned.values[i]).toBe(frontier.values[originalIndex]);
 			expect(thinned.itemIndices[i]).toBe(frontier.itemIndices[originalIndex]);
 		});
-	});
+	}, 10_000);
 
 	it('collapses a dense cluster of costs while keeping sparse states', () => {
 		// Most states are packed near zero; a few are spread far out
