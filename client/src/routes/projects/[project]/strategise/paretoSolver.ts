@@ -3,16 +3,8 @@ export interface KnapsackItem {
 	value: number;
 }
 
-/** Caps frontier size per region so pathological inputs stay fast; exceeding it trades exactness for speed. */
 export const MAX_FRONTIER_SIZE = 100_000;
 
-/** Relative tolerance applied to budgets to absorb floating point error in summed costs. */
-const BUDGET_TOLERANCE = 1e-9;
-
-/**
- * A Pareto frontier after some number of regions, stored as parallel typed arrays sorted by ascending cost
- * (with strictly increasing value). Each state remembers how it was reached so selections can be reconstructed.
- */
 interface Frontier {
 	costs: Float64Array;
 	values: Float64Array;
@@ -132,7 +124,7 @@ const addRegionToFrontier = (previous: Frontier, items: KnapsackItem[]): Frontie
 
 /** Index of the most expensive state with cost <= budget, or -1 if none fits. Relies on costs being sorted. */
 const findMostExpensiveAffordableIndex = (costs: Float64Array, budget: number): number => {
-	const budgetWithTolerance = budget + Math.abs(budget) * BUDGET_TOLERANCE;
+	const budgetWithTolerance = budget + Math.abs(budget) * 1e-9;
 	let low = 0;
 	let high = costs.length - 1;
 	let bestIndex = -1;
