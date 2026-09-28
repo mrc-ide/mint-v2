@@ -17,7 +17,6 @@ import type {
 	StrategiseResult,
 	StrategiseResults
 } from '$lib/types/userState';
-import { equalTo, lessEq, solve, type Constraint, type Model } from 'yalps';
 import type {
 	Block,
 	CompareStrategiseRegions,
@@ -26,6 +25,7 @@ import type {
 	StrategiseRegionByMetric,
 	StrategiseResultIntervention
 } from './schema';
+import { solveMultipleChoiceKnapsack } from './paretoSolver';
 
 const mapTotalsToInterventions = (
 	totals: ReturnType<typeof getTotalCasesAndCostsPerScenario>
@@ -166,43 +166,33 @@ export const buildInterventions = (
 };
 
 /**** Optimisation Helpers ****/
-type OptimizationVariables<K extends MetricKey> = Record<
-	string,
-	{
-		cost: number;
-	} & Record<K, number> &
-		Record<string, number>
->;
 type OptimisationDirection = 'maximize' | 'minimize';
 
 /**
- * Runs the optimization model for a given cost threshold and returns the selected interventions based on the specified objective.
+ * Selects one intervention per region for every cost threshold, optimising the given metric.
+ * Returns an empty selection for thresholds where no combination of interventions fits the budget.
  */
-const runOptimisation = <TResult, TVariables extends Record<string, Record<string, number>>>(
-	cost: number,
-	direction: OptimisationDirection,
-	objective: MetricKey,
-	constraints: Record<string, Constraint>,
-	variables: TVariables,
-	mapResult: (variableName: string) => TResult
-): TResult[] => {
-	const model: Model = {
-		direction,
-		objective,
-		constraints: { ...constraints, cost: lessEq(cost) },
-		variables,
-		binaries: true
-	};
+export const optimiseAcrossCosts = <K extends MetricKey>(
+	costThresholds: number[],
+	regions: StrategiseRegionByMetric<K>[],
+	metric: K,
+	direction: OptimisationDirection
+): StrategiseResultIntervention<K>[][] => {
+	const sign = direction === 'maximize' ? 1 : -1;
+	const groups = regions.map(({ interventions }) =>
+		interventions.map((intervention) => ({ cost: intervention.cost, value: sign * intervention[metric] }))
+	);
 
-	const solution = solve(model);
-	if (solution.status !== 'optimal') {
-		console.warn(`No optimal solution found for cost: ${cost}`);
-		return [];
-	}
-
-	return solution.variables
-		.filter(([_, isSelected]) => isSelected === 1)
-		.map(([variableName]) => mapResult(variableName));
+	return solveMultipleChoiceKnapsack(groups, costThresholds).map((choices) => {
+		if (!choices) return [];
+		return choices.map(
+			(choice, index) =>
+				({
+					region: regions[index].region,
+					...regions[index].interventions[choice]
+				}) as StrategiseResultIntervention<K>
+		);
+	});
 };
 
 export const strategiseAsync = (
@@ -256,17 +246,27 @@ export const strategiseCompare = (
 		Number.isFinite(longTermMinCost) && Number.isFinite(longTermMaxCost)
 			? createLinearSpace(longTermMinCost, longTermMaxCost)
 			: [];
-	const presentModel = setupOptimisationModel(compareRegionalStrategies.present, 'cases');
-	const longTermModel = setupOptimisationModel(compareRegionalStrategies.longTerm, 'cases');
+	const presentInterventions = optimiseAcrossCosts(
+		presentCostRange,
+		compareRegionalStrategies.present,
+		'cases',
+		'minimize'
+	);
+	const longTermInterventions = optimiseAcrossCosts(
+		longTermCostRange,
+		compareRegionalStrategies.longTerm,
+		'cases',
+		'minimize'
+	);
 
 	return {
-		present: presentCostRange.map((costThreshold) => ({
+		present: presentCostRange.map((costThreshold, index) => ({
 			costThreshold,
-			interventions: optimiseForMinCases(costThreshold, presentModel)
+			interventions: presentInterventions[index]
 		})),
-		longTerm: longTermCostRange.map((costThreshold) => ({
+		longTerm: longTermCostRange.map((costThreshold, index) => ({
 			costThreshold,
-			interventions: optimiseForMinCases(costThreshold, longTermModel)
+			interventions: longTermInterventions[index]
 		}))
 	};
 };
@@ -295,66 +295,17 @@ export const strategise = (
 		})
 	);
 
-	const { constraints, variables } = setupOptimisationModel(strategiesIncludingNoIntervention, 'casesAverted');
-
-	return costRange.map((costThreshold) => ({
-		costThreshold,
-		interventions: runOptimisation(costThreshold, 'maximize', 'casesAverted', constraints, variables, (variableName) =>
-			parseOptimisationResult(variableName, variables, 'casesAverted')
-		)
-	}));
-};
-
-/**
- * Optimizes intervention selection to minimize cases for a given cost threshold using linear programming.
- */
-export const optimiseForMinCases = (
-	cost: number,
-	{ constraints, variables }: ReturnType<typeof setupOptimisationModel<'cases'>>
-): StrategiseResultIntervention<'cases'>[] => {
-	return runOptimisation(cost, 'minimize', 'cases', constraints, variables, (variableName) =>
-		parseOptimisationResult(variableName, variables, 'cases')
+	const interventionsPerCost = optimiseAcrossCosts(
+		costRange,
+		strategiesIncludingNoIntervention,
+		'casesAverted',
+		'maximize'
 	);
-};
 
-/*** Sets up optimization constraints and variables for linear programming.  ***/
-const setupOptimisationModel = <K extends MetricKey>(regions: StrategiseRegionByMetric<K>[], metric: K) => {
-	const constraints: Record<string, Constraint> = {};
-	const variables: OptimizationVariables<K> = {};
-
-	for (const { region, interventions } of regions) {
-		// Ensure exactly one intervention per region
-		constraints[region] = equalTo(1);
-
-		for (const interventionData of interventions) {
-			const variableName = `${region}--${interventionData.intervention}`;
-			variables[variableName] = {
-				cost: interventionData.cost,
-				[metric]: interventionData[metric],
-				[region]: 1 // Links variable to its region constraint
-			} as OptimizationVariables<K>[string];
-		}
-	}
-
-	return { constraints, variables };
-};
-
-/*** Parses optimization result variable name back to intervention data. ***/
-
-export const parseOptimisationResult = <K extends MetricKey>(
-	variableName: string,
-	variables: OptimizationVariables<K>,
-	metric: K
-): StrategiseResultIntervention<K> => {
-	const [region, intervention] = variableName.split('--');
-	const { cost, [metric]: value } = variables[variableName];
-
-	return {
-		region,
-		intervention: intervention as Scenario,
-		cost,
-		[metric]: value
-	} as StrategiseResultIntervention<K>;
+	return costRange.map((costThreshold, index) => ({
+		costThreshold,
+		interventions: interventionsPerCost[index]
+	}));
 };
 
 /**

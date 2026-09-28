@@ -14,15 +14,13 @@ import {
 	getGridTicks,
 	getMaximumCostForStrategise,
 	getMinimumCostForStrategise,
-	optimiseForMinCases,
-	parseOptimisationResult,
+	optimiseAcrossCosts,
 	processRegionData,
 	strategise,
 	strategiseAsync,
 	strategiseCompare,
 	strategiseCompareAsync
 } from '$routes/projects/[project]/strategise/utils';
-import { equalTo } from 'yalps';
 
 beforeEach(() => {
 	vi.resetAllMocks();
@@ -580,49 +578,53 @@ describe('strategiseCompareAsync', () => {
 	});
 });
 
-describe('optimiseForMinCases', () => {
-	it('should select interventions that minimize cases within the budget', () => {
-		const model = {
-			constraints: {
-				'Region A': equalTo(1),
-				'Region B': equalTo(1)
-			},
-			variables: {
-				'Region A--no_intervention': { cost: 0, cases: 100, 'Region A': 1 },
-				'Region A--irs_only': { cost: 50, cases: 90, 'Region A': 1 },
-				'Region B--no_intervention': { cost: 0, cases: 80, 'Region B': 1 },
-				'Region B--irs_only': { cost: 50, cases: 40, 'Region B': 1 }
-			}
-		} as any;
+describe('optimiseAcrossCosts', () => {
+	const regions: StrategiseRegionByMetric<'cases'>[] = [
+		{
+			region: 'Region A',
+			interventions: [
+				{ intervention: 'no_intervention' as Scenario, cost: 0, cases: 100 },
+				{ intervention: 'irs_only' as Scenario, cost: 50, cases: 90 }
+			]
+		},
+		{
+			region: 'Region B',
+			interventions: [
+				{ intervention: 'no_intervention' as Scenario, cost: 0, cases: 80 },
+				{ intervention: 'irs_only' as Scenario, cost: 50, cases: 40 }
+			]
+		}
+	];
 
-		const result = optimiseForMinCases(50, model);
+	it('should select interventions that minimize cases within each budget', () => {
+		const result = optimiseAcrossCosts([50, 100], regions, 'cases', 'minimize');
 
-		expect(result).toHaveLength(2);
-		expect(result).toContainEqual({ region: 'Region A', intervention: 'no_intervention', cost: 0, cases: 100 });
-		expect(result).toContainEqual({ region: 'Region B', intervention: 'irs_only', cost: 50, cases: 40 });
+		expect(result[0]).toEqual([
+			{ region: 'Region A', intervention: 'no_intervention', cost: 0, cases: 100 },
+			{ region: 'Region B', intervention: 'irs_only', cost: 50, cases: 40 }
+		]);
+		expect(result[1]).toEqual([
+			{ region: 'Region A', intervention: 'irs_only', cost: 50, cases: 90 },
+			{ region: 'Region B', intervention: 'irs_only', cost: 50, cases: 40 }
+		]);
+	});
+
+	it('should select interventions that maximize the metric when direction is maximize', () => {
+		const result = optimiseAcrossCosts([0], regions, 'cases', 'maximize');
+
+		expect(result[0].map((i) => i.intervention)).toEqual(['no_intervention', 'no_intervention']);
+	});
+
+	it('should return an empty selection when no combination fits the budget', () => {
+		const expensiveRegions = regions.map((region) => ({
+			...region,
+			interventions: region.interventions.filter((i) => i.cost > 0)
+		}));
+
+		expect(optimiseAcrossCosts([99, 100], expensiveRegions, 'cases', 'minimize')).toEqual([[], expect.any(Array)]);
 	});
 });
 
-describe('parseOptimisationResult', () => {
-	it('should parse variable name and metric value correctly', () => {
-		const variables = {
-			'Region X--lsm_only': {
-				cost: 250,
-				cases: 120,
-				'Region X': 1
-			}
-		} as any;
-
-		const result = parseOptimisationResult('Region X--lsm_only', variables, 'cases');
-
-		expect(result).toEqual({
-			region: 'Region X',
-			intervention: 'lsm_only',
-			cost: 250,
-			cases: 120
-		});
-	});
-});
 describe('createGridRows', () => {
 	it('should return an empty array when strategise results are empty', async () => {
 		const { createGridRows } = await import('$routes/projects/[project]/strategise/utils');
