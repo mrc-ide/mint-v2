@@ -10,7 +10,6 @@ import {
 	coerceDefaults,
 	forEachField,
 	getFieldErrorMessage,
-	hasInputValue,
 	initializeFieldValues,
 	isCustomCrossFieldRuleViolated,
 	isDisabled,
@@ -22,7 +21,7 @@ import type { Region } from '$lib/types/userState';
 
 export const REGION_COLUMN_HEADER = 'Region';
 export const MULTISELECT_SEPARATOR = '|';
-const COMMENT_CELL = /^#(\s|$)/;
+const COMMENT_CELL = /^#/;
 const DECIMAL_NUMBER = /^[+-]?(\d+(\.\d*)?|\.\d+)(e[+-]?\d+)?$/i;
 const MAX_REPORTED_ERRORS = 10;
 const MAX_QUOTED_HEADER_LENGTH = 40;
@@ -156,7 +155,7 @@ export const parseRow = (row: string[], columns: Column[]) => {
 	let name = '';
 
 	columns.forEach((column, index) => {
-		const rawValue = (row[index] ?? '').trim();
+		const rawValue = row[index]?.trim();
 		if (!column || !rawValue) return;
 
 		if (column.kind === 'region') {
@@ -208,7 +207,6 @@ export const isSetWhileDisabled = (
 ): boolean =>
 	supplied !== undefined &&
 	isDisabled(formValues, field) &&
-	hasInputValue(supplied) &&
 	JSON.stringify(supplied) !== JSON.stringify(coerceDefaults(field));
 
 export const validateFormValues = (

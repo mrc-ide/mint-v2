@@ -329,7 +329,7 @@ describe('parseProjectCsv', () => {
 			expectErrors('Region,Size of population\n,50000\n', ['Row 2: a region name is required.']);
 		});
 
-		it.each(['North/South', 'North\\South', 'Why?', '#1 District', '100% covered'])(
+		it.each(['North/South', 'North\\South', 'Why?', 'District #1', '100% covered'])(
 			'should reject the region name "%s", which would break its URL',
 			(name) => {
 				expectErrors(`Region\n"${name}"\n`, ['Row 2: region names cannot contain / \\ ? # or %.']);
@@ -581,7 +581,8 @@ describe('projectCsv helpers', () => {
 		[['', ' '], true],
 		[['# note', 'x'], true],
 		[['#', 'x'], true],
-		[['#1', 'x'], false],
+		[['#1', 'x'], true],
+		[['North #1', 'x'], false],
 		[['North', ''], false]
 	])('isSkippedRow(%j) should be %s', (row, expected) => {
 		expect(isSkippedRow(row)).toBe(expected);
@@ -681,6 +682,28 @@ describe('projectCsv helpers', () => {
 		expect(isSetWhileDisabled(dependent, undefined, off)).toBe(false);
 		expect(isSetWhileDisabled(dependent, 0, off)).toBe(false);
 		expect(isSetWhileDisabled(dependent, 5, { population: 1, dependent: 5 })).toBe(false);
+	});
+
+	it('isSetWhileDisabled should flag a falsy value that differs from a non-zero default', () => {
+		const withDefault = asField({
+			id: 'with_default',
+			label: 'With default',
+			type: 'number',
+			default: 5,
+			disabled: falsy('population')
+		});
+		const off = { population: 0, with_default: 5 };
+		expect(isSetWhileDisabled(withDefault, 0, off)).toBe(true);
+		expect(isSetWhileDisabled(withDefault, 5, off)).toBe(false);
+
+		const toggleDefaultOn = asField({
+			id: 'toggle_on',
+			label: 'Toggle on',
+			type: 'toggle',
+			default: true,
+			disabled: falsy('population')
+		});
+		expect(isSetWhileDisabled(toggleDefaultOn, false, { population: 0, toggle_on: true })).toBe(true);
 	});
 
 	it('validateFormValues should report field, disabled and custom rule errors', () => {
