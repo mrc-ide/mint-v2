@@ -15,7 +15,7 @@ test.describe('Upload project CSV', () => {
 	});
 
 	test('can download the CSV template', async ({ page }) => {
-		await page.getByRole('button', { name: 'Upload CSV' }).click();
+		await page.getByRole('button', { name: 'Upload Project' }).click();
 
 		const [download] = await Promise.all([
 			page.waitForEvent('download'),
