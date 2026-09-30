@@ -58,7 +58,7 @@ export const runRegionWithItn = async (page: Page) => {
 };
 
 export const uploadProjectCsv = async (page: Page, projectName: string, csv: string) => {
-	await page.getByRole('button', { name: 'Upload CSV' }).click();
+	await page.getByRole('button', { name: 'Upload Project' }).click();
 	await page.getByRole('textbox', { name: 'Project Name' }).fill(projectName);
 	await page
 		.getByLabel('CSV File')
