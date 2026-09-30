@@ -32,7 +32,7 @@ describe('/+page.svelte', () => {
 		await expect.element(screen.getByText(/asia/i)).toBeVisible();
 		await expect.element(screen.getByText(/you have 2 projects/i)).toBeVisible();
 		await expect.element(screen.getByRole('button', { name: /create project/i })).toBeVisible();
-		await expect.element(screen.getByRole('button', { name: /upload csv/i })).toBeVisible();
+		await expect.element(screen.getByRole('button', { name: /upload project/i })).toBeVisible();
 	});
 
 	it('should be able to delete a project', async () => {

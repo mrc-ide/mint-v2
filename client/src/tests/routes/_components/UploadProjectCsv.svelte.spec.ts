@@ -14,7 +14,7 @@ const csvFile = (name: string) => new File(['Region\nNorth\n'], name, { type: 't
 
 const openDialog = async () => {
 	const screen = render(UploadProjectCsv, { pageForm: await superValidate(zod4(uploadProjectSchema)) } as any);
-	await screen.getByRole('button', { name: /upload csv/i }).click();
+	await screen.getByRole('button', { name: /upload project/i }).click();
 	return screen;
 };
 
