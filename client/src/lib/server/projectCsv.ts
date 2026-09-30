@@ -1,4 +1,5 @@
 import type {
+	CustomValidationRule,
 	DynamicFormSchema,
 	FormValue,
 	MultiselectField,
@@ -10,7 +11,6 @@ import {
 	coerceDefaults,
 	forEachField,
 	getFieldErrorMessage,
-	hasInputValue,
 	initializeFieldValues,
 	isCustomCrossFieldRuleViolated,
 	isDisabled,
@@ -22,7 +22,7 @@ import type { Region } from '$lib/types/userState';
 
 export const REGION_COLUMN_HEADER = 'Region';
 export const MULTISELECT_SEPARATOR = '|';
-const COMMENT_CELL = /^#(\s|$)/;
+const COMMENT_CELL = /^#/;
 const DECIMAL_NUMBER = /^[+-]?(\d+(\.\d*)?|\.\d+)(e[+-]?\d+)?$/i;
 const MAX_REPORTED_ERRORS = 10;
 const MAX_QUOTED_HEADER_LENGTH = 40;
@@ -32,6 +32,8 @@ const SPLIT_ROW_ERROR =
 export interface CsvField {
 	field: SchemaField;
 	isPreRun: boolean;
+	/** The group and sub group headings the field sits under in the form, such as `Baseline Options: Site Inputs`. */
+	section: string;
 }
 
 /** A column is either the region name or one of the form fields, or unused when its header is blank. */
@@ -56,8 +58,10 @@ export const labelOf = (field: SchemaField): string => `"${field.label.trim()}"`
 /** Display fields are derived from other fields, so they are never read from or written to a CSV. */
 export const getCsvFields = (schema: DynamicFormSchema): CsvField[] => {
 	const fields: CsvField[] = [];
-	forEachField(schema.groups, (field, group) => {
-		if (field.type !== 'display' && !field.hidden) fields.push({ field, isPreRun: Boolean(group.preRun) });
+	forEachField(schema.groups, (field, group, subGroup) => {
+		if (field.type === 'display' || field.hidden) return;
+		const section = group.title === subGroup.title ? group.title : `${group.title}: ${subGroup.title}`;
+		fields.push({ field, isPreRun: Boolean(group.preRun), section });
 	});
 	return fields;
 };
@@ -156,7 +160,7 @@ export const parseRow = (row: string[], columns: Column[]) => {
 	let name = '';
 
 	columns.forEach((column, index) => {
-		const rawValue = (row[index] ?? '').trim();
+		const rawValue = row[index]?.trim();
 		if (!column || !rawValue) return;
 
 		if (column.kind === 'region') {
@@ -208,8 +212,20 @@ export const isSetWhileDisabled = (
 ): boolean =>
 	supplied !== undefined &&
 	isDisabled(formValues, field) &&
-	hasInputValue(supplied) &&
 	JSON.stringify(supplied) !== JSON.stringify(coerceDefaults(field));
+
+/** Add the fields a custom rule sums, with their values, to its message - such as `... 100% (from "A": 60, "B": 50)`. */
+export const describeRuleViolation = (
+	rule: CustomValidationRule,
+	formValues: Record<string, FormValue>,
+	fieldsById: Map<string, SchemaField>
+): string => {
+	const involved = rule.fields.map((id) => {
+		const field = fieldsById.get(id);
+		return `${field ? labelOf(field) : `"${id}"`}: ${formValues[id]}`;
+	});
+	return `${rule.message.replace(/\.$/, '')} (from ${involved.join(', ')})`;
+};
 
 export const validateFormValues = (
 	suppliedValues: Record<string, FormValue>,
@@ -229,7 +245,7 @@ export const validateFormValues = (
 
 	const ruleErrors = Object.values(schema.customValidationRules ?? {})
 		.filter((rule) => isCustomCrossFieldRuleViolated(formValues, rule))
-		.map((rule) => rule.message);
+		.map((rule) => describeRuleViolation(rule, formValues, fieldsById));
 
 	return [...fieldErrors, ...disabledErrors, ...ruleErrors];
 };

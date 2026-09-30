@@ -87,7 +87,11 @@ describe('projectCsvTemplate helpers', () => {
 			default: 0,
 			disabled: falsy('enabled')
 		});
-		const fields = [usage, byUsage, enabled, byEnabled, kinds].map((field) => ({ field, isPreRun: false }));
+		const fields = [usage, byUsage, enabled, byEnabled, kinds].map((field) => ({
+			field,
+			isPreRun: false,
+			section: 'Section'
+		}));
 
 		expect(getExampleValues(fields, mapFieldsById(fields))).toEqual({
 			usage: 50,

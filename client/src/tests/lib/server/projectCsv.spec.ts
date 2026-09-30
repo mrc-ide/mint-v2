@@ -47,7 +47,9 @@ const DEFAULT_FORM_VALUES = {
 };
 
 const inlineSchema = (fields: object[]) =>
-	({ groups: [{ id: 'group', subGroups: [{ id: 'subGroup', fields }] }] }) as unknown as DynamicFormSchema;
+	({
+		groups: [{ id: 'group', title: 'Group', subGroups: [{ id: 'subGroup', title: 'Sub group', fields }] }]
+	}) as unknown as DynamicFormSchema;
 
 const OPTIONS = [
 	{ label: 'A', value: 'a' },
@@ -329,7 +331,7 @@ describe('parseProjectCsv', () => {
 			expectErrors('Region,Size of population\n,50000\n', ['Row 2: a region name is required.']);
 		});
 
-		it.each(['North/South', 'North\\South', 'Why?', '#1 District', '100% covered'])(
+		it.each(['North/South', 'North\\South', 'Why?', 'District #1', '100% covered'])(
 			'should reject the region name "%s", which would break its URL',
 			(name) => {
 				expectErrors(`Region\n"${name}"\n`, ['Row 2: region names cannot contain / \\ ? # or %.']);
@@ -343,7 +345,7 @@ describe('parseProjectCsv', () => {
 		it('should reject a value outside the range of its field', () => {
 			expectErrors('Region,Pyrethroid ITN population usage\nNorth,120\n', [
 				'Row 2: Pyrethroid ITN population usage must be ≤ 100.',
-				'Row 2: Total ITN population usage must be less than or equal to 100%.'
+				'Row 2: Total ITN population usage must be less than or equal to 100% (from "Pyrethroid ITN population usage": 120, "Pyrethroid-PBO ITN population usage": 0, "Pyrethroid-Pyrrole ITN population usage": 0, "Pyrethroid-pyriproxyfen ITN population usage": 0).'
 			]);
 		});
 
@@ -353,7 +355,7 @@ describe('parseProjectCsv', () => {
 
 		it('should apply the cross field validation rules of the schema', () => {
 			expectErrors('Region,Pyrethroid ITN population usage,Pyrethroid-PBO ITN population usage\nNorth,60,60\n', [
-				'Row 2: Total ITN population usage must be less than or equal to 100%.'
+				'Row 2: Total ITN population usage must be less than or equal to 100% (from "Pyrethroid ITN population usage": 60, "Pyrethroid-PBO ITN population usage": 60, "Pyrethroid-Pyrrole ITN population usage": 0, "Pyrethroid-pyriproxyfen ITN population usage": 0).'
 			]);
 		});
 
@@ -381,7 +383,7 @@ describe('parseProjectCsv', () => {
 });
 
 describe('buildProjectCsvTemplate', () => {
-	const [header, help, allParameters, baselineOnly] = parseCsv(buildProjectCsvTemplate(schema));
+	const [header, section, help, allParameters, baselineOnly] = parseCsv(buildProjectCsvTemplate(schema));
 
 	it('should have a region column followed by a column per editable field', () => {
 		expect(header).toEqual([
@@ -399,6 +401,38 @@ describe('buildProjectCsvTemplate', () => {
 			'Number of People per household',
 			'Procurement Buffer'
 		]);
+	});
+
+	it('should name the form section of each column, so a column can be tied to its group', () => {
+		expect(section).toEqual([
+			'# Section - this row is ignored. Where each field is in the form',
+			'Baseline Options: Site Inputs',
+			'Baseline Options: Site Inputs',
+			'Baseline Options: Past Vector Control',
+			'Baseline Options: Past Vector Control',
+			'Baseline Options: Past Vector Control',
+			'Baseline Options: Past Vector Control',
+			'Intervention Options: Future Intervention Options',
+			'Intervention Options: Future Intervention Options',
+			'Intervention Options: Future Intervention Options',
+			'Cost Options: Procurement and Distribution Costs',
+			'Cost Options: Procurement and Distribution Costs',
+			'Cost Options: Procurement and Distribution Costs'
+		]);
+	});
+
+	it('should name a section once when its group and sub group share a heading', () => {
+		const sameHeading = {
+			groups: [
+				{
+					id: 'g',
+					title: 'Costs',
+					subGroups: [{ id: 's', title: 'Costs', fields: [{ id: 'a', label: 'A', type: 'number' }] }]
+				}
+			]
+		} as unknown as DynamicFormSchema;
+
+		expect(parseCsv(buildProjectCsvTemplate(sameHeading))[1].slice(1)).toEqual(['Costs']);
 	});
 
 	it('should describe what each column accepts in a help row', () => {
@@ -465,7 +499,7 @@ describe('buildProjectCsvTemplate', () => {
 			{ id: 'at_most', label: 'At most', type: 'number', max: 9, default: 1, unit: '%' }
 		]);
 
-		expect(parseCsv(buildProjectCsvTemplate(openRanges))[1].slice(1)).toEqual([
+		expect(parseCsv(buildProjectCsvTemplate(openRanges))[2].slice(1)).toEqual([
 			'Number of 1 or more. Blank = 1',
 			'Number of 9 or less (%). Blank = 1'
 		]);
@@ -479,7 +513,7 @@ describe('buildProjectCsvTemplate', () => {
 			{ id: 'kinds', label: 'Kinds', type: 'multiselect', options: OPTIONS }
 		]);
 
-		const [, help, example] = parseCsv(buildProjectCsvTemplate(dependencies));
+		const [, , help, example] = parseCsv(buildProjectCsvTemplate(dependencies));
 
 		expect(help.slice(1, 3)).toEqual([
 			'Number. Blank = 0. Only applies when "Kinds" has a value',
@@ -494,7 +528,7 @@ describe('buildProjectCsvTemplate', () => {
 			{ id: 'locked', label: 'Locked', type: 'number', default: 2, disabled: true }
 		]);
 
-		expect(parseCsv(buildProjectCsvTemplate(alwaysDisabled))[2]).toEqual(['Example region - all parameters', '1', '']);
+		expect(parseCsv(buildProjectCsvTemplate(alwaysDisabled))[3]).toEqual(['Example region - all parameters', '1', '']);
 	});
 
 	it('should leave out hidden fields', () => {
@@ -531,7 +565,11 @@ describe('projectCsv helpers', () => {
 		default: 0,
 		disabled: falsy('population')
 	});
-	const csvFields = [population, seasonal, kinds, dependent].map((field) => ({ field, isPreRun: false }));
+	const csvFields = [population, seasonal, kinds, dependent].map((field) => ({
+		field,
+		isPreRun: false,
+		section: 'Section'
+	}));
 	const fieldsById = mapFieldsById(csvFields);
 	const columns: Column[] = [
 		{ kind: 'region' },
@@ -550,15 +588,17 @@ describe('projectCsv helpers', () => {
 		expect(labelOf(population)).toBe('"Population"');
 	});
 
-	it('getCsvFields should leave out display and hidden fields and flag pre-run groups', () => {
+	it('getCsvFields should leave out display and hidden fields, flag pre-run groups and name sections', () => {
 		const withPreRun = {
 			groups: [
 				{
 					id: 'baseline',
+					title: 'Baseline',
 					preRun: true,
 					subGroups: [
 						{
 							id: 'sub',
+							title: 'Inputs',
 							fields: [
 								{ id: 'a', label: 'A', type: 'number' },
 								{ id: 'b', label: 'B', type: 'display' },
@@ -567,13 +607,17 @@ describe('projectCsv helpers', () => {
 						}
 					]
 				},
-				{ id: 'other', subGroups: [{ id: 'sub', fields: [{ id: 'd', label: 'D', type: 'toggle' }] }] }
+				{
+					id: 'other',
+					title: 'Other',
+					subGroups: [{ id: 'sub', title: 'Other', fields: [{ id: 'd', label: 'D', type: 'toggle' }] }]
+				}
 			]
 		} as unknown as DynamicFormSchema;
 
-		expect(getCsvFields(withPreRun).map(({ field, isPreRun }) => [field.id, isPreRun])).toEqual([
-			['a', true],
-			['d', false]
+		expect(getCsvFields(withPreRun).map(({ field, isPreRun, section }) => [field.id, isPreRun, section])).toEqual([
+			['a', true, 'Baseline: Inputs'],
+			['d', false, 'Other']
 		]);
 	});
 
@@ -581,7 +625,8 @@ describe('projectCsv helpers', () => {
 		[['', ' '], true],
 		[['# note', 'x'], true],
 		[['#', 'x'], true],
-		[['#1', 'x'], false],
+		[['#1', 'x'], true],
+		[['North #1', 'x'], false],
 		[['North', ''], false]
 	])('isSkippedRow(%j) should be %s', (row, expected) => {
 		expect(isSkippedRow(row)).toBe(expected);
@@ -683,6 +728,28 @@ describe('projectCsv helpers', () => {
 		expect(isSetWhileDisabled(dependent, 5, { population: 1, dependent: 5 })).toBe(false);
 	});
 
+	it('isSetWhileDisabled should flag a falsy value that differs from a non-zero default', () => {
+		const withDefault = asField({
+			id: 'with_default',
+			label: 'With default',
+			type: 'number',
+			default: 5,
+			disabled: falsy('population')
+		});
+		const off = { population: 0, with_default: 5 };
+		expect(isSetWhileDisabled(withDefault, 0, off)).toBe(true);
+		expect(isSetWhileDisabled(withDefault, 5, off)).toBe(false);
+
+		const toggleDefaultOn = asField({
+			id: 'toggle_on',
+			label: 'Toggle on',
+			type: 'toggle',
+			default: true,
+			disabled: falsy('population')
+		});
+		expect(isSetWhileDisabled(toggleDefaultOn, false, { population: 0, toggle_on: true })).toBe(true);
+	});
+
 	it('validateFormValues should report field, disabled and custom rule errors', () => {
 		const withRule: ParseContext = {
 			...context,
@@ -701,7 +768,9 @@ describe('projectCsv helpers', () => {
 		expect(validateFormValues({}, { ...formValues, population: 200, dependent: 0 }, context)).toEqual([
 			' Population  must be ≤ 100'
 		]);
-		expect(validateFormValues({}, { ...formValues, population: 60, dependent: 0 }, withRule)).toEqual(['Too many']);
+		expect(validateFormValues({}, { ...formValues, population: 60, dependent: 0 }, withRule)).toEqual([
+			'Too many (from "Population": 60)'
+		]);
 	});
 
 	it('validateRegionName should require a unique, URL safe name', () => {

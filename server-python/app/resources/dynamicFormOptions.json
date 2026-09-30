@@ -40,7 +40,7 @@
               "label": "Recent malaria prevalence",
               "helpText": "Define the recent endemicity of your setting as measured by the prevalence of children 6-month to 59-months of age who are diagnosed with falciparum malaria by microscopy. The prevalence estimate should relate to the mean value from the previous year.",
               "required": true,
-              "default": 2,
+              "default": 10,
               "type": "slider",
               "min": 2,
               "max": 70,

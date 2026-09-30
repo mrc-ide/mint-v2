@@ -58,7 +58,7 @@
 		if (!isSubmittingOrRunning) isOpen = open;
 	}}
 >
-	<Dialog.Trigger class={buttonVariants({ variant: 'outline' })}><UploadIcon />Upload CSV</Dialog.Trigger>
+	<Dialog.Trigger class={buttonVariants({ variant: 'outline' })}><UploadIcon />Upload Project</Dialog.Trigger>
 	<Dialog.Content class="sm:max-w-xl" showCloseButton={!isSubmittingOrRunning}>
 		<Dialog.Header>
 			<Dialog.Title>Upload Project CSV</Dialog.Title>

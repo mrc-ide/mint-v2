@@ -107,6 +107,10 @@ export const buildProjectCsvTemplate = (schema: DynamicFormSchema): string => {
 		`${COMMENT_PREFIX}Help - this row is ignored. A unique region name, which ${URL_RESERVED_CHARACTERS_MESSAGE}`,
 		...fields.map(({ field }) => describeField(field, fieldsById))
 	];
+	const sectionRow = [
+		`${COMMENT_PREFIX}Section - this row is ignored. Where each field is in the form`,
+		...fields.map(({ section }) => section)
+	];
 	const allParameters = [
 		'Example region - all parameters',
 		...fields.map(({ field }) => formatCell(field, exampleValues))
@@ -116,5 +120,5 @@ export const buildProjectCsvTemplate = (schema: DynamicFormSchema): string => {
 		...fields.map(({ field, isPreRun }) => (isPreRun ? formatCell(field, exampleValues) : ''))
 	];
 
-	return Papa.unparse([header, help, allParameters, baselineOnly]);
+	return Papa.unparse([header, sectionRow, help, allParameters, baselineOnly]);
 };
