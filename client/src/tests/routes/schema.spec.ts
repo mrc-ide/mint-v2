@@ -1,4 +1,4 @@
-import { createProjectSchema } from '$routes/schema';
+import { createProjectSchema, MAX_CSV_FILE_SIZE_BYTES, uploadProjectSchema } from '$routes/schema';
 
 describe('create project schema', () => {
 	it('should validate a correct project', () => {
@@ -74,6 +74,61 @@ describe('create project schema', () => {
 		if (res.success) {
 			expect((res.data as Record<string, unknown>).unknown).toBeUndefined();
 			expect(res.data).toEqual({ name: 'Project', regions: ['us-east-1'] });
+		}
+	});
+});
+
+describe('upload project schema', () => {
+	const csvFile = (content: string) => new File([content], 'regions.csv', { type: 'text/csv' });
+
+	it('should validate a name and a CSV file', () => {
+		const res = uploadProjectSchema.safeParse({ name: 'My Project', file: csvFile('Region\nNorth\n') });
+		expect(res.success).toBe(true);
+	});
+
+	it('should reject an empty name', () => {
+		const res = uploadProjectSchema.safeParse({ name: '', file: csvFile('Region\n') });
+		expect(res.success).toBe(false);
+		if (!res.success) {
+			expect(res.error.flatten().fieldErrors.name?.[0]).toBe('Project name is required');
+		}
+	});
+
+	it.each(['Kenya/2026', 'Kenya?', 'Kenya #2', '100% Kenya', 'Kenya\\2026'])(
+		'should reject the project name "%s", which would break its URLs',
+		(name) => {
+			const res = uploadProjectSchema.safeParse({ name, file: csvFile('Region\n') });
+			expect(res.success).toBe(false);
+			if (!res.success) {
+				expect(res.error.flatten().fieldErrors.name?.[0]).toBe('Project names cannot contain / \\ ? # or %');
+			}
+		}
+	);
+
+	it('should reject a missing file', () => {
+		const res = uploadProjectSchema.safeParse({ name: 'My Project' });
+		expect(res.success).toBe(false);
+		if (!res.success) {
+			expect(res.error.flatten().fieldErrors.file?.[0]).toBe('A CSV file is required');
+		}
+	});
+
+	it('should reject an empty file', () => {
+		const res = uploadProjectSchema.safeParse({ name: 'My Project', file: csvFile('') });
+		expect(res.success).toBe(false);
+		if (!res.success) {
+			expect(res.error.flatten().fieldErrors.file?.[0]).toBe('A CSV file is required');
+		}
+	});
+
+	it('should reject a file that is too large', () => {
+		const res = uploadProjectSchema.safeParse({
+			name: 'My Project',
+			file: csvFile('x'.repeat(MAX_CSV_FILE_SIZE_BYTES + 1))
+		});
+		expect(res.success).toBe(false);
+		if (!res.success) {
+			expect(res.error.flatten().fieldErrors.file?.[0]).toBe('The CSV file must be smaller than 2MB');
 		}
 	});
 });

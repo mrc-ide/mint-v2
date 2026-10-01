@@ -4,6 +4,7 @@ import { env } from '$env/dynamic/public';
 export const regionUrl = (projectName: string, regionName: string) => `/projects/${projectName}/regions/${regionName}`;
 export const regionCompareUrl = (projectName: string, regionName: string) =>
 	`${regionUrl(projectName, regionName)}/compare`;
+export const csvTemplateUrl = () => '/csv-template';
 
 // API URL endpoints
 export const regionFormUrl = () => env.PUBLIC_API_URL + '/options';

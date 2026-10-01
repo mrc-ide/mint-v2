@@ -40,7 +40,7 @@
               "label": "Recent malaria prevalence",
               "helpText": "Define the recent endemicity of your setting as measured by the prevalence of children 6-month to 59-months of age who are diagnosed with falciparum malaria by microscopy. The prevalence estimate should relate to the mean value from the previous year.",
               "required": true,
-              "default": 2,
+              "default": 10,
               "type": "slider",
               "min": 2,
               "max": 70,
@@ -309,6 +309,7 @@
               "type": "number",
               "required": true,
               "default": 1.8,
+              "min": 0.01,
               "step": 0.01
             },
             {
@@ -318,6 +319,7 @@
               "type": "number",
               "required": true,
               "default": 4,
+              "min": 1,
               "step": 1
             },
             {
@@ -348,6 +350,7 @@
               "type": "number",
               "required": true,
               "default": 1.85,
+              "min": 0,
               "step": 0.01
             },
             {
@@ -356,6 +359,7 @@
               "type": "number",
               "required": true,
               "default": 2.14,
+              "min": 0,
               "step": 0.01
             },
             {
@@ -364,6 +368,7 @@
               "type": "number",
               "required": true,
               "default": 2.56,
+              "min": 0,
               "step": 0.01
             },
             {
@@ -372,6 +377,7 @@
               "type": "number",
               "required": true,
               "default": 2.86,
+              "min": 0,
               "step": 0.01
             },
             {
@@ -381,6 +387,7 @@
               "type": "number",
               "required": true,
               "default": 2.75,
+              "min": 0,
               "step": 0.01
             },
             {
@@ -390,6 +397,7 @@
               "type": "number",
               "required": true,
               "default": 2.75,
+              "min": 0,
               "step": 0.01
             },
             {
@@ -399,6 +407,7 @@
               "type": "number",
               "required": true,
               "default": 12,
+              "min": 0,
               "step": 0.01
             },
             {
@@ -408,6 +417,7 @@
               "type": "number",
               "required": true,
               "default": 12,
+              "min": 0,
               "step": 0.01
             },
             {
@@ -417,6 +427,7 @@
               "type": "number",
               "required": true,
               "default": 10,
+              "min": 0,
               "step": 0.01
             }
           ]
