@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 
 from fastapi import status
 from fastapi.testclient import TestClient
@@ -11,10 +11,15 @@ from app.models import EmulatorRequest
 client = TestClient(app)
 
 
-@patch("app.main.preload_models")
-def test_lifespan_preloads_models(mock_preload):
+@patch("app.main.emulator_pool")
+def test_lifespan_starts_and_stops_emulator_pool(mock_pool):
+    mock_pool.start = AsyncMock()
+
     with TestClient(app):
-        mock_preload.assert_called_once()
+        mock_pool.start.assert_awaited_once()
+        mock_pool.shutdown.assert_not_called()
+
+    mock_pool.shutdown.assert_called_once()
 
 
 def test_get_version():

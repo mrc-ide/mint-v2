@@ -24,5 +24,12 @@ COPY . /app
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked
 
+# Download the models at build time and run offline, so startup never waits on Hugging Face.
+RUN uv run python -c "from estimint import preload_models; preload_models()"
+ENV HF_HUB_OFFLINE=1
+
+# Emulator worker processes. Each needs ~0.75GB RAM and ~3 CPU cores while busy; see README for sizing.
+ENV EMULATOR_WORKERS=2
+
 # Start the application.
 CMD ["uv", "run", "fastapi", "run", "--port", "8000", "--host", "0.0.0.0"]
