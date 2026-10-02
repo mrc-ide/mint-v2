@@ -68,6 +68,7 @@
 		<BudgetInput
 			{form}
 			bind:budget={$formData.budget}
+			{loading}
 			{enhance}
 			maxCost={$formData.maxCost}
 			minCost={$formData.minCost}

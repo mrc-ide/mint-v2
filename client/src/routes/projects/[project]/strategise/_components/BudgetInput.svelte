@@ -10,8 +10,9 @@
 		enhance: SuperForm<StrategiseForm>['enhance'];
 		maxCost: number;
 		minCost: number;
+		loading: boolean;
 	}
-	let { form, budget = $bindable(), enhance, minCost, maxCost }: Props = $props();
+	let { form, budget = $bindable(), enhance, minCost, maxCost, loading }: Props = $props();
 </script>
 
 <form method="POST" use:enhance novalidate>
@@ -44,6 +45,6 @@
 			>
 			<Form.FieldErrors />
 		</Form.Field>
-		<Form.Button>Explore defined budget range</Form.Button>
+		<Form.Button disabled={loading}>Explore defined budget range</Form.Button>
 	</div>
 </form>
