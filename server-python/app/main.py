@@ -3,7 +3,6 @@ import time
 from contextlib import asynccontextmanager
 from importlib.metadata import version
 
-from estimint import preload_models
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -12,7 +11,7 @@ from prometheus_client import Counter, Gauge, Histogram, make_asgi_app
 from app import __version__
 
 from .models import CompareParametersResponse, EmulatorRequest, EmulatorResponse, Response, Version
-from .services.emulator import run_emulator_model
+from .services.emulator_pool import emulator_pool
 from .services.resources import get_compare_parameters, get_dynamic_form_options
 
 logging.basicConfig(
@@ -25,9 +24,10 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
-    """Preload models on startup."""
-    preload_models()
+    """Start the emulator worker processes (which preload the models) on startup."""
+    await emulator_pool.start()
     yield
+    emulator_pool.shutdown()
 
 
 app = FastAPI(title="MINT API", version=__version__, lifespan=lifespan)
@@ -88,7 +88,7 @@ async def dynamic_form_options() -> Response[dict]:
 
 @app.post("/emulator/run")
 async def run_emulator(emulator_request: EmulatorRequest) -> Response[EmulatorResponse]:
-    return Response(data=run_emulator_model(emulator_request))
+    return Response(data=await emulator_pool.run(emulator_request))
 
 
 @app.get("/compare-parameters")

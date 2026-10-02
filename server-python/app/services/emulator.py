@@ -1,3 +1,4 @@
+import threading
 from dataclasses import replace
 
 import pandas as pd
@@ -6,12 +7,21 @@ from fastapi import HTTPException
 
 from app.models import EmulatorRequest, EmulatorResponse, cases_adapter, prevalence_adapter
 
+# The flax nnx models are shared per process and are not thread-safe: nnx.jit temporarily
+# mutates the module while calling it, so concurrent calls fail. Parallelism comes from workers.
+_model_lock = threading.Lock()
+
 
 def run_emulator_model(emulator_request: EmulatorRequest) -> EmulatorResponse:
     """Run the emulator model based on the request and return the response."""
+    return post_process_results(run_emulator_scenarios(emulator_request))
+
+
+def run_emulator_scenarios(emulator_request: EmulatorRequest) -> pd.DataFrame:
+    """Build the scenarios for the request and run them through the emulator models."""
     scenarios = build_scenarios(emulator_request)
-    results = run_scenarios(scenarios)
-    return post_process_results(results)
+    with _model_lock:
+        return run_scenarios(scenarios)
 
 
 def build_scenarios(
